@@ -1,0 +1,538 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 4.2.1
+# Built for x86_64-pc-linux-gnu
+# Copyright (C) 1988-2016 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Sat Jun 25 19:14:24 2022
+
+# Variables
+
+# 'override' directive
+GNUMAKEFLAGS := 
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+?F = $(notdir $?)
+# environment
+DESKTOP_SESSION = ubuntu
+# default
+.SHELLFLAGS := -c
+# makefile (from '../var.dvr', line 6)
+OBJ = obj/
+# environment
+XDG_SESSION_CLASS = user
+# environment
+SNAP_COMMON = /var/snap/code/common
+# environment
+XDG_SESSION_TYPE = x11
+# environment
+VSCODE_LOG_NATIVE = false
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+IM_CONFIG_PHASE = 1
+# environment
+CMPLR_ROOT = /opt/intel/oneapi/compiler/2022.1.0
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+XAUTHORITY = /run/user/1000/gdm/Xauthority
+# environment
+GDMSESSION = ubuntu
+# environment
+XMODIFIERS = @im=ibus
+# makefile
+CURDIR := /home/toma/Desktop/dvr3d-master/H3+Jacobi
+# makefile
+SHELL = /bin/sh
+# environment
+SNAP_DATA = /var/snap/code/99
+# environment
+VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupport":true}
+# environment
+JOURNAL_STREAM = 8:62739
+# makefile (from '../var.dvr', line 1)
+F90 = ifort
+# environment
+XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
+# environment
+SNAP_INSTANCE_NAME = code
+# environment
+SNAP_ARCH = amd64
+# makefile (from '../var.dvr', line 3)
+F90_OPTS = -O0 -xP -traceback -check all 
+# makefile (from '../var.dvr', line 1)
+MAKEFILE_LIST :=  Makefile ../var.dvr
+# automatic
+@F = $(notdir $@)
+# environment
+GIO_LAUNCHED_DESKTOP_FILE = /var/lib/snapd/desktop/applications/code_code.desktop
+# environment
+DIAGUTIL_PATH = /opt/intel/oneapi/compiler/2022.1.0/sys_check/sys_check.sh
+# makefile (from '../var.dvr', line 2)
+DEBUG = 
+# environment
+USERNAME = toma
+# environment
+XDG_DATA_DIRS = /usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus,guid=eab0699d6a6e76da50c23c1d62b5dbdd
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+_ = /snap/code/99/usr/share/code/code
+# environment
+MANAGERPID = 1564
+# environment
+LESSOPEN = | /usr/bin/lesspipe %s
+# environment
+VSCODE_CWD = /home/toma
+# environment
+OCL_ICD_FILENAMES = /opt/intel/oneapi/compiler/2022.1.0/linux/lib/x64/libintelocl.so
+# environment
+GSETTINGS_SCHEMA_DIR = /snap/code/99/usr/share/glib-2.0/schemas
+# default
+MAKE_HOST := x86_64-pc-linux-gnu
+# environment
+PATH = /opt/intel/oneapi/compiler/2022.1.0/linux/bin/intel64:/opt/intel/oneapi/compiler/2022.1.0/linux/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+# environment
+GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
+# environment
+SESSION_MANAGER = local/ubuntu:@/tmp/.ICE-unix/1793,unix/ubuntu:/tmp/.ICE-unix/1793
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# environment
+GDK_PIXBUF_MODULE_FILE = /home/toma/snap/code/common/.cache/gdk-pixbuf-loaders.cache
+# environment
+LIBRARY_PATH = /opt/intel/oneapi/compiler/2022.1.0/linux/compiler/lib/intel64_lin:/opt/intel/oneapi/compiler/2022.1.0/linux/lib
+# environment
+SNAP = /snap/code/99
+# environment
+SNAP_VERSION = 30d9c6cd
+# makefile (from 'Makefile', line 4)
+depo = scratch
+# environment
+XDG_MENU_PREFIX = gnome-
+# environment
+VSCODE_LOG_STACK = false
+# environment
+DISABLE_WAYLAND = 1
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+INVOCATION_ID = e12af9c764934309918d5df2660c904b
+# environment
+GDK_PIXBUF_MODULEDIR = /snap/code/99/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
+# environment
+CMAKE_PREFIX_PATH = /opt/intel/oneapi/compiler/2022.1.0/linux/IntelDPCPP
+# environment
+LS_COLORS = 
+# environment
+PARENT_WINDOW_ID = x11:1a0928a
+# environment
+XDG_SESSION_DESKTOP = ubuntu
+# environment
+SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
+# environment
+GIO_LAUNCHED_DESKTOP_FILE_PID = 17128
+# automatic
+%F = $(notdir $%)
+# environment
+DISPLAY = :0
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+SNAP_INSTANCE_KEY = 
+# environment
+PWD = /home/toma/Desktop/dvr3d-master/H3+Jacobi
+# default
+.LOADED := 
+# environment
+SSH_AGENT_PID = 1758
+# environment
+PKG_CONFIG_PATH = /opt/intel/oneapi/compiler/2022.1.0/lib/pkgconfig
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = ubuntu:GNOME
+# environment
+GTK_MODULES = gail:atk-bridge
+# environment
+MANPATH = /opt/intel/oneapi/compiler/2022.1.0/documentation/en/man/common:
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/toma
+# makefile (from '../var.dvr', line 7)
+LD_LIBRARY_PATH = /usr/local/intel/Compiler/11.1/059/mkl/lib/32/
+# environment
+LESSCLOSE = /usr/bin/lesspipe %s %s
+# environment
+VSCODE_CLI = 1
+# environment
+VSCODE_CODE_CACHE_PATH = /home/toma/.config/Code/CachedData/30d9c6cd9483b2cc586687151bcbcd635f373630
+# environment
+LOGNAME = toma
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# environment
+SNAP_LIBRARY_PATH = /var/lib/snapd/lib/gl:/var/lib/snapd/lib/gl32:/var/lib/snapd/void
+# environment
+SNAP_CONTEXT = ZWHCPhvCB0bsEEqPTZL_FA-BXDWVpQy0mvhf4peF1UvML0tHmVNO
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+SNAP_USER_COMMON = /home/toma/snap/code/common
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# environment
+GNOME_DESKTOP_SESSION_ID = this-is-deprecated
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+MAKELEVEL := 0
+# environment
+SNAP_REAL_HOME = /home/toma
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# environment
+QT_IM_MODULE = ibus
+# environment
+SNAP_USER_DATA = /home/toma/snap/code/99
+# environment
+SHLVL = 0
+# environment
+GNOME_SHELL_SESSION_MODE = ubuntu
+# environment
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-6d8dff87-8db0-49f5-bf69-f1c416759d4b.sock
+# default
+MAKE_VERSION := 4.2.1
+# environment
+USER = toma
+# environment
+SNAP_REVISION = 99
+# makefile
+.DEFAULT_GOAL := null
+# environment
+XDG_CURRENT_DESKTOP = Unity
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# default
+MAKE_COMMAND := make
+# default
+.VARIABLES := 
+# automatic
+*F = $(notdir $*)
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-6a94ba75-1.68.1-main.sock
+# environment
+BAMF_DESKTOP_FILE_HINT = /var/lib/snapd/desktop/applications/code_code.desktop
+# makefile
+MAKEFLAGS = pqrR
+# environment
+MFLAGS = -pqrR
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+GDK_BACKEND = x11
+# automatic
++F = $(notdir $+)
+# environment
+QT_ACCESSIBILITY = 1
+# default
+MAKEFILES := 
+# environment
+SNAP_COOKIE = ZWHCPhvCB0bsEEqPTZL_FA-BXDWVpQy0mvhf4peF1UvML0tHmVNO
+# automatic
+<F = $(notdir $<)
+# environment
+SNAP_NAME = code
+# environment
+LC_ALL = C
+# environment
+DBUS_STARTER_BUS_TYPE = session
+# makefile (from '../var.dvr', line 4)
+LIBS = -mkl=sequential  
+# automatic
+^F = $(notdir $^)
+# makefile (from 'Makefile', line 5)
+scratch_files = fort13_h3p_j0j1  fort26_h3p_j0_odd fort26_h3p_j1_even  fort8_h3p_j1_even fort9_h3p_j1_even  
+# makefile (from '../var.dvr', line 5)
+REL_PATH = source/
+# default
+SUFFIXES := 
+# environment
+SNAP_REEXEC = 
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+NLSPATH = /opt/intel/oneapi/compiler/2022.1.0/linux/compiler/lib/intel64_lin/locale/%l_%t/%N
+# environment
+WINDOWPATH = 2
+# default
+.INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
+# default
+.RECIPEPREFIX := 
+# environment
+LANG = C
+# environment
+VSCODE_PID = 17177
+# environment
+DBUS_STARTER_ADDRESS = unix:path=/run/user/1000/bus,guid=eab0699d6a6e76da50c23c1d62b5dbdd
+# variable set hash-table stats:
+ 
+make: *** No rule to make target 'all'.  Stop.
+
+# Load=138/1024=13%, Rehash=0, Collisions=19/167=11%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 2053, inode 795066): 7 files, no impossibilities.
+
+# 7 files, no impossibilities in 1 directories.
+
+# Implicit Rules
+
+%_file:
+#  recipe to execute (from 'Makefile', line 41):
+	@cp ${depo}/$@  ./ 
+
+%.o:
+#  recipe to execute (from 'Makefile', line 56):
+	cd ../ ;  \
+	make $@ ; 
+
+# 2 implicit rules, 0 (0.0%) terminal.
+
+# Files
+
+# Not a target:
+../var.dvr:
+#  Implicit rule search has been done.
+#  Last modified 2021-04-19 06:30:09
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+all:
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has not been updated.
+
+fort8_h3p_j1_even:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 60):
+	cp ${depo}/$@   ./  ;  
+
+J0: dvr.out
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 15):
+	./dvr.out < jobs/dvrJ0.job > result.H3p.J0.dvr  ; \
+	cp fort.26 fort26_h3p_j0_odd ; 
+
+dvr.out: dvr3drjz.o
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 44):
+	${F90} ${F90_OPTS} ../${OBJ}/dvr3drjz.o source/pot_h3p.f90  -o dvr.out ${LIBS} ; 
+
+rot.out: rotlev3.o f02fjf.o
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 47):
+	${F90} ${F90_OPTS}  ../${OBJ}/rotlev3.o ../${OBJ}f02fjf.o  -o rot.out ${LIBS} ; \
+
+
+# Not a target:
+f02fjf.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+J1:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 19):
+	make J1_dvr J1_rot 
+
+dip: fort26_h3p_j0_odd fort8_h3p_j1_even dip.out
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 32):
+	@cp fort26_h3p_j0_odd fort.11  ;  \
+	cp  fort8_h3p_j1_even fort.12  ;  \
+	./dip.out < jobs/dip.job > result.H3p.dip ;  \
+
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2021-04-19 06:30:09
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+dpsort.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+test:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 12):
+	make J0 J1 dip spt  \
+
+
+J1_rot: rot.out fort26_h3p_j1_even
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 26):
+	@cp -f fort26_h3p_j1_even fort.26 ; \
+	./rot.out < jobs/rot.job > result.H3p.J1even.rot ; \
+	cp fort.8 fort8_h3p_j1_even  ; \
+	cp fort.9 fort9_h3p_j1_even  ; 
+
+spc.out: spectra.o dpsort.o
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 50):
+	${F90}  ${F90_OPTS} ../${OBJ}/spectra.o ../${OBJ}/dpsort.o  -o spc.out ${LIBS} ;  \
+
+
+J1_dvr: dvr.out
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 22):
+	./dvr.out < jobs/dvrJ1.job > result.H3p.J1even.dvr  ; \
+	cp fort.26 fort26_h3p_j1_even 
+
+# Not a target:
+rotlev3.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+fort9_h3p_j1_even:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 60):
+	cp ${depo}/$@   ./  ;  
+
+dip.out: dipole.o
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 53):
+	${F90}  ${F90_OPTS} ../${OBJ}/dipole.o  source/dip_h3p.f  -o dip.out ${LIBS} ; \
+
+
+null:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 9):
+	@echo Please specify test or clean
+
+# Not a target:
+dipole.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+clean:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 63):
+	@-rm fort* *_file result.H3p* *out *mod 
+
+fort26_h3p_j1_even:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 60):
+	cp ${depo}/$@   ./  ;  
+
+# Not a target:
+spectra.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+fort13_h3p_j0j1:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 60):
+	cp ${depo}/$@   ./  ;  
+
+# Not a target:
+dvr3drjz.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+fort26_h3p_j0_odd:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 60):
+	cp ${depo}/$@   ./  ;  
+
+spt: spc.out fort13_h3p_j0j1
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 37):
+	@cp fort13_h3p_j0j1 fort.13 ; \
+	./spc.out < jobs/spec.job > result.H3p.spec ; 
+
+# files hash-table stats:
+# Load=29/1024=3%, Rehash=0, Collisions=1/63=2%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 39 / storage = 342 B / avg = 8 B
+# current buf: size = 8162 B / used = 342 B / count = 39 / avg = 8 B
+
+# strcache performance: lookups = 71 / hit rate = 45%
+# hash-table stats:
+# Load=39/8192=0%, Rehash=0, Collisions=1/71=1%
+# Finished Make data base on Sat Jun 25 19:14:24 2022
+
+ 
