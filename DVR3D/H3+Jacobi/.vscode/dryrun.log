@@ -1,0 +1,22 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/toma/Desktop/dvr3d-master/H3+Jacobi'
+cd ../ ;  \
+make ../var.dvr.o ; 
+make[1]: Entering directory '/home/toma/Desktop/dvr3d-master'
+make[1]: Leaving directory '/home/toma/Desktop/dvr3d-master'
+cd ../ ;  \
+make Makefile.o ; 
+make[1]: Entering directory '/home/toma/Desktop/dvr3d-master'
+make[1]: Leaving directory '/home/toma/Desktop/dvr3d-master'
+echo Please specify test or clean
+rm ../var.dvr.o Makefile.o
+make: Leaving directory '/home/toma/Desktop/dvr3d-master/H3+Jacobi'
+ 
+make[1]: *** No rule to make target '../var.dvr.o'.
+make: *** [Makefile:56: ../var.dvr.o] Error 2
+make[1]: *** No rule to make target 'Makefile.o', needed by 'Makefile'.
+make[1]: Failed to remake makefile 'Makefile'.
+make: *** [Makefile:56: Makefile.o] Error 2
+make: Failed to remake makefile '../var.dvr'.
+make: Failed to remake makefile 'Makefile'.
+
