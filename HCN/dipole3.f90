@@ -2,7 +2,15 @@
       call dipole3b
       stop
       end
-
+!========================================================================
+!Section 000
+!Copyright(C), 2022, UCL
+!FileName: depole3.f90
+!Author: Runyu Zhang
+!Version: 0.01
+!Data: 30/06/2022
+!Description: main function: Section 004
+!History Version info: Section 001
 !========================================================================
 !Section 001
       subroutine dipole3b
