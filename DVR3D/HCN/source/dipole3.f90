@@ -154,11 +154,11 @@
 
       implicit double precision (a-h,o-y), logical (z)
       common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2
-      namelist/prt/ zprint, zpmin, ztra, zstart,&
+      namelist  /prt/zprint, zpmin, ztra, zstart,&
                     iket, ibra, itra, iscr, ires, nblock
       common /head/ title
       common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
-      common/timing/itime0
+      common /timing/itime0
       character(len=8) title(9)
 
       write(6,200)
@@ -1038,11 +1038,12 @@
                    		      3,kbeg2,jk2,ip,ibase2,xd,2,1,ipar2)
 		      endif
 
-	      else if(kmin2==kmin1) then
-			call dsrd(dmiddle,dstemp,ibra,mbass2,nbass2(1),neval2,&
-                        1,kbeg2,jk2,1-ip,ibase2,xd,0,1,ipar2)
+	      else 
+                  if(kmin2==kmin1) then
+			      call dsrd(dmiddle,dstemp,ibra,mbass2,nbass2(1),neval2,&
+                              1,kbeg2,jk2,1-ip,ibase2,xd,0,1,ipar2)
 
-	            if(jk2 /= 1) call dsrd(dupper,dstemp,ibra,mbass2,nbass2(2),neval2,&
+	                  if(jk2 /= 1) call dsrd(dupper,dstemp,ibra,mbass2,nbass2(2),neval2,&
                                     2,kbeg2,jk2,ip,ibase2,xd,1,1,ipar2)
 		      else
                         call dsrd(dupper,dstemp,ibra,mbass2,nbass2(1),neval2,& 
@@ -2045,30 +2046,30 @@
       do 1 ie1=1,neval1
             xe1= e1(ie1)*autocm - ezero
 
-      do 2 ie2=1,neval2
+            do 2 ie2=1,neval2
 
-            if (ie1==1) xe2(ie2)= e2(ie2)*autocm - ezero
+                  if (ie1==1) xe2(ie2)= e2(ie2)*autocm - ezero
 
-            dd= xe2(ie2) - xe1
-            dd3= abs(dd*dd*dd)
-            sx= (tz(ie1,ie2) + tx(ie1,ie2))**2
-            sint(ie1,ie2)= sx*xf*xf
-            tzd= tz(ie1,ie2)*autode*xf
-            txd= tx(ie1,ie2)*autode*xf
+                  dd= xe2(ie2) - xe1
+                  dd3= abs(dd*dd*dd)
+                  sx= (tz(ie1,ie2) + tx(ie1,ie2))**2
+                  sint(ie1,ie2)= sx*xf*xf
+                  tzd= tz(ie1,ie2)*autode*xf
+                  txd= tx(ie1,ie2)*autode*xf
 
-            if (.not.zbisc .and. zembed) txd = -txd
+                  if (.not.zbisc .and. zembed) txd = -txd
 
-            t= abs(tzd + txd)
-            sxd= t*t
+                  t= abs(tzd + txd)
+                  sxd= t*t
 
-            if (dd > x0) a= sxd*dd3*detosec/dble(2*j2 + 1)
-            if (dd < x0) a= sxd*dd3*detosec/dble(2*j1 + 1)
-            if (zpmin .and. max(ie1,ie2)>10) goto 2
+                  if (dd > x0) a= sxd*dd3*detosec/dble(2*j2 + 1)
+                  if (dd < x0) a= sxd*dd3*detosec/dble(2*j1 + 1)
+                  if (zpmin .and. max(ie1,ie2)>10) goto 2
 
-            write(6,206) ie1,ie2,xe1,xe2(ie2),dd,tzd,txd,t,sxd,a
-!206  format(2(i4),3(3x,f10.3),5(2x,e13.6))
-206         format(2(i4),3(3x,f14.6),5(2x,es15.8)) ! changed L Lodi 8-Feb-2010
-2     continue
+                  write(6,206) ie1,ie2,xe1,xe2(ie2),dd,tzd,txd,t,sxd,a
+!206              format(2(i4),3(3x,f10.3),5(2x,e13.6))
+206               format(2(i4),3(3x,f14.6),5(2x,es15.8)) ! changed L Lodi 8-Feb-2010
+2           continue
 
 !      if (.not.zpmin .or. ie1<=10) write(6,207)
 !207   format(//)
