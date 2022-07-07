@@ -39,7 +39,7 @@
 
 ! **************************************************************************
 
-      subroutine dipd(dipole, smallr, bigr, cosg,  icomp )
+      subroutine dipd(dipole,RME, smallr, bigr, cosg,  icomp )
 
 ! Jacobi coordinates are used.
 ! Units of lengths in a0 and dipole in au.
