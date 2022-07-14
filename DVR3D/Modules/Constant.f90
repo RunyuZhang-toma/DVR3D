@@ -185,6 +185,9 @@ logical :: zs0   = .false.
 logical :: zs1   = .false.
 logical :: zx    = .false.
 
+! /size/
+
+
 !Integer variable
 ! /prt/ /outp/
 integer :: idiag1 = 20          ! the final Hamiltonian matrix is written on units IDIAG1 and IDIAG2.
@@ -205,6 +208,50 @@ integer :: iband  = 15          ! scratch file used for storing bands of the fin
 integer :: intvec = 16          ! a scratch stream for intermediate storage of the 2d vectors.
 integer :: itime0
 
+! /size/
+! contral parameter from the problem
+integer :: npnt         ! max(npnt1,npnt2)
+integer :: npnt1        ! number of (gauss-laguerre) dvr points in r1
+integer :: npnt2        ! number of (gauss-laguerre) dvr points in r2
+integer :: npnta        ! the number of dvr points in
+                        ! the coordinate to be treated first in the dvr successive
+                        ! diagonalisation-truncation procedure
+integer :: npntb        ! the number of dvr points in the coordinate to come second
+integer :: npntc        ! the number of dvr points in the coordinate to come last
+integer :: nalf         ! number of (gauss-legendre) dvr points in theta
+integer :: nalf2
+integer :: nmax1        ! max order of r1 radial laguerre polynomial ( = npnt1-1)
+integer :: nmax2        ! max order of r2 radial laguerre polynomial ( = npnt2-1)
+integer :: maxleg       ! max order of angular legendre polynomial   ( = nalf -1)
+integer :: idvr         ! number of unique dvr points
+integer :: nlim1        ! nmax1+1*(nmax1+1+1)/2
+integer :: nlim2        ! nmax2+1*(nmax2+1+1)/2
+integer :: neval        ! number of eigenvalues which have to actually be supplied as output
+integer :: ncoord       ! number of vibrational coordinates explicitly considered
+                        ! ncoord = 2: atom-diatom problem with diatom rigid
+                        ! ncoord=2: also need lmax,lpot,idia,kmin
+                        ! ncoord = 3: full 3-d triatomic problem
+                        ! ncoord=3: all paramters required
+integer :: jrot         ! total angular momentum of the molecule
+integer :: kmin         ! zrot=t, kmin=1 sym. rot. basis, =0 anti-sym.
+                        ! kmin=2 loop over both sym & anti-sym (zbisc=t only)
+                        ! zrot=f, kmin=fixed value of k
+integer :: idia         ! 1 scattering coordinates heteronuclear diatomic
+                        ! 2 scattering coordinates homonuclear diatomic
+                        ! -1 radau  coordinates hetronuclear diatomic
+                        ! -2 radau  coordinates homonuclear  diatomic
+                        ! 0 radau   coordinates with the z axis perpendicular to the molecular plane.
+integer :: ipar         ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
+integer :: max2d        ! upper bound on size of intermediate 2d hamiltonian
+integer :: max2d2       ! max2d for smaller block (zbisc=t only)
+integer :: max3d        ! upper bound on size of full 3d hamiltonian
+integer :: max3d2       ! max3d for smaller block (zbisc=t only)
+integer :: ndima        ! set equal to npnta at the start - used for dimensioning
+integer :: ndimb        ! set equal to npntb at the start - used for dimensioning
+integer :: ndimc        ! set equal to npntc at the start - used for dimensioning
+integer :: iq
+
+
 namelist /prt/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
                 zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
                 zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zperp,&
@@ -217,6 +264,36 @@ namelist /prt/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
 real(kind=dp) :: xp0
 real(kind=dp) :: xp1
 real(kind=dp) :: xp2
+
+! /size/
+real(kind=dp) :: emax1
+real(kind=dp) :: emax2
+
+! /split1/
+real(kind=dp) :: re1
+real(kind=dp) :: diss1
+real(kind=dp) :: we1
+real(kind=dp) :: beta1
+real(kind=dp) :: ur1
+real(kind=dp) :: urr1
+real(kind=dp) :: a1
+real(kind=dp) :: iu1
+
+! /split2/
+real(kind=dp) :: re2
+real(kind=dp) :: diss2
+real(kind=dp) :: we2
+real(kind=dp) :: beta2
+real(kind=dp) :: ur2
+real(kind=dp) :: urr2
+real(kind=dp) :: a2
+real(kind=dp) :: iu2
+
+! /mass/
+real(kind=dp) :: xmass(3)
+real(kind=dp) :: xmassr(3)
+real(kind=dp) :: g1
+real(kind=dp) :: g2
 
 end module dvr3drjz_file
 !unmention variable

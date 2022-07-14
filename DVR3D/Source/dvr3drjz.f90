@@ -215,7 +215,7 @@
 !            as output
 !     ncoord: number of vibrational coordinates explicitly considered
 !     if (ncoord .ne. 3) some of the above are dummies, see below.
-
+      implicit double precision (a-h,o-y), logical (z)
       common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
                     npnt,nlim1,nlim2,neval,ncoord,&
                     jrot,kmin,idia,ipar,&
