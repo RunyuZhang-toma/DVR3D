@@ -117,7 +117,7 @@
       common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
                     zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
                     ,nploti,nplotf,ithre 
-                common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
+      common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
           iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
            nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb      
      character(len=8) title(9)

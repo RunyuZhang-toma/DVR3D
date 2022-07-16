@@ -64,6 +64,7 @@ end program dipj0dvr
       character*80 title
       dimension r1(maxq),r2(maxq),theta(maxq),r11(maxq),r21(maxq), &
      &          theta1(maxq),xmass1(3)
+     
       common/logic/zembed,iptot,idia,zdone
       common/stream/ibra0,ibra1,iket0,iket1,iwave0,iwave1, &
      &              ivc0,ivc1,ione,itwo

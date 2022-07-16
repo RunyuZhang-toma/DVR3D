@@ -8,122 +8,9 @@ Module Constant
 !Data: 04/07/2022
 !Description: This is a test mudole file for dipole3.f90
 
-!=================================================================
-! /H3+Jacobi.f90
-! Ediss, Esp, m, ga1
 
 !==================================================================
-!Section 001
-!/F90 file
-!/HCN/dipole3.f90
-!/H3+Jacobi
-!/H3+Radau
-!/water
-!/source/dipj0dvr.f90
-!module template /source/dipolez.f90
-!new common constant dvr3drjz.f90
-
-    implicit None
-    ! integer /stream/ /timing/ /dim/ /sym/ /potiential/ /pot/
-    integer :: &
-            ezero, &
-            ibase1, ibase2, ibra, ibra0,ibra1, idia, ifit, iket, ione, ipar1, ipar2, ipot, iprop, iptot, &
-                ires, iscr, itera, itra, itime0, itwo, iwave0,iwave1, ivc0, ivc1, &
-            jk1, jk2, iket0,iket1, jrot1, jrot2 &
-            lket0, lket1, lbra0, lbra1 &
-            kmin1, kmin2, &
-            max2d, max2d1, max3d, max3d1, mbass, mbass1, mbass2, mblock, &
-            nbin, nblock, nbmax1, nbmax2, nbra0, nbra1, ncoord, neval0, neval1, neval2, &
-            nket0, nket1, nn2, npnt, npta, npta1, nptb, nptb1, nptc, nptc1, npnt1, npnt2, npot, nqe, nqo, &
-            nr1, nr2, nr21, nrade, nrado, ntheta,
-
-
-    ! logical /logic/ /mass/
-    logical :: &
-            zbisc, &
-            zdone, &
-            zembed, zezmbed, &
-            zmors1, zmors2, &
-            znco1, znco2, &
-            zpmin, zprint, zpseg, &
-            zrme1, zrme2, zrme3, zr2r1, zr2r11, &
-            zsame, zstart,  &
-            ztheta, zthet1, ztra,  &
-            zuvvis
-             
-
-
-    ! real /head/ /mass/ /potential/
-    real(kind=dp) :: 
-            alphao, alphae, &
-            betao, , betae, &
-            cv, &
-            der, &
-            ex(3), ez(3), &
-            g1, g2, &
-            ototal, osys, ouser, &
-            PI, &
-            title, tmass, &
-            xm1(3), xm2(3), xmass(3), xmassr(3)
-                      
-
-    ! character
-    character(len=8) :: title(9)
-
-!-------------------------------------------------------------------
-
-!    zmors1 = .true.
-!    zprint = .false.
-!    ztra = .true.
-!    zmors2 = .true.
-!    zpmin = .false.
-!    zstart = .false.
-
-!    ires = 0
-!    nblock = 1000
-!    iket = 11
-!    ibra = 12
-!    itera = 13
-!    iscr = 24
-
-!    cv = 100
-!    ifit = 100
-!    der = 100
-
-
-!==================================================================
-
-!EXample module template
-!MODULE DEFINITIONS--------------------------------------------
-
-module input
-!  definition of the control input parameters
-  save
-  !line 1
-  !namelist prt
-  logical :: zprint ! =T supplies extra print out for debugging purposes
-  logical :: ztra   ! =T writes data for spectra to stream ITRA
-  logical :: zstart ! =T initiates the output file for the data for SPECTRA
-  integer :: iket   ! input stream from DVR3DRJZ/ROTLEV3/ROTLEV3B for the ket (unformated)
-  integer :: ibra   ! input stream for the bra (unformmatted)
-  integer :: itra   ! output stream to SPECTRA (if ZTRA = T ) (unformated)
-  namelist /prt/ zprint, ztra, zstart, iket, ibra, itra    
-  
-  !line 2
-  character(len=72) :: title
-  
-  !line 3
-  integer :: npot   ! number of gauss legendre integration points
-  integer :: nv2    ! number of ket eigenfunctions considered
-  integer :: nv1    ! number of bra eigenfunctions considered
-  integer :: ibase2 ! number of lowest ket eigenfunctions skipped
-  integer :: ibase1 ! number of lowest bra eigenfunctions skipped
-  
-  !line 4
-  real(8) :: ezero  ! the ground state of the system in cm-1
-end module input
-
-
+! include file: dvr3drjz.f90 dipj0dvr.f90 dipole3_with_rme.f90
 !==================================================================================================
 
 module dvr3drjz_file
@@ -131,7 +18,7 @@ module dvr3drjz_file
     save
 
     implicit none
-
+!/ from file dvr3drjz.f90
 !logical variable
 ! /prt/ /outp/
 logical :: zpham = .false.      ! T request printing of the hamiltonian matrix
@@ -185,9 +72,46 @@ logical :: zs0   = .false.
 logical :: zs1   = .false.
 logical :: zx    = .false.
 
-! /size/
+logical :: zdcore = .false.     ! T for in core diagonalisation
+logical :: z1da = .false.
+logical :: zptra = .false.      ! print the transformed vectors.
+logical :: zplot = .false.
+
+! /diffs/
+logical :: zsame
+
+! /logic/
+logical :: zembed
+logical :: zdone
+logical :: zncor = .false.
+logical :: znco1
+logical :: znco2
+logical :: zprint = .false.     ! T supplies extra print out for debugging purposes.
+logical :: zpmin                ! T supplies less  print out for large runs.
+logical :: ztra = .true.        ! T writes out the data needed for program spectra 
+                                ! to calculate simulated spectra.
+logical :: zstart = .false.     ! T if we are writing out for spectra for the first time.
+logical :: zrme1 = .true.       ! F program calculates reduced matrix elements for the dipole order.
+                                ! We follow defintion of Lamouroux et al.
+                                ! http://dx.doi.org/10.1016/j.jqsrt.2014.06.011
+logical :: zrme2 = .true.       ! F program calculates reduced matrix elements for the quadrupole order.
+logical :: zrme3 = .false.      ! F program calculates reduced matrix elements for the octupole order.
+logical :: zout                 ! this should be true if the sorted line strengths are to be written
+                                ! to the lineprinter. 
+                                ! zout is set to true automatically if zspe is false.
+logical :: zsort                ! if false subroutine sortsp is skipped.
+logical :: zspe                 ! if false the program stops after sortsp. units of ispe are atomic units.
+logical :: zpfun                ! calculates the partition function from energy levels supplied from
+                                ! DVR3DRJZ and ROTLEV3/3B.
+                                ! if zpfun false, the partition function
+                                ! is set to q read in below.
+logical :: zembed
+logical :: zfit = .false.
+logical :: zform = .true.
+logical :: 
 
 
+!==================================================================================================
 !Integer variable
 ! /prt/ /outp/
 integer :: idiag1 = 20          ! the final Hamiltonian matrix is written on units IDIAG1 and IDIAG2.
@@ -207,10 +131,27 @@ integer :: ivint  = 17          ! a scratch stream used for storing intermediate
 integer :: iband  = 15          ! scratch file used for storing bands of the final hamiltonian.
 integer :: intvec = 16          ! a scratch stream for intermediate storage of the 2d vectors.
 integer :: itime0
+integer :: jscr = 7
+integer :: jvec = 3
+integer :: jvec2 = 2
+integer :: kvec = 8
+integer :: kvec2 = 9
+integer :: irf1 = 21
+integer :: irf2 = 22
+integer :: ivec = 26            ! input  eigenvalues & eigenvectors 
+integer :: ivec1 = 27           ! input  eigenvalues & eigenvectors 
+integer :: ivec2                ! input  eigenvalues & eigenvectors
+integer :: ivec3                ! input  eigenvalues & eigenvectors
+integer :: kvecpb = 9
+integer :: nploti = 1
+integer :: nplotf = 0
+integer :: ithre = -8
+integer :: idiag = 2
+
 
 ! /size/
 ! contral parameter from the problem
-integer :: npnt         ! max(npnt1,npnt2)
+integer :: npnt         ! max(npnt1,npnt2) number of gauss-associated legendre grid points requested
 integer :: npnt1        ! number of (gauss-laguerre) dvr points in r1
 integer :: npnt2        ! number of (gauss-laguerre) dvr points in r2
 integer :: npnta        ! the number of dvr points in
@@ -218,6 +159,7 @@ integer :: npnta        ! the number of dvr points in
                         ! diagonalisation-truncation procedure
 integer :: npntb        ! the number of dvr points in the coordinate to come second
 integer :: npntc        ! the number of dvr points in the coordinate to come last
+integer :: npntt
 integer :: nalf         ! number of (gauss-legendre) dvr points in theta
 integer :: nalf2
 integer :: nmax1        ! max order of r1 radial laguerre polynomial ( = npnt1-1)
@@ -250,6 +192,165 @@ integer :: ndima        ! set equal to npnta at the start - used for dimensionin
 integer :: ndimb        ! set equal to npntb at the start - used for dimensioning
 integer :: ndimc        ! set equal to npntc at the start - used for dimensioning
 integer :: iq
+integer :: lmax
+integer :: jk
+integer :: ifile
+integer :: nbass        ! maximum dimension of rotational secular problem
+integer :: mbass
+integer :: ibass        ! actual dimension of rotational secular problem
+integer :: nlim
+integer :: kmin         ! kmin=1 for sym. rotational basis, =0 for anti-sym.
+                        ! kmin>1 loop over both.
+integer :: neval2       ! neval for f block when kmin>1.
+integer :: meval        ! number of eigenvalues computed in the vibrational problem
+integer :: keval        ! number of eigenvectors used for iterations (=neval+4)
+integer :: nvib         ! number of vibrational eigenvalues used in rotational prob.
+integer :: nblk         ! number of k values
+integer :: loff         ! space required for all the off-diagonal blocks
+integer :: loff0        ! space required for the largest off-diagonal block
+integer :: kbass
+integer :: nmax         ! number of dvr points in each radial coordinate
+integer :: maxblk       ! size of vibrational radial problem (even basis)
+integer :: mxblk2       ! size of vibrational radial problem (odd  basis)
+integer :: maxblk_even
+integer :: maxblk_odd
+integer :: kmax
+integer :: ndvr         ! maximum dimension of theta dvr grid used in vibrational problem
+integer :: iang         ! maximum number of discrete angles retained in vib. problem
+integer :: nktot        ! number of k values
+integer :: kpar
+integer :: iqpar
+integer :: nr           ! number of dvr points in each radial coordinate
+
+! /sizes/
+integer :: lbra0
+integer :: lbra1
+integer :: nbra0
+integer :: nbra1
+integer :: lket0
+integer :: lket1
+integer :: nket0
+integer :: nket1
+integer :: ntheta
+integer :: nr1
+integer :: nr2
+integer :: neval0
+integer :: neval1
+
+! /diffs/
+integer :: nqe
+integer :: nqo
+integer :: nr21
+! /ligic/
+integer :: iptot
+integer :: idia
+! /stream/
+integer :: ibra = 12    ! input stream for the bra
+integer :: ibra0
+integer :: ibra1
+integer :: itra = 13    ! output stream to program spectrm (if ztra).
+                        ! note that for all times other than the dipole assumes 
+                        ! that we have accessed the permanent dataset or file which has the
+                        ! data from previous runs and that we are writing to the end of that file.
+                        ! ************************************************
+                        ! **  for the sake of safety you are therefore  **
+                        ! **  advised to keep one previous edition as   **
+                        ! **  backup!                                   **
+                        ! ************************************************
+integer :: iscr = 24    ! scratch file used for restart runs
+integer :: ires = 0
+integer :: iket = 11    ! input stream for the ket.
+integer :: iket0
+integer :: iket1
+integer :: iwave0
+integer :: iwave1
+integer :: ivc0
+integer :: ivc1
+integer :: ione
+integer :: itwo
+integer :: mblock
+integer :: nblock = 1000
+!        e) outzrme1 (14) = program calculates reduced matrix elements for the dipole order.
+!                      We follow defintion of Lamouroux et al. http://dx.doi.org/10.1016/j.jqsrt.2014.06.011
+!        f) outzrme2 (15) = program calculates reduced matrix elements for the quadrupole order.
+!                      We follow defintion of Lamouroux et al. http://dx.doi.org/10.1016/j.jqsrt.2014.06.011
+!        fg outzrme3 (16) = program calculates reduced matrix elements for the octupole order.
+!                      We follow defintion of Lamouroux et al. http://dx.doi.org/10.1016/j.jqsrt.2014.06.011
+!
+!        a) ires (0) restart parameter
+!           ires = 0, normal run
+!           ires = 1, restart run
+!        b) nblock (1000) number of k --> k' blocks to be attempted
+!
+!       l3) npot, nv1, nv2 (all in i5 format)
+!        a) npot  = number of Gauss-Legendre integration points used
+!        b) nv1   = number of ket eigenfunctions considered.
+!                   if this is input as zero, all available
+!                   ket eigenfunctions will be considered when
+!                   computing transitions.
+!        c) nv2   = as above for the bra.
+! /dim/
+integer :: nrade
+integer :: nrado
+integer :: npot         ! number of Gauss-Legendre integration points used
+integer :: nbin         ! largest binomial coef. required for angular integration(+1)
+integer :: nbmax1
+integer :: nbmax2
+integer :: mbass        ! maximum size of vibrational problem (excluding linear geom)
+integer :: mbass0       ! maximum size of vibrational problem (including linear geom)
+integer :: mbass1
+integer :: mbass2
+integer :: kmin1
+integer :: kmin2
+integer :: jk1
+integer :: jk2
+integer :: nn2
+integer :: ibase1       ! number of lowest ket eigenfunctions skipped
+integer :: ibase2       ! number of lowest bra eigenfunctions skipped
+integer :: ipot
+integer :: nv1          ! number of bra eigenfunctions considered
+integer :: nv2          ! number of ket eigenfunctions considered
+integer :: nprt
+integer :: npropin
+integer :: lpot
+! /sym/
+integer :: ipar1
+integer :: ipar2
+integer :: jrot1
+integer :: jrot2
+
+! /pb/
+integer :: inda1 = 100
+integer :: inda2 = 100
+integer :: indb1 = 100
+integer :: indb2 = 100
+integer :: indk = 100
+integer :: iqa
+integer :: iqb
+integer :: isa
+integer :: isb
+integer :: ipa
+integer :: ipb
+integer :: kmina
+integer :: kminb
+integer :: nka
+integer :: nkb
+integer :: nbassa
+integer :: nbassb
+integer :: nskipka
+integer :: nskipkb
+integer :: mevala
+integer :: mevlab
+integer :: ibassa
+integer :: ibassb
+integer :: nviba
+integer :: nvibb
+
+! /pot/
+integer :: iprop        ! vector with the information on which properties
+                        ! will be considered in the run
+
+
 
 
 namelist /prt/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
@@ -259,8 +360,43 @@ namelist /prt/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
                 ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
                 zpseg
 
+!     outp holds information which controls the amount of printed output
+!     toler: convergence tolerance for the iterative diagonaliser
+!            toler = 0.0 gives machine accuracy
+!     zpham: print matrix hamil if zpham = .true.
+!     zpvec: print eigenvectors if zpvec = .true.
+!     thresh: threshold for printing a coefficient if zpvec=.true.
+!     zptra: print the transformed vectors.
+!     zdcore: = .true. for in core diagonalisation
+!     zdiag:  = .false. do not diagonalise the Hamiltonian matrix.
+!     ztran:  = .true. transform eigenvectors back to original basis.
+!     zvec:   = .true. eigenvalues and eigenvectors written to disk file.
+!     zpfun:  = .true.  eigenvalues concatenated on stream ILEV.
+!     stream         holds                              used if
+!      ilev    input/output of eigenvalues              zpfun=.true.
+!      ivec    input  eigenvalues & eigenvectors        always
+!      ivec2   input  eigenvalues & eigenvectors        nblk .gt. 2
+!      jvec    output first  set eigenvalues & vectors  zvec=.true.
+!      jvec2   output second set                        zvec=.true.
+!      kvec    output first  set transformed vectors    ztran=.true.
+!      kvec2   output second set                        ztran=.true.
+!      iscr    hamiltonian file                          always
+!      irf1    restart file one                         zdiag=.false.
+!      irf2    restart file two                         always
+!
+!     ires = 0  normal run
+!          = 1  restart from first  call to dgrot
+!          = 2  restart from second call to dgrot
+!          = 3  restart from first  call to dgrot, one diagonalisation only
+!          = -1 perform both transformations
+!          = -2 perform second transformation only
+!          = -3 perform first  transformation only
+! (restart after zdiag=.false. run, ivec=irf1 and irf2 required)
+
+
+!==================================================================================================
 !Double precision real
-!Common /oupb/
+! /oupb/
 real(kind=dp) :: xp0
 real(kind=dp) :: xp1
 real(kind=dp) :: xp2
@@ -294,7 +430,135 @@ real(kind=dp) :: xmass(3)
 real(kind=dp) :: xmassr(3)
 real(kind=dp) :: g1
 real(kind=dp) :: g2
+real(kind=dp) :: ezero
+
+! /time/
+real(kind=dp) :: ouser
+real(kind=dp) :: osys
+real(kind=dp) :: ototal
+
+! /diffs/
+real(kind=dp) :: alphae
+real(kind=dp) :: betae
+real(kind=dp) :: alphao
+real(kind=dp) :: betao
+
+! /eqm/
+real(kind=dp) :: ex(3)
+real(kind=dp) :: ez(3)
+real(kind=dp) :: tmass
+
+! /outp/
+real(kind=dp) :: toler = 0.0D0
+real(kind=dp) :: thresh = 0.1D0 ! threshold for printing a coefficient if zpvec=.true.
+
+
+
+
+
+
+
+
+
+
+
+
+! /head/
+!===================================================
+!real(kind=dp) :: title
+!===================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 end module dvr3drjz_file
 !unmention variable
 !integer :: ncoord
+
+!=====================================================================================================
+module input
+!  definition of the control input parameters
+  save
+  !line 1
+  !namelist prt
+  logical :: zprint = .false. ! =T supplies extra print out for debugging purposes
+  logical :: ztra = .true.  ! =T writes data for spectra to stream ITRA
+  logical :: zstart = .false. ! =T initiates the output file for the data for SPECTRA
+  integer :: iket   ! input stream from DVR3DRJZ/ROTLEV3/ROTLEV3B for the ket (unformated)
+  integer :: ibra   ! input stream for the bra (unformmatted)
+  integer :: itra   ! output stream to SPECTRA (if ZTRA = T ) (unformated)
+  namelist /prt/ zprint, ztra, zstart, iket, ibra, itra    
+  
+  !line 2
+  character(len=72) :: title
+  
+  !line 3
+  integer :: npot   ! number of gauss legendre integration points
+  integer :: nv2    ! number of ket eigenfunctions considered
+  integer :: nv1    ! number of bra eigenfunctions considered
+  integer :: ibase2 ! number of lowest ket eigenfunctions skipped
+  integer :: ibase1 ! number of lowest bra eigenfunctions skipped
+  
+  !line 4
+  real(8) :: ezero  ! the ground state of the system in cm-1
+end module input
+module lists
+!linked list definitions for the complicated header reading procedure
+!this is just an exercise, feel free to get rid of this mess (but it works ;-) 
+  save
+  type rgridnode
+     real(8) :: rgrid 
+     type (rgridnode),pointer :: next
+  end type rgridnode
+  type eigsnode
+     real(8) :: eigs  
+     type (eigsnode),pointer :: next
+  end type eigsnode
+  
+  type headnode
+     integer :: n3d    ! total number of grid points 
+     integer :: nr     ! number of radial grid points
+     integer :: jrot   ! total rotational angular momentum
+     integer :: nval   ! number of eigenvalues
+     integer :: kpar   ! laboratory coordinates parity
+     integer :: ifpar  ! nuclear permutation parity
+     integer :: nk     ! total number of k blocks
+     type(rgridnode),pointer :: rgridfirst,rgridlist 
+     type(eigsnode),pointer :: eigsfirst,eigslist
+     type (headnode),pointer :: next 
+  end type headnode
+  type(headnode),pointer :: headfirst,headlist 
+end module lists
+
+module workdata
+  save
+  integer :: nk1, nk2, ispar1, ispar2, kz1, kz2, nval, nval1, nval2, nth1, nth2
+  integer :: jrot1,jrot2,iqpar1,iqpar2,ifpar1,ifpar2,kpar1,kpar2,n3d1,n3d2,nr1,nr2
+  real(8), allocatable :: eigs1(:),eigs2(:)
+  real(8), allocatable :: rgrid1(:), rgrid2(:), thgrid1(:), thgrid2(:)  
+  
+  ! common grid
+  integer :: nr,nth
+  real(8) :: x,x1,x2
+  real(8), allocatable :: thgrid(:),tanth(:),rgrid(:),wt(:)
+  real(8), allocatable :: waves1(:,:),waves2(:,:)
+  real(8), allocatable :: dipcxa(:),dipcya(:),dipcxb(:),dipcyb(:)
+  real(8), allocatable :: pol1(:,:),pol2(:,:)
+
+  ! dipole storage
+  real(8), allocatable :: dpba(:,:)!,dpbb(:,:)
+  real(8) :: pi,sumpb
+end module workdata
