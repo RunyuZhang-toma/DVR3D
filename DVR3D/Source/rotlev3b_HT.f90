@@ -72,12 +72,12 @@ print *, "RULE IS VALID FOR PSI(K)^2>0.5"
 print *, "******************************************"
 
 
-if(kmin .eq. 2) then!THERE ARE SYMMETRIC AND ASYMMETRIC BASIS TO CONSIDER
+if(kmin == 2) then!THERE ARE SYMMETRIC AND ASYMMETRIC BASIS TO CONSIDER
 call hosetaylor(8)
 call hosetaylor(9)
-else if(kmin .eq. 1) then ! SYMMETRIC
+else if(kmin == 1) then ! SYMMETRIC
 call hosetaylor(8)
-else if(kmin .eq. 0) then! ASYMMETRIC
+else if(kmin == 0) then! ASYMMETRIC
 call hosetaylor(8)
 else
 continue
@@ -105,7 +105,7 @@ end if
 !     stream         holds                              used if
 !      ilev    input/output of eigenvalues              zpfun=.true.
 !      ivec    input  eigenvalues & eigenvectors        always
-!      ivec2   input  eigenvalues & eigenvectors        nblk .gt. 2
+!      ivec2   input  eigenvalues & eigenvectors        nblk > 2
 !      jvec    output first  set eigenvalues & vectors  zvec=.true.
 !      jvec2   output second set                        zvec=.true.
 !      kvec    output first  set transformed vectors    ztran=.true.
@@ -162,13 +162,13 @@ open(unit=ifile,form='unformatted',recordtype='segmented')
 ! reader header record to determine file structure  
 read(ifile) idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval
 rewind(ifile)
-If (jrot.eq.0) kmin=1
+If (jrot==0) kmin=1
 jk=jrot+kmin
 
-If (idia .eq. -2 .and. jk .gt. 1) then
+If (idia == -2 .and. jk > 1) then
  !  print *, "Radau, 8 or 9"
     call read_8or9_radau(ifile,jk,ezero)
-elseif (idia .eq. -2) then
+elseif (idia == -2) then
  !  print *, "Radau, 26"
     call read_26_radau(ifile,jk,ezero)
 else
@@ -203,7 +203,7 @@ double precision, intent(in) :: ezero
 ! PLEASE SPECIFY EZERO TO OBTAIN ENERGIES WRT ZERO POINT EQUILIBRIUM
 !ezero = 0.0d0
 
- ! if(ezero .eq. 0.0d0) print *, "WARNING: ZPE IS ZERO: LINE 190"
+ ! if(ezero == 0.0d0) print *, "WARNING: ZPE IS ZERO: LINE 190"
 
 
   do i=1,5
@@ -231,21 +231,21 @@ double precision, intent(in) :: ezero
 
 !get the eigenvectors
 
-if ( (MODULO(jrot,2) .eq. 0 ) ) THEN
+if ( (MODULO(jrot,2) == 0 ) ) THEN
 
-    if( (ipar .eq. 0) .and. (kmin .eq. 1) ) then
+    if( (ipar == 0) .and. (kmin == 1) ) then
     state = 'para'
     label = 0
     parity = 1
-    else if( (ipar .eq. 0) .and. (kmin .eq. 0) ) then
+    else if( (ipar == 0) .and. (kmin == 0) ) then
     state = 'para'
     label = 0
     parity = -1
-    else if( (ipar .eq. 1) .and. (kmin .eq. 1) ) then
+    else if( (ipar == 1) .and. (kmin == 1) ) then
     state = 'orth'
     label = 1
     parity = 1
-    else if( (ipar .eq. 1) .and. (kmin .eq. 0) ) then
+    else if( (ipar == 1) .and. (kmin == 0) ) then
     state = 'orth'
     label = 1
     parity = -1
@@ -253,21 +253,21 @@ if ( (MODULO(jrot,2) .eq. 0 ) ) THEN
     continue 
     end if
 
-else if ( (MODULO(jrot,2) .eq. 1 ) ) THEN
+else if ( (MODULO(jrot,2) == 1 ) ) THEN
 
-    if( (ipar .eq. 0) .and. (kmin .eq. 1) ) then
+    if( (ipar == 0) .and. (kmin == 1) ) then
     state = 'orth'
     label = 1
     parity = -1
-    else if( (ipar .eq. 0) .and. (kmin .eq. 0) ) then
+    else if( (ipar == 0) .and. (kmin == 0) ) then
     state = 'orth'
     label = 1
     parity = 1
-    else if( (ipar .eq. 1) .and. (kmin .eq. 1) ) then
+    else if( (ipar == 1) .and. (kmin == 1) ) then
     state = 'para'
     label = 0
     parity = -1
-    else if( (ipar .eq. 1) .and. (kmin .eq. 0) ) then
+    else if( (ipar == 1) .and. (kmin == 0) ) then
     state = 'para'
     label = 0
     parity = 1
@@ -278,19 +278,19 @@ else
 continue
 end if
 
-if (kmin .eq. 0) ka =  1 
-if (kmin .eq. 1) ka = 1 - 1
+if (kmin == 0) ka =  1 
+if (kmin == 1) ka = 1 - 1
 
-if(ka .eq. 0) then 
+if(ka == 0) then 
 kc=jrot
 !KA+KC EVEN
-if((mod((ka + kc),2) .eq. 0) .and. (state .eq. 'orth')) nu3=1
-if((mod((ka + kc),2) .eq. 0) .and. (state .eq. 'para')) nu3=0
+if((mod((ka + kc),2) == 0) .and. (state == 'orth')) nu3=1
+if((mod((ka + kc),2) == 0) .and. (state == 'para')) nu3=0
 
-if((mod((ka + kc),2) .eq. 1) .and. (state .eq. 'orth')) nu3=0
-if((mod((ka + kc),2) .eq. 1) .and. (state .eq. 'para')) nu3=1
+if((mod((ka + kc),2) == 1) .and. (state == 'orth')) nu3=0
+if((mod((ka + kc),2) == 1) .and. (state == 'para')) nu3=1
 
-else if(ka .gt. 0 ) then
+else if(ka > 0 ) then
 kc1 = jrot - ka
 p1=(-1.0d0)**kc1
 !----------
@@ -299,13 +299,13 @@ p2=(-1.0d0)**kc2
 
 
 
-if(parity .eq. p1) kc=kc1
-if(parity .eq. p2) kc=kc2
-if((mod((ka + kc),2) .eq. 0) .and. (state .eq. 'orth')) nu3=1
-if((mod((ka + kc),2) .eq. 0) .and. (state .eq. 'para')) nu3=0
+if(parity == p1) kc=kc1
+if(parity == p2) kc=kc2
+if((mod((ka + kc),2) == 0) .and. (state == 'orth')) nu3=1
+if((mod((ka + kc),2) == 0) .and. (state == 'para')) nu3=0
 
-if((mod((ka + kc),2) .eq. 1) .and. (state .eq. 'orth')) nu3=0
-if((mod((ka + kc),2) .eq. 1) .and. (state .eq. 'para')) nu3=1
+if((mod((ka + kc),2) == 1) .and. (state == 'orth')) nu3=0
+if((mod((ka + kc),2) == 1) .and. (state == 'para')) nu3=1
 else
 continue 
 end if
@@ -350,7 +350,7 @@ integer, allocatable :: ka(:),kc(:),kc1(:),kc2(:),p1(:),p2(:),nu3(:)
 ! PLEASE SPECIFY EZERO TO OBTAIN ENERGIES WRT ZERO POINT EQUILIBRIUM
 !ezero = 0.0d0
 
- ! if(ezero .eq. 0.0d0) print *, "WARNING: ZPE IS ZERO: LINE 336"
+ ! if(ezero == 0.0d0) print *, "WARNING: ZPE IS ZERO: LINE 336"
 
   read(ifile) idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval
   read(ifile) zembed,zmorse1,zmorse2,xm,g1,g2,zncor
@@ -383,21 +383,21 @@ sum(j)=0.0d0
 biggest(j)=0.0d0
 end do
 
-if ( (MODULO(jrot,2) .eq. 0 ) ) THEN
+if ( (MODULO(jrot,2) == 0 ) ) THEN
 
-    if( (ipar .eq. 0) .and. (kmin .eq. 1) ) then
+    if( (ipar == 0) .and. (kmin == 1) ) then
     state = 'para'
     label = 0
     parity = 1
-    else if( (ipar .eq. 0) .and. (kmin .eq. 0) ) then
+    else if( (ipar == 0) .and. (kmin == 0) ) then
     state = 'para'
     label = 0
     parity = -1
-    else if( (ipar .eq. 1) .and. (kmin .eq. 1) ) then
+    else if( (ipar == 1) .and. (kmin == 1) ) then
     state = 'orth'
     label = 1
     parity = 1
-    else if( (ipar .eq. 1) .and. (kmin .eq. 0) ) then
+    else if( (ipar == 1) .and. (kmin == 0) ) then
     state = 'orth'
     label = 1
     parity = -1
@@ -405,21 +405,21 @@ if ( (MODULO(jrot,2) .eq. 0 ) ) THEN
     continue 
     end if
 
-else if ( (MODULO(jrot,2) .eq. 1 ) ) THEN
+else if ( (MODULO(jrot,2) == 1 ) ) THEN
 
-    if( (ipar .eq. 0) .and. (kmin .eq. 1) ) then
+    if( (ipar == 0) .and. (kmin == 1) ) then
     state = 'orth'
     label = 1
     parity = -1
-    else if( (ipar .eq. 0) .and. (kmin .eq. 0) ) then
+    else if( (ipar == 0) .and. (kmin == 0) ) then
     state = 'orth'
     label = 1
     parity = 1
-    else if( (ipar .eq. 1) .and. (kmin .eq. 1) ) then
+    else if( (ipar == 1) .and. (kmin == 1) ) then
     state = 'para'
     label = 0
     parity = -1
-    else if( (ipar .eq. 1) .and. (kmin .eq. 0) ) then
+    else if( (ipar == 1) .and. (kmin == 0) ) then
     state = 'para'
     label = 0
     parity = 1
@@ -444,28 +444,28 @@ d=d**2
         sum(j) = sum(j) + d(i)
         component(j,k) = component(j,k) + d(i) 
         end do
-            if(k .eq. 1) then 
+            if(k == 1) then 
             biggest(j)=component(j,k)
-            if (kmin .eq. 0) ka(j) =  k 
-            if (kmin .eq. 1) ka(j) = k - 1
-            else if ( (k .gt. 1) .and. ( component(j,k) .gt. biggest(j) )) then
+            if (kmin == 0) ka(j) =  k 
+            if (kmin == 1) ka(j) = k - 1
+            else if ( (k > 1) .and. ( component(j,k) > biggest(j) )) then
             biggest(j)=component(j,k)
-            if (kmin .eq. 0) ka(j) = k 
-            if (kmin .eq. 1) ka(j) = k - 1
+            if (kmin == 0) ka(j) = k 
+            if (kmin == 1) ka(j) = k - 1
             else
             continue
             end if
 
-if(ka(j) .eq. 0) then 
+if(ka(j) == 0) then 
 kc(j)=jrot
 !KA+KC EVEN
-if((mod((ka(j) + kc(j)),2) .eq. 0) .and. (state .eq. 'orth')) nu3(j)=1
-if((mod((ka(j) + kc(j)),2) .eq. 0) .and. (state .eq. 'para')) nu3(j)=0
+if((mod((ka(j) + kc(j)),2) == 0) .and. (state == 'orth')) nu3(j)=1
+if((mod((ka(j) + kc(j)),2) == 0) .and. (state == 'para')) nu3(j)=0
 
-if((mod((ka(j) + kc(j)),2) .eq. 1) .and. (state .eq. 'orth')) nu3(j)=0
-if((mod((ka(j) + kc(j)),2) .eq. 1) .and. (state .eq. 'para')) nu3(j)=1
+if((mod((ka(j) + kc(j)),2) == 1) .and. (state == 'orth')) nu3(j)=0
+if((mod((ka(j) + kc(j)),2) == 1) .and. (state == 'para')) nu3(j)=1
 
-else if(ka(j) .gt. 0 ) then
+else if(ka(j) > 0 ) then
 kc1(j) = jrot - ka(j)
 p1(j)=(-1.0d0)**kc1(j)
 !----------
@@ -474,13 +474,13 @@ p2(j)=(-1.0d0)**kc2(j)
 
 
 
-if(parity .eq. p1(j)) kc(j)=kc1(j)
-if(parity .eq. p2(j)) kc(j)=kc2(j)
-if((mod((ka(j) + kc(j)),2) .eq. 0) .and. (state .eq. 'orth')) nu3(j)=1
-if((mod((ka(j) + kc(j)),2) .eq. 0) .and. (state .eq. 'para')) nu3(j)=0
+if(parity == p1(j)) kc(j)=kc1(j)
+if(parity == p2(j)) kc(j)=kc2(j)
+if((mod((ka(j) + kc(j)),2) == 0) .and. (state == 'orth')) nu3(j)=1
+if((mod((ka(j) + kc(j)),2) == 0) .and. (state == 'para')) nu3(j)=0
 
-if((mod((ka(j) + kc(j)),2) .eq. 1) .and. (state .eq. 'orth')) nu3(j)=0
-if((mod((ka(j) + kc(j)),2) .eq. 1) .and. (state .eq. 'para')) nu3(j)=1
+if((mod((ka(j) + kc(j)),2) == 1) .and. (state == 'orth')) nu3(j)=0
+if((mod((ka(j) + kc(j)),2) == 1) .and. (state == 'para')) nu3(j)=1
 else
 continue 
 end if
@@ -553,24 +553,24 @@ end subroutine read_8or9_radau
       mxblk2=nmax*(nmax-1)/2
       mbass0=ndvr*maxblk
 
-      if (kmin .ne. kmin0 .and. kmin0 .ne. 2) goto 960
-      if (ires .lt. 0) ztran=.true.
-      if (ires .gt. 0) zdiag=.true.
+      if (kmin /= kmin0 .and. kmin0 /= 2) goto 960
+      if (ires < 0) ztran=.true.
+      if (ires > 0) zdiag=.true.
 
 !     compute size of rotational secular problem
 
       nvib=min(nvib,meval)
-      if (kmin .gt. 0) then
+      if (kmin > 0) then
          nblk=jrot+1
       else
          nblk=jrot
-         if (kmin0 .eq. 2) ipar=1-ipar
+         if (kmin0 == 2) ipar=1-ipar
       endif
       nbass=nblk*nvib
-      if (ibass .gt. 0) nbass=min(nbass,ibass)
-      if (neval .le. 0) neval = 10
+      if (ibass > 0) nbass=min(nbass,ibass)
+      if (neval <= 0) neval = 10
       neval=min(neval,nbass)
-      if (neval2 .le. 0) neval2 = neval
+      if (neval2 <= 0) neval2 = neval
       npnt=max(ndvr,npnt)
 
       write(6,1000) meval,mbass0,ndvr,nvib,npnt,neval,nbass
@@ -582,7 +582,7 @@ end subroutine read_8or9_radau
              /i9,3x,'point gauss-associated legendre integration',&
              /i9,3x,'lowest rotational eigenvectors required for',&
              /i9,3x,'dimension rotation secular problem')
-      if (ibass .gt. 0) write(6,1005)
+      if (ibass > 0) write(6,1005)
  1005 format(12x,'with basis selected by energy ordering')
 
       read(5,500)   title
@@ -602,15 +602,15 @@ end subroutine read_8or9_radau
          else
             write(6,1014)
  1014 format(/5x,'Diagonalisation performed iteratively using f02fjf')
-            if (toler .ne. x0) write(6,1016) toler
+            if (toler /= x0) write(6,1016) toler
  1016 format(5x,'Eigenvalue convergence tolerance, TOLER =',d12.3)
-            if (toler .eq. x0) write(6,1017)
+            if (toler == x0) write(6,1017)
  1017 format(5x,'Eigenvalues converged to machine accuracy')
          endif
       endif
-      if (ires .ne. 0) write(6,1018) ires
+      if (ires /= 0) write(6,1018) ires
  1018 format(/5x,'***** restart run, IRES =',i2,' *****')
-      if (ires .lt. 0) write(6,1019)
+      if (ires < 0) write(6,1019)
  1019 format(/'      transformation only')
       if (zpham) write(6,1020)
  1020 format(/5x,'Printing of hamiltonian matrix requested')
@@ -628,11 +628,11 @@ end subroutine read_8or9_radau
           if (.not.zptra) write(6,1043)
  1043     format(5x,'Printing of transformed vectors not requested')
       endif
-      if (ires .eq. 0) write(6,1051) 'IVEC',ivec
-      if (ires .ne. 0) write(6,1051) 'IRTF1',irf1
+      if (ires == 0) write(6,1051) 'IVEC',ivec
+      if (ires /= 0) write(6,1051) 'IRTF1',irf1
  1051 format(/5x,'DVR3DRJZ data  to be read         from stream ',&
              a4,'  =',i4)
-      if (nblk .gt. 2) write(6,1052) ivec2
+      if (nblk > 2) write(6,1052) ivec2
  1052 format( 5x,'and                               from stream ',&
              'IVEC2 =',i4)
       if (zdiag) write(6,1053) iscr
@@ -644,40 +644,40 @@ end subroutine read_8or9_radau
       if (zvec) write(6,1054) jvec
  1054 format( 5x,'Eigenvalues & vectors to be written to stream ',&
              'JVEC  =',i4)
-      if (zvec .and. kmin .gt. 1) write(6,1056) jvec2
+      if (zvec .and. kmin > 1) write(6,1056) jvec2
  1056 format( 5x,'Second set            to be written to stream ',&
              'JVEC2 =',i4)
       if (ztran) write(6,1058) kvec
  1058 format( 5x,'Transformed vectors   to be written to stream ',&
              'KVEC  =',i4)
-      if (ztran .and. kmin .gt. 1) write(6,1059) kvec2
+      if (ztran .and. kmin > 1) write(6,1059) kvec2
  1059 format( 5x,'Second set            to be written to stream ',&
              'KVEC2 =',i4)
-      if (.not. zdiag .and. ires.eq.0) write(6,1061) irf1
+      if (.not. zdiag .and. ires==0) write(6,1061) irf1
  1061 format( 5x,'Restart data file one to be written to stream ',&
              'IRF1  =',i4)
-      if (ires .eq. 0) write(6,1062) irf2
+      if (ires == 0) write(6,1062) irf2
  1062 format( 5x,'Restart data file two to be written to stream ',&
              'IRF2  =',i4)
-      if (ires .ne. 0) write(6,1063) irf2
+      if (ires /= 0) write(6,1063) irf2
  1063 format( 5x,'Restart data file two to be read from  stream ',&
              'IRF2  =',i4)
 
       write(6,1080)
  1080 format(/5x,'Radau coordinates used')
-      if (ipar .eq. 0) write(6,1100)
+      if (ipar == 0) write(6,1100)
  1100 format(/5x,'Diatomic assumed homonuclear',&
              /5x,'even parity functions in basis set')
-      if (ipar .eq. 1) write(6,1110)
+      if (ipar == 1) write(6,1110)
  1110 format(/5x,'Diatomic assumed homonuclear',&
              /5x,'odd parity functions in basis set')
       write(6,1120) jrot
  1120 format(/5x,'J =',i3,' rotational state')
-      if (kmin .eq. 0) write(6,1130)
+      if (kmin == 0) write(6,1130)
  1130 format(12x,'with anti-symmetric |Jk> - |J-k> functions in basis')
-      if (kmin .eq. 1) write(6,1140)
+      if (kmin == 1) write(6,1140)
  1140 format(12x,'with symmetric |Jk> + |J-k> functions in basis')
-      if (kmin .gt. 1) write(6,1150)
+      if (kmin > 1) write(6,1150)
  1150 format(12x,'loop over symmetric and anti-symmetric functions')
       return
 
@@ -710,7 +710,7 @@ end subroutine read_8or9_radau
       character(len=4) symm(2)
       data symm/'even','odd '/
 !     read energies from file ivec,
-      if (ires .eq. 0) then
+      if (ires == 0) then
       if (zdiag) then
 !        first skip matrix elements
          do 10 i=1,4
@@ -737,10 +737,10 @@ end subroutine read_8or9_radau
       read(ivec,end=900)
 !     if k2=0 and we are doing an f parity calculation, read k=1 from
 !     end of file
-      if (k2 .eq. 0 .and. kmin .eq. 0) then
+      if (k2 == 0 .and. kmin == 0) then
          call endiv(ivec,jrot+1)
          read(ivec,end=900) k2,maxleg,idvr,lincr
-         if (abs(k2) .ne. 1) then
+         if (abs(k2) /= 1) then
             write(6,950) ivec,k2
   950       format(//' Last block on stream',i3,' has k =',i3,&
                     /' 1 expected: STOP')
@@ -782,7 +782,7 @@ end subroutine read_8or9_radau
       do 110 i=1,3
       read(ivec)
   110 continue
-      if (ibass .le. 0 .or. ibass .ge. ipt) then
+      if (ibass <= 0 .or. ibass >= ipt) then
           nbass=ipt
           ivib=nvib
       else
@@ -796,7 +796,7 @@ end subroutine read_8or9_radau
   160    continue
          ipt=1
          do 200 n=1,ibass
-  210    if (iv(ipt) .le. mvib(ipt)) then
+  210    if (iv(ipt) <= mvib(ipt)) then
             evibr=evib(iv(ipt),ipt)
             jpt=ipt
          else
@@ -804,8 +804,8 @@ end subroutine read_8or9_radau
             goto 210
          endif
          do 220 j=ipt+1,nblk
-         if (iv(j) .gt. mvib(j)) goto 220
-         if (evib(iv(j),j) .ge. evibr) goto 220
+         if (iv(j) > mvib(j)) goto 220
+         if (evib(iv(j),j) >= evibr) goto 220
          evibr=evib(iv(j),j)
          jpt=j
   220    continue
@@ -841,7 +841,7 @@ end subroutine read_8or9_radau
  
        write(6,1010)
  1010 format(//5x,' basis functions selected')
-      if (kmin .eq. 0) then
+      if (kmin == 0) then
          kz=1
       else
          kz=0
@@ -866,7 +866,7 @@ end subroutine read_8or9_radau
       ipu=ipd+mvib(ioff)
       write(6,1020) kz,ipd+1,ipu,symm(mod(ipar+kz,2)+1)
  1020 format(5x,'k =',i3,', i runs from',i5,' to',i5,2x,a4)
-      if(ipu.EQ.nbass) exit
+      if(ipu==nbass) exit
   310 continue
 
       nblk = kz + 1
@@ -914,12 +914,12 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: radmee,radmoo,radmeo,radmoe
       data x0/0.0d0/
 
-      if (abs(ires) .eq. 2) goto 100
-      if (ires .lt. 0) then
+      if (abs(ires) == 2) goto 100
+      if (ires < 0) then
          allocate(eval(neval))
          goto 50
       endif
-      if (ires .eq. 0) then
+      if (ires == 0) then
           ALLOCATE(radmee(maxblk),radmoo(mxblk2),radmeo(mxblk2),radmoe(mxblk2))
 
 !        2d symmetrised radial matrix elements from 1d componants
@@ -937,7 +937,7 @@ end subroutine read_8or9_radau
       endif
  
       if (.not.zdiag) stop
-      if (ires .ge. 0) then
+      if (ires >= 0) then
          ezero=x0
          read(5,505,end=555) ezero
   505    format(f20.0)
@@ -959,15 +959,15 @@ end subroutine read_8or9_radau
  
 !        diagonalise the hamiltonian (twice if requested)
  
-         if (kmin .eq. 0) write(6,1000) jrot,ibass
+         if (kmin == 0) write(6,1000) jrot,ibass
  1000 format('1'/5x,'J =',i3,' rotational state,',i7,' basis functions'&
           /12x,'f parity, anti-symmetric |jk> - |j-k> functions in basis')
-         if (kmin .ge. 1) write(6,1010) jrot,ibass
+         if (kmin >= 1) write(6,1010) jrot,ibass
  1010 format('1'/5x,'J =',i3,' rotational state,',i7,' basis functions'&
           /12x,'e parity, symmetric |jk> + |j-k> functions in basis')
-         if (ipar .eq. 0) write(6,1020)
+         if (ipar == 0) write(6,1020)
  1020    format(12x,'even parity radial functions in basis set')
-         if (ipar .eq. 1) write(6,1030)
+         if (ipar == 1) write(6,1030)
  1030    format(12x,'odd parity radial functions in basis set')
  
          call dgrot(diag,mvib,eval,vec,1,ezero,lwork)
@@ -984,7 +984,7 @@ end subroutine read_8or9_radau
           call dstore(mvib,1,nkbas,lmin,lbasis,eval,idvr)
           call nftim('end of transformation')
       endif
-      if (kmin.le.1 .or. abs(ires).eq.3) goto 200
+      if (kmin<=1 .or. abs(ires)==3) goto 200
  
 !     diagonalise/transform a second time if kmin > 1
  
@@ -992,31 +992,31 @@ end subroutine read_8or9_radau
       neval=min(neval2,ibass)
       if (.not. zdcore) keval=min(ibass,neval+4)
       if (      zdcore) keval=ibass
-      if (abs(ires).eq.2) allocate(eval(keval))
+      if (abs(ires)==2) allocate(eval(keval))
       jvec=jvec2
       ipar=1-ipar
       kvec=kvec2
 
 
-      if (jrot.eq.1) then
+      if (jrot==1) then
 !     J=1f: treat as a special case
          write(6,1001) jrot
  1001 format('1'/5x,'J =',i3,' rotational state special case for'&
           /12x,'f parity, anti-symmetric |jk> - |j-k> functions in basis')
-         if (ipar .eq. 0) write(6,1020)
-         if (ipar .eq. 1) write(6,1030)
+         if (ipar == 0) write(6,1020)
+         if (ipar == 1) write(6,1030)
          call dstore1(2,eval,idvr,ezero)
          goto 200
       endif
 
-      if (ires .ge. 0) then
+      if (ires >= 0) then
          write(6,1000) jrot,ibass
-         if (ipar .eq. 0) write(6,1020)
-         if (ipar .eq. 1) write(6,1030)
+         if (ipar == 0) write(6,1020)
+         if (ipar == 1) write(6,1030)
  
 !        re-load the hamiltonian matrix elements
 !        (for a restart run, first position the file)
-         if (ires.eq.2 .or. ztran .or. zdcore) then
+         if (ires==2 .or. ztran .or. zdcore) then
             if (zdcore) then
                lwork=max(loff0,3*nbass)
                allocate(vec(nbass,nbass),diag(lwork))
@@ -1072,7 +1072,7 @@ end subroutine read_8or9_radau
  
 !     then use this data to construct the radial matrices
       call mkrad(radmee,nmax,rm2,0,0,0)
-      if (mxblk2 .gt. 0) then
+      if (mxblk2 > 0) then
          call mkrad(radmoo,nmax,rm2,1,0,0)
          call mkrad(radmeo,nmax,rm2,1,1,0)
          call mkrad(radmoe,nmax,rm2,1,1,1)
@@ -1140,7 +1140,7 @@ end subroutine read_8or9_radau
       write(6,1010) cswalf,tswalf
  1010 format(/5x,'computed sum of weights',d26.15,&
              /5x,'exact    sum of weights',d26.15)
-      if (abs((cswalf-tswalf)/tswalf) .gt. toler) then
+      if (abs((cswalf-tswalf)/tswalf) > toler) then
          write(6,910)
   910    format(//5x,'points & weights in error, adjust algorithm'//)
          stop
@@ -1153,7 +1153,7 @@ end subroutine read_8or9_radau
 !     evaluate the polynomials at the quadrature points
       call asleg(plega,fbrmat,nang1-1,xalf,npnt,k1)
 !     return if the matrix elements are not actually needed
-      if (mn .eq. 0) return
+      if (mn == 0) return
       call asleg(plegb,fbrmat,nang2-1,xalf,npnt,k1+1)
 !     compute the fbr matrix elements
       fbrmat = x0
@@ -1172,17 +1172,17 @@ end subroutine read_8or9_radau
       xkph=dble(k1)+xp5
       i1=0
       do 60 i= 1,nang1
-      if (iv1(i) .eq. 0) goto 60
+      if (iv1(i) == 0) goto 60
       i1=i1+1
       i2=0
       do 65 ip=1,nang2
-      if (iv2(ip) .eq. 0) goto 65
+      if (iv2(ip) == 0) goto 65
       i2=i2+1
       sum1=x0
       sum2=x0
       jj=k1
       do 70 j =1,nang1
-      if (j .gt. 1) then
+      if (j > 1) then
          jj=jj+1
          sum1 = sum1 + pleg1(j,i) * pleg2(j-1,ip)&
              * sqrt(dble(jj*(jj+1)-kkp1))
@@ -1238,11 +1238,11 @@ end subroutine read_8or9_radau
  
       i1=0
       do 60 i= 1,nang1
-      if (iv1(i) .eq. 0) goto 60
+      if (iv1(i) == 0) goto 60
       i1=i1+1
       i2=0
       do 65 ip=1,nang2
-      if (iv2(ip) .eq. 0) goto 65
+      if (iv2(ip) == 0) goto 65
       i2=i2+1
       sum=x0
       do 70 j =1,nang1
@@ -1286,21 +1286,21 @@ end subroutine read_8or9_radau
       cc= cc*c(i)
  1    continue
       do 12 i=1,nn2
-      if (i .eq. 1) then
+      if (i == 1) then
 !        largest zero
          an= alf/fn
          bn= bta/fn
          r1= (x1 + alf)*(2.78d0/(x4 + fn*fn) +0.768*an/fn)
          r2= x1 + 1.48d0*an + 0.96d0*bn + 0.452*an*an + 0.83d0*an*bn
          xt= x1 - r1/r2
-      else if (i .eq. 2) then
+      else if (i == 2) then
 !        second zero
          r1= (4.1d0 + alf)/((x1 + alf)*(x1 + 0.156*alf))
          r2= x1 + 0.06d0*(fn - x8)*(x1 + 0.12d0*alf)/fn
          r3= x1 + 0.012*bta*(x1 + abs(alf)/x4)/fn
          ratio= r1*r2*r3
          xt= xt - ratio*(x1 - xt)
-      else if (i .eq. 3) then
+      else if (i == 3) then
 !        third zero
          r1= (1.67d0 + 0.28d0*alf)/(x1 + 0.37d0*alf)
          r2= x1 + 0.22d0*(fn - x8)/fn
@@ -1317,7 +1317,7 @@ end subroutine read_8or9_radau
       a(i)= cc/(dpn*pn1)
       csa= csa + a(i)*x2
   12  continue
-      if (2*nn2 .ne. nn) csa = csa - a(nn2)
+      if (2*nn2 /= nn) csa = csa - a(nn2)
       return
       end
 
@@ -1362,19 +1362,19 @@ end subroutine read_8or9_radau
  30   continue
       call recur(p,dp,pn1,xxx,nn,alf,bta,b,c)
 
-      if (pm1*p .lt. x0) then
+      if (pm1*p < x0) then
          pm1 = -pm1
          ii = ii +1
          xt(ii)=xxx-0.5*xstep
       endif
 
-      if (ii .eq. nn2) then
+      if (ii == nn2) then
          do 40 i=1,nn2
          call recur(ptemp,dp,pn1,xt(i),nn,alf,bta,b,c)
 40      continue
       else
          xxx=xxx-xstep
-         if (xxx .gt. -1.5*xstep) goto 30
+         if (xxx > -1.5*xstep) goto 30
          write(6,*) "Incorrect number",ii-1," of zeros found in JACOBI"
          stop
       endif 
@@ -1385,7 +1385,7 @@ end subroutine read_8or9_radau
        a(i)= cc/(dpn*pn1)
        csa= csa + a(i) + a(i)
   20  continue
-      if (2*nn2 .ne. nn) csa=csa-a(nn2)
+      if (2*nn2 /= nn) csa=csa-a(nn2)
       return
       end
 
@@ -1404,8 +1404,8 @@ end subroutine read_8or9_radau
       call recur(p,dp,pn1,x,nn,alf,bta,b,c)
       d = p/dp
       x = x - d
-      if(abs(d) .le. eps) goto 3
-      if (iter .lt. 10) goto 1
+      if(abs(d) <= eps) goto 3
+      if (iter < 10) goto 1
 3     dpn= dp
       return
       end
@@ -1446,14 +1446,14 @@ end subroutine read_8or9_radau
       dimension pleg(0:lmax,nn2),x(nn2),pnorm(0:lmax)
       data x1/1.0d0/,x2/2.0d0/
 
-      if (m .lt. 0) goto 999
+      if (m < 0) goto 999
       do 10 i=1,nn2
 
       !For high J and high k the value pmm can become too large over this loop
       !Therefore in these instances we need pmm to be very small to begin with
       !We later divide by this factor to achieve the originally required number
       !For so2 at J = 200 and k > 90 we find this necessary, so we add this conditional
-	if(m.LT.90)then
+	if(m<90)then
 	  pmm = x1
 	else
 	  pmm = 1d-250
@@ -1468,7 +1468,7 @@ end subroutine read_8or9_radau
       !Even when we use the above trick to reduce the size of pmm, it can still be too large for subsequent loops
       !We therefore conditionally divide pmm by a large enough factor - we take this to be for k > 150 (for so2)
       !write(*,*) pmm
-      if(m.GT.150)then
+      if(m>150)then
 	pmm = pmm/1.0d200
       end if
  
@@ -1500,7 +1500,7 @@ end subroutine read_8or9_radau
   
 !After a certain point, square-rooting this factor doesn't reduce the number sufficiently to a coping level
 !Therefore we take the fourth root instead. We set the cut-off point to be the same as that for pmm, k > 90
-	 if(m.LT.90)then
+	 if(m<90)then
 	   facti = sqrt(dble(i))
 	 else
 	   facti = dble(i)**(1.0d0/4.0d0)
@@ -1511,7 +1511,7 @@ end subroutine read_8or9_radau
       rj = dble(j)
       jj = jj + 1
 
-      if(m.LT.90)then
+      if(m<90)then
 	   pnorm(jj) = sqrt((rj + rj + x1) /2)/fact
 	 else
 	   pnorm(jj) = (((rj + rj + x1) /2)**(1.0d0/4.0d0))/fact
@@ -1524,12 +1524,12 @@ end subroutine read_8or9_radau
 	do 15 jj=0,lmax
 	  pleg(jj,i) = pleg(jj,i) * pnorm(jj)
 	   !This is where we multiply by the large factor initially divided from pmm at the beginning of its loop
-	    if(m.GE.90)then
+	    if(m>=90)then
 	      pleg(jj,i) = pleg(jj,i) * 1.0d250 * pnorm(jj)
 	    end if
 	    
 	    !And for the k's which are greater than 150, we need to divide by the reducing factor again
-	     if(m.GT.150)then
+	     if(m>150)then
 	      pleg(jj,i) = pleg(jj,i) * 1.0d200
 	    end if
 	15 continue
@@ -1600,15 +1600,15 @@ end subroutine read_8or9_radau
       endif
  
       ipt=1+ibass
-      if (itime .gt. 1) then
+      if (itime > 1) then
 !     first the blocks involving k=1 from the end of iscr
          if (.not. zdcore) then
             leng=mvib(3)*mvib(2)
-            if (leng .gt. 0)  call getrow(diag(ipt),leng,iscr)
+            if (leng > 0)  call getrow(diag(ipt),leng,iscr)
             ipt=ipt+leng
-            if (nblk .gt. 3) then
+            if (nblk > 3) then
                leng=mvib(4)*mvib(2)
-               if (leng .gt. 0) call getrow(diag(ipt),leng,iscr)
+               if (leng > 0) call getrow(diag(ipt),leng,iscr)
                ipt=ipt+leng
             endif
 !           then the diagonal elements
@@ -1616,7 +1616,7 @@ end subroutine read_8or9_radau
          else
             ist2=ist2+mvib(2)
             leng=mvib(3)*mvib(2)
-            if (leng .gt. 0) call getrow(diag,leng,iscr)
+            if (leng > 0) call getrow(diag,leng,iscr)
             ipt=0
             do 10 i1=1,mvib(2)
             do 20 i2=ist2+1,ist2+mvib(3)
@@ -1625,10 +1625,10 @@ end subroutine read_8or9_radau
             hamil(i2,i1)=diag(ipt)
    20       continue
    10       continue
-            if (nblk .gt. 3) then
+            if (nblk > 3) then
                ist3=ist2+mvib(3)
                leng=mvib(4)*mvib(2)
-               if (leng .gt. 0) call getrow(diag,leng,iscr)
+               if (leng > 0) call getrow(diag,leng,iscr)
                ipt=ipt+leng
                ipt=0
                do 30 i1=1,mvib(2)
@@ -1648,12 +1648,12 @@ end subroutine read_8or9_radau
       endif
 !     reposition iscr (skipping k=0 and k=1 blocks if already read)
       rewind iscr
-      if (itime .gt. 1) then
-         if (mvib(1)*mvib(2) .gt. 0) read(iscr)
-         if (mvib(1)*mvib(3) .gt. 0) read(iscr)
-         if (mvib(2)*mvib(3) .gt. 0) read(iscr)
-         if (nblk .gt. 3) then
-         if (mvib(2)*mvib(4) .gt. 0) read(iscr)
+      if (itime > 1) then
+         if (mvib(1)*mvib(2) > 0) read(iscr)
+         if (mvib(1)*mvib(3) > 0) read(iscr)
+         if (mvib(2)*mvib(3) > 0) read(iscr)
+         if (nblk > 3) then
+         if (mvib(2)*mvib(4) > 0) read(iscr)
          end if
          j0=4
       else
@@ -1663,15 +1663,15 @@ end subroutine read_8or9_radau
       if (.not. zdcore) then
          do 100 j=j0,nblk
          leng=mvib(j)*mvib(j-1)
-         if (leng .gt. 0) call getrow(diag(ipt),leng,iscr)
+         if (leng > 0) call getrow(diag(ipt),leng,iscr)
          ipt=ipt+leng
-         if (j .lt. nblk) then
+         if (j < nblk) then
             leng=mvib(j+1)*mvib(j-1)
-            if (leng .gt. 0) call getrow(diag(ipt),leng,iscr)
+            if (leng > 0) call getrow(diag(ipt),leng,iscr)
             ipt=ipt+leng
          endif
   100    continue
-         if (itime .le. 1) call getrow(diag,nbass,iscr)
+         if (itime <= 1) call getrow(diag,nbass,iscr)
  
 !     print hamiltonian matrix- if requested
  
@@ -1682,7 +1682,7 @@ end subroutine read_8or9_radau
          ist1=ist2
          ist2=ist2+mvib(j-1)
          leng=mvib(j)*mvib(j-1)
-         if (leng .gt. 0) call getrow(diag,leng,iscr)
+         if (leng > 0) call getrow(diag,leng,iscr)
          ipt=0
          do 130 i1=ist1+1,ist1+mvib(j-1)
          do 135 i2=ist2+1,ist2+mvib(j)
@@ -1691,10 +1691,10 @@ end subroutine read_8or9_radau
          hamil(i2,i1)=diag(ipt)
   135    continue
   130    continue
-         if (j .lt. nblk) then
+         if (j < nblk) then
             ist3=ist2+mvib(j)
             leng=mvib(j+1)*mvib(j-1)
-            if (leng .gt. 0) call getrow(diag,leng,iscr)
+            if (leng > 0) call getrow(diag,leng,iscr)
             ipt=ipt+leng
             ipt=0
             do 140 i1=ist1+1,ist1+mvib(j-1)
@@ -1706,7 +1706,7 @@ end subroutine read_8or9_radau
   140       continue
          endif
   150    continue
-         if (itime .eq. 1) then
+         if (itime == 1) then
             call getrow(diag,ibass,iscr)
             do 160 i=1,ibass
             hamil(i,i)=diag(i)
@@ -1758,14 +1758,14 @@ end subroutine read_8or9_radau
       ip = ipar
  
 !     position ket input file (and load first ket data)
-!     for nblk .eq. 2 also load bra file
+!     for nblk == 2 also load bra file
   
       read(ivec)
       read(ivec)
       read(ivec) k1,maxleg,nang1
 !     if k1=0 and we are doing an f parity calculation, read k=1 from
 !     end of file
-      if (k1 .eq. 0 .and. kmin .eq. 0) then
+      if (k1 == 0 .and. kmin == 0) then
          read(ivec)
          call endiv(ivec,jrot+1)
  
@@ -1773,10 +1773,10 @@ end subroutine read_8or9_radau
          call getrow(pleg1,nang1*ndvr,ivec)
          read(ivec) iang1,ibass1
          read(ivec) (iv1(i),i=1,nang1)
-         if (mvib(1) .gt. 0) then
+         if (mvib(1) > 0) then
             read(ivec)
             call getrow(diag(1),mvib(1),ivec)
-            if (nblk .le. 2)&
+            if (nblk <= 2)&
                call rdcoef(coef1,ibass1,mvib(1),mvib(1),ivec)
          endif
          call reseti(ivec)
@@ -1785,9 +1785,9 @@ end subroutine read_8or9_radau
          read(ivec) iang1,ibass1
          read(ivec) (iv1(i),i=1,nang1)
          read(ivec) meval2
-         if (mvib(1) .gt. 0) then
+         if (mvib(1) > 0) then
             call getrow(diag(1),mvib(1),ivec)
-            if (nblk .le. 2) then
+            if (nblk <= 2) then
                call rdcoef(coef1,ibass1,mvib(1),meval2,ivec)
             else
                call rdcoef(coef1,ibass1,0,meval2,ivec)
@@ -1805,7 +1805,7 @@ end subroutine read_8or9_radau
       read(ivec) (iv2(i),i=1,nang2)
  
       read(ivec) meval2
-      if (mvib(2) .gt. 0) then
+      if (mvib(2) > 0) then
          call getrow(diag(idpt),mvib(2),ivec)
          idpt=idpt+mvib(2)
       else
@@ -1813,7 +1813,7 @@ end subroutine read_8or9_radau
       endif
       call rdcoef(coef2,ibass2,mvib(2),meval2,ivec)
 !     position second vectors file if it is required
-      if (nblk .gt. 2) then
+      if (nblk > 2) then
          open(unit=ivec2,form='unformatted',recordtype='segmented')
          rewind ivec2
          do 10 i=1,5
@@ -1825,12 +1825,12 @@ end subroutine read_8or9_radau
  
       do 300 ioff=2,nblk
 !     read in next set of bra vibrational vectors & diagonal elements
-      if (nblk .gt. 2) then
+      if (nblk > 2) then
          read(ivec2)
          read(ivec2) k1,maxleg,nang1
 !     if k1=0 and we are doing an f parity calculation, read k=1 from
 !     end of file
-         if (k1 .eq. 0 .and. kmin .eq. 0) then
+         if (k1 == 0 .and. kmin == 0) then
             read(ivec2)
             call endiv(ivec2,jrot+1)
  
@@ -1839,7 +1839,7 @@ end subroutine read_8or9_radau
             read(ivec2) iang1,ibass1
             read(ivec2) (iv1(i),i=1,nang1)
             read(ivec2)
-            if (mvib(1) .gt. 0) then
+            if (mvib(1) > 0) then
                call getrow(diag(1),mvib(1),ivec2)
                call rdcoef(coef1,ibass1,mvib(1),mvib(1),ivec2)
             endif
@@ -1860,12 +1860,12 @@ end subroutine read_8or9_radau
       mn = mvib(ioff-1)*mvib(ioff)
 !     angular factor for the present off-diagonal block
       angfac = +sqrt(dble(jjp1-k1*(k1+1)))/x2
-      if (k1 .eq. 0) angfac = sqrt2 * angfac
+      if (k1 == 0) angfac = sqrt2 * angfac
 
       call angin1(angmat,xalf,walf,pleg1,pleg2,mn,k1,&
                   plega,plegb,iv1,iv2,nang1,nang2,angfac)
-      if (mn .gt. 0) then
-         if (ip .eq. 0) then
+      if (mn > 0) then
+         if (ip == 0) then
             call solofd(mn,radmeo,angmat,nmax,1,1,0,offdg,iang,&
                         iang1,iang2,mvib(ioff-1),mvib(ioff),coef1,coef2,&
                         ibass1,ibass2)
@@ -1878,7 +1878,7 @@ end subroutine read_8or9_radau
  
 !     next block: kp = k+2 (skip if we are near end of matrix)
  
-      if (ioff .eq. nblk) goto 300
+      if (ioff == nblk) goto 300
       read(ivec)
       read(ivec) k2,maxleg,nang2
       call getrow(pleg2,nang2*ndvr,ivec)
@@ -1886,7 +1886,7 @@ end subroutine read_8or9_radau
       read(ivec) (iv2(i),i=1,nang2)
       read(ivec) meval2
  
-      if (mvib(ioff+1) .gt. 0) then
+      if (mvib(ioff+1) > 0) then
          call getrow(diag(idpt),mvib(ioff+1),ivec)
          idpt=idpt+mvib(ioff+1)
       else
@@ -1897,14 +1897,14 @@ end subroutine read_8or9_radau
 !     compute angular off diagonal elements (if needed)
  
       mn = mvib(ioff-1)*mvib(ioff+1)
-      if (mn .gt. 0) then
+      if (mn > 0) then
 !        angular factor for the present off-diagonal block
          angfac = -sqrt(dble((jjp1-(k1+1)*(k1+2))*(jjp1-k1*(k1+1))))/x16
-         if (k1 .eq. 0) angfac = sqrt2 * angfac
+         if (k1 == 0) angfac = sqrt2 * angfac
          call angin2(angmat,xalf,walf,pleg1,pleg2,k1,&
                   plega,plegb,iv1,iv2,nang1,nang2,angfac)
  
-         if (ip .eq. 0) then
+         if (ip == 0) then
             call solofd(mn,radmee,angmat,nmax,0,0,0,offdg,iang,&
                      iang1,iang2,mvib(ioff-1),mvib(ioff+1),coef1,coef2,&
                      ibass1,ibass2)
@@ -1920,7 +1920,7 @@ end subroutine read_8or9_radau
 !     place diagonal elements at end of scratch file
  
       call outrow(diag,nbass,iscr)
-      if (kmin .lt. 2) goto 600
+      if (kmin < 2) goto 600
  
 !     compute k=1 f blocks and place them at the end of the scratch file
  
@@ -1929,7 +1929,7 @@ end subroutine read_8or9_radau
       call getrow(pleg1,nang1*ndvr,ivec)
       read(ivec) iang1,ibass1
       read(ivec) (iv1(i),i=1,nang1)
-      if (mvib(2) .le. 0 .or. nblk.le.2) goto 500
+      if (mvib(2) <= 0 .or. nblk<=2) goto 500
       read(ivec)
       call getrow(diag(mvib(1)+1),mvib(2),ivec)
       call rdcoef(coef1,ibass1,mvib(2),mvib(2),ivec)
@@ -1953,8 +1953,8 @@ end subroutine read_8or9_radau
       angfac = +sqrt(dble(jjp1-2))/x2
       call angin1(angmat,xalf,walf,pleg1,pleg2,mn,k1,&
                   plega,plegb,iv1,iv2,nang1,nang2,angfac)
-      if (mn .gt. 0) then
-         if (ip .eq. 0) then
+      if (mn > 0) then
+         if (ip == 0) then
             call solofd(mn,radmeo,angmat,nmax,1,1,0,offdg,iang,&
                         iang1,iang2,mvib(2),mvib(3),coef1,coef2,&
                         ibass1,ibass2)
@@ -1967,7 +1967,7 @@ end subroutine read_8or9_radau
  
 !     next block: kp = k+2 (skip if we are near end of matrix)
  
-      if (nblk .le. 3) goto 500
+      if (nblk <= 3) goto 500
       read(ivec)
       read(ivec) k2,maxleg,nang2
       call getrow(pleg2,nang2*ndvr,ivec)
@@ -1981,13 +1981,13 @@ end subroutine read_8or9_radau
 !     compute angular off diagonal elements (if needed)
  
       mn = mvib(2)*mvib(4)
-      if (mn .gt. 0) then
+      if (mn > 0) then
 !        angular factor for the present off-diagonal block
          angfac = -sqrt(dble((jjp1-6)*(jjp1-2)))/x16
          call angin2(angmat,xalf,walf,pleg1,pleg2,k1,&
                   plega,plegb,iv1,iv2,nang1,nang2,angfac)
  
-         if (ip .eq. 0) then
+         if (ip == 0) then
             call solofd(mn,radmee,angmat,nmax,0,0,0,offdg,iang,&
                      iang1,iang2,mvib(2),mvib(4),coef1,coef2,&
                      ibass1,ibass2)
@@ -2138,7 +2138,7 @@ end subroutine read_8or9_radau
       if (zdcore) then
           ifail=0
           call dsyev('V','U',ibass,vec,ibass,eval,diag,lwork,ifail)
-          if (ifail .ne. 0) write(6,950) ifail
+          if (ifail /= 0) write(6,950) ifail
  950     format(/5x,'LAPACK routine SSYEV returned INFO =',i5)  
       else
          LWORK=3*KEVAL+MAX(KEVAL*KEVAL,NBASS+NBASS)
@@ -2151,7 +2151,7 @@ end subroutine read_8or9_radau
  1000 format(//5x,'lowest',i4,' eigenvalues in Hartrees',/)
       write(6,1020) eval
       if (zpfun) then
-         if (k1 .eq. 1) then
+         if (k1 == 1) then
             open(unit=ilev,form='formatted')
             rewind ilev
   200       read(ilev,*,end=210,err=210)
@@ -2161,7 +2161,7 @@ end subroutine read_8or9_radau
             backspace ilev
          endif
          ip=1-kmin
-         if (kmin .gt. 1) ip=k1-1
+         if (kmin > 1) ip=k1-1
          write(ilev,1025) jrot,ip,0,0,(2-4*ipar),neval
  1025    format(6i6) 
          write(ilev,1026) eval
@@ -2170,7 +2170,7 @@ end subroutine read_8or9_radau
       if (zvec) then
 !        write eigenvalues, eigenvectors, etc to stream jvec
          kz=kmin
-         if (kmin .gt. 1) kz=2-k1
+         if (kmin > 1) kz=2-k1
          open(unit=jvec,form='unformatted')
          rewind jvec
          write(jvec) jrot,kz,ipar,neval,ibass
@@ -2180,7 +2180,7 @@ end subroutine read_8or9_radau
          do 100 k=1,nblk
          mbeg=mend+1
          mend=mend+mvib(k)
-         if(mvib(k).gt.0) write(jvec) ((vec(j,i),j=mbeg,mend),i=1,neval)
+         if(mvib(k)>0) write(jvec) ((vec(j,i),j=mbeg,mend),i=1,neval)
   100    continue
       endif
       do 60 i=1,neval
@@ -2193,7 +2193,7 @@ end subroutine read_8or9_radau
  1020 format(5d24.12/)
 
       if (zpvec) then
-          if (thresh .le. x0) then
+          if (thresh <= x0) then
 !             print complete eigenvectors
               write(6,1030)
  1030         format(//'    eigenvectors',/)
@@ -2211,11 +2211,11 @@ end subroutine read_8or9_radau
               ipt=0
               do 90 j=1,ibass
               vv=abs(vec(j,i))
-              if (vv .gt. thresh) then
+              if (vv > thresh) then
                   ipt=ipt+1
                   ibig(ipt)=j
               endif
-              if (ipt .le. 0 .and. vv .gt. vbig) then
+              if (ipt <= 0 .and. vv > vbig) then
                   vbig=vv
                   ibig(1)=j
               endif
@@ -2259,8 +2259,8 @@ end subroutine read_8or9_radau
       do 10 i=1,keval
       ebig=emax
       do 20 j=1,ibass
-      if (diag(j) .gt. ebig) goto 20
-      if (diag(j) .le. esmall) goto 20
+      if (diag(j) > ebig) goto 20
+      if (diag(j) <= esmall) goto 20
       ind=j
       ebig=diag(j)
    20 continue
@@ -2286,7 +2286,7 @@ end subroutine read_8or9_radau
       call f02fjf(ibass,neval,keval,noits,toler,vecvec,matvec,f02fjz,&
                   keval,vec,ibass,eval,work,lwork,diag,noffd,&
                   mvib,ndiag,ifail)
-      if (ifail .ne. 0) write(6,900) ifail
+      if (ifail /= 0) write(6,900) ifail
   900 format(//5x,'f02fjf returned ifail =',i3)
  
       write(6,1000) noits
@@ -2355,20 +2355,20 @@ end subroutine read_8or9_radau
       read(jvec) mvib
       nval=min(nval,neval)
 !     check for compatability
-      if (jrot1 .ne. abs(jrot0)) then
+      if (jrot1 /= abs(jrot0)) then
           write(6,900) jrot1,abs(jrot0)
   900     format(/5x,'j levels mismatched',&
                  /5x,'jrot1 =',i3,'  jrot0 =',i3)
           stop
       endif
-      if (kmin1 .gt. kmin0) then
+      if (kmin1 > kmin0) then
          write(6,910)
   910    format(/5x,'kmin1 and kmin0 incompatible')
          stop
       endif
-      if (itra .eq. 2) ipar=1-ipar
-      if (itra.eq.1 .and. kmin0.eq.2 .and. kmin1.eq.0)  ipar=1-ipar
-      if (ipar .ne. ipar1) then
+      if (itra == 2) ipar=1-ipar
+      if (itra==1 .and. kmin0==2 .and. kmin1==0)  ipar=1-ipar
+      if (ipar /= ipar1) then
          write(6,920) ipar,ipar1
   920    format(/5x,'parities mismatched'/5x,'ipar= ',i2,'  ipar1= ',i2)
          stop
@@ -2402,7 +2402,7 @@ end subroutine read_8or9_radau
       do 50 k=1,nblk
 !     transform dvr basis to fbr in theta for current k-block
       call tofbr(nkbas(k),mvib(k),ivt,b,itra,idvr)
-      if (mvib(k) .le. 0) goto 50
+      if (mvib(k) <= 0) goto 50
 !     read in the untransformed vectors for current k-block
       call getrow(c,mvib(k)*nval,jvec)
 
@@ -2468,8 +2468,8 @@ end subroutine read_8or9_radau
       read(ivec)
       read(ivec) r
       kmin1=0
-      if (itra .eq. 2) ipar=1-ipar
-      if (itra.eq.1 .and. kmin0.eq.2 .and. kmin1.eq.0)  ipar=1-ipar
+      if (itra == 2) ipar=1-ipar
+      if (itra==1 .and. kmin0==2 .and. kmin1==0)  ipar=1-ipar
       if (ztran) then
 !        write header on new file
          open(unit=kvec,form='unformatted',recordtype='segmented')
@@ -2485,7 +2485,7 @@ end subroutine read_8or9_radau
       if (ztran) write(kvec) r
 !     if file contains e and f, we are doing an f parity calculation, 
 !     read k=1 from  end of file
-      if (kmin0 .eq. 2) then
+      if (kmin0 == 2) then
          read(ivec)
          read(ivec)
          read(ivec)
@@ -2513,7 +2513,7 @@ end subroutine read_8or9_radau
  1000 format(//5x,'lowest',i4,' eigenvalues in hartrees',/)
       write(6,1020) (energy(i),i=1,neval)
       if (zpfun) then
-         if (itra .eq. 1) then
+         if (itra == 1) then
             open(unit=ilev,form='formatted')
             rewind ilev
   200       read(ilev,*,end=210,err=210)
@@ -2584,7 +2584,7 @@ end subroutine read_8or9_radau
       read(ivec) kz,maxleg,idvr,lincr
 !     if k=0 and we are doing an f parity calculation, read k=1 from
 !     end of file
-      if (kz .eq. 0 .and. (kmin .eq. 0 .or. itra .eq. 2)) then
+      if (kz == 0 .and. (kmin == 0 .or. itra == 2)) then
          read(ivec)
          call endiv(ivec,jrot+1)
  
@@ -2604,9 +2604,9 @@ end subroutine read_8or9_radau
       read(ivec) meval
       read(ivec)
 !     read basis vectors and transform to associated legendres
-      if (mvib .gt. 0) &
+      if (mvib > 0) &
          call jtran(fbrvec,mvib,pleg,idvr,nrad,nang,ibass1,iv1,nkbas)
-      if (ivres .eq. 0) then
+      if (ivres == 0) then
 !        skip vectors that are not needed
          do 106 l=mvib+1,meval
          read(ivec)
@@ -2646,7 +2646,7 @@ end subroutine read_8or9_radau
       sumk=x0
       kk=0
       do 40 k=1,idvr
-      if (iv(k) .eq. 0) goto 40
+      if (iv(k) == 0) goto 40
       kk=kk+1
       do 50 mn=1,nrad
       sumk(mn)=sumk(mn) + dvrvec(kk,mn) * pleg(j,k)
@@ -2719,28 +2719,28 @@ end subroutine read_8or9_radau
       ioff=ndiag
       i2=1
       do 20 k=1,nblk
-      if (mvib(k) .lt. 1) goto 20
+      if (mvib(k) < 1) goto 20
 !     (k,k-2) block
-      if (k .gt. 2 .and. mvib(k-2) .gt. 0) then
+      if (k > 2 .and. mvib(k-2) > 0) then
          j1=i1-mvib(k-2)
          joff2=ioff-mvib(k-2)*mvib(k)
          call dgemv('N',mvib(k),&
                    mvib(k-2),x1,hamil(joff2),mvib(k),z(j1),1,x1,w(i2),1)
       endif
 !     (k,k-1) block
-       if (k .gt. 1 .and. mvib(k-1) .gt. 0) call dgemv('N',mvib(k),&
+       if (k > 1 .and. mvib(k-1) > 0) call dgemv('N',mvib(k),&
                    mvib(k-1),x1,hamil(ioff),mvib(k),z(i1),1,x1,w(i2),1)
-      if (k.gt.1.and.k.lt.nblk) ioff=ioff2+mvib(k-1)*mvib(k+1)
+      if (k>1.and.k<nblk) ioff=ioff2+mvib(k-1)*mvib(k+1)
       i1=i2
       i2=i2+mvib(k)
 !     (k,k+1) block
-      if (k .lt. nblk .and. mvib(k+1) .gt. 0) then
+      if (k < nblk .and. mvib(k+1) > 0) then
           call dgemv('T',mvib(k+1),&
                    mvib(k),x1,hamil(ioff),mvib(k+1),z(i2),1,x1,w(i1),1)
          ioff2=ioff+mvib(k+1)*mvib(k)
       endif
 !     (k,k+2) block
-      if (k .lt. nblk-1 .and. mvib(k+2) .gt. 0) then
+      if (k < nblk-1 .and. mvib(k+2) > 0) then
          j2=i2+mvib(k+1)
          call dgemv('T',mvib(k+2),&
                    mvib(k),x1,hamil(ioff2),mvib(k+2),z(j2),1,x1,w(i1),1)

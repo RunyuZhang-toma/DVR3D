@@ -61,7 +61,7 @@
 !     stream         holds                              used if
 !      ilev    		input/output of eigenvalues              zpfun=.true.
 !      ivec,ivec1      input  eigenvalues & eigenvectors        always
-!      ivec2,ivec3    input  eigenvalues & eigenvectors        nktot .gt. 2
+!      ivec2,ivec3    input  eigenvalues & eigenvectors        nktot > 2
 !      iscr,iscr_1,iscr-diag,
 !      iscr_2,iscr2_1,iscr_f  hamiltonian files                  always
 
@@ -147,11 +147,11 @@
 !     check input data for consistency
       ierr26=abs(ipar_1)
       ierr27=abs(ipar_2-1)
-      if (ierr26.gt.0) then
+      if (ierr26>0) then
          write(6,850) ivec,ipar_2
          stop
       endif
-      if (ierr27.gt.0) then
+      if (ierr27>0) then
         write(6,850) ivec1,ipar_1
         stop
       endif
@@ -159,43 +159,43 @@
      
 !check consistency on all params
 
-      if (iang_1.ne.iang_2) then
+      if (iang_1/=iang_2) then
          write(6,1200)' iang ',iang_1,iang_2
          stop
       else 
          iang=iang_1
       end if
-      if (idia_1.ne.idia_2) then
+      if (idia_1/=idia_2) then
          write(6,1200)' idia ',idia_1,idia_2
          stop
       else 
          idia=idia_1
       end if
-      if (ndvr_1.ne.ndvr_2) then
+      if (ndvr_1/=ndvr_2) then
          write(6,1200)' ndvr ',ndvr_1,ndvr_2
          stop
       else 
          ndvr=ndvr_1
       end if
-      if (nr_1.ne.nr_2) then
+      if (nr_1/=nr_2) then
          write(6,1200)' nr ',nr_1,nr_2
          stop
       else 
          nr=nr_1
       end if
-      if (jrot_1.ne.jrot_2) then
+      if (jrot_1/=jrot_2) then
          write(6,1200)' jrot ',jrot_1,jrot_2
          stop
       else 
          jrot=jrot_1
       end if
-      if (kmin0_1.ne.kmin0_2) then
+      if (kmin0_1/=kmin0_2) then
          write(6,1200)' kmin0',kmin0_1,kmin0_2
          stop
       else 
          kmin0=kmin0_1
       end if
-      if (nlim_1.ne.nlim_2) then
+      if (nlim_1/=nlim_2) then
          write(6,1200)' nlim ',nlim_1,nlim_2
          stop
       else 
@@ -207,7 +207,7 @@
              /3x,'stream 27: ',I6,&
              /3x,'i stop here. ')
 
-      if (npnt.le.ndvr) then
+      if (npnt<=ndvr) then
          write(6,*)'Npnt set too small...'
          npnt=max(npnt,ndvr)
          write(6,*)'resizing it to ',npnt
@@ -221,10 +221,10 @@
       write(6,1120) jrot
  1120 format(/5x,'J =',i3,' rotational state')
 
-      if (kpar .eq. 0) then
+      if (kpar == 0) then
         write(6,1)
     1   format(5x,'Calculate EVEN K block')
-        if (iqpar .eq. 0) then
+        if (iqpar == 0) then
            write(6,3)  
     3      format(5x,'Block K=0 contains EVEN parity functions')
         else
@@ -234,7 +234,7 @@
       else
         write(6,2)
     2   format(5x,'Calculate ODD K block')
-        if (iqpar .eq. 0) then
+        if (iqpar == 0) then
             write(6,33)
             write(6,34)
     33     format(/10x,'Hamiltonian matrix has structure: positive K->q=0')
@@ -249,10 +249,10 @@
 !
 !
 !    define k-blocks to be taken into account
-      if (kpar.eq.0) then
+      if (kpar==0) then
          kmina=0
          kminb=2
-         if (iqpar.eq.0) then
+         if (iqpar==0) then
             ipa=ivec
             ipb=ivec1
             mevala=meval_1
@@ -286,7 +286,7 @@
          ibassb=ibass_2
          isa=0
          isb=1
-         if (iqpar.eq.0) then
+         if (iqpar==0) then
             iqa=0
             iqb=1
          else
@@ -308,7 +308,7 @@
          indk(k)=k-2
       end do
 !----------------------------------------------
-      if (kpar.eq.0) then !even k-blocks
+      if (kpar==0) then !even k-blocks
 ! we build the hamiltonian as follows
 !  0e 2e 2o 4e 4o 6e 6o ......
 !  1  2  3  4  5  6  7
@@ -329,12 +329,12 @@
       nka=ia
       nkb=ib
       nktot=j
-      else if (kpar.eq.1) then
+      else if (kpar==1) then
 ! we build the hamiltonian as follows
 !  1a 1b 3a 3b 5a 5b ......
 !  1  2  3  4  5  6 
 ! which k=1 block do we need?
-         if (iqpar.eq.0) then
+         if (iqpar==0) then
          inda1(1)=2
          indb1(1)=3
          else
@@ -367,8 +367,8 @@
 
 !     compute size of rotational secular problem
 
-!      if (nvib.ne.0) nvib=0
-      if (nvib.eq.0) nvib=max(mevala,mevalb)
+!      if (nvib/=0) nvib=0
+      if (nvib==0) nvib=max(mevala,mevalb)
       nviba=min(nvib,mevala)
       nvibb=min(nvib,mevalb)
 
@@ -384,7 +384,7 @@
              /i9,3x,'point gauss-associated legendre integration',&
              /i9,3x,'lowest rotational eigenvectors required for',&
              /i9,3x,'dimension rotation secular problem')
-      if (ibass .gt. 0) write(6,1005)
+      if (ibass > 0) write(6,1005)
  1005 format(17x,'with basis selected by energy ordering')
 
       read(5,500)   title
@@ -556,7 +556,7 @@
       if (zcut) then
          write(6,*)'Vib levels selected according to energy cut:'
          write(6,*)' E_cut = ',ecut,'  cm-1 .'
-         if (ecut.ge.emax) then
+         if (ecut>=emax) then
             iva=mevala
             ivb=mevalb
             write(6,*)emax
@@ -566,12 +566,12 @@
       do ia=1,nka
          ic=0
          do l=1,nviba
-            if (eviba(l,ia).gt.ecut.and.ic.eq.0) then
+            if (eviba(l,ia)>ecut.and.ic==0) then
                ic=1
                iva(ia)=l-1
             end if
          end do
-         if (ic.eq.0) then
+         if (ic==0) then
             iva(ia)=nviba
          end if
                nsum=nsum+iva(ia)
@@ -579,12 +579,12 @@
       do ib=1,nkb
          ic=0
          do l=1,nvibb
-            if (evibb(l,ib).gt.ecut.and.ic.eq.0) then
+            if (evibb(l,ib)>ecut.and.ic==0) then
                ic=1
                ivb(ib)=l-1
             end if
          end do
-         if (ic.eq.0) then
+         if (ic==0) then
             ivb(ib)=nvibb
          end if
                nsum=nsum+ivb(ib)
@@ -603,7 +603,7 @@
       else
 ! case b: choosing the lowest nbass states ...... (zcut=false)
 
-         if (ibass.eq.0) then
+         if (ibass==0) then
 
             write(6,*)'Selecting ALL 3d functions....'
             iva=nviba
@@ -628,27 +628,27 @@
          i=1
          do ia=2,nka
          emina=min(ea(ia),emina)
-         if (emina.eq.ea(ia)) i=ia
+         if (emina==ea(ia)) i=ia
          end do
 
          eminb=eb(1)
          j=1
          do ib=2,nkb
          eminb=min(eb(ib),eminb)
-         if (eminb.eq.eb(ib)) j=ib
+         if (eminb==eb(ib)) j=ib
          end do
 
 
-         if (emina.lt.eminb) then
+         if (emina<eminb) then
             iva(i)=iva(i)+1
-            if (iva(i).eq.nviba) then
+            if (iva(i)==nviba) then
                ea(i)=1.d300
             else
                ea(i)=eviba(iva(i)+1,i)
             end if
          else 
             ivb(j)=ivb(j)+1
-            if (ivb(j).eq.nvibb) then 
+            if (ivb(j)==nvibb) then 
                eb(j)=1.d300
             else 
                eb(j)=evibb(ivb(j)+1,j)
@@ -663,7 +663,7 @@
       do ib=1,nkb
          nsum=nsum+ivb(ib)
       end do
-      if (nsum.ne.nbass) then
+      if (nsum/=nbass) then
          write(6,*)'Problem in state selection (zcut=F):'
          write(6,*)'Nbass = ',nbass
          write(6,*)'but checksum returned ... ',nsum
@@ -673,17 +673,17 @@
 
       emax=eviba(iva(1),1)
       do ia=1,nka
-         if (iva(ia).ne.0) emax=max(emax,eviba(iva(ia),ia))
+         if (iva(ia)/=0) emax=max(emax,eviba(iva(ia),ia))
       end do
       do ib=1,nkb
-         if (ivb(ib).ne.0) emax=max(emax,evibb(ivb(ib),ib))
+         if (ivb(ib)/=0) emax=max(emax,evibb(ivb(ib),ib))
       end do
 
       write(6,1000) nbass,emin,emax
  1000 format(/i10,' Functions selected from E =',d20.10,' to',d20.10,&
              ' cm-1 ')
 
-      if (nbass.eq.0) then
+      if (nbass==0) then
          write(6,*)'No functions selected...'
          stop
       end if
@@ -691,7 +691,7 @@
       open(unit=idiag,form='unformatted')
       do ia=1,nka
          write(idiag)inda2(ia),iva(ia)
-         if (iva(ia).gt.0) then
+         if (iva(ia)>0) then
          do i=1,iva(ia)
             write(idiag)eviba(i,ia)
          end do
@@ -699,7 +699,7 @@
       end do
       do ib=1,nkb
          write(idiag)indb2(ib),ivb(ib)
-         if (ivb(ib).gt.0) then
+         if (ivb(ib)>0) then
          do i=1,ivb(ib)
             write(idiag)evibb(i,ib)
          end do
@@ -707,7 +707,7 @@
       end do
       close(unit=idiag)
 
-      if (neval.eq.0) neval=10
+      if (neval==0) neval=10
       neval=min(neval,nbass)
  
 !     determine  and print basis set labels
@@ -716,7 +716,7 @@
  1010 format(//5x,' basis functions selected')
       do ia=1,nka
       kz=indk(inda1(ia))
-      if (iva(ia).lt.mevala) then
+      if (iva(ia)<mevala) then
       write(6,1021)kz,iqa,isa,iva(ia),mevala
       else
       write(6,1022)kz,iqa,isa,iva(ia),mevala
@@ -724,7 +724,7 @@
       end do
       do ib=1,nkb
       kz=indk(indb1(ib))
-      if (ivb(ib).lt.mevalb) then
+      if (ivb(ib)<mevalb) then
       write(6,1021)kz,iqb,isb,ivb(ib),mevalb
       else 
       write(6,1022)kz,iqb,isb,ivb(ib),mevalb
@@ -857,7 +857,7 @@
 
 !     then use this data to construct the radial matrices
       call mkrad(radmee,nr,rma,0,0,0)
-      if (maxblk_odd .gt. 0) then
+      if (maxblk_odd > 0) then
          call mkrad(radmoo,nr,rma,1,0,0)
          call mkrad(radmeo,nr,rma,1,1,0)
       endif
@@ -957,11 +957,11 @@
 !     final step: transform the fbr matrix elements to the dvr 
       ij=0
       do 60 jp= 1,nang1
-         if (iv1(jp) .eq. 0) goto 60
+         if (iv1(jp) == 0) goto 60
          ij=ij+1
          ik=0
          do 65 kp=1,nang2
-            if (iv2(kp) .eq. 0) goto 65
+            if (iv2(kp) == 0) goto 65
             ik=ik+1
             sum=x0
             do 70 j =1,nang1
@@ -1049,11 +1049,11 @@
 !     final step: transform the fbr matrix elements to the dvr 
       ij=0
       do 60 jp= 1,nang1
-         if (iv1(jp) .eq. 0) goto 60
+         if (iv1(jp) == 0) goto 60
          ij=ij+1
          ik=0
          do 65 kp=1,nang2
-            if (iv2(kp) .eq. 0) goto 65
+            if (iv2(kp) == 0) goto 65
             ik=ik+1
             sum=x0
             do 70 j =1,nang1
@@ -1153,11 +1153,11 @@
 !     final step: transform the fbr matrix elements to the dvr 
       ij=0
       do 60 jp= 1,nang1
-         if (iv1(jp) .eq. 0) goto 60
+         if (iv1(jp) == 0) goto 60
          ij=ij+1
          ik=0
          do 65 kp=1,nang2
-            if (iv2(kp) .eq. 0) goto 65
+            if (iv2(kp) == 0) goto 65
             ik=ik+1
             sum=x0
             do 70 j =1,nang1
@@ -1251,11 +1251,11 @@
 !     final step: transform the fbr matrix elements to the dvr 
       ij=0
       do 60 jp= 1,nang1
-         if (iv1(jp) .eq. 0) goto 60
+         if (iv1(jp) == 0) goto 60
          ij=ij+1
          ik=0
          do 65 kp=1,nang2
-            if (iv2(kp) .eq. 0) goto 65
+            if (iv2(kp) == 0) goto 65
             ik=ik+1
             sum=x0
             do 70 j =1,nang1
@@ -1302,7 +1302,7 @@
 
 ! extra-term for k=1
       xx=0.d0
-      if (k1.eq.1) xx = angxt
+      if (k1==1) xx = angxt
       xy=-xsign(iq)*xp5*dble(k1)
 
       angmat=x0
@@ -1331,7 +1331,7 @@
                sum=0.d0
                sumc=0.d0
                rk=dble(k-1)
-               if (k.gt.1) then
+               if (k>1) then
                   fact3=norm(k)/norm(k-1)
                   do i=1,npnt
                      fact1 = - jxcos(i) * (1.d0 + 2.d0 * alf + 2.d0 * rk)* xy 
@@ -1362,11 +1362,11 @@
 !     second step: transform the fbr matrix elements to the dvr
       i1=0
       do 60 i= 1,nang1
-      if (iv1(i) .eq. 0) goto 60
+      if (iv1(i) == 0) goto 60
       i1=i1+1
       i2=0
       do 65 ip=1,nang2
-      if (iv2(ip) .eq. 0) goto 65
+      if (iv2(ip) == 0) goto 65
       i2=i2+1
       sum=x0
       do j =1,nang1
@@ -1555,7 +1555,7 @@
          mvib2=mvib(j)
          allocate(offdg(mvib1*mvib2))
          read(iscr)offdg
-         if (i.eq.j) then
+         if (i==j) then
          ll=0
          i0=n0(i)-1
          j0=n0(j)-1
@@ -1709,11 +1709,11 @@
          is2=isa
          mvib2=iva(ia2)
          mn=mvib1*mvib2
-         if (abs(k1-k2).eq.2.and.mn.ne.0) then
+         if (abs(k1-k2)==2.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',iva(ia1),iva(ia2)
-         else if (k1.eq.k2.and.mn.ne.0) then
+         else if (k1==k2.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,' diag',iva(ia1),iva(ia2)
-         if (k1.eq.1) & 
+         if (k1==1) & 
          write(6,1010)k1,iq1,is1,k2,iq2,is2,'  xdg',iva(ia1),iva(ia2)
          end if
          end do
@@ -1732,11 +1732,11 @@
          is2=isb
          mvib2=ivb(ib2)
          mn=mvib1*mvib2
-         if (abs(k1-k2).eq.2.and.mn.ne.0) then
+         if (abs(k1-k2)==2.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',ivb(ib1),ivb(ib2)
-         else if (k1.eq.k2.and.mn.ne.0) then
+         else if (k1==k2.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,' diag',ivb(ib1),ivb(ib2)
-         if (k1.eq.1) & 
+         if (k1==1) & 
          write(6,1010)k1,iq1,is1,k2,iq2,is2,'  xdg',ivb(ib1),ivb(ib2)
          end if
          end do
@@ -1756,15 +1756,15 @@
          mvib2=ivb(ib)
          mn=mvib1*mvib2
 !   coriolis type
-         if (k1.eq.k2.and.mn.ne.0) then
+         if (k1==k2.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,'  cor',iva(ia),ivb(ib)
          end if
 !   rot type
-         if (abs(k1-k2).eq.2.and.mn.ne.0) then
+         if (abs(k1-k2)==2.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',iva(ia),ivb(ib)
          end if
 ! xtra rotational term for k1=k2=1
-         if (k1.eq.1.and.k2.eq.1.and.mn.ne.0) then
+         if (k1==1.and.k2==1.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,' xrot',iva(ia),ivb(ib)
          end if
 
@@ -1822,9 +1822,9 @@
       read(ipr)                                 !13b   
       end do
 !-----------------------------------------------------------
-      if (k2.eq.1) then !add extra diagonal term ....
+      if (k2==1) then !add extra diagonal term ....
          mn = mvib2*mvib2
-         if (mn.ne.0) then
+         if (mn/=0) then
       write(6,*)'calculating '
       write(6,1010)k2,iq2,is2,k2,iq2,is2,'  xdg',mvib2,mvib2
       angfac = -xsign(iqa)*dble(jjp1)/x4
@@ -1833,7 +1833,7 @@
       offdg=0.d0
          call angin_xdg(angmat,pleg2,pleg2,k2,k2,&
                           iv2,iv2,iang,iang,angfac)
-         if (isa.eq.0) then
+         if (isa==0) then
          call solofd(mn,radmee,angmat,nr,id,id2,id2,offdg,iang,&
                      iang,iang,mvib2,mvib2,coef2,coef2,&
                      ibassa,ibassa)
@@ -1873,16 +1873,16 @@
       end do
 
          mn = mvib1*mvib2
-         if (mn.ne.0) then
+         if (mn/=0) then
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',mvib1,mvib2
          angfac = -sqrt(dble((jjp1-k2*(k2+1))*(jjp1-k2*(k2+3)-2)))/x4
-         if (k1 .eq. 0 .or. k2 .eq. 0) angfac =  angfac*sqrt2
+         if (k1 == 0 .or. k2 == 0) angfac =  angfac*sqrt2
          ALLOCATE(offdg(mn))
          offdg=x0
          call angin_pl_pl(angmat,pleg1,pleg2,k1,k2,&
                           iv1,iv2,iang,iang,angfac)
-         if (is1.eq.0) then
+         if (is1==0) then
          call solofd(mn,radmee,angmat,nr,id,id1,id2,offdg,iang,&
                      iang,iang,mvib1,mvib2,coef1,coef2,&
                      ibassa,ibassa)
@@ -1957,16 +1957,16 @@
       read(ipr)                             !13b   
       end do
 !-----------------------------------------------------------
-      if (k2.eq.1) then !add extra diagonal term ....
+      if (k2==1) then !add extra diagonal term ....
          mn = mvib2*mvib2
-         if (mn.ne.0) then
+         if (mn/=0) then
       write(6,*)'calculating '
       write(6,1010)k2,iq2,is2,k2,iq2,is2,'  xdg',mvib2,mvib2
          angfac = -xsign(iqb)*dble(jjp1)/x4
       ALLOCATE(offdg(mn))
          call angin_xdg(angmat,pleg2,pleg2,k2,k2,&
                           iv2,iv2,iang,iang,angfac)
-         if (isb.eq.0) then
+         if (isb==0) then
          call solofd(mn,radmee,angmat,nr,id,id2,id2,offdg,iang,&
                      iang,iang,mvib2,mvib2,coef2,coef2,&
                      ibassb,ibassb)
@@ -2006,15 +2006,15 @@
       end do
 
          mn = mvib1*mvib2
-         if (mn.ne.0) then
+         if (mn/=0) then
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',mvib1,mvib2
          angfac = -sqrt(dble((jjp1-k2*(k2+1))*(jjp1-k2*(k2+3)-2)))/x4
-         if (k1 .eq. 0 .or. k2 .eq. 0) angfac =  angfac*sqrt2
+         if (k1 == 0 .or. k2 == 0) angfac =  angfac*sqrt2
       ALLOCATE(offdg(mn))
          call angin_pl_pl(angmat,pleg1,pleg2,k1,k2,&
                           iv1,iv2,iang,iang,angfac)
-         if (is1.eq.0) then
+         if (is1==0) then
          call solofd(mn,radmee,angmat,nr,id,id2,id1,offdg,iang,&
                      iang,iang,mvib1,mvib2,coef1,coef2,&
                      ibassb,ibassb)
@@ -2120,16 +2120,16 @@
       end do
       j0=j
 
-! do extra off-k block if kmina.ne.kminb
-      if (k1.ne.k2) then
+! do extra off-k block if kmina/=kminb
+      if (k1/=k2) then
          mn = mvib1*mvib2  
-         if (mn.ne.0) then
+         if (mn/=0) then
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',mvib1,mvib2
       write(6,*)jp1,ip1
          angfac = sqrt(dble((jjp1-k1*(k1+1))*(jjp1-k1*(k1+3)-2)))/x4
          angfac = xsign(iqb) * angfac
-         if (k1 .eq. 0 .or. k2 .eq. 0) angfac =  angfac*sqrt2
+         if (k1 == 0 .or. k2 == 0) angfac =  angfac*sqrt2
       ALLOCATE(offdg(mn))
          call angin_pl_mn(angmat,plegb1,plega1,k2,k1,&
                           ivb1,iva1,iang,iang,angfac)
@@ -2177,7 +2177,7 @@
       k1=ka1
       k2=kb1
       mn=mvib1*mvib2
-      if (mn.ne.0) then
+      if (mn/=0) then
       ALLOCATE(offdg(mn))
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  cor',mvib1,mvib2
@@ -2265,10 +2265,10 @@
       mvib1=mviba1
       mvib2=mvibb2
       mn = mvib1*mvib2
-      if (mn.ne.0) then
+      if (mn/=0) then
       angfac = sqrt(dble((jjp1-k1*(k1+1))*(jjp1-k1*(k1+3)-2)))/x4
       angfac = xsign(iqb) * angfac
-      if (k1 .eq. 0 .or. k2 .eq. 0) angfac =  angfac*sqrt2 
+      if (k1 == 0 .or. k2 == 0) angfac =  angfac*sqrt2 
       ALLOCATE(offdg(mn))
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',mvib1,mvib2
@@ -2290,14 +2290,14 @@
       mvib1=mvibb1
       mvib2=mviba2
       mn = mvib1*mvib2
-      if (mn.ne.0) then
+      if (mn/=0) then
       ALLOCATE(offdg(mn))
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',mvib1,mvib2
       write(6,*)ip2,jp1
       angfac = sqrt(dble((jjp1-k1*(k1+1))*(jjp1-k1*(k1+3)-2)))/x4
       angfac = xsign(iqa) * angfac
-      if (k1 .eq. 0 .or. k2 .eq. 0) angfac =  angfac*sqrt2 
+      if (k1 == 0 .or. k2 == 0) angfac =  angfac*sqrt2 
       call angin_pl_mn(angmat,plega2,plegb1,k2,k1,&
            iva2,ivb1,iang,iang,angfac)
       call solofd(mn,radmeo,angmat,nr,id,ida,idb,offdg,iang,&
@@ -2315,7 +2315,7 @@
       mvib1=mviba2
       mvib2=mvibb2
       mn = mvib1*mvib2
-      if (mn.ne.0) then
+      if (mn/=0) then
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  cor',mvib1,mvib2
       write(6,*)jp2,ip2
@@ -2368,7 +2368,7 @@
          call getrow(ro,idim,iv)
 !         ss=ro(1)
 !         do ii=1,idim
-!            if (abs(ro(ii)).gt.abs(ss)) ss=ro(ii)
+!            if (abs(ro(ii))>abs(ss)) ss=ro(ii)
 !         end do
 !         xs=ss/abs(ss)
          xs=1.d0
@@ -2491,7 +2491,7 @@ end do !i2
 
       deallocate(vec)
 
-      IF (INFO .NE. 0) then
+      IF (INFO /= 0) then
          WRITE(6,900) INFO
 900  FORMAT(//5X,'DSPEVX RETURNED INFO =',I3)
          WRITE(96,901) IFAIL
@@ -2509,7 +2509,7 @@ end do !i2
       write(6,1020) (eval(i),i=1,nevalp)
  1020 format(5d24.12/)
       if (zpfun) then
-         if (k1 .eq. 0) then
+         if (k1 == 0) then
             open(unit=ilev,form='formatted')
             rewind ilev
   200       read(ilev,*,end=210,err=210)
@@ -2536,7 +2536,7 @@ end do !i2
          mbeg=1
          do  k=1,nktot
             mvv=mvib(k)
-            if (mvv.ne.0) then
+            if (mvv/=0) then
             mend=mbeg+mvv-1
             write(jvec) ((evec(j,i),j=mbeg,mend),i=1,nevalp)
             mbeg=mbeg+mvv
@@ -2559,7 +2559,7 @@ end do !i2
 1034 format(1I4,2f30.20)
 
       if (zpvec) then
-          if (thresh .le. x0) then
+          if (thresh <= x0) then
 !             print complete eigenvectors
               write(6,1030)
  1030         format(//'    eigenvectors',/)
@@ -2577,11 +2577,11 @@ end do !i2
               ipt=0
               do 90 j=1,ibass
               vv=abs(evec(j,i))
-              if (vv .gt. thresh) then
+              if (vv > thresh) then
                   ipt=ipt+1
                   ibig(ipt)=j
               endif
-              if (ipt .le. 0 .and. vv .gt. vbig) then
+              if (ipt <= 0 .and. vv > vbig) then
                   vbig=vv
                   ibig(1)=j
               endif
@@ -2671,7 +2671,7 @@ end do !i2
       bass=x0
       DO 60 I=1,nn
       bass(0,I)=x1
-      IF(nb.LT.1) GO TO 70
+      IF(nb<1) GO TO 70
       bass(1,I)=(alf-bet+(lmd+x1)*x(I))/x2
       DO 80 n=2,nb
          bass(n,I)=((A2n(n-1)+A3n(n-1)*x(I))*bass(n-1,I)&
@@ -2753,7 +2753,7 @@ end do !i2
            &    (DBLE(n)+bet)*p2)/(temp*(x1-z*z))
             z1=z
             z=z1-p1/pp
-            IF(ABS(z-z1).LE.EPS) GOTO 1
+            IF(ABS(z-z1)<=EPS) GOTO 1
  12         CONTINUE            
      1   x(i)=z 
          w(i)=DEXP(gammln(alf+DBLE(n))+gammln(bet+DBLE(n))    &
@@ -2892,15 +2892,15 @@ end do !i2
       nkbas_even=ndvr*(nr+1)*nr/2
       nkbas_odd=ndvr*(nr-1)*nr/2
       nkbas_tot=nr*nr*ndvr
-         if (isa.eq.0) nkbas_a=nkbas_even
-         if (isa.eq.1) nkbas_a=nkbas_odd
-         if (isb.eq.0) nkbas_b=nkbas_even
-         if (isb.eq.1) nkbas_b=nkbas_odd
-         if ((nkbas_b+nkbas_a).ne.nkbas_tot) then
+         if (isa==0) nkbas_a=nkbas_even
+         if (isa==1) nkbas_a=nkbas_odd
+         if (isb==0) nkbas_b=nkbas_even
+         if (isb==1) nkbas_b=nkbas_odd
+         if ((nkbas_b+nkbas_a)/=nkbas_tot) then
             write(6,*)'problem in assigning 3d dimension...'
             stop
          end if
-         if (kpar .eq. 1) then
+         if (kpar == 1) then
             nend=nkbas_a*nka+nkbas_b*nkb
             ipar_new=0
             write(6,*)'Running over odd k values'
@@ -2927,7 +2927,7 @@ end do !i2
             allocate(r2(nr),wr(nr))
       call radgrid(zmors1,re1,diss1,we1,nr,wr,r2,idia,xmass)
 
-      if (abs(r2(1)-r(1)).gt.1.d-13) then
+      if (abs(r2(1)-r(1))>1.d-13) then
          write(6,*)'Detected inconsinstency in the radial grid'
          write(6,*)'Retrieved from file ',ipa,' : ' 
          write(6,*)r(1)
@@ -2937,9 +2937,9 @@ end do !i2
       end if
 
       isize=nr*(nr+1)*npnt/2
-      if (nplotf.eq.0) nplotf=nval
+      if (nplotf==0) nplotf=nval
       nplotf=min(nplotf,nval)
-      if (nploti.gt.nplotf) then
+      if (nploti>nplotf) then
          write(6,*)'Inconsinstency in call to wf plotting program'
          write(6,*)'Requested to print from wf: '
          write(6,*)'[ ',nploti,' - ',nplotf,' ] '
@@ -3022,13 +3022,13 @@ end do !i2
          j0=1
          iadd=0
 ! do extra ka block if necessary.....
-      if (kmina.ne.kminb) then
+      if (kmina/=kminb) then
 ! there is no point to skip as it should be the first block, however
 ! lets check this
          i=inda1(1)
          k=indk(i)
          mvib0=mvib(inda2(1))
-         if (k.ne.0) then
+         if (k/=0) then
             write(6,*)'Problem in dstorepb2 '
             write(6,*)' i =  ',i
             write(6,*)' k =  ',k
@@ -3037,7 +3037,7 @@ end do !i2
             end if
          allocate(wf(nplot,nkbas_a))
          wf=0.d0
-!            if (zplot.and.mvib0.gt.0) then
+!            if (zplot.and.mvib0>0) then
 !               allocate(wf(nplot,nkbas_a))
 !               wf=0.d0
 !            else
@@ -3051,7 +3051,7 @@ end do !i2
          write(kvecpb)x_leg
          i0=2
          iadd=1
-         if (zplot.and.mvib0.gt.0) then
+         if (zplot.and.mvib0>0) then
             call sumwf(wr,wf,wfs,alf,jxcos0,isa,nr,iang,npnt,nkbas_a,isize,nplot,jwalf0)
          end if
             deallocate(wf)
@@ -3069,7 +3069,7 @@ end do !i2
 
          allocate(wf(nplot,nkbas_a))
          wf=0.d0
-!            if (zplot.and.mvib0.gt.0) then
+!            if (zplot.and.mvib0>0) then
 !               allocate(wf(nplot,nkbas_a))
 !               wf=0.d0
 !            else
@@ -3083,7 +3083,7 @@ end do !i2
          call transblock(ipa,kvec,kvecpb,mvib0,nkbas_a,neval,jvec,isa,zplot,nplot,nploti,wf)
          write(kvec)x_leg
          write(kvecpb)x_leg
-         if (zplot.and.mvib0.gt.0) then
+         if (zplot.and.mvib0>0) then
       call sumwf(wr,wf,wfs,alf,jxcos0,isa,nr,iang,npnt,nkbas_a,isize,nplot,jwalf0)
          end if
             deallocate(wf)
@@ -3094,7 +3094,7 @@ end do !i2
 
          allocate(wf(nplot,nkbas_b))
          wf=0.d0
-!            if (zplot.and.mvib0.gt.0) then
+!            if (zplot.and.mvib0>0) then
 !               allocate(wf(nplot,nkbas_b))
 !               wf=0.d0
 !            else
@@ -3108,7 +3108,7 @@ end do !i2
          call transblock(ipb,kvec,kvecpb,mvib0,nkbas_b,neval,jvec,isb,zplot,nplot,nploti,wf)
          write(kvec)x_leg
          write(kvecpb)x_leg
-         if (zplot.and.mvib0.gt.0) then
+         if (zplot.and.mvib0>0) then
             call sumwf(wr,wf,wfs,alf,jxcos0,isb,nr,iang,npnt,nkbas_b,isize,nplot,jwalf0)
          end if
             deallocate(wf)
@@ -3161,7 +3161,7 @@ end do !i2
       x0=0.d0
    allocate(d(nkbas,nval))
 
-      if (mvib.gt.0) then
+      if (mvib>0) then
         if (z) wf=x0
 
    allocate(c(mvib,nval),fbrvec(nkbas,mvib),dvrvec(nkbas,mvib))
@@ -3301,7 +3301,7 @@ end do !i2
       do 20 j=1,iang
       sumk=x0
       do 40 k=1,iang
-      if (iv(k) .eq. 0) goto 40
+      if (iv(k) == 0) goto 40
       sumk=sumk + sumt(k,mn) * pleg(j,k)
    40 continue
       coeffbr(ipt+j,l) = sumk
@@ -3327,7 +3327,7 @@ real*8, allocatable, dimension(:,:) :: dz
 data x0,xp5,x1,x4/0.0d0,0.5d0,1.0d0,4.0d0/
 data amtoau/1.8228883d03/
 
-      if (idia .ge. 1) then
+      if (idia >= 1) then
 !        scattering coordinates
          g1 = xmass(2) / (xmass(2) + xmass(3))
          g2 = x0
@@ -3531,7 +3531,7 @@ subroutine lagbasis(aa,nlag,dg,wlag,wln,zd,csx)
   do i=0,nlag-1
      di=dble(i)
      dg(i+1)=(2.d0*di+aa+1.d0)
-     if (i.ge.1) dg1(i)=-dsqrt((di+aa)*di)
+     if (i>=1) dg1(i)=-dsqrt((di+aa)*di)
   end do
   
   
@@ -3540,7 +3540,7 @@ subroutine lagbasis(aa,nlag,dg,wlag,wln,zd,csx)
 
   CALL  DSTEV('V',nlag,dg,dg1,zd,nlag,work,info)
   
-  if (info.ne.0) then
+  if (info/=0) then
      write(6,*)'Problems with diagonalisation',info
      stop
   endif
@@ -3556,7 +3556,7 @@ subroutine lagbasis(aa,nlag,dg,wlag,wln,zd,csx)
   
   do j=1,nlag
      zc=zd(1,j)/wlag(j)
-     if (zc.lt.0.d0) then
+     if (zc<0.d0) then
         do i=1,nlag
            zd(i,j)=-zd(i,j)
         end do
@@ -3629,7 +3629,7 @@ SUBROUTINE LAGPTNEW(ir,Y,R,WT,DZ,npnt,nmax,zmorse,RE,BETA,A,IU)
       end do
       csa=csa*(dnormnew(0)**2)
 
-      if (myid .eq. 0) WRITE(6,1000) NPNT,ir
+      if (myid == 0) WRITE(6,1000) NPNT,ir
  1000 FORMAT(/,I8,' POINT GAUSS-LAGUERRE INTEGRATION', &
      &       /,5X,'INTEGRATION POINTS',11X,'WEIGHTS',9X,&
      &            'CORRESPONDING R',I1,/)
@@ -3647,7 +3647,7 @@ SUBROUTINE LAGPTNEW(ir,Y,R,WT,DZ,npnt,nmax,zmorse,RE,BETA,A,IU)
 !     POLYNOMIAL OF ORDER 0
       xep=dexp(-y(I)*0.5d0)
       BASS(0,I) = X1*xep
-      IF (NMAX .LT. 1) GOTO 70
+      IF (NMAX < 1) GOTO 70
 !     POLYNOMIAL OF ORDER 1
       AMX = ALF + X1 - Y(I)
       BASS(1,I) = AMX*xep
@@ -3698,21 +3698,21 @@ SUBROUTINE LAGPTNEW(ir,Y,R,WT,DZ,npnt,nmax,zmorse,RE,BETA,A,IU)
 !        write(71,*)wt(l),wt2(l)
 !        wt(l)=wt(l)/(sqrt(2.d0)*beta*y(l)**(ALF+1.d0))
         
-      if (myid .eq. 0) WRITE(6,1010) Y(l),WT(l),R(l)
+      if (myid == 0) WRITE(6,1010) Y(l),WT(l),R(l)
  1010 FORMAT (F23.15,D25.12,F13.5)
-      IF ((R(I) .LT. X0) .and. (myid .eq. 0)) WRITE(6,1015) I
+      IF ((R(I) < X0) .and. (myid == 0)) WRITE(6,1015) I
  1015 FORMAT(5X,'***** WARNING: FOR INTEGRATION POINT',I3, &
      &       ', R LESS THAN ZERO *****')
      end do
 
 !     CHECK THAT THE CORRECT POINTS & WEIGHTS HAVE BEEN GENERATED
-      if (myid .eq. 0) WRITE(6,1020) CSX,CSA,TSX,TSA
+      if (myid == 0) WRITE(6,1020) CSX,CSA,TSX,TSA
  1020 FORMAT(/5X,'COMPUTED SUM OF POINTS',D26.15,' & WEIGHTS',D26.15,&
      &       /5X,'EXACT    SUM OF POINTS',D26.15,' & WEIGHTS',D26.15)
-      IF (ABS((CSX-TSX)/TSX) .GT. TOLER) GOTO 900
-      IF (ABS((CSA-TSA)/TSA) .GT. TOLER) GOTO 900
+      IF (ABS((CSX-TSX)/TSX) > TOLER) GOTO 900
+      IF (ABS((CSA-TSA)/TSA) > TOLER) GOTO 900
       RETURN
-  900 if (myid .eq. 0) WRITE(6,910)
+  900 if (myid == 0) WRITE(6,910)
   910 FORMAT(//5X,'(ERROR) POINTS & WEIGHTS IN ERROR, ADJUST ALGORITHM',//)
       STOP
       END

@@ -1,4 +1,5 @@
       program DVR3DRJZ
+      use dvr3drjz_file
       call dvr3d
       stop
       end
@@ -45,17 +46,6 @@
 !
 !     Rewritten into fortran 95 by Max Kostin and Jonathan Tennyson
       implicit double precision (a-h,o-y), logical (z)
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common /oupb/   xp0,xp1,xp2
-      namelist/prt/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
       common/timing/itime0
 
       write(6,1000)
@@ -150,21 +140,6 @@
 !  iwave[26]    stores the wavefunction amplitudes at the grid points when
 !               ztran = t.
 !
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,& 
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,& 
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,& 
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,& 
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      data zpham/.false./,zprad/.false./,zpvec/.false./,zrot/.true./,& 
-           zladd/.true./,zembed/.true./,zmors2/.true./,& 
-           zpmin/.false./,zvec/.false./,zquad2/.true./,zcut/.false./,& 
-           zdiag/.true./,zlmat/.false./,zall/.false./,& 
-           zp1d/.false./,zp2d/.false./,zr2r1/.true./,ztheta/.true./,& 
-           zmors1/.true./,ztran/.false./,ztwod/.false./,zperp/.false./,& 
-            zx/.false./,zs0/.false./,zs1/.false./,& 
-           ieigs1/7/,ivecs1/3/,ieigs2/2/,ivecs2/4/,ivint/17/,& 
-           iband/15/,intvec/16/,idiag1/20/,idiag2/21/,iout1/24/,& 
-           iout2/25/,iwave/26/,zlin/.false./,zpfun/.false./,ilev/14/
       end
 
 !############################################################################
@@ -211,19 +186,8 @@
 !     neval: number of eigenvalues which have to actually be supplied
 !            as output
 !     ncoord: number of vibrational coordinates explicitly considered
-!     if (ncoord .ne. 3) some of the above are dummies, see below.
+!     if (ncoord /= 3) some of the above are dummies, see below.
 
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common /oupb/   xp0,xp1,xp2
       character(len=8) title(9)
 !     read in control parameters of problem:
 
@@ -239,25 +203,25 @@
                 kmin,npnt1,ipar,max3d2
       
       zbisc = .false.
-      if (jrot .eq. 0) then
+      if (jrot == 0) then
          zembed = .true.
          kmin = 0
          zrot = .false.
       endif
-      if (idia .eq. -2) then
+      if (idia == -2) then
          ncoord=3
          npnt1=npnt2
          idvr=nalf
          zmors1=zmors2
          ztheta=.false.
-         if (jrot .ne. 0) zbisc=.true.
+         if (jrot /= 0) zbisc=.true.
 !        Q symmetry
 !        iq=0 -> q=0("+")
 !        iq=1 -> q=1("-")
          if (zperp) then
             iq=kmin
             kmin=1
-            if (jrot .eq. 0) kmin=0
+            if (jrot == 0) kmin=0
          endif
       else
           if (ztran) zvec=.true.
@@ -280,7 +244,7 @@
 !     calculated for the half-range:
       nalf2 = (nalf+1)/2
 !     are we doing atom, atom-rigid diatom or the full problem?
-      if (ncoord .eq. 2) then
+      if (ncoord == 2) then
 !        atom - rigid diatom case, set dummy /size/
          if (zr2r1) then
             write(6,1010)
@@ -327,8 +291,8 @@
           npntc = nalf/max(1,idia)
       endif
 
-      if (idia .eq. -2) then
-         if (zrot .and. (jrot+kmin).gt.1) then
+      if (idia == -2) then
+         if (zrot .and. (jrot+kmin)>1) then
             max2d  = npnt1*(npnt1+1)/2
             max2d2 = npnt1*(npnt1-1)/2
          else
@@ -338,7 +302,7 @@
          if (.not. zall)  max3d=min(max3d,max2d*nalf)
          if (zall) max3d=max2d*nalf
          if (zrot) then
-            if (max3d2 .le. 0) max3d2=max3d
+            if (max3d2 <= 0) max3d2=max3d
             max3d2=min(max3d,max2d2*nalf,max3d2)
          endif
       else
@@ -351,20 +315,20 @@
          endif
       endif
 
-      if (neval .le. 0) neval = 10
+      if (neval <= 0) neval = 10
       neval=min(max3d,neval)
       if (ztwod) write(6,1023) npnt1
  1023 format(/5x,i5,3x,'radial r1 dvr points used,')
-      if (ncoord .eq. 3) write(6,1030) npnt2,2,nalf,neval,max3d
-      if (ncoord .eq. 2 .and. zr2r1)&
+      if (ncoord == 3) write(6,1030) npnt2,2,nalf,neval,max3d
+      if (ncoord == 2 .and. zr2r1)&
           write(6,1030) npnt2,2,nalf,neval,max3d
-      if(ncoord .eq. 2 .and. .not. zr2r1)&
+      if(ncoord == 2 .and. .not. zr2r1)&
           write(6,1030) npnt1,1,nalf,neval,max3d
  1030 format(5x,i5,3x,'radial r',i1,' dvr points used,',&
             /5x,i5,3x,'angular dvr points used, with',&
             /5x,i5,3x,'lowest eigenvectors chosen from',&
             /5x,i5,3x,'maximum dimension secular problem'/)
-      if(idia .eq. 2 .and. zperp) then
+      if(idia == 2 .and. zperp) then
         write(6,1035)
         stop
  1035  format(/5x,'STOP!!!  ZPERP should be .true. for IDIA=2')
@@ -373,11 +337,11 @@
   500 format(9a8)
       write(6,1040) title
  1040 format(5x,'Title: ',9a8/)
-      if (ncoord .eq. 3) then
+      if (ncoord == 3) then
          if (zmors1)  write(6,1050) 1
          if (.not. zmors1) write(6,1060) 1
       endif
-      if (ncoord .eq. 2 .and. .not. zr2r1) then
+      if (ncoord == 2 .and. .not. zr2r1) then
          if (zmors1)  write(6,1050) 1
          if (.not. zmors1) write(6,1060) 1
       else
@@ -417,7 +381,7 @@
          write(6,1061)
  1061    format(5x,'Final basis selected using energy cut-off')
       else
-         if (zrot .and. zbisc .and. (jrot+kmin).gt.1) then
+         if (zrot .and. zbisc .and. (jrot+kmin)>1) then
             write(6,1062) max3d,max3d2
  1062    format(/5x,'Final basis comprises',i5,' lowest functions',&
                    ' for even parity hamiltonian'/&
@@ -463,10 +427,10 @@
  1132 format(5x,'Wavefunction amplitudes written to stream IWAVE =',i4)
          open(unit=iwave, form='unformatted',recordtype='segmented')
       endif
-      if (abs(jrot) .gt. 1) zpfun=.false.
+      if (abs(jrot) > 1) zpfun=.false.
       if (zpfun) then
          open(unit=ilev,form='formatted')
-         if (jrot .eq. 0 .and. mod(ipar,2) .eq. 0) then
+         if (jrot == 0 .and. mod(ipar,2) == 0) then
 !           header on file ilev
             write(ilev,500) title
             write(6,1134) ilev
@@ -483,11 +447,11 @@
          endif
       endif
 
-      if (idia .gt. 0) write(6,1140)
+      if (idia > 0) write(6,1140)
  1140 format(/5x,'Calculation performed in scattering coordinates')
-      if (idia .le. 0 .and.  .not.zperp) write(6,1150)
+      if (idia <= 0 .and.  .not.zperp) write(6,1150)
  1150 format(/5x,'Calculation performed in Radau coordinates')
-      if (idia .le. 0 .and. zperp) write(6,1151)
+      if (idia <= 0 .and. zperp) write(6,1151)
  1151 format(/5x,'Calculation performed in Radau coordinates with Z axis', &
               /5x,'perpendicular to the plane')
  
@@ -496,13 +460,13 @@
 
       if (ztwod) goto 886
 
-      if (abs(idia) .eq. 2) then
+      if (abs(idia) == 2) then
          write(6,1180)
  1180    format(/5x,'Diatomic assumed homonuclear')
-         if (ipar .eq. 1) then
+         if (ipar == 1) then
             write(6,1190)
  1190       format(5x,'Odd parity functions in basis set')
-         else if (ipar .eq. 0) then
+         else if (ipar == 0) then
             write(6,1200)
  1200       format(5x,'Even parity functions in basis set')
          else
@@ -510,9 +474,9 @@
  1205       format(5x,'Illegal value of ipar for idia = +/-2: STOP')
             stop
          endif
-         if (idia .eq. 2) then
+         if (idia == 2) then
             idvr=nalf2
-            if (2*idvr .ne. nalf) goto 960
+            if (2*idvr /= nalf) goto 960
          endif
       else
          write(6,1210)
@@ -520,17 +484,17 @@
          idvr=nalf
          ipar=0
       endif
-      if (jrot .ne. 0) then
+      if (jrot /= 0) then
          jrot=abs(jrot)
          if (zrot) then
-            if (kmin .ne. 0 .and. .not. zbisc) kmin=1
+            if (kmin /= 0 .and. .not. zbisc) kmin=1
             write(6,1220)
  1220 format(/5x,'***  vibrational part of rot-vib calculation  ***')
             write(6,1260) jrot
-            if (kmin .eq. 1) then
+            if (kmin == 1) then
                write(6,1270)
  1270 format(12x,'with symmetric |Jk> + |J-k> functions in basis')
-            else if (kmin .eq. 0) then
+            else if (kmin == 0) then
                write(6,1280)
  1280 format(12x,'with anti-symmetric |Jk> - |J-k> functions in basis')
             else
@@ -546,7 +510,7 @@
             write(6,1230) jrot,kmin
  1230 format(5x,'J =',i3,'  k =',i3,&
              /5x,'***  option to neglect coriolis interactions  ***')
-            if (abs(kmin) .gt. abs(jrot)) then
+            if (abs(kmin) > abs(jrot)) then
                write(6,1235)
  1235 format(5x,'Error: k greater than J. STOP')
                stop
@@ -607,7 +571,7 @@
 
 !     declare dvr sizes for dimensioning the arrays
       ndima=npnta
-      if (idia .le. -2 .and. .not. zrot) ndima=ndima-ipar
+      if (idia <= -2 .and. .not. zrot) ndima=ndima-ipar
       ndimb=npntb
       ndimc=npntc
 
@@ -617,7 +581,7 @@
 
       if (zmors2 .and. .not. zquad2) goto 961
       if (.not. ztheta .and. .not. zquad2) goto 962
-      if (idia .le. -2 .and. .not. zquad2) goto 963
+      if (idia <= -2 .and. .not. zquad2) goto 963
 
       return
   960 write(6,970)
@@ -645,20 +609,6 @@
 !     intermediate and the final hamiltonians.
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,& 
-                    npnt,nlim1,nlim2,neval,ncoord,& 
-                    jrot,kmin,idia,ipar,& 
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,& 
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,& 
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,& 
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,& 
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,& 
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common /mass/ xmass(3),g1,g2,xmassr(3)
-      common /oupb/   xp0,xp1,xp2
 
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: dnorm1
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: r1m2
@@ -705,7 +655,7 @@
                  plegw(0:maxleg,idvr))
 
 !     open the streams......(most not needed for symmetrised radau case)
-      if (idia .gt. -2) then
+      if (idia > -2) then
          open(unit=ieigs1,form='unformatted',recordtype='segmented')
          open(unit=ieigs2,form='unformatted',recordtype='segmented')
          open(unit=ivecs1,form='unformatted',recordtype='segmented')
@@ -727,7 +677,7 @@
 
 !     set up points, weights & basis for numerical integration
 
-      if (ncoord .eq. 2) then
+      if (ncoord == 2) then
 !     in less than 3-d cases fix the 3-d paramters
          if (zr2r1) then
             bass1(0,1) = x1
@@ -763,7 +713,7 @@
       else
          call lagpt(1,y1,r1,wt1,b,c,cc1,bass1,dnorm1,npnt1,nmax1,zmors1,&
                     re1,beta1,a1,iu1)
-         if (idia .gt. -2) then
+         if (idia > -2) then
             call lagpt(2,y2,r2,wt2,b,c,cc2,bass2,dnorm2,npnt2,nmax2,&
                        zmors2,re2,beta2,a2,iu2)
 !           setup kinetic energy & inertia integrals over r2
@@ -788,23 +738,23 @@
 !     write the quadrature points to disk for zvec = .true.
       if (zvec) then
          write (iout2) r1
-         if (idia .gt. -2) write (iout2) r2
+         if (idia > -2) write (iout2) r2
       endif
-      if (ncoord .eq. 3) then
+      if (ncoord == 3) then
       endif
 
 !     take square roots of the weights
       wt1=sqrt(wt1)
-      if (idia .gt. -2) wt2=sqrt(wt2)
+      if (idia > -2) wt2=sqrt(wt2)
 
 !     set up the transformed kinetic energy integrals,  t'(hbl) t
 !                                                       ~  ~~~  ~
       call k1k2(xk1,hbl1,bass1,wt1,npnt1,nmax1,nlim1)
-      if (idia .gt. -2)&
+      if (idia > -2)&
          call k1k2(xk2,hbl2,bass2,wt2,npnt2,nmax2,nlim2)
 
 !     ...... and the inertia integrals for spherical oscillators
-      if (.not.zmors2 .and. .not.ztwod .and. idia .gt. -2)&
+      if (.not.zmors2 .and. .not.ztwod .and. idia > -2)&
           call k1k2(r2m2t,r2m2,bass2,wt2,npnt2,nmax2,nlim2)
 
 !     some of the j>0 stuff to get the loop over k correct
@@ -812,7 +762,7 @@
         kd = 1-min(kmin,1)
         ku = jrot
 !       if looping over sym & anti-sym, do one extra k=1 block
-        if (kmin .eq. 2) ku=ku+1
+        if (kmin == 2) ku=ku+1
       else
         kd = kmin
         ku = kmin
@@ -821,7 +771,7 @@
       kkz0  = 0
 !     for j > 0, store r**(-2) term for rotlev3
       if (ztran) then
-         if (ku .gt. kd) then
+         if (ku > kd) then
             if (zembed) then
               if (zquad2) then
                 write(iwave) (xp5/(r2(i)*r2(i)*urr2),i=1,npnt2)
@@ -834,17 +784,17 @@
          else
             jdia=max(1,idia)
             jstart=kmin
-            if (mod(jstart,jdia) .ne. ipar) jstart=jstart+1
+            if (mod(jstart,jdia) /= ipar) jstart=jstart+1
             nang=(maxleg-jstart)/jdia+1
             mbass=idvr*npnt1*npnt2
-            if (idia .eq. -2) mbass=idvr*max2d
+            if (idia == -2) mbass=idvr*max2d
             write(iwave) mbass,jstart,nang,mbass
          endif
          write(iwave) r1
-         if (idia .gt. -2) write(iwave) r2
+         if (idia > -2) write(iwave) r2
       endif
 
-      if (idia .eq. -2) then
+      if (idia == -2) then
          max2d1=max2d
          max3d1=max3d
          DEALLOCATE(xk2,r2,r2m2t)
@@ -855,7 +805,7 @@
 
 !     -------------  start rotational loop here  -------------
       do 40 kk=kd,ku
-      if (kk .le. jrot) then
+      if (kk <= jrot) then
          kz=kk
       else
          kz=1
@@ -865,8 +815,8 @@
 
 !     first rewind the scratch files for a calculation with j>0
 !     and, if needed, reposition iout2 after set up data.
-      if (kk .gt. kd) then
-        if (idia .gt. -2) then
+      if (kk > kd) then
+        if (idia > -2) then
            rewind ieigs1
            rewind ieigs2
            rewind ivecs1
@@ -891,24 +841,24 @@
          tswalf=tswalf*dble(ia)/dble(kz+ia+1)
    30 continue
 
-      if (zladd .or. kz .eq. kd) then
+      if (zladd .or. kz == kd) then
          nidvr = idvr
          nang  = nalf
          nang2 = nalf2
          lincr = kz
       else
          lincr = 0
-         if (idia .ne. 2) then
+         if (idia /= 2) then
             nidvr = idvr - kz
             nang  = nalf - kz
             nang2 = (nang+1)/2
-         else if (ipar .eq. 0) then
-            if(mod(kz,2).eq.1) kkz0 = kkz0 + 2
+         else if (ipar == 0) then
+            if(mod(kz,2)==1) kkz0 = kkz0 + 2
             nidvr = idvr - kkz0/2
             nang  = nalf - kkz0
             nang2 = (nang+1)/2
          else
-            if(mod(kz,2).eq.0 .and. kz.gt.0) kkz12 = kkz12 + 2
+            if(mod(kz,2)==0 .and. kz>0) kkz12 = kkz12 + 2
             nidvr = idvr - kkz12/2
             nang  = nalf - kkz12
             nang2 = (nang+1)/2
@@ -936,7 +886,7 @@
         write(6,1010) cswalf,tswalf
  1010   format(/4x,'Computed sum of weights',d22.15,&
               /4x,'Exact    sum of weights',d22.15//)
-          if (abs((cswalf-tswalf)/tswalf) .gt. toler) then
+          if (abs((cswalf-tswalf)/tswalf) > toler) then
              write(6,910)
   910       format(//5x,'Points & weights in error, adjust algorithm'//)
              stop
@@ -978,17 +928,17 @@
       
 !     build the transformed angular momentum matrix xlmatr;
       ipar0=0
-      if (idia .eq. 2 .and. ipar .eq. 1) ipar0=1
+      if (idia == 2 .and. ipar == 1) ipar0=1
       call lmatrx(xlmatr,pleg,walf,kz,ipar0,nidvr,lincr,alf)
 
   333 continue
 
 !     for ab2 molecules in radau coordinates, use separate main
 !     driving routine
-      if (idia .le. -2) then
+      if (idia <= -2) then
          if (zrot) then
-            if (kz .gt. kd .and. .not.zperp) ipar=mod(ipar+1,2)
-            if (ipar .gt. 0) then
+            if (kz > kd .and. .not.zperp) ipar=mod(ipar+1,2)
+            if (ipar > 0) then
                max2d=max2d2
                max3d=max3d2
             else
@@ -1008,7 +958,7 @@
 
       DEALLOCATE(xalf,walf,xlmatr,pleg,xk1,r1)
       if (zperp) DEALLOCATE(jxcos,jwalf,sjwalf,pjac,plegw)
-      if (idia .gt. -2) DEALLOCATE(r2,xk2,r2m2t)
+      if (idia > -2) DEALLOCATE(r2,xk2,r2m2t)
       return
       end
 
@@ -1018,21 +968,6 @@
 !     read in masses & set constants for radial basis sets          #007
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      common /oupb/   xp0,xp1,xp2
-!     save masses & g in case they are needed in the potential routine
-      common /mass/ xmass(3),g1,g2,xmassr(3)
 !     amtoau converts amu (proton masses) to au (electron masses).
       data amtoau/1.8228883d03/
       data x0,xp5,x1,x4/0.0d0,0.5d0,1.0d0,4.0d0/
@@ -1051,24 +986,24 @@
 !     .... then rotational mass
       read(5,5)     xmassr
 !     Default rotational mass to vibration mass if it is not set
-      if (xmassr(1).le.x0) xmassr = xmass
+      if (xmassr(1)<=x0) xmassr = xmass
 
 !     read cut off energies
 !     read parameters defining energy cut offs for each block
       read(5,5) emax1,emax2
       if (.not. zall) then
          if (zcut) then
-            if (idia .gt. -2) write(6,990) emax1,emax2
+            if (idia > -2) write(6,990) emax1,emax2
   990       format(//5x,'Cut-off energies in wavenumbers:',2d16.8/)
-            if (idia .eq. -2) write(6,991)       emax2
+            if (idia == -2) write(6,991)       emax2
   991       format(//5x,'Final cut-off energy in wavenumbers:',2d16.8/)
          else
-            if (idia .gt. -2) write(6,992) emax1
+            if (idia > -2) write(6,992) emax1
   992       format(//5x,'First cut-off energy in wavenumbers:',1d16.8/)
          endif
       endif
 !     set default value of g1 and g2
-      if (idia .ge. 1) then
+      if (idia >= 1) then
 !        scattering coordinates
          g1 = xmass(2) / (xmass(2) + xmass(3))
          g2 = x0
@@ -1095,7 +1030,7 @@
       read(5,5)     re2,diss2,we2
       write(6,1000) xmass
  1000 FORMAT(/5X,'Vibrational nuclear mass in AMU:',3F12.6)
-      if (jrot.ne.0) write(6,1001) xmassr
+      if (jrot/=0) write(6,1001) xmassr
  1001 FORMAT( 5X,'Rotational  nuclear mass in AMU:',3F12.6/)
 !     compute the effective moments of inertia
       ur1 = amtoau/(g2*g2/xmass(1)+x1/xmass(2)+(x1-g2)**2/xmass(3))
@@ -1103,7 +1038,7 @@
       urr1 = amtoau/(g2*g2/xmassr(1)+x1/xmassr(2)+(x1-g2)**2/xmassr(3))
       urr2 = amtoau/(x1/xmassr(1)+g1*g1/xmassr(2)+(x1-g1)**2/xmassr(3))
  
-      if (ncoord .eq. 3) goto 20
+      if (ncoord == 3) goto 20
       if (zr2r1) then
          write(6,1010) re1,ur1
  1010 format(/5x,'r1 fixed bondlength =',f8.4,' bohr',&
@@ -1138,8 +1073,8 @@
              /5x,'reduced mass =',d16.7,' a.u., beta =',f12.6,&
                   ' bohr**-2')
       endif
-      if (ncoord .eq. 2 .and. .not. zr2r1) goto 40
-      if (idia .eq. -2) goto 40
+      if (ncoord == 2 .and. .not. zr2r1) goto 40
+      if (idia == -2) goto 40
    30 continue
       if (zmors2) then
          write(6,1020) 2,re2,diss2,we2
@@ -1174,7 +1109,7 @@
             nlim = 0
          endif
          zncor=.not.zrot
-         if (idia .gt. -2) then
+         if (idia > -2) then
             write(iwave) idia,ipar,idvr,npnt1,npnt2,jrot,kmin,neval,nlim
             write(iwave) zembed,zmors1,zmors2,xmass,g1,g2,zncor,zquad2
             write(iwave) re1,diss1,we1,re2,diss2,we2
@@ -1196,20 +1131,6 @@
 !       dnorm(m) = sqrt((m-1)! * binom(npnt+iu,npnt-m))
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      common /oupb/   xp0,xp1,xp2
-
       double precision, dimension(0:nmax1) :: dnorm1
       double precision, dimension(0:nmax2) :: dnorm2
       double precision, dimension(npnt+1) :: fact
@@ -1221,7 +1142,7 @@
       fact(i+1) = count * fact(i)
       count = count + x1
    10 continue
-      if (ncoord .eq. 2) then
+      if (ncoord == 2) then
         if (.not. zr2r1) then
           if (zmors1) then
             alf=dble(iu1)
@@ -1244,7 +1165,7 @@
           alf=a1+xp5
         endif
         call norms(dnorm1,fact,cc1,alf,npnt1,nmax1)
-        if (idia .gt. -2) then
+        if (idia > -2) then
            if (zmors2) then
              alf=dble(iu2)
            else
@@ -1326,7 +1247,7 @@
       endif
       write(6,1010) y(i),wt(i),r(i)
  1010 format (f23.15,d25.12,f13.5)
-      if (r(i) .lt. x0) write(6,1015) i
+      if (r(i) < x0) write(6,1015) i
  1015 format(5x,'***** warning: for integration point',i3,&
              ', r less than zero *****')
 
@@ -1334,7 +1255,7 @@
 
 !     polynomial of order 0
       bass(0,i) = x1
-      if (nmax .lt. 1) goto 70
+      if (nmax < 1) goto 70
 !     polynomial of order 1
       amx = alf + x1 - y(i)
       bass(1,i) = amx
@@ -1357,8 +1278,8 @@
       write(6,1020) csx,csa,tsx,tsa
  1020 format(/4x,'Computed sum of points',d22.15,' & weights',d22.15,&
              /4x,'Exact    sum of points',d22.15,' & weights',d22.15)
-      if (abs((csx-tsx)/tsx) .gt. toler) goto 900
-      if (abs((csa-tsa)/tsa) .gt. toler) goto 900
+      if (abs((csx-tsx)/tsx) > toler) goto 900
+      if (abs((csa-tsa)/tsa) > toler) goto 900
       return
   900 write(6,910)
   910 format(//5x,'points & weights in error, adjust algorithm',//)
@@ -1406,11 +1327,11 @@
       call lgrecr(pt,dpn,pn1,xt,nn,alf,b,c)
 
       do 7 i=1,nn
-      if (i .gt. 2) goto 4
+      if (i > 2) goto 4
 !     smallest two zeros: found by "brute force" search
     2 xt2 = xt + step
       call lgrecr(pt2,dpn,pn1,xt2,nn,alf,b,c)
-      if (dsign(x1,pt)*dsign(x1,pt2) .gt. 0.0d0) goto 5
+      if (dsign(x1,pt)*dsign(x1,pt2) > 0.0d0) goto 5
       pt = pt2
       xt = 0.5d0 * (xt + xt2)
       go to 6
@@ -1454,8 +1375,8 @@
       call lgrecr(p,dpn,pn1,x,nn,alf,b,c)
       d = p/dpn
       x = x-d
-      if (abs(d/x) .le. eps) return
-      if (iter .lt. itmax) goto 1 
+      if (abs(d/x) <= eps) return
+      if (iter < itmax) goto 1 
       write(6,100) iter,d,x
   100 format(5x,'warning: noconvergence after',i4,' iterations',&
              /,5x,'current difference',d26.15,' & root',d26.15)
@@ -1499,13 +1420,6 @@
 
       implicit double precision (a-h,o-y), logical (z)
 
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-
-      common /oupb/   xp0,xp1,xp2
       double precision, dimension(nlim) ::  hbl
 
       data x0/0.0d0/
@@ -1513,10 +1427,10 @@
       do 10 n2=1,nmax+1
         do 20 n1=1,n2
           index=index+1
-          if (n1 .eq. n2) then
+          if (n1 == n2) then
 !             special case:  n1 = n2
               hbl(index) = fke * dble(2*(n2-1)*(n2+iu)+iu+1)
-          else if (n1+2 .eq. n2) then
+          else if (n1+2 == n2) then
 !                  special case:  n2 = n1 + 2
                    hbl(index) = - fke * sqrt(dble((iu+n1+1)*(iu+n1))*dble((n1+1)*n1))
           else
@@ -1541,14 +1455,6 @@
 !     and moment of intertia integral for spherical oscillator functions
 
       implicit double precision (a-h,o-y), logical (z)
-
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-       common /oupb/   xp0,xp1,xp2
-
       double precision, dimension(nlim) :: hbl
       double precision, dimension(nlim) :: rm2
       double precision, dimension(*) :: dnorm
@@ -1584,7 +1490,7 @@
 !     special case:  n1 = n2
       hbl(index) = hbl(index) + fke * (fn+fn+alf+1.5d0)
 !     special case:  n2 = n1 + 1
-      if (n2 .gt. 1)&
+      if (n2 > 1)&
           hbl(index-1) = hbl(index-1) + fke * sqrt(fn*(fn+alf+xp5))
    50 continue
       if (.not. zprad) return
@@ -1671,19 +1577,19 @@
  30   continue
       call recur(p,dp,pn1,xxx,nn,alf,bta,b,c)
 
-      if (pm1*p .lt. x0) then
+      if (pm1*p < x0) then
          pm1 = -pm1
          ii = ii +1
          xt(ii)=xxx
       endif
 
-      if (ii .eq. nn2) then
+      if (ii == nn2) then
          do 40 i=1,nn2
          call recur(ptemp,dp,pn1,xt(i),nn,alf,bta,b,c)
 40      continue
       else
          xxx=xxx-0.0001
-         if (xxx .gt. -0.002) goto 30
+         if (xxx > -0.002) goto 30
          write(6,*) "Incorrect number",ii-1," of zeros found in JACOBI"
          stop
       endif 
@@ -1694,7 +1600,7 @@
        a(i)= cc/(dpn*pn1)
        csa= csa + a(i) + a(i)
   20  continue
-      if (2*nn2 .ne. nn) csa=csa-a(nn2)
+      if (2*nn2 /= nn) csa=csa-a(nn2)
       return
       end
 
@@ -1714,8 +1620,8 @@
       call recur(p,dp,pn1,x,nn,alf,bta,b,c)
       d = p/dp
       x = x - d
-      if(abs(d) .le. eps) goto 3 
-      if(iter .lt. 10) goto 1 
+      if(abs(d) <= eps) goto 3 
+      if(iter < 10) goto 1 
 3     dpn= dp
       return
       end
@@ -1751,18 +1657,12 @@
 
       implicit double precision (a-h,o-y)
 
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-
       double precision, dimension(idvr) :: xalf,walf
 
       scale = dble(max(1,idia))
       do 10 i=1,nang2
       walf(i) = sqrt(scale*walf(i))
-      if (idia .eq. 2) goto 10
+      if (idia == 2) goto 10
       xalf(nang+1-i) = xalf(i)
       xalf(i)        =-xalf(i)
       walf(nang+1-i) = walf(i)
@@ -1788,7 +1688,7 @@
 
       data x1/1.0d0/,x2/2.0d0/
       m = kz
-      if (m.lt.0) goto 999
+      if (m<0) goto 999
       do 10 i=1,nn2
       pmm = x1
       fact = x1
@@ -1849,18 +1749,6 @@
 !     angular momentum matrix l(alpha,alpha')
 
       implicit double precision (a-h,o-y), logical (z) 
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common /oupb/   xp0,xp1,xp2
-
       double precision, dimension(idvr,idvr) :: xlmatr
       double precision, dimension(0:maxleg,idvr) :: pleg
       double precision, dimension(idvr) :: walf
@@ -1879,7 +1767,7 @@
 
       jdia=max(1,idia)
       jj0=-jdia
-      if (.not.zperp .and. mod(jstart,jdia) .ne. ipar0) then
+      if (.not.zperp .and. mod(jstart,jdia) /= ipar0) then
           jj0=jj0+1
           jstart=jstart+1
       endif
@@ -1919,18 +1807,6 @@
 !     written by james henderson
 
       implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common /oupb/   xp0,xp1,xp2
-
       double precision, dimension(npnt1) :: r1
       double precision, dimension(npnt2) :: r2
       double precision, dimension(idvr) :: xalf
@@ -1990,9 +1866,9 @@
       write(6,985) nham2
   985 format(5x,' nham2 = ',i4)
       nsum = nsum + nham2
-      if (ione .eq. npntc) write(6,986) nsum
+      if (ione == npntc) write(6,986) nsum
   986 format(/5x,' sum = ',i5)
-      if (nham2 .gt. 0) then
+      if (nham2 > 0) then
 !        dump the 1d eigenavlues & vectors to disk for each ione
          call outrow(eigs1d,nham2,ieigs1)
          do 2 ka=1,npnta
@@ -2024,7 +1900,7 @@
     3 continue
       ndim2d(ione) = nham2
 
-      if ( nham2 .gt. 0 ) then
+      if ( nham2 > 0 ) then
         call mkham2(ham2,eigs1d,vecs1d,xk1,xk2,iv1,ione,nham2)
         if (.not. ztwod) then
            call diag(ham2,max2d,nham2,eig2)
@@ -2045,7 +1921,7 @@
 
       endif
 
-      if (ione .eq. npntc .and. zcut) write(6,987)  low3d,emax2
+      if (ione == npntc .and. zcut) write(6,987)  low3d,emax2
   987 format(/i14,' eigenvalues selected below ',d20.10)
 
    31 continue
@@ -2072,8 +1948,8 @@
           rewind ieigs2
           do 55 i1 = 1,npntc
           iv = iv2(i1)
-          if (iv .gt. 0) call getrow(eig2,iv,ieigs2)
-          if (iv .gt. 0) call outrow(eig2,iv,idiag1)
+          if (iv > 0) call getrow(eig2,iv,ieigs2)
+          if (iv > 0) call outrow(eig2,iv,idiag1)
    55     continue
         else
           call outrow(eigs2,max2d*ndimc,idiag1)
@@ -2121,20 +1997,6 @@
       subroutine mkham1(ham1,xlmatr,i1,i2,term,r1,r2,xalf,xk1,xk2,kz)
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      common /oupb/   xp0,xp1,xp2
-
       double precision, dimension(ndima,ndima) :: ham1
       double precision, dimension(idvr,idvr) :: xlmatr
       double precision, dimension(npnt1) :: r1
@@ -2156,7 +2018,7 @@
          w2beta = xp5 / (r2(i2)*r2(i2)*ur2)
          wsum = w1gama + w2beta
 
-         if (jrot .gt. 0) then
+         if (jrot > 0) then
             if (zembed) then
 !              have term * r2**(-2) term
                wterm = term * w2beta * ur2/urr2
@@ -2164,8 +2026,8 @@
 !              have term * r1**(-2) term
                wterm = term * w1gama * ur1/urr1
             endif
-!     extra NBO term if vib mass .ne. rot mass
-            if (kz .gt. 0) then
+!     extra NBO term if vib mass /= rot mass
+            if (kz > 0) then
                s1 = ur1/urr1-x1
                s2 = ur2/urr2-x1
                w3 = dble(kz*kz) * (s1*w1gama + s2*w2beta)*xp0
@@ -2185,14 +2047,14 @@
       endif
 
       if (ztheta) then
-         if (kz .gt. 0) v = v + w3/(x1-xalf(k)**2)
+         if (kz > 0) v = v + w3/(x1-xalf(k)**2)
          ham1(k,k) = v + wterm
          do 20 kp= 1,k
          ham1(k,kp) = ham1(k,kp) + xlmatr(k,kp)*wsum
    20    continue    
 
       else
-         if (jrot .gt. 0) then
+         if (jrot > 0) then
             if (zembed) then
               if (zr2r1)then
                  wterm = (term * xp5) / (r2(k)*r2(k)*ur2)
@@ -2227,18 +2089,6 @@
 !####################################################################
       subroutine mkham2(ham2,eigs1d,vecs1d,xk1,xk2,iv1,ione,nham2)
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common /oupb/   xp0,xp1,xp2
-
       double precision, dimension(max2d,max2d) :: ham2
       double precision, dimension(npnt2,npnt2) :: xk2
       dimension iv1(ndimc,ndimb)
@@ -2305,20 +2155,6 @@
 !     build the final 3-d hamiltonian matrix.
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      common  /oupb/   xp0,xp1,xp2
-
       double precision, dimension(ndima*ndimb,max2d) :: cint
       double precision, dimension(max2d,max2d) :: ham2
       dimension iv1(ndimc,ndimb),iv2(ndimc),ndim2d(npntc)
@@ -2349,7 +2185,7 @@
               eigs2d(neig) = eigs2(ii,ione)
    19       continue
           endif
-          if (iv .gt. 0 .and. zcut) call getrow(eigs2d,iv,ieigs2)
+          if (iv > 0 .and. zcut) call getrow(eigs2d,iv,ieigs2)
   184   continue
       endif
 
@@ -2362,11 +2198,11 @@
       do 10 ione = 1,npntc
 !        recall the size of the 2-d vectors
          nham2=ndim2d(ione)
-         if (nham2 .eq. 0) goto 10
+         if (nham2 == 0) goto 10
          cint = 0.0d0
 !     bring back the 1-d vectors for each i1
          do 23 kk = 1,npnta
-           if (iv2(ione) .gt. 0) then
+           if (iv2(ione) > 0) then
              call getrow(vecs1d(1,kk),nham2,ivecs1)
            else
              read (ivecs1)
@@ -2407,7 +2243,7 @@
            endif
    20    continue
 !     store cint on disk for each npntc
-         if (iv2(ione) .gt. 0) call outrow(cint,ndimt*iv2(ione),ivint)
+         if (iv2(ione) > 0) call outrow(cint,ndimt*iv2(ione),ivint)
    10 continue
 
 !     now do the second part of the transformation
@@ -2422,13 +2258,13 @@
          hband = 0.0d0
          ivsm = 0
          nham2 = ndim2d(ione)
-         if (nham2 .eq. 0) goto 61
+         if (nham2 == 0) goto 61
          iv = iv2(ione)
-         if (iv .gt. 0) call getrow(cint,ndimt*iv,ivint)
+         if (iv > 0) call getrow(cint,ndimt*iv,ivint)
          rewind ivint
          ivpsm = 0
          do 51 ionep = 1,ione
-           if (ione .eq. ionep) then
+           if (ione == ionep) then
              if (zquad2) then
                rm2t = 0.0d0
              else
@@ -2447,10 +2283,10 @@
              xkterm = xk1(ione,ionep)
            else
              xkterm = xk2(ione,ionep)
-             if(jrot .gt. 0 .and. .not. zquad2 .and. zembed) xkterm = xkterm + term*rm2t
+             if(jrot > 0 .and. .not. zquad2 .and. zembed) xkterm = xkterm + term*rm2t
            endif
            ivp = iv2(ionep)
-           if (ivp .gt. 0) call getrow(cintp,ndimt*ivp,ivint)
+           if (ivp > 0) call getrow(cintp,ndimt*ivp,ivint)
            do 41 j=1,iv
              ind1 = ivsm + j
              do 31 jp =1,ivp
@@ -2479,7 +2315,7 @@
    51    continue
          if (zdiag) then
            do 71 jj=1,ind2
-             if (iv .gt. 0) call outrow(hband(1,jj),iv,iband)
+             if (iv > 0) call outrow(hband(1,jj),iv,iband)
    71      continue
            ndim2d(ione)=ind2
          else
@@ -2500,15 +2336,15 @@
 !         set the hband to zero
           hband=0.0d0
           ivsm = 0
-          if (ndim2d(ione) .eq. 0) goto 66
+          if (ndim2d(ione) == 0) goto 66
           iv = iv2(ione)
-          if (iv .gt. 0) call getrow(cint,ndimt*iv,ivint)
+          if (iv > 0) call getrow(cint,ndimt*iv,ivint)
           rewind ivint
           ivpsm = 0
           do 56 ionep = 1,ione
             xkterm = xlmatr(ione,ionep)
             ivp = iv2(ionep)
-            if (ivp .gt. 0) call getrow(cintp,ndimt*ivp,ivint)
+            if (ivp > 0) call getrow(cintp,ndimt*ivp,ivint)
             do 46 j=1,iv
               ind1 = ivsm + j
               do 36 jp =1,ivp
@@ -2525,7 +2361,7 @@
    56     continue
           if (zdiag) then
             do 76 jj=1,ind2
-              if (iv .gt. 0) call outrow(hband(1,jj),iv,iband)
+              if (iv > 0) call outrow(hband(1,jj),iv,iband)
    76       continue
             ndim2d(ione)=ind2
           else
@@ -2556,17 +2392,6 @@
 !     load the final 3-d hamiltonian matrix.
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common  /oupb/   xp0,xp1,xp2
 
       dimension iv2(ndimc),ndim2d(npntc)
       double precision, dimension(nham3,nham3) :: ham3
@@ -2577,10 +2402,10 @@
       rewind iband
       ivsm = 0
       do 62 ione = 1,npntc
-        if (ndim2d(ione) .eq. 0) goto 62
+        if (ndim2d(ione) == 0) goto 62
         iv = iv2(ione)
         do 72 jj=1,ndim2d(ione)
-          if (iv .gt. 0) call getrow(ham3(ivsm + 1,jj),iv,iband)
+          if (iv > 0) call getrow(ham3(ivsm + 1,jj),iv,iband)
    72   continue
         ivsm = ivsm + iv
    62 continue
@@ -2596,7 +2421,7 @@
           eigs2d(ii) = eigs2(ii,ione)
     9  continue
        endif
-       if (iv .gt. 0 .and. zcut) call getrow(eigs2d,iv,ieigs2)
+       if (iv > 0 .and. zcut) call getrow(eigs2d,iv,ieigs2)
        do 185 i = 1,iv
          nn = nn + 1
          ham3(nn,nn) = ham3(nn,nn) + eigs2d(i)
@@ -2630,7 +2455,7 @@
         
 !        call dsyevd('V','L',nham,ham,maxham,eig,work,lwork,iwork,liwork,ifail)
         
-!        if (ifail .ne. 0) write(6,100) ifail
+!        if (ifail /= 0) write(6,100) ifail
 !        return
 !100     format(' diagonalisation has failed with, ifail=',i3)
 !      end subroutine diag
@@ -2639,12 +2464,6 @@
 
 !     diagonalise the appropriate hamiltonian matrices
       implicit real*8 (a-h,o-y), logical (z)
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zplot,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,idip,idipd,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,iwvpb,iplot
-
       real*8, dimension(maxham,nham) :: ham
       real*8, dimension(nham) :: eig
       real*8, dimension(maxham*3) :: work
@@ -2653,7 +2472,7 @@
       nnham=maxham*3
       call dsyev ('V','L',nham,ham,maxham,eig,work,nnham,ifail)
 
-      if (ifail .ne. 0) write(6,100) ifail
+      if (ifail /= 0) write(6,100) ifail
       return
 100   format(' diagonalisation has failed with, ifail=',i3)
     END SUBROUTINE diag
@@ -2661,18 +2480,6 @@
       subroutine diag3d(ham3,nham3,eval,kz)
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common  /oupb/   xp0,xp1,xp2
-
       double precision, dimension(nham3,nham3) :: ham3
       double precision, dimension(nham3) :: eval
       double precision, dimension(nham3) :: evalcm
@@ -2683,10 +2490,10 @@
       if (zrot) then
          write(6,1040) jrot,kz
  1040    format(/5x,'Solutions with J =',i3,' k =',i3)
-         if (idia .eq. -2) then
-            if (ipar .eq. 0)  write(6,1025)
+         if (idia == -2) then
+            if (ipar == 0)  write(6,1025)
  1025       format(/5x,'even parity solutions')
-            if (ipar .eq. 1)  write(6,1035)
+            if (ipar == 1)  write(6,1035)
  1035       format(/5x,'odd parity solutions')
          endif
       endif
@@ -2707,11 +2514,11 @@
       endif
       if (zpfun) then
          ip=jrot-kmin
-         if (jrot .ne. 0 .and. ip .ne. 1) goto 10
+         if (jrot /= 0 .and. ip /= 1) goto 10
          jdia=max(0,idia)
          jpar=min(jdia,ipar)
          isym=abs(min(0,idia))
-         if (ipar .eq. 1) isym=-isym
+         if (ipar == 1) isym=-isym
          write(ilev,1125) jrot,ip,jdia,jpar,isym,meval
  1125    format(6i4)
          write(ilev,1126) (eval(i),i=1,meval)
@@ -2744,8 +2551,8 @@
          call outrow(ham3(1,l),nham3,iout2)
    60    continue
       endif
-      if (jrot .ne. 0) return
-      if (abs(idia) .eq. 2 .and. ipar .eq. 1) then
+      if (jrot /= 0) return
+      if (abs(idia) == 2 .and. ipar == 1) then
          ii=1
          ezero=x0
          read(5,5,end=55) ezero
@@ -2769,18 +2576,6 @@
 !     this routine chooses the max3d lowest eigenvalues from eigs2.
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common  /oupb/   xp0,xp1,xp2
-
       double precision, dimension(max2d,ndimc) :: eigs2
       dimension iv2(ndimc)
       dimension ndim2d(ndimc)
@@ -2795,10 +2590,10 @@
         nhamsm = nhamsm + ndim2d(i)
         iv2(i) = 1
   160 continue
-      if (nhamsm .lt. max3d) low3d = nhamsm
+      if (nhamsm < max3d) low3d = nhamsm
       ipt = 1
       do 200 n=1,low3d
-  210 if(iv2(ipt) .le. ndim2d(ipt)) then
+  210 if(iv2(ipt) <= ndim2d(ipt)) then
           eigvib = eigs2(iv2(ipt),ipt)
           jpt = ipt
       else
@@ -2806,8 +2601,8 @@
           goto 210
       endif
       do 220 j=ipt+1,npntc
-      if(iv2(j) .gt. ndim2d(j)) goto 220
-      if(eigs2(iv2(j),j) .ge. eigvib) goto 220
+      if(iv2(j) > ndim2d(j)) goto 220
+      if(eigs2(iv2(j),j) >= eigvib) goto 220
       eigvib = eigs2(iv2(j),j)
       jpt = j
   220 continue
@@ -2857,9 +2652,9 @@
     7 continue
       do 30 ind = 1,ivm
       if (zvec) then
-         if (nham2 .gt. 0) call outrow(ham2(1,ind),nham2,iout2)
+         if (nham2 > 0) call outrow(ham2(1,ind),nham2,iout2)
       endif
-         if (nham2 .gt. 0) call outrow(ham2(1,ind),nham2,ivecs2)
+         if (nham2 > 0) call outrow(ham2(1,ind),nham2,ivecs2)
    30 continue
    31 continue
 
@@ -2875,18 +2670,6 @@
 !     to disk.
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common  /oupb/   xp0,xp1,xp2
-
       double precision, dimension(ndima,ndima) :: ham1
       double precision, dimension(ndima) :: eig1
       double precision, dimension(max2d) :: eigs1d
@@ -2900,7 +2683,7 @@
       if (.not. zall) then
          ivn = 0
          do 10 n=1,npnta
-         if (eig1(n) .gt. emaxau) goto 20
+         if (eig1(n) > emaxau) goto 20
          ivn = ivn + 1
    10    continue
    20    iv = ivn
@@ -2910,7 +2693,7 @@
       endif
 
       if (zp1d) then
-         if (icall .eq. 1) write(6,1051)
+         if (icall == 1) write(6,1051)
  1051    format(//5x,'1d eigenvalues in wavenumbers:'/)
          write(6,1050) (eig1(i)*autocm,i=1,npnta)
  1050    format(5d24.12/)
@@ -2922,7 +2705,7 @@
       do 30 i=1,iv
          nham2 = nham2 + 1
 
-      if (nham2 .gt. max2d .and. .not. zall)  then
+      if (nham2 > max2d .and. .not. zall)  then
          write(6,999)
   999    format(//6x,'**** core exceeded: reduce cut-off emax1 ****')
          stop
@@ -2946,18 +2729,6 @@
 !     to disk.
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common  /oupb/   xp0,xp1,xp2
-
       double precision, dimension(max2d,max2d) :: ham2
       double precision, dimension(nham2) :: eig2
 
@@ -2969,7 +2740,7 @@
       if (.not. zall) then
          ivm = 0
          do 10 n=1,nham2
-         if(eig2(n) .gt. emaxau) goto 20
+         if(eig2(n) > emaxau) goto 20
          ivm = ivm + 1
    10    continue
    20    low3d = low3d + ivm
@@ -2978,14 +2749,14 @@
          low3d = low3d + ivm
       endif
 
-      if (low3d .gt. max3d .and. .not. zall)  then
+      if (low3d > max3d .and. .not. zall)  then
          write(6,999)
   999    format(//6x,'**** core exceeded: reduce cut-off emax2 ****')
          stop
       endif
 
       if (zp2d) then
-         if (icall .eq. 1) write(6,1051)
+         if (icall == 1) write(6,1051)
  1051    format(//5x,'2d eigenvalues in wavenumbers:'/)
          write(6,1050) (eig2(i)*autocm,i=1,nham2)
  1050    format(5d24.12/)
@@ -2994,7 +2765,7 @@
       endif
 
 !     save the vectors and eigenvalues
-      if (ivm .gt. 0) call outrow(eig2,ivm,ieigs2)
+      if (ivm > 0) call outrow(eig2,ivm,ieigs2)
       do 30 ind = 1,ivm
       if (zvec) call outrow(ham2(1,ind),nham2,iout2)
       call outrow(ham2(1,ind),nham2,ivecs2)
@@ -3010,18 +2781,6 @@
 !     written by nic fulton, feb 1993.
 
       implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common  /oupb/   xp0,xp1,xp2
-
       double precision, dimension(npnt,npnt) :: hr
       double precision, dimension(nalf,nalf) :: htheta
       double precision, dimension(npnt) :: r
@@ -3054,12 +2813,12 @@
 
       xtscw=(dble(jrot * jrot + jrot)*(asw+bsw)*0.5d0+dble(kz*kz)& 
            *(csw-(bsw+asw)*0.5d0))*xp2
-      if (jrot .ne. 0) then
+      if (jrot /= 0) then
          term  = dble(jrot * jrot + jrot - kz * kz) / x8
          term2 = dble(jrot * jrot + jrot - 3 * kz * kz) / x4
-         if (abs(kz) .eq. 1) then
+         if (abs(kz) == 1) then
             term3 = dble(jrot * jrot + jrot) / x16
-            if (kmin .ge. 1 .and. zrot) term3 = -term3
+            if (kmin >= 1 .and. zrot) term3 = -term3
          endif
       endif
 
@@ -3080,7 +2839,7 @@
           call choosr(igamma,nham2,eig2,ham2,iv2,eigs2d,&
                       vecs2d,nv2,eigtmp)
 
-          if(igamma .eq. nalf .and. .not. zpmin)&
+          if(igamma == nalf .and. .not. zpmin)&
               write(6,110) (itmp, iv2(2,itmp),itmp=1,nalf)
         else
            call cut2dr(igamma,nham2,eig2,ham2,iv2,eigs2d,vecs2d)
@@ -3124,15 +2883,6 @@
 
       subroutine blc2d1(xcos,r,hr,ham2,nham2,term,term2,term3,xtscw,kz)
       implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,& 
-                    npnt,nlim1,nlim2,neval,ncoord,& 
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,max1dv,& 
-                    ndima,ndimb,ndimc,& 
-                    emax1,emax2
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common  /oupb/   xp0,xp1,xp2
-
       double precision, dimension(npnt,npnt) :: hr
       double precision, dimension(npnt,npnt) :: hrpb
       double precision, dimension(npnt) :: r
@@ -3152,9 +2902,9 @@
 
 
 !     allow for j > 0 case
-      if (jrot .ne. 0) then
+      if (jrot /= 0) then
         fact =  term + term2 / (x1 - xcos)
-        if (kz .eq. 1) fact = fact + term3 * (x1 + xcos)/(x1-xcos)
+        if (kz == 1) fact = fact + term3 * (x1 + xcos)/(x1-xcos)
         ia = 0
         do 15 ibeta=1,npnt
           do 25 ialpha=1,ibeta-ipar
@@ -3172,42 +2922,42 @@
 
  25       continue
           ia=ia+ibeta-ipar
-          if (ipar .eq. 0) ham2(ia,ia) = ham2(ia,ia) + wsum - wsum2
+          if (ipar == 0) ham2(ia,ia) = ham2(ia,ia) + wsum - wsum2
  15     continue
       endif
       q=1.0d0
-      if(ipar .eq. 1) q=-1.0d0
+      if(ipar == 1) q=-1.0d0
       iap=0
       do 10 ibetap=1,npnt
         ia=0
         do 20 ibeta=1,npnt
           do 30 ialphp=1,ibetap-ipar
             do 40 ialpha=1,ibeta-ipar
-              if(ibeta .eq. ibetap)&
+              if(ibeta == ibetap)&
                  ham2(ialphp+iap,ialpha+ia)=&
                   ham2(ialphp+iap,ialpha+ia)+hrpb(ialphp,ialpha)
-              if(ibeta .eq. ialphp)&
+              if(ibeta == ialphp)&
                  ham2(ialphp+iap,ialpha+ia)=&
                   ham2(ialphp+iap,ialpha+ia)+q*hrpb(ibetap,ialpha)
-              if(ialpha .eq. ibetap)&
+              if(ialpha == ibetap)&
                  ham2(ialphp+iap,ialpha+ia)=&
                   ham2(ialphp+iap,ialpha+ia)+q*hrpb(ialphp,ibeta)
-              if(ialpha .eq. ialphp)&
+              if(ialpha == ialphp)&
                  ham2(ialphp+iap,ialpha+ia)=&
                   ham2(ialphp+iap,ialpha+ia)+hrpb(ibetap,ibeta)
-              if(ialpha .eq. ialphp .and. ibeta .eq. ibetap) then
+              if(ialpha == ialphp .and. ibeta == ibetap) then
                 call potv(v,r(ialpha),r(ibeta),xcos)
                 ham2(ialphp+iap,ialpha+ia)=&
                   ham2(ialphp+iap,ialpha+ia)+v
               endif
-              if(ialpha .eq. ibetap .and. ibeta .eq. ialphp) then
+              if(ialpha == ibetap .and. ibeta == ialphp) then
                 call potv(v,r(ibeta),r(ialpha),xcos)
                 ham2(ialphp+iap,ialpha+ia)=&
                   ham2(ialphp+iap,ialpha+ia)+q*v
               endif
-              if(ialphp .eq. ibetap) ham2(ialphp+iap,ialpha+ia)=&
+              if(ialphp == ibetap) ham2(ialphp+iap,ialpha+ia)=&
                 ham2(ialphp+iap,ialpha+ia)*factr2
-              if(ialpha .eq. ibeta) ham2(ialphp+iap,ialpha+ia)=&
+              if(ialpha == ibeta) ham2(ialphp+iap,ialpha+ia)=&
                 ham2(ialphp+iap,ialpha+ia)*factr2
 40          continue
 30        continue
@@ -3225,18 +2975,6 @@
 !     this routine chooses the max3d lowest eigenvalues from eigs2.
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common  /oupb/   xp0,xp1,xp2
-
       double precision, dimension(nham2) :: eig2
       double precision, dimension(nham2,nham2) :: ham2
       dimension iv2(2,nalf)
@@ -3247,7 +2985,7 @@
       save itotal
       data autocm/2.19474624d+05/
 
-      if (igamma .eq. 1) then
+      if (igamma == 1) then
          itotal = 0
          rewind intvec
       endif
@@ -3260,9 +2998,9 @@
       iprev=itotal
       inew=nham2
       do 20 ipos = itotal + nham2,1,-1
-        if(iprev .ne. 0) then
-          if(inew .ne. 0) then
-            if(eig2(inew) .lt. eigtmp(iprev)) then
+        if(iprev /= 0) then
+          if(inew /= 0) then
+            if(eig2(inew) < eigtmp(iprev)) then
               eigtmp(ipos) = eigtmp(iprev)
               iprev = iprev - 1
             else
@@ -3281,10 +3019,10 @@
 
       itotal = itotal + nham2
 
-      if (igamma .eq. nalf) then
+      if (igamma == nalf) then
         rewind intvec
 
-        if(itotal .le. max3d) then
+        if(itotal <= max3d) then
           emax = eigtmp(itotal)
           write(6,100) itotal,eigtmp(1),emax
         else
@@ -3298,7 +3036,7 @@
           ichose=0
           do 50 j=1,nv2(i)
             read(intvec) eig
-            if(eig .le. emax) then
+            if(eig <= emax) then
               eigs2d(itotal) = eig
               read(intvec) (vecs2d(k,itotal),k=1,nv2(i))
               ichose = ichose + 1
@@ -3328,18 +3066,6 @@
 !     in the array vecs1d.
 
       implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common  /oupb/   xp0,xp1,xp2
-
       double precision, dimension(nham2) :: eig2
       double precision, dimension(nham2,nham2) :: ham2
       dimension iv2(2,nalf)
@@ -3347,16 +3073,16 @@
       double precision, dimension(max2d,max3d) :: vecs2d
       save npos
       data autocm /2.19474624d+05/
-      if (igamma .eq. 1) npos = 1
+      if (igamma == 1) npos = 1
 
 !     change emax2 to hartree for the selection
       emaxau=emax2/autocm
 
       nvec = 0
       do 10 ialpha = 1,nham2
-        if (eig2(ialpha) .lt. emaxau) then
+        if (eig2(ialpha) < emaxau) then
           ntot = npos + nvec
-          if (ntot .gt. max3d) then
+          if (ntot > max3d) then
              write(6,140) max3d, emax2
              stop
           endif
@@ -3384,31 +3110,19 @@
 !     also calculate which angular grid points are redundant.
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common  /oupb/   xp0,xp1,xp2
-
       dimension iv(2,nalf)
 
-      if (jrot .gt. 0) then
+      if (jrot > 0) then
 !        first find the extent of the functions in low theta direction
          do 20 iend=nalf/2,nalf
-         if (iv(2,iend) .eq. 0) goto 30
+         if (iv(2,iend) == 0) goto 30
    20    continue
          iend=nalf
 !        have we saved functions beyond the point of zero amplitude ?
    30    ioff=0
          do 40 i=iend+1,nalf
 !        if so remove them
-         if (iv(2,i) .gt. 0) then
+         if (iv(2,i) > 0) then
             ioff=ioff+iv(2,i)
             iv(2,i)=0
             iv(1,i)=iv(1,i-1)
@@ -3417,10 +3131,10 @@
 
 !         zlin = .true.
 
-         if (ioff .gt. 0) write(6,960) ioff,iv(1,iend)
+         if (ioff > 0) write(6,960) ioff,iv(1,iend)
   960    format(/5x,'*** warning:',i4,' functions removed from theta =',&
                 ' 0 region'/8x,' basis reset to nham3 =',i5)
-         if (iv(2,nalf) .gt. 0) then
+         if (iv(2,nalf) > 0) then
             if (zlin) then
 !!              if there are still theta=0 functions, remove them
                write(6,987) iv(2,nalf),iv(1,nalf)-1
@@ -3440,7 +3154,7 @@
 
       iang=0
       do 60 ii=1,nalf
-        if (iv(2,ii) .gt. 0) iang=iang+1
+        if (iv(2,ii) > 0) iang=iang+1
    60 continue
       nbass=iang*max2d
       if (ztran) then
@@ -3454,18 +3168,6 @@
 
       subroutine bloc3d(htheta,ham3,eigs2d,vecs2d,iv2,nv2,ham2,nham3,r)
       implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-      common  /oupb/   xp0,xp1,xp2
-
       double precision, dimension(nalf,nalf) ::  htheta
       double precision, dimension(nham3,nham3) ::  ham3
       double precision, dimension(max3d) :: eigs2d
@@ -3479,10 +3181,10 @@
 
       ndim1g = 1
       do 10 igamma = 1,nalf
-        if(iv2(2,igamma) .gt. 0) then
+        if(iv2(2,igamma) > 0) then
           ndim2g = 1
           do 20 igammp = 1,igamma
-            if(iv2(2,igammp) .gt. 0) then
+            if(iv2(2,igammp) > 0) then
               call blc2d2(r,igamma,igammp,htheta,ham2,nv2(igamma))
 
               call vecmul(vecs2d(1,iv2(1,igamma)),nv2(igamma),&
@@ -3508,14 +3210,6 @@
 
       subroutine blc2d2(r,igamma,igammp,htheta,ham2,nham2)
       implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,& 
-                    jrot,kmin,idia,ipar,& 
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,& 
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common  /oupb/   xp0,xp1,xp2
-
       double precision, dimension(nalf,nalf) ::  htheta
       double precision, dimension(npnt) :: r
       double precision, dimension(nham2,nham2) :: ham2
@@ -3526,14 +3220,14 @@
 
 !      q=0.0d0
       q=1.0d0
-      if(ipar .eq. 1) q=-1.0d0
+      if(ipar == 1) q=-1.0d0
       iap=0
       do 10 ibetap=1,npnt
         ia=0
         do 20 ibeta=1,npnt
           do 30 ialphp=1,ibetap-ipar
             do 40 ialpha=1,ibeta-ipar
-              if(ialpha .eq. ialphp .and. ibeta .eq. ibetap) then
+              if(ialpha == ialphp .and. ibeta == ibetap) then
                 walpha = xp5 / (r(ialpha)*r(ialpha)*ur1)
                 wbeta = xp5 / (r(ibeta)*r(ibeta)*ur1)
                 wsum = walpha + wbeta
@@ -3545,16 +3239,16 @@
                 ham2(ialphp+iap,ialpha+ia)=& 
                   ham2(ialphp+iap,ialpha+ia)+htheta(igammp,igamma)*wsum
               endif
-              if(ialpha .eq. ibetap .and. ibeta .eq. ialphp) then
+              if(ialpha == ibetap .and. ibeta == ialphp) then
                 walpha = xp5 / (r(ialpha)*r(ialpha)*ur1)
                 wbeta = xp5 / (r(ibeta)*r(ibeta)*ur1)
                 wsum = walpha + wbeta
                 ham2(ialphp+iap,ialpha+ia)=& 
                  ham2(ialphp+iap,ialpha+ia)+q*htheta(igammp,igamma)*wsum
               endif
-              if(ialphp .eq. ibetap) ham2(ialphp+iap,ialpha+ia)=& 
+              if(ialphp == ibetap) ham2(ialphp+iap,ialpha+ia)=& 
                 ham2(ialphp+iap,ialpha+ia)*factr2
-              if(ialpha .eq. ibeta) ham2(ialphp+iap,ialpha+ia)=& 
+              if(ialpha == ibeta) ham2(ialphp+iap,ialpha+ia)=& 
                 ham2(ialphp+iap,ialpha+ia)*factr2
 40          continue
 30        continue
@@ -3582,7 +3276,7 @@
       do 10 ib = 1,idimb
         do 20 ia = 1,idima
           temp1 = hama(ia,ib)
-          if (temp1 .eq. 0.0d0) goto 20
+          if (temp1 == 0.0d0) goto 20
           do 30 ja = 1,jdima
             temp2 = veca(ia,ja) * temp1
             do 40 jb = 1,jdimb
@@ -3598,20 +3292,6 @@
 
       subroutine transr(iv2,vecs2d,ham3,eig3,nham3,nbass)
       implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,& 
-                    npnt,nlim1,nlim2,neval,ncoord,& 
-                    jrot,kmin,idia,ipar,& 
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,& 
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,& 
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,& 
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,& 
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,& 
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-     
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /mass/ xmass(3),g1,g2,xmassr(3)
-      common  /oupb/   xp0,xp1,xp2
 
       dimension iv2(2,nalf)
       double precision, dimension(max2d,max3d) :: vecs2d
@@ -3629,7 +3309,7 @@
         index = 1    
        do 30 irs=1,(npnt*(npnt+1-2*ipar))/2
           do 300 igamma=1,nalf
-            if (iv2(2,igamma) .eq. 0) goto 300
+            if (iv2(2,igamma) == 0) goto 300
             do 20 level2=0,iv2(2,igamma)-1
               ivec2=iv2(1,igamma)+level2
               wvfunc(index)=wvfunc(index)+&
@@ -3654,21 +3334,6 @@
 !     coefficients to psi, the wavefunction amplitudes at the dvr points
 
       implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
-     
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      common /mass/ xmass(3),g1,g2,xmassr(3)
-      common  /oupb/   xp0,xp1,xp2
 
       double precision, dimension(max2d,ndima) :: vecs1l
       double precision, dimension(max2d,max2d) :: vecs2l
@@ -3708,10 +3373,10 @@
 
       do 35 ione = 1,npntc
       nham2 = ndim2l(ione)
-      if (nham2 .gt. 0) then
+      if (nham2 > 0) then
          do 5 kk=1,npnta
          call getrow(vecs1l(1,kk),nham2,iout2)
-         if (iv2l(ione) .ne. 0) call outrow(vecs1l(1,kk),nham2,ivecs1)
+         if (iv2l(ione) /= 0) call outrow(vecs1l(1,kk),nham2,ivecs1)
     5    continue
       endif
    35 continue
@@ -3720,7 +3385,7 @@
       do 31 ione = 1,npntc
       nham2 = ndim2l(ione)
       ivm = iv2l(ione)
-      if (nham2 .gt. 0) then
+      if (nham2 > 0) then
          do 30 ind = 1,ivm
          call getrow(vecs2l(1,ind),nham2,iout2)
          call outrow(vecs2l(1,ind),nham2,ivecs2)
@@ -3747,9 +3412,9 @@
       nham2 = ndim2l(ic)
       do 56 j  = 1,iv2l(ic)
       ind2 = ind2 + 1
-      if (nham2 .gt. 0) call getrow(vecs2l(1,j),nham2,ivecs2)
+      if (nham2 > 0) call getrow(vecs2l(1,j),nham2,ivecs2)
       do 54 ia = 1,npnta
-      if (nham2.gt.0 .and. j.eq.1)&
+      if (nham2>0 .and. j==1)&
        call getrow(vecs1l(1,ia),nham2,ivecs1)
       ind1 = 0
       do 52 ib = 1,npntb
@@ -3875,7 +3540,7 @@
     7 format(i4,f12.7,9f13.7)
       ind0=ind0+i
     5 continue
-      if(lup.ge.ndim) return
+      if(lup>=ndim) return
       ip=ip+1
       go to 3
       end
@@ -3939,16 +3604,6 @@
 !     written by max kostin, 2001.
 
       implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
 
       double precision, dimension(npnt,npnt) :: hr
       double precision, dimension(nalf,nalf) :: htheta
@@ -3984,7 +3639,7 @@
           call choosr(igamma,nham2,eig2,ham2,iv2,eigs2d,&
                       vecs2d,nv2,eigtmp)
 
-          if(igamma .eq. nalf .and. .not. zpmin)&
+          if(igamma == nalf .and. .not. zpmin)&
               write(6,110) (itmp, iv2(2,itmp),itmp=1,nalf)
         else
            call cut2dr(igamma,nham2,eig2,ham2,iv2,eigs2d,vecs2d)
@@ -4032,12 +3687,6 @@
 
       subroutine z_blc2d1(xcos,r,hr,ham2,nham2,term,term2,kz)
       implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
 
       double precision, dimension(npnt,npnt) :: hr
       double precision, dimension(npnt) :: r
@@ -4050,16 +3699,16 @@
       realkz = DBLE(kz)
 
 !     allow for j > 0 case
-      if (jrot .ne. 0) then
+      if (jrot /= 0) then
 ! for q=0(+) term goes with -
 ! for q=1(-) term goes with +
-         if(iq .eq. 0)then
+         if(iq == 0)then
             term= -realj*(realj+x1)/x4
          else
             term= realj*(realj+x1)/x4
          endif
          fact = (realkz**2)/x4
-         if (kz .eq. 1) fact = fact + term * (xcos)/(x1-(xcos)**2)
+         if (kz == 1) fact = fact + term * (xcos)/(x1-(xcos)**2)
 
 !-----  Extra NBO term ------
          s=1.0d0-urr1/ur1
@@ -4079,43 +3728,43 @@
                ham2(ialpha+ia,ialpha+ia) = ham2(ialpha+ia,ialpha+ia)+wsum+wsum2
 25          continue
             ia=ia+ibeta-ipar
-            if (ipar .eq. 0)ham2(ia,ia) = ham2(ia,ia) + wsum + wsum2
+            if (ipar == 0)ham2(ia,ia) = ham2(ia,ia) + wsum + wsum2
  15     continue
       endif
 
       q=x1
-      if(ipar .eq. 1) q=-x1
+      if(ipar == 1) q=-x1
       iap=0
       do 10 ibetap=1,npnt
         ia=0
         do 20 ibeta=1,npnt
           do 30 ialphp=1,ibetap-ipar
             do 40 ialpha=1,ibeta-ipar
-              if(ibeta .eq. ibetap)&
+              if(ibeta == ibetap)&
                  ham2(ialphp+iap,ialpha+ia)=&
                   ham2(ialphp+iap,ialpha+ia)+hr(ialphp,ialpha)
-              if(ibeta .eq. ialphp)&
+              if(ibeta == ialphp)&
                  ham2(ialphp+iap,ialpha+ia)=&
                   ham2(ialphp+iap,ialpha+ia)+q*hr(ibetap,ialpha)
-              if(ialpha .eq. ibetap)&
+              if(ialpha == ibetap)&
                  ham2(ialphp+iap,ialpha+ia)=&
                   ham2(ialphp+iap,ialpha+ia)+q*hr(ialphp,ibeta)
-              if(ialpha .eq. ialphp)&
+              if(ialpha == ialphp)&
                  ham2(ialphp+iap,ialpha+ia)=&
                   ham2(ialphp+iap,ialpha+ia)+hr(ibetap,ibeta)
-              if(ialpha .eq. ialphp .and. ibeta .eq. ibetap) then
+              if(ialpha == ialphp .and. ibeta == ibetap) then
                 call potv(v,r(ialpha),r(ibeta),xcos)
                 ham2(ialphp+iap,ialpha+ia)=&
                   ham2(ialphp+iap,ialpha+ia)+v
               endif
-              if(ialpha .eq. ibetap .and. ibeta .eq. ialphp) then
+              if(ialpha == ibetap .and. ibeta == ialphp) then
                 call potv(v,r(ibeta),r(ialpha),xcos)
                 ham2(ialphp+iap,ialpha+ia)=&
                   ham2(ialphp+iap,ialpha+ia)+q*v
               endif
-              if(ialphp .eq. ibetap) ham2(ialphp+iap,ialpha+ia)=&
+              if(ialphp == ibetap) ham2(ialphp+iap,ialpha+ia)=&
                 ham2(ialphp+iap,ialpha+ia)*factr2
-              if(ialpha .eq. ibeta) ham2(ialphp+iap,ialpha+ia)=&
+              if(ialpha == ibeta) ham2(ialphp+iap,ialpha+ia)=&
                 ham2(ialphp+iap,ialpha+ia)*factr2
 40          continue
 30        continue
@@ -4174,7 +3823,7 @@
       bass=x0
       DO 60 I=1,nn
       bass(0,I)=x1
-      IF(nb.LT.1) GO TO 70
+      IF(nb<1) GO TO 70
       bass(1,I)=(alf-bet+(lmd+x1)*x(I))/x2
       DO 80 n=2,nb
          bass(n,I)=((A2n(n-1)+A3n(n-1)*x(I))*bass(n-1,I)&
@@ -4251,7 +3900,7 @@
            &    (DBLE(n)+bet)*p2)/(temp*(x1-z*z))
             z1=z
             z=z1-p1/pp
-            IF(ABS(z-z1).LE.EPS) GOTO 1
+            IF(ABS(z-z1)<=EPS) GOTO 1
  12         CONTINUE            
      1   x(i)=z 
          w(i)=DEXP(gammln(alf+DBLE(n))+gammln(bet+DBLE(n))    &

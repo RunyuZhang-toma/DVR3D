@@ -90,83 +90,83 @@ end program dipj0dvr
       read(5,1001)nbra0,nket0,nbra1,nket1
       read(5,1002)r1e,r2e,xcose
 
-      if (ibra0 .eq. iket0 .or. ibra0 .eq. iwave0 .or.                   &
-     &    ibra0 .eq. ibra1 .or. ibra0 .eq. iket1 .or.                    &
-     &    ibra0 .eq. iwave1 .or. (.not.zdone .and.                       &
-     &              (ibra0 .eq. ivc0 .or. ibra0 .eq. ivc1 .or.           &
-     &               ibra0 .eq. ione .or. ibra0 .eq. itwo))) then
+      if (ibra0 == iket0 .or. ibra0 == iwave0 .or.                   &
+     &    ibra0 == ibra1 .or. ibra0 == iket1 .or.                    &
+     &    ibra0 == iwave1 .or. (.not.zdone .and.                       &
+     &              (ibra0 == ivc0 .or. ibra0 == ivc1 .or.           &
+     &               ibra0 == ione .or. ibra0 == itwo))) then
         write(6,*)' **** stream ibra0 clashes with other streams ****'
         stop
-      elseif (iket0 .eq. iwave0 .or. iket0 .eq. ibra1 .or.               &
-     &        iket0 .eq. iket1 .or.  iket0 .eq. iwave1 .or.              &
+      elseif (iket0 == iwave0 .or. iket0 == ibra1 .or.               &
+     &        iket0 == iket1 .or.  iket0 == iwave1 .or.              &
      &              (.not.zdone .and.                                    &
-     &              (iket0 .eq. ivc0 .or. iket0 .eq. ivc1 .or.           &
-     &               iket0 .eq. ione .or. iket0 .eq. itwo))) then
+     &              (iket0 == ivc0 .or. iket0 == ivc1 .or.           &
+     &               iket0 == ione .or. iket0 == itwo))) then
         write(6,*)' **** stream iket0 clashes with other streams ****'
         stop
-      elseif (iwave0 .eq. ibra1 .or. iwave0 .eq. iket1 .or.              &
-     &        iwave0 .eq. iwave1 .or. (.not.zdone .and.                  &
-     &              (iwave0 .eq. ivc0 .or. iwave0 .eq. ivc1 .or.         &
-     &               iwave0 .eq. ione .or. iwave0 .eq. itwo))) then
+      elseif (iwave0 == ibra1 .or. iwave0 == iket1 .or.              &
+     &        iwave0 == iwave1 .or. (.not.zdone .and.                  &
+     &              (iwave0 == ivc0 .or. iwave0 == ivc1 .or.         &
+     &               iwave0 == ione .or. iwave0 == itwo))) then
         write(6,*)' **** stream iwave0 clashes with other streams ****'
         stop
-      elseif (ibra1 .eq. iket1 .or. ibra1 .eq. iwave1 .or.               &
+      elseif (ibra1 == iket1 .or. ibra1 == iwave1 .or.               &
      &              (.not.zdone .and.                                    &
-     &              (ibra1 .eq. ivc0 .or. ibra1 .eq. ivc1 .or.           &
-     &               ibra1 .eq. ione .or. ibra1 .eq. itwo))) then
+     &              (ibra1 == ivc0 .or. ibra1 == ivc1 .or.           &
+     &               ibra1 == ione .or. ibra1 == itwo))) then
         write(6,*)' **** stream ibra1 clashes with other streams ****'
         stop
-      elseif (iket1 .eq. iwave1 .or. (.not.zdone .and.                   &
-     &              (iket1 .eq. ivc0 .or. iket1 .eq. ivc1 .or.           &
-     &               iket1 .eq. ione .or. iket1 .eq. itwo))) then
+      elseif (iket1 == iwave1 .or. (.not.zdone .and.                   &
+     &              (iket1 == ivc0 .or. iket1 == ivc1 .or.           &
+     &               iket1 == ione .or. iket1 == itwo))) then
         write(6,*)' **** stream iket1 clashes with other streams ****'
         stop
       elseif (.not.zdone .and.                                           &
-     &              (iwave1 .eq. ivc0 .or. iwave1 .eq. ivc1 .or.         &
-     &               iwave1 .eq. ione .or. iwave1 .eq. itwo)) then
+     &              (iwave1 == ivc0 .or. iwave1 == ivc1 .or.         &
+     &               iwave1 == ione .or. iwave1 == itwo)) then
         write(6,*)' **** stream iwave1 clashes with other streams ****'
         stop
       elseif (.not.zdone .and.                                           &
-     &              (ivc0 .eq. ivc1 .or.                                 &
-     &               ivc0 .eq. ione .or. ivc0 .eq. itwo)) then
+     &              (ivc0 == ivc1 .or.                                 &
+     &               ivc0 == ione .or. ivc0 == itwo)) then
         write(6,*)' **** stream ivc0 clashes with other streams ****'
         stop
       elseif (.not.zdone .and.                                           &
-     &              (ivc1 .eq. ione .or. ivc1 .eq. itwo)) then
+     &              (ivc1 == ione .or. ivc1 == itwo)) then
         write(6,*)' **** stream ivc1 clashes with other streams ****'
         stop
       elseif (.not.zdone .and.                                           &
-     &               ione .eq. itwo) then
+     &               ione == itwo) then
         write(6,*)' **** stream ione clashes with other streams ****'
         stop
       endif
-      if (lbra0 .le. 0) lbra0=1
-      if (lket0 .le. 0) lket0=1
-      if (lbra1 .le. 0) lbra1=1
-      if (lket1 .le. 0) lket1=1
-      if ((lbra0 .gt. nbra0 .and. nbra0 .ne. -1) .or. nbra0 .eq. 0) then
+      if (lbra0 <= 0) lbra0=1
+      if (lket0 <= 0) lket0=1
+      if (lbra1 <= 0) lbra1=1
+      if (lket1 <= 0) lket1=1
+      if ((lbra0 > nbra0 .and. nbra0 /= -1) .or. nbra0 == 0) then
         lbra0=1
         nbra0=0
       endif
-      if ((lket0 .gt. nket0 .and. nket0 .ne. -1) .or. nket0 .eq. 0) then
+      if ((lket0 > nket0 .and. nket0 /= -1) .or. nket0 == 0) then
         lket0=1
         nket0=0
       endif
-      if ((lbra1 .gt. nbra1 .and. nbra1 .ne. -1) .or. nbra1 .eq. 0) then
+      if ((lbra1 > nbra1 .and. nbra1 /= -1) .or. nbra1 == 0) then
         lbra1=1
         nbra1=0
       endif
-      if ((lket1 .gt. nket1 .and. nket1 .ne. -1) .or. nket1 .eq. 0) then
+      if ((lket1 > nket1 .and. nket1 /= -1) .or. nket1 == 0) then
         lket1=1
         nket1=0
       endif
-      if (nbra0 .ne. 0 .and. nket0 .ne. 0) then
+      if (nbra0 /= 0 .and. nket0 /= 0) then
         open (unit=ibra0,form='UNFORMATTED')
         open (unit=iket0,form='UNFORMATTED')
         open (unit=iwave0,form='UNFORMATTED')
         if (.not.zdone) open (unit=ivc0, form='UNFORMATTED')
       endif
-      if (nbra1 .ne. 0 .and. nket0 .ne. 0) then
+      if (nbra1 /= 0 .and. nket0 /= 0) then
         open (unit=ibra1,form='UNFORMATTED')
         open (unit=iket1,form='UNFORMATTED')
         open (unit=iwave1,form='UNFORMATTED')
@@ -207,28 +207,28 @@ end program dipj0dvr
           endif
         endif
       endif
-      if (idia .ne. 2 .or. (idia .eq. 2 .and. iptot .ne. 2)) then
+      if (idia /= 2 .or. (idia == 2 .and. iptot /= 2)) then
         iptot=0
         nbra1=0
         nket1=0
         neval1=0
       endif
-      if (ntheta .gt. maxq .or. nr1 .gt. maxq .or. nr2 .gt. maxq) then
+      if (ntheta > maxq .or. nr1 > maxq .or. nr2 > maxq) then
         write(6,*)' **** parameter MAXQ is too small ****'
         write(6,*)'       resize it to at least ',max(ntheta,nr1,nr2)
         write(6,*)'       and recompile'
         stop
       endif
-      if (nbra0 .eq. -1) nbra0=neval0
-      if (nket0 .eq. -1) nket0=neval0
+      if (nbra0 == -1) nbra0=neval0
+      if (nket0 == -1) nket0=neval0
          write(*,*)  'DEBUG :: READING FROM IWAVE, LINE=225' ! Lorenzo Lodi 30-Oct-2009
          read(iwave0) ! Record skip to conform to new dvr3drjz format. Lorenzo Lodi 30-Oct-2009
       call getrow(r1,nr1,iwave0)
       call getrow(r2,nr2,iwave0)
       call getrow(theta,ntheta,iwave0)
 
-      if (iptot .eq. 2 .and. (nbra1 .eq. -1 .or. nket1 .eq. -1           &
-     &    .or. nbra1 .ge. lbra1 .or. nket1 .ge. lket1)) then
+      if (iptot == 2 .and. (nbra1 == -1 .or. nket1 == -1           &
+     &    .or. nbra1 >= lbra1 .or. nket1 >= lket1)) then
         if (zdone) then
           read(iwave1)idia1,ipar1,ntheta1,nr11,nr21,jrot1,kmin1,neval1,   &
      &                                                             nlim1
@@ -256,44 +256,44 @@ end program dipj0dvr
               nr11=npta1
             endif
           endif
-          if (nbra1 .eq. -1) nbra1=neval1
-          if (nket1 .eq. -1) nket1=neval1
+          if (nbra1 == -1) nbra1=neval1
+          if (nket1 == -1) nket1=neval1
         endif
 
         call getrow(r11,nr11,iwave1)
         call getrow(r21,nr21,iwave1)
         call getrow(theta1,nthet1,iwave1)
         if (((zembed .and. .not.zemb1) .or. (.not.zembed .and. zemb1))     &
-     &  .or. idia .ne. idia1 .or. ntheta .ne. nthet1 .or. nr1 .ne. nr11)   &
+     &  .or. idia /= idia1 .or. ntheta /= nthet1 .or. nr1 /= nr11)   &
      &  then
           write(6,*)' **** The two runs are incompatible ****'
           stop
-        elseif (zsame .and. nr2 .ne. nr21) then
+        elseif (zsame .and. nr2 /= nr21) then
           write(6,*)' **** The two runs are incompatible ****'
           stop
-        elseif (abs(xmass(1)-xmass1(1))/xmass(1) .gt. tol .or.            &
-     &          abs(xmass(2)-xmass1(2))/xmass(2) .gt. tol .or.            &
-     &          abs(xmass(3)-xmass1(3))/xmass(3) .gt. tol) then
+        elseif (abs(xmass(1)-xmass1(1))/xmass(1) > tol .or.            &
+     &          abs(xmass(2)-xmass1(2))/xmass(2) > tol .or.            &
+     &          abs(xmass(3)-xmass1(3))/xmass(3) > tol) then
           write(6,*)' **** The two runs use different masses ****'
           stop
-        elseif (abs(g1-g11) .gt. tol .or. abs(g2-g21) .gt. tol) then
+        elseif (abs(g1-g11) > tol .or. abs(g2-g21) > tol) then
           write(6,*)' **** The two runs use different g''s ****'
           stop
         elseif (zsame) then
           do 10 ipt=1,nr1
-            if (abs(r1(ipt)-r11(ipt))/r1(ipt) .gt. tol) then
+            if (abs(r1(ipt)-r11(ipt))/r1(ipt) > tol) then
               write(6,*)' **** The two runs use different quadrature points ****'
               stop
             endif
 10        continue
           do 20 ipt=1,nr2
-            if (abs(r2(ipt)-r21(ipt))/r2(ipt) .gt. tol) then
+            if (abs(r2(ipt)-r21(ipt))/r2(ipt) > tol) then
               write(6,*)' **** The two runs use different quadrature points ****'
               stop
             endif
 20        continue
           do 30 ipt=1,ntheta
-            if (abs(theta(ipt)-theta1(ipt))/theta(ipt) .gt. tol) then
+            if (abs(theta(ipt)-theta1(ipt))/theta(ipt) > tol) then
               write(6,*)' **** The two runs use different quadrature points ****'
               stop
             endif
@@ -339,10 +339,10 @@ end program dipj0dvr
 
       write(6,100)('*',i=1,78),('*',i=1,78),title
 
-      if (g1 .eq. 0d0) then
+      if (g1 == 0d0) then
 ! bondlength-bondangle coordinates
         write(6,102)'bondlength-bondangle'
-      elseif (g2 .eq. 0d0) then
+      elseif (g2 == 0d0) then
 ! scattering coordinates
         write(6,102)'scattering'
       else
@@ -360,22 +360,22 @@ end program dipj0dvr
         write(6,105)i,xmass(i),ex(i),ez(i)
 10    continue
 
-      if (iptot .ne. 2) then
+      if (iptot /= 2) then
         write(6,106) lket0,nket0,lbra0,nbra0
       else
         write(6,107)
-        if (nket0 .ne. 0 .and. nket1 .ne. 0) then
+        if (nket0 /= 0 .and. nket1 /= 0) then
           write(6,108)lket0,nket0,lket1,nket1
-        elseif (nket0 .eq. 0) then
+        elseif (nket0 == 0) then
           write(6,109)'odd',lket1,nket1
-        elseif (nket1 .eq. 0) then
+        elseif (nket1 == 0) then
           write(6,109)'even',lket0,nket0
         endif
-        if (nbra0 .ne. 0 .and. nbra1 .ne. 0) then
+        if (nbra0 /= 0 .and. nbra1 /= 0) then
           write(6,110)lbra0,nbra0,lbra1,nbra1
-        elseif (nbra0 .eq. 0) then
+        elseif (nbra0 == 0) then
           write(6,111)'odd',lbra1,nbra1
-        elseif (nbra1 .eq. 0) then
+        elseif (nbra1 == 0) then
           write(6,111)'even',lbra0,nbra0
         endif
         if (.not.zsame) write(6,112)nqe,idint(alphae),betae,nqo,idint(alphao),betao
@@ -430,7 +430,7 @@ end program dipj0dvr
 10    continue
       xsin=dsqrt(x1-xcos*xcos)
 
-      if (g1 .eq. 0d0) then
+      if (g1 == 0d0) then
 ! bondlength-bondangle coordinates
         if (zembed) then
           z(1)=r2
@@ -441,7 +441,7 @@ end program dipj0dvr
           z(1)=r2*xcos
           x(1)=r2*xsin
         endif
-      elseif (g2 .eq. 0d0) then
+      elseif (g2 == 0d0) then
 ! scattering coordinates
         if (zembed) then
           z(1)=r2
@@ -520,7 +520,7 @@ end program dipj0dvr
 ! dipz
       i4=i3+ntheta*nr1*nr2
       if (.not.zsame .and.                                                &
-     & (min(nbra0,nket1) .ne. 0 .or. min(nbra1,nket0) .ne. 0)) then
+     & (min(nbra0,nket1) /= 0 .or. min(nbra1,nket0) /= 0)) then
 ! dipx
         i3=i2+ntheta*nr1*nr2*nr21
 ! dipz
@@ -590,7 +590,7 @@ end program dipj0dvr
 
       write(6,*)' space needed is    ',i16
       write(6,*)' space available is ',navail
-      if (i16 .gt. navail) then
+      if (i16 > navail) then
         write(6,*)' **** memory allocated is not large enough **** '
         write(6,*)'       change parameter NAVAIL to at least ',i16
         write(6,*)
@@ -625,7 +625,7 @@ end program dipj0dvr
       call timer(' ')
 
 ! Read in wavefunctions
-      if (max(nbra0,nket0) .ne. 0) then
+      if (max(nbra0,nket0) /= 0) then
 
         if (zdone) then
           call rdphi(phi,evals(1),0,nr2,neval0)
@@ -633,7 +633,7 @@ end program dipj0dvr
           call oldphi(phi,j,evals(1),0,neval0)
         endif
 
-        if (iptot .eq. 2) then
+        if (iptot == 2) then
           call timer(                                                       &
      &    'Reading in wavefunctions for even symmetry block took')
         else
@@ -641,7 +641,7 @@ end program dipj0dvr
         endif
       endif
 
-      if (iptot .eq. 2 .and. max(nbra1,nket1) .ne. 0) then
+      if (iptot == 2 .and. max(nbra1,nket1) /= 0) then
 
         if (zdone) then
           call rdphi(phi,evals(neval0+1),1,nr21,neval1)
@@ -662,8 +662,8 @@ end program dipj0dvr
 ! transformation matrices, and do integral over dipole & basis functions
 !
 ! Tx is passed as the starting point of arrays needed to produce dipx
-      if (.not.zsame .and. iptot .eq. 2 .and..not.                            &
-     &   (max(nbra0,nket0) .eq. 0 .or. max(nbra1,nket1) .eq. 0)) then
+      if (.not.zsame .and. iptot == 2 .and..not.                            &
+     &   (max(nbra0,nket0) == 0 .or. max(nbra1,nket1) == 0)) then
 
         call diffmu(dipx,Tx,r1,theta,max(nqe,nqo,nr2,nr21))
 
@@ -672,7 +672,7 @@ end program dipj0dvr
 ! Calculate transition intensities
       call getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,0,0,nr2)
 
-      if (iptot .eq. 2) then
+      if (iptot == 2) then
         call timer(                                                            &
      &'Calculating transition intensities for even-even transitions took       &
      &')
@@ -681,7 +681,7 @@ end program dipj0dvr
       endif
 
 ! If symmetry used other transition intensities must also be calculated
-      if (iptot .eq. 2 .and. zsame) then
+      if (iptot == 2 .and. zsame) then
 
         call getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,0,1,nr2)
 
@@ -693,7 +693,7 @@ end program dipj0dvr
 
         call timer(                                                              &
      &'Calculating transition intensities for odd-odd transitions took')
-      elseif (iptot .eq. 2 .and. max(nbra1,nket1) .ne. 0) then
+      elseif (iptot == 2 .and. max(nbra1,nket1) /= 0) then
 
 ! if even and odd blocks use different DVR points, calculating the
 ! transition intensities is slightly more complicated
@@ -734,7 +734,7 @@ end program dipj0dvr
      &             ntheta,nr1,nr2,neval0,neval1
       data autocm/2.19474624D+05/
 
-      if (itime .eq. 0) then
+      if (itime == 0) then
         iwave=iwave0
         neval=neval0
         nbra=nbra0
@@ -757,7 +757,7 @@ end program dipj0dvr
         read(iwave0) ! Record skip to conform to new dvr3drjz format. Lorenzo Lodi 30-Oct-2009
         read(iwave0) ! Record skip to conform to new dvr3drjz format. Lorenzo Lodi 30-Oct-2009
       read(iwave) meval
-      if (meval .lt. neval) neval=meval
+      if (meval < neval) neval=meval
       call getrow(evals,neval,iwave)
 
       do 300 i=1,min(jbra,jket)-1
@@ -796,7 +796,7 @@ end program dipj0dvr
      &             ntheta,nr1,nr2,neval0,neval1
       common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
 
-      if (itime .eq. 0) then
+      if (itime == 0) then
         ibra=ibra0
         iket=iket0
         iout=iwave0
@@ -883,17 +883,17 @@ end program dipj0dvr
         NDIM2D(IGAMMA)=NHAM2
         ntot=ntot+nham2
 20    CONTINUE
-      if(n3d.gt.ntot)n3d=ntot
+      if(n3d>ntot)n3d=ntot
 
 ! Write the 1D and 2D  Hamiltonian coefficients to different streams
 ! in order to facilitate the calculations
       rewind ivec1
       rewind ivec2
       DO 40 IGAMMA=1,NPTC
-        IF (NDIM2D(IGAMMA) .EQ. 0) GOTO 40
+        IF (NDIM2D(IGAMMA) == 0) GOTO 40
         DO 50 IALPHA=1,NPTA
           CALL GETROW(C1D(1,ialpha),NDIM2D(IGAMMA),IOUT)
-          if (j(igamma).ne.0)                                   &
+          if (j(igamma)/=0)                                   &
      &      CALL OUTROW(C1D(1,ialpha),NDIM2D(IGAMMA),IVEC1)
 50      CONTINUE
 40    CONTINUE
@@ -906,7 +906,7 @@ end program dipj0dvr
 41    CONTINUE
       read(iout)(J(i),i=1,NPTC)
       read(iout) meval
-      if (meval .lt. neval) neval=meval
+      if (meval < neval) neval=meval
       CALL GETROW(EVALS,NEVAL,IOUT)
 
       do 120 i=1,neval
@@ -922,10 +922,10 @@ end program dipj0dvr
       DO 150 IGAMMA=1,NPTC
         DO 160 JJ=1,J(IGAMMA)
           JDUM=JDUM+1
-          IF (NDIM2D(IGAMMA) .EQ. 0) GOTO 170
+          IF (NDIM2D(IGAMMA) == 0) GOTO 170
           CALL GETROW(C2D,NDIM2D(IGAMMA),IVEC2)
 170       DO 190 IALPHA=1,NPTA
-            IF (NDIM2D(IGAMMA) .EQ. 0 .OR. JJ .NE. 1) GOTO 200
+            IF (NDIM2D(IGAMMA) == 0 .OR. JJ /= 1) GOTO 200
             CALL GETROW(C1D(1,ialpha),NDIM2D(IGAMMA),IVEC1)
 200         KDUM=0
             DO 210 IBETA=1,NPTB
@@ -1047,14 +1047,14 @@ end program dipj0dvr
      &             ntheta,nr1,nr2,neval0,neval1
       common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
 
-      if (ibtime .eq. iktime .and. ibtime .eq. 0) then
+      if (ibtime == iktime .and. ibtime == 0) then
         ibra=ibra0
         iket=iket0
         nbra=nbra0
         nket=nket0
         jbra=lbra0
         jket=lket0
-      elseif (ibtime .eq. iktime) then
+      elseif (ibtime == iktime) then
         ibra=ibra1
         iket=iket1
         nbra=nbra1
@@ -1072,34 +1072,34 @@ end program dipj0dvr
       rewind iket
 
       mket=min(jbra,jket)
-      if (ibtime .ne. iktime) mket=jket
+      if (ibtime /= iktime) mket=jket
       mbra=min(jbra,jket)
-      if (ibtime .ne. iktime) mbra=jbra
+      if (ibtime /= iktime) mbra=jbra
 
       do 10 lket=mket,nket
         call getrow(phiket,ntheta*nr1*mr2,iket)
-        if (lket .lt. jket) goto 10
-        if (ibtime .ne. iktime .and. lket .gt. min(nbra1,nket1) .and.        &
-     &                               lket .lt. max(lbra1,lket1)) goto 10
+        if (lket < jket) goto 10
+        if (ibtime /= iktime .and. lket > min(nbra1,nket1) .and.        &
+     &                               lket < max(lbra1,lket1)) goto 10
         rewind ibra
         do 20 lbra=mbra,nbra
           call getrow(phibra,ntheta*nr1*mr2,ibra)
-          if (lbra .lt. jbra) goto 20
-          if (ibtime .eq. iktime .and. lket .lt. lbra .and.                   &
-     &    nbra .ge. lket .and. lket .ge. jbra .and.                           &
-     &    nket .ge. lbra .and. lbra .ge. jket) goto 20
-          if (ibtime .ne. iktime .and..not.                                  &
-     &      ((nbra1 .ge. lket .and. lket .ge. lbra1 .and.                    &
-     &        nket0 .ge. lbra .and. lbra .ge. lket0) .or.                    &
-     &       (nket1 .ge. lket .and. lket.ge. lket1 .and.                     &
-     &        nbra0 .ge. lbra .and. lbra .ge. lbra0))) goto 20
+          if (lbra < jbra) goto 20
+          if (ibtime == iktime .and. lket < lbra .and.                   &
+     &    nbra >= lket .and. lket >= jbra .and.                           &
+     &    nket >= lbra .and. lbra >= jket) goto 20
+          if (ibtime /= iktime .and..not.                                  &
+     &      ((nbra1 >= lket .and. lket >= lbra1 .and.                    &
+     &        nket0 >= lbra .and. lbra >= lket0) .or.                    &
+     &       (nket1 >= lket .and. lket>= lket1 .and.                     &
+     &        nbra0 >= lbra .and. lbra >= lbra0))) goto 20
           tix=0d0
           tiz=0d0
-          if (idia .eq. 2 .and. ibtime .eq. iktime) then
+          if (idia == 2 .and. ibtime == iktime) then
             do 30 iabc=1,ntheta*nr1*mr2
               tiz=tiz+phibra(iabc)*dipz(iabc)*phiket(iabc)
 30          continue
-          elseif (ibtime .ne. iktime) then
+          elseif (ibtime /= iktime) then
             do 40 iabc=1,ntheta*nr1*mr2
               tix=tix+phibra(iabc)*dipx(iabc)*phiket(iabc)
 40          continue
@@ -1109,29 +1109,29 @@ end program dipj0dvr
               tiz=tiz+phibra(iabc)*dipz(iabc)*phiket(iabc)
 50          continue
           endif
-          if (ibtime .eq. iktime) then
-            if (lket .le. nket .and. lket .ge. jket .and.                  &
-     &          lbra .le. nbra .and. lbra .ge. jbra) then
+          if (ibtime == iktime) then
+            if (lket <= nket .and. lket >= jket .and.                  &
+     &          lbra <= nbra .and. lbra >= jbra) then
               Tx(ibtime*(nbra0-lbra0+1)+lbra-jbra+1,                        &
      &           iktime*(nket0-lket0+1)+lket-jket+1)=tix
               Tz(ibtime*(nbra0-lbra0+1)+lbra-jbra+1,                       &
      &           iktime*(nket0-lket0+1)+lket-jket+1)=tiz
             endif
-            if (lket .le. nbra .and. lket .ge. jbra .and.                  &
-     &          lbra .le. nket .and. lbra .ge. jket) then
+            if (lket <= nbra .and. lket >= jbra .and.                  &
+     &          lbra <= nket .and. lbra >= jket) then
               Tx(ibtime*(nbra0-lbra0+1)+lket-jbra+1,                       &
      &           iktime*(nket0-lket0+1)+lbra-jket+1)=tix
               Tz(ibtime*(nbra0-lbra0+1)+lket-jbra+1,                        &
      &           iktime*(nket0-lket0+1)+lbra-jket+1)=tiz
             endif
           else
-            if (lket .le. nket1 .and. lket .ge. lket1 .and.               &
-     &          lbra .le. nbra0 .and. lbra .ge. lbra0) then
+            if (lket <= nket1 .and. lket >= lket1 .and.               &
+     &          lbra <= nbra0 .and. lbra >= lbra0) then
               Tx(lbra-lbra0+1,nket0+lket-lket0-lket1+2)=tix
               Tz(lbra-lbra0+1,nket0+lket-lket0-lket1+2)=tiz
             endif
-            if (lket .le. nbra1 .and. lket .ge. lbra1 .and.                &
-     &          lbra .le. nket0 .and. lbra .ge. lket0) then
+            if (lket <= nbra1 .and. lket >= lbra1 .and.                &
+     &          lbra <= nket0 .and. lbra >= lket0) then
               Tx(nbra0+lket-lbra0-lbra1+2,lbra-lket0+1)=tix
               Tz(nbra0+lket-lbra0-lbra1+2,lbra-lket0+1)=tiz
             endif
@@ -1215,8 +1215,8 @@ end program dipj0dvr
       call glagpt(q,wt,b,c,alphae+0.5d0,csx,csa,tsx,nr2)
       call basis(transe,q,dnorme,alphae,nr2-1,nr2-1,nr2)
       tsa=1d0/(dnorme(1)*dnorme(1))
-      if (abs((csx-tsx)/tsx) .gt. toler .or.                           &
-     &    abs((csa-tsa)/tsa) .gt. toler) then
+      if (abs((csx-tsx)/tsx) > toler .or.                           &
+     &    abs((csa-tsa)/tsa) > toler) then
         write(6,1000)'even',nr2,csx,csa,tsx,tsa
         stop
       endif
@@ -1231,8 +1231,8 @@ end program dipj0dvr
       call glagpt(q,wt,b,c,alphao+0.5d0,csx,csa,tsx,nr21)
       call basis(transo,q,dnormo,alphao,nr21-1,nr21-1,nr21)
       tsa=1d0/(dnormo(1)*dnormo(1))
-      if (abs((csx-tsx)/tsx) .gt. toler .or.                            &
-     &    abs((csa-tsa)/tsa) .gt. toler) then
+      if (abs((csx-tsx)/tsx) > toler .or.                            &
+     &    abs((csa-tsa)/tsa) > toler) then
         write(6,1000)'odd',nr21,csx,csa,tsx,tsa
         stop
       endif
@@ -1395,7 +1395,7 @@ end program dipj0dvr
 
 20    xt2=xt+step
       call lgrecr(pt2,dpn,pn1,xt2,npts,alpha,b,c)
-      if (dsign(1d0,pt)*dsign(1d0,pt2) .le. 0d0) then
+      if (dsign(1d0,pt)*dsign(1d0,pt2) <= 0d0) then
         pt=pt2
         q(1)=0.5d0*(xt+xt2)
       else
@@ -1411,7 +1411,7 @@ end program dipj0dvr
       xt=q(1)
 25    xt2=xt+step
       call lgrecr(pt2,dpn,pn1,xt2,npts,alpha,b,c)
-      if (dsign(1d0,pt)*dsign(1d0,pt2) .le. 0d0) then
+      if (dsign(1d0,pt)*dsign(1d0,pt2) <= 0d0) then
         pt=pt2
         q(2)=0.5d0*(xt+xt2)
       else
@@ -1423,7 +1423,7 @@ end program dipj0dvr
       wt(2)=cc/dpn/pn1
       csx=csx+q(2)
       csa=csa+wt(2)
-      if (npts .le. 2) return
+      if (npts <= 2) return
 
       do 30 ipt=3,npts
         fi=dfloat(ipt-2)
@@ -1480,7 +1480,7 @@ end program dipj0dvr
       CALL LGRECR(P,DPN,PN1,X,NN,ALF,B,C)
       D = P/DPN
       X = X-D
-      IF (ABS(D/X) .LE. EPS) RETURN
+      IF (ABS(D/X) <= EPS) RETURN
       IF (ITER - ITMAX) 1,2,2
     2 WRITE(6,100) ITER,D,X
   100 FORMAT(5X,'WARNING: NOCONVERGENCE AFTER',I4,' ITERATIONS',       &
@@ -1500,23 +1500,23 @@ end program dipj0dvr
      &             ntheta,nr1,nr2,neval0,neval1
       common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
 
-      if (nqe .gt. 0)                                               &
+      if (nqe > 0)                                               &
      &call glagpt(q,wt,b,c,alphae+0.5d0,csxe,csae,tsxe,nqe)
       do 100 ipt=1,nqe
         reo(ipt)=dsqrt(q(ipt)/betae)
 100   continue
 
-      if (nqo .gt. 0) call glagpt                                    &
+      if (nqo > 0) call glagpt                                    &
      &   (q(1+nqe),wt(1+nqe),b,c,alphao+0.5d0,csxo,csao,tsxo,nqo)
       do 200 ipt=1,nqo
         reo(ipt+nqe)=dsqrt(q(ipt+nqe)/betao)
 200   continue
 
-      if (nqe .gt. 0) then
+      if (nqe > 0) then
         call basis(basise(1,1),q,dnorme,alphae,nr2-1,nr2-1,nqe)
         tsae=1d0/(dnorme(1)*dnorme(1))
-        if (abs((csxe-tsxe)/tsxe) .gt. toler .or.                     &
-     &      abs((csae-tsae)/tsae) .gt. toler) then
+        if (abs((csxe-tsxe)/tsxe) > toler .or.                     &
+     &      abs((csae-tsae)/tsae) > toler) then
           write(6,1000)'even',nqe,csxe,csae,tsxe,tsae
           stop
         endif
@@ -1525,7 +1525,7 @@ end program dipj0dvr
 
       ifaile=0
       ifailo=0
-      if (nqe .gt. 0)                                                 &
+      if (nqe > 0)                                                 &
      &factor=dsqrt(s14aaf(dfloat(nqe)+alphae+1.5d0,ifaile)/           &
      &             s14aaf(dfloat(nqe)+alphao+1.5d0,ifailo))
 
@@ -1541,14 +1541,14 @@ end program dipj0dvr
 130     continue
 110   continue
 
-      if (nqo .gt. 0) then
+      if (nqo > 0) then
         call basis(basise(1,1+nqe),q(1+nqe),dnorme,alphae,nr2-1,      &
      &           nr2-1,nqo)
         call basis(basiso(1,1+nqe),q(1+nqe),dnormo,alphao,nr21-1,     &
      &           nr21-1,nqo)
         tsao=1d0/(dnormo(1)*dnormo(1))
-        if (abs((csxo-tsxo)/tsxo) .gt. toler .or.                    &
-     &      abs((csao-tsao)/tsao) .gt. toler) then
+        if (abs((csxo-tsxo)/tsxo) > toler .or.                    &
+     &      abs((csao-tsao)/tsao) > toler) then
           write(6,1000)'odd',nqo,csxo,csao,tsxo,tsao
           stop
         endif
@@ -1556,7 +1556,7 @@ end program dipj0dvr
 
       ifaile=0
       ifailo=0
-      if (nqo .gt. 0)                                                 &
+      if (nqo > 0)                                                 &
      &factor=dsqrt(s14aaf(dfloat(nqo)+alphao+1.5d0,ifailo)/           &
      &             s14aaf(dfloat(nqo)+alphae+1.5d0,ifaile))
 
@@ -1596,7 +1596,7 @@ end program dipj0dvr
       common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
 
       divide=2d0
-      if (nqe .eq. 0 .or. nqo .eq. 0) divide=1d0
+      if (nqe == 0 .or. nqo == 0) divide=1d0
       do 100 ic0=1,nr2
       do 100 ic1=1,nr21
       do 100 ipt=1,nqe+nqo
@@ -1646,15 +1646,15 @@ end program dipj0dvr
       rewind ibra0
       do 200 ne=min(lbra0,lket0),max(nbra0,nket0)
         call getrow(phibra,ntheta*nr1*nr2,ibra0)
-        if (ne .gt. min(nbra0,nket0) .and. ne .lt. max(lbra0,lket0))        &
+        if (ne > min(nbra0,nket0) .and. ne < max(lbra0,lket0))        &
      &                                                          goto 200
         rewind iket1
         do 210 no=min(lbra1,lket1),max(nket1,nbra1)
           call getrow(phiket,ntheta*nr1*nr21,iket1)
-          if (.not.((ne .le. nbra0 .and. ne .ge. lbra0 .and.                 &
-     &               no .le. nket1 .and. no .ge. lket1) .or.                 &
-     &              (ne .le. nket0 .and. ne .ge. lket0 .and.                 &
-     &               no .le. nbra1 .and. no .ge. lbra1))) goto 210
+          if (.not.((ne <= nbra0 .and. ne >= lbra0 .and.                 &
+     &               no <= nket1 .and. no >= lket1) .or.                 &
+     &              (ne <= nket0 .and. ne >= lket0 .and.                 &
+     &               no <= nbra1 .and. no >= lbra1))) goto 210
           tix=0d0
           do 220 ic0=1,nr2
           do 220 ic1=1,nr21
@@ -1663,13 +1663,13 @@ end program dipj0dvr
      &                phiket(iab,ic1)
 230         continue
 220       continue
-          if (ne .le. nbra0 .and. ne .ge. lbra0 .and.                        &
-     &        no .le. nket1 .and. no .ge. lket1) then
+          if (ne <= nbra0 .and. ne >= lbra0 .and.                        &
+     &        no <= nket1 .and. no >= lket1) then
             Tx(ne-lbra0+1,nket0+no-lket0-lket1+2)=tix
             Tz(ne-lbra0+1,nket0+no-lket0-lket1+2)=0d0
           endif
-          if (ne .le. nket0 .and. ne .ge. lket0 .and.                       &
-     &        no .le. nbra1 .and. no .ge. lbra1) then
+          if (ne <= nket0 .and. ne >= lket0 .and.                       &
+     &        no <= nbra1 .and. no >= lbra1) then
             Tx(nbra0+no-lbra0-lbra1+2,ne-lket0+1)=tix
             Tz(nbra0+no-lbra0-lbra1+2,ne-lket0+1)=0d0
           endif
@@ -1710,22 +1710,22 @@ end program dipj0dvr
 
       DO 1 IE1=1,Nbra0+nbra1-lbra0-lbra1+2
         c1=' '
-        if (iptot .eq. 2 .and. ie1 .le. nbra0-lbra0+1) c1='e'
-        if (iptot .eq. 2 .and. ie1 .gt. nbra0-lbra0+1) c1='o'
+        if (iptot == 2 .and. ie1 <= nbra0-lbra0+1) c1='e'
+        if (iptot == 2 .and. ie1 > nbra0-lbra0+1) c1='o'
         i1=ie1+lbra0-1
         e1=evals(i1)
-        if (ie1 .gt. nbra0-lbra0+1) then
+        if (ie1 > nbra0-lbra0+1) then
           i1=ie1-nbra0+lbra0-1+lbra1-1
           e1=evals(i1+neval0)
         endif
         XE1= (E1 - GZz)
         DO 2 IE2=1,Nket0+nket1-lket0-lket1+2
           c2=' '
-          if (iptot .eq. 2 .and. ie2 .le. nket0-lket0+1) c2='e'
-          if (iptot .eq. 2 .and. ie2 .gt. nket0-lket0+1) c2='o'
+          if (iptot == 2 .and. ie2 <= nket0-lket0+1) c2='e'
+          if (iptot == 2 .and. ie2 > nket0-lket0+1) c2='o'
           i2=ie2+lket0-1
           e2=evals(i2)
-          if (ie2 .gt. nket0-lket0+1) then
+          if (ie2 > nket0-lket0+1) then
             i2=ie2-nket0+lket0-1+lket1-1
             e2=evals(i2+neval0)
           endif
@@ -1784,7 +1784,7 @@ end program dipj0dvr
 !     user=dble(time(1))
 !     system=dble(time(2))
 
-      if (ototal .ne. 0d0) write(6,1000)text,user-ouser,system-osys,      &
+      if (ototal /= 0d0) write(6,1000)text,user-ouser,system-osys,      &
      &                                       total-ototal
 
       ouser=user
@@ -1810,7 +1810,7 @@ end program dipj0dvr
       DO 1 I=1,NPA
       F=1.
       DO 2 J=1,3
-        IF (INDEX(J,I).NE.0) THEN
+        IF (INDEX(J,I)/=0) THEN
           F=F*Q(J)**INDEX(J,I)
         END IF
 2     CONTINUE
