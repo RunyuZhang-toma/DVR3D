@@ -79,7 +79,8 @@ tail -n20 result.HCN.*
 4. if statement in one line mode should have a blank line after it.
 5. The maximum line length permitted is 80 for old editor and terminals support.
 6. Use >, >=, ==, <, <=, /= instead of .gt., .ge., .eq., .lt., .le., .ne. in logical comparisons. The new syntax, being closer to standard mathematical notation, should be clearer.
-7. !(incomplete)Separate the information to be output from the formatting information on how to output it on I/O statements.  That is don't put text inside the brackets of the I/O statement.
+7. Still cannot change the .or., .and., .not. to the normally format. Because the fortrna 90 still not support that.
+8. !(incomplete)Separate the information to be output from the formatting information on how to output it on I/O statements.  That is don't put text inside the brackets of the I/O statement.
 
 ### Constant module
 
