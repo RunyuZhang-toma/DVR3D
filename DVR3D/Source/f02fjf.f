@@ -135,21 +135,21 @@ C
 C     TEST THE INPUT PARAMETERS.
 C
       ITEMP = MAX(P**2,2*N)
-      IF (N.GE.1 .AND. EM.GE.1 .AND. EM.LT.P .AND. P.LE.N .AND.MN.GE.N .
-     *AND. LWORK.GE.(ITEMP+3*P) .AND. LRWORK.GE.1 .AND.LIWORK.GE.1)
+      IF (N>=1 .AND. EM>=1 .AND. EM<P .AND. P<=N .AND.MN>=N .
+     *AND. LWORK>=(ITEMP+3*P) .AND. LRWORK>=1 .AND.LIWORK>=1)
      * GO TO 20
       IFAIL = P01AAF(IFAIL,1,SRNAME)
       RETURN
    20 CONTINUE
-      IF (KM.LT.0) KM = 100
+      IF (KM<0) KM = 100
 C
       CALL X02ZAZ
 C
       EPSMCH = WMACH(3)
       TOL = EPS
-      IF (TOL.LT.EPSMCH .OR. TOL.GT.1.0D0) TOL = EPSMCH
+      IF (TOL<EPSMCH .OR. TOL>1.0D0) TOL = EPSMCH
       IK = P - NOVECS
-      IF (NOVECS.LT.0 .OR. NOVECS.GT.P) IK = P
+      IF (NOVECS<0 .OR. NOVECS>P) IK = P
 C
 C     ASSIGN THE PARAMETERS THAT SPLIT UP THE WORKSPACE.
 C
@@ -185,7 +185,7 @@ C
       DO 60 L=RQ1,RQP
          WORK(L) = 0.0D0
    60 CONTINUE
-      IF (NOVECS.EQ.P) GO TO 120
+      IF (NOVECS==P) GO TO 120
       DO 100 L=1,IK
          DO 80 J=1,N
             X(J,L) = 2.0D0*G05CAF(0.0D0) - 1.0D0
@@ -209,7 +209,7 @@ C     FIRST FORM Y = C*X( R ). Y IS OVERWRITTEN ON X.
 C
   140 DO 160 K=IG,P
          CALL OP(IFLAG, N, X(1,K), WORK, RWORK, LRWORK, IWORK,LIWORK)
-         IF (IFLAG.LT.0) GO TO 1460
+         IF (IFLAG<0) GO TO 1460
 C
          CALL F01YAX(N, WORK, 1, X(1,K), 1)
 C
@@ -226,20 +226,20 @@ C     WORK( P**2 ).
 C
       GO TO 1100
 C
-  180 IF (KS.NE.0) GO TO 240
+  180 IF (KS/=0) GO TO 240
 C
 C     MEASURES AGAINST UNHAPPY CHOICE OF INITIAL VECTORS
 C
       ITEMP = -P
       DO 220 K=1,P
          ITEMP = ITEMP + P + 1
-         IF (WORK(ITEMP).NE.0.0D0) GO TO 220
+         IF (WORK(ITEMP)/=0.0D0) GO TO 220
          DO 200 I=1,N
             X(I,K) = 2.0D0*G05CAF(0.0D0) - 1.0D0
   200    CONTINUE
          KS = 1
   220 CONTINUE
-      IF (KS.NE.1) GO TO 240
+      IF (KS/=1) GO TO 240
       IK = 1
       LF = 1
       L1 = P
@@ -269,7 +269,7 @@ C
       CALL F02SZF(P-G, D(IG), WORK(K), D(IG), .FALSE., WORK(RQ1),.TRUE.,
      * X(1,IG), MN, N, .FALSE., TEMP, 1, 1, WORK(K),WORK(RQ1), WORK(RQ1)
      *, IER)
-      IF (IER.EQ.0) GO TO 260
+      IF (IER==0) GO TO 260
       IFAIL = P01AAF(IFAIL,5,SRNAME)
       RETURN
   260 CONTINUE
@@ -279,7 +279,7 @@ C
 C
 C     RANDOMIZATION ON THE FIRST THREE STEPS.
 C
-      IF (Z1.GT.3) GO TO 300
+      IF (Z1>3) GO TO 300
       DO 280 J=1,N
          X(J,P) = 2.0D0*G05CAF(0.0D0) - 1.0D0
   280 CONTINUE
@@ -295,46 +295,46 @@ C
       DO 360 K=IG,JP
          ITEMP = ITEMP + 1
          S = (D(K)-E)*(D(K)+E)
-         IF (S.GT.0.0D0) GO TO 320
+         IF (S>0.0D0) GO TO 320
          WORK(ITEMP) = 0.0D0
          GO TO 360
-  320    IF (E.NE.0.0D0) GO TO 340
+  320    IF (E/=0.0D0) GO TO 340
          WORK(ITEMP) = 1.0D+3 + LOG(D(K))
          GO TO 360
   340    WORK(ITEMP) = LOG((D(K)+SQRT(S))/E)
   360 CONTINUE
 C
 C     ACCEPTANCE TEST FOR EIGENVALUES INCLUDING ADJUSTMENT OF EM AND
-C     H SUCH THAT D( EM ).GT. E, D( H ).GT. E AND D( EM )DOES NOT
+C     H SUCH THAT D( EM )> E, D( H )> E AND D( EM )DOES NOT
 C     OSCILLATE STRONGLY
 C
       I = Z1 - 1
       K = G
   380 ITEMP = RQ1 + K
       K = K + 1
-      IF (EM.LT.K) GO TO 420
-      IF (D(K).LE.E) GO TO 400
-      IF (I.LE.0) GO TO 380
-      IF (D(K).GT.0.999D0*WORK(ITEMP)) GO TO 380
+      IF (EM<K) GO TO 420
+      IF (D(K)<=E) GO TO 400
+      IF (I<=0) GO TO 380
+      IF (D(K)>0.999D0*WORK(ITEMP)) GO TO 380
   400 CONTINUE
       EM = K - 1
       IERR = 2
 C
 C     STATEMENT 420 IS EX4.
 C
-  420 IF (EM.EQ.0) GO TO 1280
+  420 IF (EM==0) GO TO 1280
       K = H
       S = 1.0D0 + 0.1D0*TOL
   440 ITEMP = RQ1 + K
       K = K + 1
-      IF (D(K).EQ.0.0D0) GO TO 460
-      IF (D(K).LE.S*WORK(ITEMP)) GO TO 440
+      IF (D(K)==0.0D0) GO TO 460
+      IF (D(K)<=S*WORK(ITEMP)) GO TO 440
   460 CONTINUE
       H = K - 1
       K = EM
   480 K = K + 1
-      IF (K.GT.H) GO TO 500
-      IF (D(K).GT.E) GO TO 480
+      IF (K>H) GO TO 500
+      IF (D(K)>E) GO TO 480
       H = K - 1
 C
 C     ACCEPTANCE TEST FOR EIGENVECTORS
@@ -342,7 +342,7 @@ C
   500 L = G
       E2 = 0.0D0
       DO 620 K=IG,JP
-         IF (K.NE.(L+1)) GO TO 560
+         IF (K/=(L+1)) GO TO 560
 C
 C     CHECK FOR NESTED EIGENVALUES
 C
@@ -352,55 +352,55 @@ C
          T = 1.0D0/DBLE(KS*M)
   520    ITEMP = CX1 + L
          L = L + 1
-         IF (L.GT.JP) GO TO 540
-         IF ((WORK(ITEMP)*(WORK(ITEMP)+S)+T).GT.WORK(ITEMP-1)**2)
+         IF (L>JP) GO TO 540
+         IF ((WORK(ITEMP)*(WORK(ITEMP)+S)+T)>WORK(ITEMP-1)**2)
      *   GO TO 520
   540    CONTINUE
          L = L - 1
 C
 C     THE NEXT STATEMENT IS EX5.
 C
-         IF (L.LE.H) GO TO 560
+         IF (L<=H) GO TO 560
          L = L1 - 1
          GO TO 640
   560    CALL OP(IFLAG, N, X(1,K), WORK, RWORK, LRWORK, IWORK,LIWORK)
-         IF (IFLAG.LT.0) GO TO 1460
+         IF (IFLAG<0) GO TO 1460
          S = 0.0D0
          DO 580 J=1,L
-            IF (ABS(D(J)-D(K)).GE.0.01D0*D(K)) GO TO 580
+            IF (ABS(D(J)-D(K))>=0.01D0*D(K)) GO TO 580
             T = IP(IFLAG,N,WORK,X(1,J),RWORK,LRWORK,IWORK,LIWORK)
-            IF (IFLAG.LT.0) GO TO 1460
+            IF (IFLAG<0) GO TO 1460
 C
             CALL F01YAY(N, -T, X(1,J), 1, WORK, 1)
 C
             S = S + T*T
   580    CONTINUE
          T = 1.0D0
-         IF (S.NE.0.0D0) T = IP(IFLAG,N,WORK,WORK,RWORK,LRWORK,IWORK,
+         IF (S/=0.0D0) T = IP(IFLAG,N,WORK,WORK,RWORK,LRWORK,IWORK,
      *   LIWORK)
-         IF (IFLAG.LT.0) GO TO 1460
+         IF (IFLAG<0) GO TO 1460
          E2 = MAX(E2,SQRT(T/(S+T)))
-         IF (K.NE.L) GO TO 620
+         IF (K/=L) GO TO 620
 C
 C     TEST FOR ACCEPTANCE OF GROUP OF EIGENVECTORS
 C
          ITEMP = F1 + EM - 1
-         IF (L.GE.EM .AND. D(EM)*WORK(ITEMP).LT.TOL*(D(EM)-E)) G =EM
+         IF (L>=EM .AND. D(EM)*WORK(ITEMP)<TOL*(D(EM)-E)) G =EM
          ITEMP = F1 + L - 1
-         IF (E2.GE.WORK(ITEMP)) GO TO 600
+         IF (E2>=WORK(ITEMP)) GO TO 600
          ITEMP = F1 + L1 - 1
          TEMP(1) = E2
 C
          CALL F01YAX(L-L1+1, TEMP, 0, WORK(ITEMP), 1)
 C
-  600    IF (L.LE.EM .AND. D(L)*WORK(ITEMP).LT.TOL*(D(L)-E)) G = L
+  600    IF (L<=EM .AND. D(L)*WORK(ITEMP)<TOL*(D(L)-E)) G = L
   620 CONTINUE
 C
 C     ADJUST M.
 C     STATEMENT 640 IS EX6.
 C
   640 IG = G + 1
-      IF (E.GT.0.04D0*D(1)) GO TO 660
+      IF (E>0.04D0*D(1)) GO TO 660
       M = 1
       K = 1
       GO TO 680
@@ -412,11 +412,11 @@ C
 C     REDUCE EM IF CONVERGENCE WOULD BE TOO SLOW.
 C
   680 IK = F1 + EM - 1
-      IF (WORK(IK).EQ.0.0D0) GO TO 740
-      IF (10*KS.GE.9*KM) GO TO 740
+      IF (WORK(IK)==0.0D0) GO TO 740
+      IF (10*KS>=9*KM) GO TO 740
       ITEMP = CX1 + EM - 1
       S = DBLE(K)*WORK(ITEMP)
-      IF (S.GE.0.05D0) GO TO 700
+      IF (S>=0.05D0) GO TO 700
       T = 0.5D0*S*WORK(ITEMP)
       GO TO 720
   700 T = WORK(ITEMP) + LOG(0.5D0+0.5D0*EXP(-2.0D0*S))/DBLE(K)
@@ -424,7 +424,7 @@ C
 C
 C     EM IS REDUCED HERE
 C
-      IF (S*DBLE(KS).LE.T*DBLE((KM-KS)*KM)) GO TO 740
+      IF (S*DBLE(KS)<=T*DBLE((KM-KS)*KM)) GO TO 740
       IERR = 3
       EM = EM - 1
 C
@@ -434,16 +434,16 @@ C
 C
       CALL F01YAX(JP-IG+1, D(IG), 1, WORK(ITEMP), 1)
 C
-      IF (KS.GE.KM) IERR = 4
-      IF (G.GE.EM .OR. KS.GE.KM) GO TO 1280
+      IF (KS>=KM) IERR = 4
+      IF (G>=EM .OR. KS>=KM) GO TO 1280
       ISTATE = 0
-      IF (H.EQ.LH) GO TO 760
+      IF (H==LH) GO TO 760
       LH = H
       ISTATE = 1
   760 CONTINUE
-      IF (G.EQ.LG) GO TO 800
+      IF (G==LG) GO TO 800
       LG = G
-      IF (ISTATE.EQ.1) GO TO 780
+      IF (ISTATE==1) GO TO 780
       ISTATE = 2
       GO TO 800
   780 CONTINUE
@@ -453,35 +453,35 @@ C
 C
 C     STATEMENT 820 IS EX1.
 C
-  820 IF ((KS+M).LE.KM) GO TO 840
+  820 IF ((KS+M)<=KM) GO TO 840
       Z2 = -1
-      IF (M.GT.1) M = 2*((KM-KS+1)/2)
+      IF (M>1) M = 2*((KM-KS+1)/2)
   840 M1 = M
 C
 C     SHORTCUT LAST INTERMEDIATE BLOCK IF ALL F( I )ARE SUFFICIENTLY
 C     SMALL.
 C
-      IF (L.LT.EM) GO TO 880
+      IF (L<EM) GO TO 880
       ITEMP = F1 + EM - 1
       S = D(EM)*WORK(ITEMP)/(TOL*(D(EM)-E))
       T = (S+1.0D0)*(S-1.0D0)
-      IF (T.LE.0.0D0) GO TO 140
+      IF (T<=0.0D0) GO TO 140
       ITEMP = CX1 + EM - 1
       I = CX1 + H
       S = LOG(S+SQRT(T))/(WORK(ITEMP)-WORK(I))
       M1 = 2*INT(0.5D0*S+1.01D0)
-      IF (M1.LE.M) GO TO 860
+      IF (M1<=M) GO TO 860
       M1 = M
       GO TO 880
   860 Z2 = -1
 C
 C     CHEBYSHEV ITERATION
 C
-  880 IF (M.LT.1) GO TO 980
-      IF (M.GT.1) GO TO 920
+  880 IF (M<1) GO TO 980
+      IF (M>1) GO TO 920
       DO 900 K=IG,P
          CALL OP(IFLAG, N, X(1,K), WORK, RWORK, LRWORK, IWORK,LIWORK)
-         IF (IFLAG.LT.0) GO TO 1460
+         IF (IFLAG<0) GO TO 1460
 C
          CALL F01YAX(N, WORK, 1, X(1,K), 1)
 C
@@ -490,23 +490,23 @@ C
   920 L1 = M1 - 4
       DO 960 K=IG,P
          CALL OP(IFLAG, N, X(1,K), WORK, RWORK, LRWORK, IWORK,LIWORK)
-         IF (IFLAG.LT.0) GO TO 1460
+         IF (IFLAG<0) GO TO 1460
 C
 C     BEWARE THE NEXT STATEMENT IF PASS BY COPY EVER COMES.
 C
          CALL F01YAL(N, E1, WORK, 1, WORK(N+1), 1)
 C
          CALL OP(IFLAG, N, WORK(N+1), WORK, RWORK, LRWORK, IWORK,LIWORK)
-         IF (IFLAG.LT.0) GO TO 1460
+         IF (IFLAG<0) GO TO 1460
 C
          CALL F01YAY(N, -E2, WORK, 1, X(1,K), 1)
 C
          CALL F01YAJ(N, X(1,K), 1)
 C
-         IF (L1.LT.0) GO TO 960
+         IF (L1<0) GO TO 960
          DO 940 J=4,M1,2
             CALL OP(IFLAG, N, X(1,K), WORK, RWORK, LRWORK, IWORK,LIWORK)
-            IF (IFLAG.LT.0) GO TO 1460
+            IF (IFLAG<0) GO TO 1460
 C
 C     BEWARE THE FOLLOWING STATEMENT IF PASS BY COPY EVER COMES.
 C
@@ -514,7 +514,7 @@ C
 C
             CALL OP(IFLAG, N, WORK(N+1), WORK, RWORK, LRWORK,IWORK,
      *       LIWORK)
-            IF (IFLAG.LT.0) GO TO 1460
+            IF (IFLAG<0) GO TO 1460
 C
             CALL F01YAY(N, E2, WORK, 1, X(1,K), 1)
 C
@@ -528,8 +528,8 @@ C
 C
 C     DISCOUNTING THE ERROR QUANTITIES F
 C
- 1000 IF (G.GE.H) GO TO 1080
-      IF (M.NE.1) GO TO 1040
+ 1000 IF (G>=H) GO TO 1080
+      IF (M/=1) GO TO 1040
       ITEMP = F1 + G
       DO 1020 K=IG,H
          WORK(ITEMP) = WORK(ITEMP)*(D(H+1)/D(K))
@@ -550,7 +550,7 @@ C
 C
 C     POSSIBLE REPETITION OF INTERMEDIATE STEPS
 C
-      IF (Z2.GE.0) GO TO 820
+      IF (Z2>=0) GO TO 820
       Z1 = Z1 + 1
       Z2 = 2*Z1
       M = 2*M
@@ -564,10 +564,10 @@ C
          ORIG = .TRUE.
  1120    T = 0.0D0
          JK = K - 1
-         IF (JK.LE.0) GO TO 1180
+         IF (JK<=0) GO TO 1180
          DO 1160 I=1,JK
             S = IP(IFLAG,N,X(1,I),X(1,K),RWORK,LRWORK,IWORK,LIWORK)
-            IF (IFLAG.LT.0) GO TO 1460
+            IF (IFLAG<0) GO TO 1460
             IF (.NOT.ORIG) GO TO 1140
             ITEMP = (K-1)*P + I
             WORK(ITEMP) = S
@@ -579,17 +579,17 @@ C
 C
  1160    CONTINUE
  1180    S = IP(IFLAG,N,X(1,K),X(1,K),RWORK,LRWORK,IWORK,LIWORK)
-         IF (IFLAG.LT.0) GO TO 1460
+         IF (IFLAG<0) GO TO 1460
          T = S + T
-         IF (S.LE.0.001D0*T) GO TO 1200
-         IF (T.GT.MT) GO TO 1220
+         IF (S<=0.001D0*T) GO TO 1200
+         IF (T>MT) GO TO 1220
  1200    ORIG = .FALSE.
-         IF (S.GT.MT) GO TO 1120
+         IF (S>MT) GO TO 1120
          S = 0.0D0
  1220    S = SQRT(S)
          ITEMP = (K-1)*P + K
          WORK(ITEMP) = S
-         IF (S.EQ.0.0D0) GO TO 1240
+         IF (S==0.0D0) GO TO 1240
          S = 1.0D0/S
 C
  1240    CALL F01YAP(N, S, X(1,K), 1)
@@ -612,12 +612,12 @@ C
  1300 CONTINUE
       DO 1340 K=1,JP
          CALL OP(IFLAG, N, X(1,K), X(1,P), RWORK, LRWORK, IWORK,LIWORK)
-         IF (IFLAG.LT.0) GO TO 1460
+         IF (IFLAG<0) GO TO 1460
          ITEMP = (K-1)*JP + K
          DO 1320 I=K,JP
             WORK(ITEMP) = IP(IFLAG,N,X(1,I),X(1,P),RWORK,LRWORK,IWORK,
      *      LIWORK)
-            IF (IFLAG.LT.0) GO TO 1460
+            IF (IFLAG<0) GO TO 1460
             ITEMP = ITEMP + 1
  1320    CONTINUE
  1340 CONTINUE
@@ -625,7 +625,7 @@ C
       CALL F01AJF(JP, MT, WORK, JP, D, WORK(CX1), WORK, JP)
       IER = 1
       CALL F02AMF(JP, EPSMCH, D, WORK(CX1), WORK, JP, IER)
-      IF (IER.EQ.0) GO TO 1360
+      IF (IER==0) GO TO 1360
       IFAIL = P01AAF(IFAIL,5,SRNAME)
       RETURN
  1360 CONTINUE
@@ -635,9 +635,9 @@ C
       DO 1400 J=1,JP
          K = J
          DO 1380 I=J,JP
-            IF (ABS(D(I)).GT.ABS(D(K))) K = I
+            IF (ABS(D(I))>ABS(D(K))) K = I
  1380    CONTINUE
-         IF (K.LE.J) GO TO 1400
+         IF (K<=J) GO TO 1400
          T = D(K)
          D(K) = D(J)
          D(J) = T
@@ -754,7 +754,7 @@ C     OUTPUT PARAMETERS.
 C
 C     SV    - N ELEMENT VECTOR CONTAINING THE SINGULAR
 C             VALUES OF A. THEY ARE ORDERED SO THAT
-C             SV(1).GE.SV(2).GE. ... .GE.SV(N). THE ROUTINE
+C             SV(1)>=SV(2)>= ... >=SV(N). THE ROUTINE
 C             MAY BE CALLED WITH SV=D.
 C
 C     B     - IF WANTB IS .TRUE. THEN B WILL RETURN THE N
@@ -813,11 +813,11 @@ C     F01LZW, F01LZY, F02SZZ
 C     ..
       DATA SRNAME /8H F02SZF /
       IERR = IFAIL
-      IF (IERR.EQ.0) IFAIL = 1
+      IF (IERR==0) IFAIL = 1
 C
-      IF (N.LT.1) GO TO 500
-      IF (WANTY .AND. (NRY.LT.LY .OR. LY.LT.1)) GO TO 500
-      IF (WANTZ .AND. (NRZ.LT.N .OR. NCZ.LT.1)) GO TO 500
+      IF (N<1) GO TO 500
+      IF (WANTY .AND. (NRY<LY .OR. LY<1)) GO TO 500
+      IF (WANTZ .AND. (NRZ<N .OR. NCZ<1)) GO TO 500
 C
       SMALL = X02AGF(0.0D0)
       BIG = 1.0D0/SMALL
@@ -829,7 +829,7 @@ C
       K = N
       SV(1) = D(1)
       ANORM = ABS(D(1))
-      IF (N.EQ.1) GO TO 280
+      IF (N==1) GO TO 280
 C
       DO 20 I=2,N
          SV(I) = D(I)
@@ -851,12 +851,12 @@ C     NOW TEST FOR SPLITTING. L GOES IN OPPOSITE DIRECTION TO LL.
 C
    40    L = K
          DO 60 LL=2,K
-            IF (ABS(WORK1(L)).LE.EPS) GO TO 240
+            IF (ABS(WORK1(L))<=EPS) GO TO 240
             L = L - 1
-            IF (ABS(SV(L)).LT.EPS) GO TO 180
+            IF (ABS(SV(L))<EPS) GO TO 180
    60    CONTINUE
 C
-   80    IF (ITER.EQ.MAXIT) GO TO 280
+   80    IF (ITER==MAXIT) GO TO 280
 C
 C     MAXIT QR-STEPS WITHOUT CONVERGENCE. FAILURE.
 C
@@ -869,13 +869,13 @@ C
          DKM1 = SV(K-1)
          DK = SV(K)
          EKM1 = 0.0D0
-         IF (K.NE.2) EKM1 = WORK1(K-1)
+         IF (K/=2) EKM1 = WORK1(K-1)
          EK = WORK1(K)
          F = (DKM1-DK)*(DKM1+DK) + (EKM1-EK)*(EKM1+EK)
          F = F/(2.0D0*EK*DKM1)
          G = ABS(F)
-         IF (G.LE.RSQTPS) G = SQRT(1.0D0+F**2)
-         IF (F.LT.0.0D0) G = -G
+         IF (G<=RSQTPS) G = SQRT(1.0D0+F**2)
+         IF (F<0.0D0) G = -G
 C
          SHIFT = EK*(EK-DKM1/(F+G))
          F = (DL-DK)*(DL+DK) - SHIFT
@@ -889,7 +889,7 @@ C
 C
             CALL F01LZW(T, C, S, SQTEPS, RSQTPS, BIG)
 C
-            IF (I.GT.LP1) WORK1(I-1) = C*F + S*X
+            IF (I>LP1) WORK1(I-1) = C*F + S*X
             F = C*SV(I-1) + S*WORK1(I)
             WORK1(I) = C*WORK1(I) - S*SV(I-1)
             X = S*SV(I)
@@ -914,7 +914,7 @@ C
             F = C*WORK1(I) + S*SVI
             SV(I) = C*SVI - S*WORK1(I)
 C
-            IF (I.EQ.K) GO TO 140
+            IF (I==K) GO TO 140
             X = S*WORK1(I+1)
             WORK1(I+1) = C*WORK1(I+1)
 C
@@ -949,7 +949,7 @@ C
             B(LM1) = C*B(LM1) - S*T
 C
   200       SV(I) = C*SV(I) + S*X
-            IF (I.EQ.K) GO TO 220
+            IF (I==K) GO TO 220
             X = -S*WORK1(I+1)
             WORK1(I+1) = C*WORK1(I+1)
 C
@@ -958,7 +958,7 @@ C
 C     IF WE COME HERE WITH L=K THEN A SINGULAR VALUE HAS BEEN
 C     FOUND.
 C
-  240    IF (L.LT.K) GO TO 80
+  240    IF (L<K) GO TO 80
 C
          K = K - 1
   260 CONTINUE
@@ -970,7 +970,7 @@ C     NOW MAKE SINGULAR VALUES NON-NEGATIVE.
 C     K WILL BE 1 UNLESS FAILURE HAS OCCURED.
 C
       DO 320 J=K,N
-         IF (SV(J).GE.0.0D0) GO TO 320
+         IF (SV(J)>=0.0D0) GO TO 320
 C
          SV(J) = -SV(J)
 C
@@ -990,14 +990,14 @@ C
          L = J
 C
          DO 340 I=J,N
-            IF (SV(I).LE.S) GO TO 340
+            IF (SV(I)<=S) GO TO 340
             S = SV(I)
             L = I
   340    CONTINUE
 C
-         IF (S.EQ.0.0D0) GO TO 420
+         IF (S==0.0D0) GO TO 420
          IF (WANTZ) WORK2(J) = L
-         IF (L.EQ.J) GO TO 400
+         IF (L==J) GO TO 400
          IF (WANTZ) JJ = J
 C
          SV(L) = SV(J)
@@ -1018,18 +1018,18 @@ C
   400 CONTINUE
 C
   420 IF (.NOT.WANTZ) GO TO 480
-      IF (JJ.EQ.0) GO TO 480
+      IF (JJ==0) GO TO 480
       DO 460 I=1,NCZ
          DO 440 J=K,JJ
             L = WORK2(J)
-            IF (J.EQ.L) GO TO 440
+            IF (J==L) GO TO 440
             T = Z(J,I)
             Z(J,I) = Z(L,I)
             Z(L,I) = T
   440    CONTINUE
   460 CONTINUE
 C
-  480 IF (IFAIL.EQ.0) RETURN
+  480 IF (IFAIL==0) RETURN
 C
       IFAIL = IFAIL + 1
   500 IFAIL = P01AAF(IERR,IFAIL,SRNAME)
@@ -1069,7 +1069,7 @@ C
 C     N MUST BE AT LEAST 1. IF N=1 THEN AN IMMEDIATE RETURN TO
 C     THE CALLING PROGRAM IS MADE.
 C
-      IF (N.EQ.1) RETURN
+      IF (N==1) RETURN
 C
       DO 20 I=2,N
          W = X(I-1)
@@ -1106,7 +1106,7 @@ C$P 1
      * Z(IZ,N)
       DATA SRNAME /8H F02AMF /
       ISAVE = IFAIL
-      IF (N.EQ.1) GO TO 40
+      IF (N==1) GO TO 40
       DO 20 I=2,N
          E(I-1) = E(I)
    20 CONTINUE
@@ -1116,22 +1116,22 @@ C$P 1
       J = 30*N
       DO 300 L=1,N
          H = ACHEPS*(ABS(D(L))+ABS(E(L)))
-         IF (B.LT.H) B = H
+         IF (B<H) B = H
 C     LOOK FOR SMALL SUB-DIAG ELEMENT
          DO 60 M=L,N
-            IF (ABS(E(M)).LE.B) GO TO 80
+            IF (ABS(E(M))<=B) GO TO 80
    60    CONTINUE
-   80    IF (M.EQ.L) GO TO 280
-  100    IF (J.LE.0) GO TO 400
+   80    IF (M==L) GO TO 280
+  100    IF (J<=0) GO TO 400
          J = J - 1
 C     FORM SHIFT
          G = D(L)
          H = D(L+1) - G
-         IF (ABS(H).GE.ABS(E(L))) GO TO 120
+         IF (ABS(H)>=ABS(E(L))) GO TO 120
          P = H*0.5D0/E(L)
          R = SQRT(P*P+1.0D0)
          H = P + R
-         IF (P.LT.0.0D0) H = P - R
+         IF (P<0.0D0) H = P - R
          D(L) = E(L)/H
          GO TO 140
   120    P = 2.0D0*E(L)/H
@@ -1139,7 +1139,7 @@ C     FORM SHIFT
          D(L) = E(L)*P/(1.0D0+R)
   140    H = G - D(L)
          I1 = L + 1
-         IF (I1.GT.N) GO TO 180
+         IF (I1>N) GO TO 180
          DO 160 I=I1,N
             D(I) = D(I) - H
   160    CONTINUE
@@ -1153,7 +1153,7 @@ C     QL TRANSFORMATION
             I = M1 - II + L
             G = C*E(I)
             H = C*P
-            IF (ABS(P).LT.ABS(E(I))) GO TO 200
+            IF (ABS(P)<ABS(E(I))) GO TO 200
             C = E(I)/P
             R = SQRT(C*C+1.0D0)
             E(I+1) = S*P*R
@@ -1176,7 +1176,7 @@ C     FORM VECTOR
   260    CONTINUE
          E(L) = S*P
          D(L) = C*P
-         IF (ABS(E(L)).GT.B) GO TO 100
+         IF (ABS(E(L))>B) GO TO 100
   280    D(L) = D(L) + F
   300 CONTINUE
 C     ORDER EIGENVALUES AND EIGENVECTORS
@@ -1184,13 +1184,13 @@ C     ORDER EIGENVALUES AND EIGENVECTORS
          K = I
          P = D(I)
          I1 = I + 1
-         IF (I1.GT.N) GO TO 340
+         IF (I1>N) GO TO 340
          DO 320 J=I1,N
-            IF (D(J).GE.P) GO TO 320
+            IF (D(J)>=P) GO TO 320
             K = J
             P = D(J)
   320    CONTINUE
-  340    IF (K.EQ.I) GO TO 380
+  340    IF (K==I) GO TO 380
          D(K) = D(I)
          D(I) = P
          DO 360 J=1,N
@@ -1225,7 +1225,7 @@ C
       DO 20 I=1,N
          C(I) = 0.0D0
    20 CONTINUE
-      IF (N.EQ.1) GO TO 100
+      IF (N==1) GO TO 100
       NM1 = N - 1
       DO 80 I=1,NM1
          DO 40 J=I,N
@@ -1268,13 +1268,13 @@ C
    20    CONTINUE
          D(I) = A(N,I)
    40 CONTINUE
-      IF (N.EQ.1) GO TO 440
+      IF (N==1) GO TO 440
       DO 260 II=2,N
          I = N - II + 2
          L = I - 2
          F = D(I-1)
          G = 0.0D0
-         IF (L.EQ.0) GO TO 80
+         IF (L==0) GO TO 80
          DO 60 K=1,L
             G = G + D(K)*D(K)
    60    CONTINUE
@@ -1282,7 +1282,7 @@ C
          L = L + 1
 C     IF G IS TOO SMALL FOR ORTHOGONALITY TO BE
 C     GUARANTEED THE TRANSFORMATION IS SKIPPED
-         IF (G.GT.ATOL) GO TO 100
+         IF (G>ATOL) GO TO 100
          E(I) = F
          H = 0.0D0
          DO 85 J=1,L
@@ -1294,7 +1294,7 @@ C     GUARANTEED THE TRANSFORMATION IS SKIPPED
    90    CONTINUE
          GO TO 240
   100    G = SQRT(H)
-         IF (F.GE.0.0D0) G = -G
+         IF (F>=0.0D0) G = -G
          E(I) = G
          H = H - F*G
          D(I-1) = F - G
@@ -1336,7 +1336,7 @@ C     ACCUMULATION OF TRANSFORMATION MATRICES
          Z(N,L) = Z(L,L)
          Z(L,L) = 1.0D0
          H = D(I)
-         IF (H.EQ.0.0D0) GO TO 360
+         IF (H==0.0D0) GO TO 360
          DO 290 K=1,L
             D(K) = 0.0D0
   290    CONTINUE
@@ -1515,11 +1515,11 @@ C     F01LZW, F01LZX, F01LZY
 C     ..
       DATA SRNAME /8H F01LZF /
       IERR = IFAIL
-      IF (IERR.EQ.0) IFAIL = 1
+      IF (IERR==0) IFAIL = 1
 C
-      IF (NRA.LT.N .OR. NRC.LT.N .OR. N.LT.1) GO TO 220
-      IF (WANTY .AND. (NRY.LT.LY .OR. LY.LT.1)) GO TO 220
-      IF (WANTZ .AND. (NRZ.LT.N .OR. NCZ.LT.1)) GO TO 220
+      IF (NRA<N .OR. NRC<N .OR. N<1) GO TO 220
+      IF (WANTY .AND. (NRY<LY .OR. LY<1)) GO TO 220
+      IF (WANTZ .AND. (NRZ<N .OR. NCZ<1)) GO TO 220
 C
       SMALL = X02AGF(0.0D0)
       BIG = 1.0D0/SMALL
@@ -1536,8 +1536,8 @@ C
    40 CONTINUE
 C
       IFAIL = 0
-      IF (N.EQ.1) RETURN
-      IF (N.EQ.2) GO TO 200
+      IF (N==1) RETURN
+      IF (N==2) GO TO 200
 C
 C     START MAIN LOOP. K(TH) STEP PUTS ZEROS INTO K(TH) ROW OF C.
 C
@@ -1567,7 +1567,7 @@ C
             WORK1(J) = CS
             WORK2(J) = SN
 C
-   60       IF (T.EQ.0.0D0) GO TO 80
+   60       IF (T==0.0D0) GO TO 80
             C(K,J) = CS*C(K,J) + SN*W
 C
 C     NOW APPLY THE TRANSFORMATION P(J,J+1).
@@ -1653,17 +1653,17 @@ C     .. LOCAL SCALARS ..
 C     .. FUNCTION REFERENCES ..
 !      DOUBLE PRECISION SQRT
 C     ..
-      IF (T.NE.0.0D0) GO TO 20
+      IF (T/=0.0D0) GO TO 20
       C = 1.0D0
       S = 0.0D0
       RETURN
 C
    20 ABST = ABS(T)
-      IF (ABST.LT.SQTEPS) GO TO 60
-      IF (ABST.GT.RSQTPS) GO TO 80
+      IF (ABST<SQTEPS) GO TO 60
+      IF (ABST>RSQTPS) GO TO 80
 C
       TT = ABST*ABST
-      IF (ABST.GT.1.0D0) GO TO 40
+      IF (ABST>1.0D0) GO TO 40
 C
       TT = 0.25D0*TT
       C = 0.5D0/SQRT(0.25D0+TT)
@@ -1681,7 +1681,7 @@ C
       RETURN
 C
    80 C = 0.0D0
-      IF (ABST.LT.BIG) C = 1.0D0/ABST
+      IF (ABST<BIG) C = 1.0D0/ABST
       S = SIGN(1.0D0,T)
       RETURN
       END
@@ -1719,7 +1719,7 @@ C
 C     N MUST BE AT LEAST 1. IF N=1 THEN AN IMMEDIATE RETURN TO
 C     THE CALLING PROGRAM IS MADE.
 C
-      IF (N.EQ.1) RETURN
+      IF (N==1) RETURN
 C
       I = N
       DO 20 II=2,N
@@ -1794,19 +1794,19 @@ C     .. LOCAL SCALARS ..
       DOUBLE PRECISION ABSA, ABSB, X
 C     ..
       F01LZZ = 0.0D0
-      IF (B.EQ.0.0D0) RETURN
+      IF (B==0.0D0) RETURN
 C
       ABSA = ABS(A)
       ABSB = ABS(B)
       X = 0.0D0
-      IF (ABSA.GE.1.0D0) X = ABSA*SMALL
+      IF (ABSA>=1.0D0) X = ABSA*SMALL
 C
-      IF (ABSB.LT.X) RETURN
+      IF (ABSB<X) RETURN
 C
       X = 0.0D0
-      IF (ABSB.GE.1.0D0) X = ABSB*SMALL
+      IF (ABSB>=1.0D0) X = ABSB*SMALL
 C
-      IF (ABSA.LE.X) GO TO 20
+      IF (ABSA<=X) GO TO 20
 C
       F01LZZ = B/A
       RETURN
@@ -1837,9 +1837,9 @@ C     .. LOCAL SCALARS ..
 C     ..
       DATA ZERO /0.0D+0/
 C
-      IF (N.LT.1) RETURN
+      IF (N<1) RETURN
 C
-      IF (CONST.EQ.ZERO) GO TO 40
+      IF (CONST==ZERO) GO TO 40
       LX = 1 + (N-1)*INCX
       DO 20 IX=1,LX,INCX
          X(IX) = CONST
@@ -1877,7 +1877,7 @@ C     .. LOCAL SCALARS ..
       INTEGER IX, LX
 C     ..
 C
-      IF (N.LT.1) RETURN
+      IF (N<1) RETURN
 C
       LX = 1 + (N-1)*INCX
       DO 20 IX=1,LX,INCX
@@ -1919,29 +1919,29 @@ C     ..
       COMMON /AX02ZA/ WMACH
       DATA ONE /1.0D+0/, ZERO /0.0D+0/
 C
-      IF (N.LT.1) RETURN
-      IF (ALPHA.NE.ZERO) GO TO 20
+      IF (N<1) RETURN
+      IF (ALPHA/=ZERO) GO TO 20
 C
       CALL F01YAH(N, ZERO, Y, ABS(INCY))
 C
       RETURN
    20 CONTINUE
 C
-      IF (WMACH(9).NE.ZERO .AND. ABS(ALPHA).LT.ONE) GO TO 220
-      IF (INCX.NE.INCY .OR. INCX.LE.0) GO TO 60
+      IF (WMACH(9)/=ZERO .AND. ABS(ALPHA)<ONE) GO TO 220
+      IF (INCX/=INCY .OR. INCX<=0) GO TO 60
       LX = 1 + (N-1)*INCX
       DO 40 IX=1,LX,INCX
          Y(IX) = ALPHA*X(IX)
    40 CONTINUE
       GO TO 200
    60 CONTINUE
-      IF (INCY.LT.0) GO TO 80
+      IF (INCY<0) GO TO 80
       IY = 1
       GO TO 100
    80 CONTINUE
       IY = 1 - (N-1)*INCY
   100 CONTINUE
-      IF (INCX.LE.0) GO TO 140
+      IF (INCX<=0) GO TO 140
       LX = 1 + (N-1)*INCX
       DO 120 IX=1,LX,INCX
          Y(IY) = ALPHA*X(IX)
@@ -1960,10 +1960,10 @@ C
       GO TO 480
   220 CONTINUE
       TNY = WMACH(5)/ABS(ALPHA)
-      IF (INCX.NE.INCY .OR. INCX.LE.0) GO TO 300
+      IF (INCX/=INCY .OR. INCX<=0) GO TO 300
       LX = 1 + (N-1)*INCX
       DO 280 IX=1,LX,INCX
-         IF (ABS(X(IX)).LT.TNY) GO TO 240
+         IF (ABS(X(IX))<TNY) GO TO 240
          Y(IX) = ALPHA*X(IX)
          GO TO 260
   240    CONTINUE
@@ -1972,20 +1972,20 @@ C
   280 CONTINUE
       GO TO 460
   300 CONTINUE
-      IF (INCX.LT.0) GO TO 320
+      IF (INCX<0) GO TO 320
       IX = 1
       GO TO 340
   320 CONTINUE
       IX = 1 - (N-1)*INCX
   340 CONTINUE
-      IF (INCY.LT.0) GO TO 360
+      IF (INCY<0) GO TO 360
       IY = 1
       GO TO 380
   360 CONTINUE
       IY = 1 - (N-1)*INCY
   380 CONTINUE
       DO 440 I=1,N
-         IF (ABS(X(IX)).LT.TNY) GO TO 400
+         IF (ABS(X(IX))<TNY) GO TO 400
          Y(IY) = ALPHA*X(IX)
          GO TO 420
   400    CONTINUE
@@ -2025,9 +2025,9 @@ C     .. LOCAL SCALARS ..
       INTEGER I, IX, IY, LY
 C     ..
 C
-      IF (N.LT.1) RETURN
+      IF (N<1) RETURN
 C
-      IF (INCX.NE.INCY .OR. INCY.LE.0) GO TO 40
+      IF (INCX/=INCY .OR. INCY<=0) GO TO 40
       LY = 1 + (N-1)*INCY
       DO 20 IY=1,LY,INCY
          TEMP = X(IY)
@@ -2036,13 +2036,13 @@ C
    20 CONTINUE
       GO TO 180
    40 CONTINUE
-      IF (INCX.LT.0) GO TO 60
+      IF (INCX<0) GO TO 60
       IX = 1
       GO TO 80
    60 CONTINUE
       IX = 1 - (N-1)*INCX
    80 CONTINUE
-      IF (INCY.LE.0) GO TO 120
+      IF (INCY<=0) GO TO 120
       LY = 1 + (N-1)*INCY
       DO 100 IY=1,LY,INCY
          TEMP = X(IX)
@@ -2098,15 +2098,15 @@ C     ..
       COMMON /AX02ZA/ WMACH
       DATA ONE /1.0D+0/, ZERO /0.0D+0/
 C
-      IF (N.LT.1) RETURN
+      IF (N<1) RETURN
 C
-      IF (ALPHA.NE.ZERO) GO TO 40
+      IF (ALPHA/=ZERO) GO TO 40
       LX = 1 + (N-1)*INCX
       DO 20 IX=1,LX,INCX
          X(IX) = ZERO
    20 CONTINUE
       GO TO 160
-   40 IF (WMACH(9).NE.ZERO .AND. ABS(ALPHA).LT.ONE) GO TO 80
+   40 IF (WMACH(9)/=ZERO .AND. ABS(ALPHA)<ONE) GO TO 80
       LX = 1 + (N-1)*INCX
       DO 60 IX=1,LX,INCX
          X(IX) = ALPHA*X(IX)
@@ -2116,7 +2116,7 @@ C
       TNY = WMACH(5)/ABS(ALPHA)
       LX = 1 + (N-1)*INCX
       DO 140 IX=1,LX,INCX
-         IF (ABS(X(IX)).LT.TNY) GO TO 100
+         IF (ABS(X(IX))<TNY) GO TO 100
          X(IX) = ALPHA*X(IX)
          GO TO 120
   100    CONTINUE
@@ -2159,27 +2159,27 @@ C     ..
       COMMON /AX02ZA/ WMACH
       DATA ONE /1.0D+0/, ZERO /0.0D+0/
 C
-      IF (N.GE.1) GO TO 20
+      IF (N>=1) GO TO 20
       F01YAV = ZERO
       RETURN
    20 CONTINUE
 C
       SUM = ZERO
-      IF (WMACH(9).NE.ZERO) GO TO 220
-      IF (INCX.NE.INCY .OR. INCX.LE.0) GO TO 60
+      IF (WMACH(9)/=ZERO) GO TO 220
+      IF (INCX/=INCY .OR. INCX<=0) GO TO 60
       LX = 1 + (N-1)*INCX
       DO 40 IX=1,LX,INCX
          SUM = SUM + X(IX)*Y(IX)
    40 CONTINUE
       GO TO 200
    60 CONTINUE
-      IF (INCY.LT.0) GO TO 80
+      IF (INCY<0) GO TO 80
       IY = 1
       GO TO 100
    80 CONTINUE
       IY = 1 - (N-1)*INCY
   100 CONTINUE
-      IF (INCX.LE.0) GO TO 140
+      IF (INCX<=0) GO TO 140
       LX = 1 + (N-1)*INCX
       DO 120 IX=1,LX,INCX
          SUM = SUM + X(IX)*Y(IY)
@@ -2196,13 +2196,13 @@ C
   180 CONTINUE
   200 CONTINUE
       GO TO 500
-  220 IF (INCX.NE.INCY .OR. INCX.LE.0) GO TO 320
+  220 IF (INCX/=INCY .OR. INCX<=0) GO TO 320
       LX = 1 + (N-1)*INCX
       DO 300 IX=1,LX,INCX
-         IF (X(IX).EQ.ZERO .OR. Y(IX).EQ.ZERO) GO TO 280
+         IF (X(IX)==ZERO .OR. Y(IX)==ZERO) GO TO 280
          ABSX = ABS(X(IX))
-         IF (ABSX.GE.ONE) GO TO 240
-         IF (ABS(Y(IX)).GE.WMACH(5)/ABSX) SUM = SUM + X(IX)*Y(IX)
+         IF (ABSX>=ONE) GO TO 240
+         IF (ABS(Y(IX))>=WMACH(5)/ABSX) SUM = SUM + X(IX)*Y(IX)
          GO TO 260
   240    CONTINUE
          SUM = SUM + X(IX)*Y(IX)
@@ -2211,23 +2211,23 @@ C
   300 CONTINUE
       GO TO 500
   320 CONTINUE
-      IF (INCX.LT.0) GO TO 340
+      IF (INCX<0) GO TO 340
       IX = 1
       GO TO 360
   340 CONTINUE
       IX = 1 - (N-1)*INCX
   360 CONTINUE
-      IF (INCY.LT.0) GO TO 380
+      IF (INCY<0) GO TO 380
       IY = 1
       GO TO 400
   380 CONTINUE
       IY = 1 - (N-1)*INCY
   400 CONTINUE
       DO 480 I=1,N
-         IF (X(IX).EQ.ZERO .OR. Y(IY).EQ.ZERO) GO TO 460
+         IF (X(IX)==ZERO .OR. Y(IY)==ZERO) GO TO 460
          ABSX = ABS(X(IX))
-         IF (ABSX.GE.ONE) GO TO 420
-         IF (ABS(Y(IY)).GE.WMACH(5)/ABSX) SUM = SUM + X(IX)*Y(IY)
+         IF (ABSX>=ONE) GO TO 420
+         IF (ABS(Y(IY))>=WMACH(5)/ABSX) SUM = SUM + X(IX)*Y(IY)
          GO TO 440
   420    CONTINUE
          SUM = SUM + X(IX)*Y(IY)
@@ -2266,22 +2266,22 @@ C     .. LOCAL SCALARS ..
       INTEGER I, IX, IY, LY
 C     ..
 C
-      IF (N.LT.1) RETURN
+      IF (N<1) RETURN
 C
-      IF (INCX.NE.INCY .OR. INCY.LE.0) GO TO 40
+      IF (INCX/=INCY .OR. INCY<=0) GO TO 40
       LY = 1 + (N-1)*INCY
       DO 20 IY=1,LY,INCY
          Y(IY) = X(IY)
    20 CONTINUE
       GO TO 180
    40 CONTINUE
-      IF (INCX.LT.0) GO TO 60
+      IF (INCX<0) GO TO 60
       IX = 1
       GO TO 80
    60 CONTINUE
       IX = 1 - (N-1)*INCX
    80 CONTINUE
-      IF (INCY.LE.0) GO TO 120
+      IF (INCY<=0) GO TO 120
       LY = 1 + (N-1)*INCY
       DO 100 IY=1,LY,INCY
          Y(IY) = X(IX)
@@ -2333,23 +2333,23 @@ C     ..
       COMMON /AX02ZA/ WMACH
       DATA ONE /1.0D+0/, ZERO /0.0D+0/
 C
-      IF (N.LT.1 .OR. ALPHA.EQ.ZERO) RETURN
+      IF (N<1 .OR. ALPHA==ZERO) RETURN
 C
-      IF (WMACH(9).NE.ZERO .AND. ABS(ALPHA).LT.ONE) GO TO 200
-      IF (INCX.NE.INCY .OR. INCX.LE.0) GO TO 40
+      IF (WMACH(9)/=ZERO .AND. ABS(ALPHA)<ONE) GO TO 200
+      IF (INCX/=INCY .OR. INCX<=0) GO TO 40
       LX = 1 + (N-1)*INCX
       DO 20 IX=1,LX,INCX
          Y(IX) = ALPHA*X(IX) + Y(IX)
    20 CONTINUE
       GO TO 180
    40 CONTINUE
-      IF (INCY.LT.0) GO TO 60
+      IF (INCY<0) GO TO 60
       IY = 1
       GO TO 80
    60 CONTINUE
       IY = 1 - (N-1)*INCY
    80 CONTINUE
-      IF (INCX.LE.0) GO TO 120
+      IF (INCX<=0) GO TO 120
       LX = 1 + (N-1)*INCX
       DO 100 IX=1,LX,INCX
          Y(IY) = ALPHA*X(IX) + Y(IY)
@@ -2368,27 +2368,27 @@ C
       GO TO 380
   200 CONTINUE
       TNY = WMACH(5)/ABS(ALPHA)
-      IF (INCX.NE.INCY .OR. INCX.LE.0) GO TO 240
+      IF (INCX/=INCY .OR. INCX<=0) GO TO 240
       LX = 1 + (N-1)*INCX
       DO 220 IX=1,LX,INCX
-         IF (ABS(X(IX)).GE.TNY) Y(IX) = ALPHA*X(IX) + Y(IX)
+         IF (ABS(X(IX))>=TNY) Y(IX) = ALPHA*X(IX) + Y(IX)
   220 CONTINUE
       GO TO 360
   240 CONTINUE
-      IF (INCX.LT.0) GO TO 260
+      IF (INCX<0) GO TO 260
       IX = 1
       GO TO 280
   260 CONTINUE
       IX = 1 - (N-1)*INCX
   280 CONTINUE
-      IF (INCY.LT.0) GO TO 300
+      IF (INCY<0) GO TO 300
       IY = 1
       GO TO 320
   300 CONTINUE
       IY = 1 - (N-1)*INCY
   320 CONTINUE
       DO 340 I=1,N
-         IF (ABS(X(IX)).GE.TNY) Y(IY) = ALPHA*X(IX) + Y(IY)
+         IF (ABS(X(IX))>=TNY) Y(IY) = ALPHA*X(IX) + Y(IY)
          IX = IX + INCX
          IY = IY + INCY
   340 CONTINUE
@@ -2412,11 +2412,11 @@ C     RETURNS THE VALUE OF ERROR OR TERMINATES THE PROGRAM.
 C$P 1
       DOUBLE PRECISION SRNAME
 C     TEST IF NO ERROR DETECTED
-      IF (ERROR.EQ.0) GO TO 20
+      IF (ERROR==0) GO TO 20
 C     DETERMINE OUTPUT UNIT FOR MESSAGE
       CALL X04AAF (0,NOUT)
 C     TEST FOR SOFT FAILURE
-      IF (MOD(IFAIL,10).EQ.1) GO TO 10
+      IF (MOD(IFAIL,10)==1) GO TO 10
 C     HARD FAILURE
       WRITE (NOUT,99999) SRNAME, ERROR
 C     ******************** IMPLEMENTATION NOTE ********************
@@ -2427,7 +2427,7 @@ C     *************************************************************
       STOP
 C     SOFT FAIL
 C     TEST IF ERROR MESSAGES SUPPRESSED
-   10 IF (MOD(IFAIL/10,10).EQ.0) GO TO 20
+   10 IF (MOD(IFAIL/10,10)==0) GO TO 20
       WRITE (NOUT,99999) SRNAME, ERROR
    20 P01AAF = ERROR
       RETURN
@@ -2468,8 +2468,8 @@ C     AND -1.0/R CAN ALL BE COMPUTED WITHOUT OVERFLOW OR UNDERFLOW.
 C     ON MANY MACHINES THE CORRECT VALUE CAN BE DERIVED FROM THOSE
 C     OF X02AAF, X02ABF AND X02ACF AS FOLLOWS
 C
-C     IF (X02ABF(X)*X02ACF(X).GE.1.0) X02AGF = X02ABF(X)
-C     IF (X02ABF(X)*X02ACF(X).LT.1.0)
+C     IF (X02ABF(X)*X02ACF(X)>=1.0) X02AGF = X02ABF(X)
+C     IF (X02ABF(X)*X02ACF(X)<1.0)
 C    *                            X02AGF = (1.0+X02AAF(X))/X02ACF(X)
 C
 C     THE CORRECT VALUE SHOULD BE DEFINED AS A CONSTANT,
@@ -2621,8 +2621,8 @@ C     .. LOCAL SCALARS ..
       INTEGER NERR1
 C     ..
       DATA NERR1 /6/
-      IF (I.EQ.0) NERR = NERR1
-      IF (I.EQ.1) NERR1 = NERR
+      IF (I==0) NERR = NERR1
+      IF (I==1) NERR1 = NERR
       RETURN
       END
       SUBROUTINE X04ABF(I,NADV)
@@ -2646,8 +2646,8 @@ C     .. LOCAL SCALARS ..
       INTEGER NADV1
 C     ..
       DATA NADV1 /6/
-      IF (I.EQ.0) NADV = NADV1
-      IF (I.EQ.1) NADV1 = NADV
+      IF (I==0) NADV = NADV1
+      IF (I==1) NADV1 = NADV
       RETURN
       END
       FUNCTION G05CAF(DUMMY)
@@ -2682,9 +2682,9 @@ C      COUNT THE NUMBER OF CALLS
        IFACT=(NCALL-1)/79
        ICALL=NCALL-79*IFACT
        G05CAF=RANDOM(ICALL)
-       IF (IFACT .LE. 0) RETURN
+       IF (IFACT <= 0) RETURN
        IFACT=MOD(IFACT,101)
        GO5CAF=G05CAF+DBLE(IFACT)/101.0D0
-       IF (G05CAF .GT. 1.0D0) G05CAF=G05CAF-1.0D0
+       IF (G05CAF > 1.0D0) G05CAF=G05CAF-1.0D0
        RETURN
        END

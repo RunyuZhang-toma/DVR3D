@@ -1,0 +1,7 @@
+F90      =ifort
+DEBUG    = #-openmp -check all -traceback
+F90_OPTS = -O0  -traceback -check all 
+LIBS= -qmkl=sequential  # -llapack 
+REL_PATH =source/
+OBJ =obj/
+

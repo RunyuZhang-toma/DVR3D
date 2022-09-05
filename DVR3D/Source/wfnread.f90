@@ -12,18 +12,18 @@ program reader
 ! reader header record to determine file structure  
   read(ifile) idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval
   write(*,*) idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval
-  If (jrot.eq.0) kmin=1
+  If (jrot==0) kmin=1
   jk=jrot+kmin
 
 
 
-  If (idia .eq. -2 .and. jk .gt. 1) then
+  If (idia == -2 .and. jk > 1) then
      print *, "Radau, 8 or 9"
       call read_8or9_radau
-  elseif (idia .eq. -2) then
+  elseif (idia == -2) then
      print *, "Radau, 26"
       call read_26_radau
-  elseif (jk .gt. 1) then
+  elseif (jk > 1) then
      print *, "Jacobi, 8 or 9"
       call read_8or9_jacobi
   else

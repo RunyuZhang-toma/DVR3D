@@ -63,7 +63,7 @@ C   890619  Double precision version of SPSORT created by D. W. Lozier.
 C   890620  Algorithm for rearranging the data vector corrected by R.
 C           Boisvert.
 C   890622  Prologue upgraded to Version 4.0 style by D. Lozier.
-C   891128  Error when KFLAG.LT.0 and N=1 corrected by R. Boisvert.
+C   891128  Error when KFLAG<0 and N=1 corrected by R. Boisvert.
 C   920507  Modified by M. McClain to revise prologue text.
 C   920818  Declarations section rebuilt and code restructured to use
 C           IF-THEN-ELSE-ENDIF.  (SMR, WRB)
@@ -85,7 +85,7 @@ C     .. Intrinsic Functions ..
 C***FIRST EXECUTABLE STATEMENT  DPSORT
       IER = 0
       NN = N
-      IF (NN .LT. 1) THEN
+      IF (NN < 1) THEN
          IER = 1
          CALL XERMSG ('SLATEC', 'DPSORT',
      +    'The number of values to be sorted, N, is not positive.',
@@ -94,7 +94,7 @@ C***FIRST EXECUTABLE STATEMENT  DPSORT
       ENDIF
 C
       KK = ABS(KFLAG)
-      IF (KK.NE.1 .AND. KK.NE.2) THEN
+      IF (KK/=1 .AND. KK/=2) THEN
          IER = 2
          CALL XERMSG ('SLATEC', 'DPSORT',
      +    'The sort control parameter, KFLAG, is not 2, 1, -1, or -2.',
@@ -110,11 +110,11 @@ C
 C
 C     Return if only one value is to be sorted
 C
-      IF (NN .EQ. 1) RETURN
+      IF (NN == 1) RETURN
 C
 C     Alter array DX to get decreasing order if needed
 C
-      IF (KFLAG .LE. -1) THEN
+      IF (KFLAG <= -1) THEN
          DO 20 I=1,NN
             DX(I) = -DX(I)
    20    CONTINUE
@@ -127,8 +127,8 @@ C
       J = NN
       R = .375D0
 C
-   30 IF (I .EQ. J) GO TO 80
-      IF (R .LE. 0.5898437D0) THEN
+   30 IF (I == J) GO TO 80
+      IF (R <= 0.5898437D0) THEN
          R = R+3.90625D-2
       ELSE
          R = R-0.21875D0
@@ -143,7 +143,7 @@ C
 C
 C     If first element of array is greater than LM, interchange with LM
 C
-      IF (DX(IPERM(I)) .GT. DX(LM)) THEN
+      IF (DX(IPERM(I)) > DX(LM)) THEN
          IPERM(IJ) = IPERM(I)
          IPERM(I) = LM
          LM = IPERM(IJ)
@@ -152,7 +152,7 @@ C
 C
 C     If last element of array is less than LM, interchange with LM
 C
-      IF (DX(IPERM(J)) .LT. DX(LM)) THEN
+      IF (DX(IPERM(J)) < DX(LM)) THEN
          IPERM(IJ) = IPERM(J)
          IPERM(J) = LM
          LM = IPERM(IJ)
@@ -160,7 +160,7 @@ C
 C        If first element of array is greater than LM, interchange
 C        with LM
 C
-         IF (DX(IPERM(I)) .GT. DX(LM)) THEN
+         IF (DX(IPERM(I)) > DX(LM)) THEN
             IPERM(IJ) = IPERM(I)
             IPERM(I) = LM
             LM = IPERM(IJ)
@@ -175,21 +175,21 @@ C     Find an element in the second half of the array which is smaller
 C     than LM
 C
    60 L = L-1
-      IF (DX(IPERM(L)) .GT. DX(LM)) GO TO 60
+      IF (DX(IPERM(L)) > DX(LM)) GO TO 60
 C
 C     Find an element in the first half of the array which is greater
 C     than LM
 C
    70 K = K+1
-      IF (DX(IPERM(K)) .LT. DX(LM)) GO TO 70
+      IF (DX(IPERM(K)) < DX(LM)) GO TO 70
 C
 C     Interchange these elements
 C
-      IF (K .LE. L) GO TO 50
+      IF (K <= L) GO TO 50
 C
 C     Save upper and lower subscripts of the array yet to be sorted
 C
-      IF (L-I .GT. J-K) THEN
+      IF (L-I > J-K) THEN
          IL(M) = I
          IU(M) = L
          I = K
@@ -205,29 +205,29 @@ C
 C     Begin again on another portion of the unsorted array
 C
    80 M = M-1
-      IF (M .EQ. 0) GO TO 120
+      IF (M == 0) GO TO 120
       I = IL(M)
       J = IU(M)
 C
-   90 IF (J-I .GE. 1) GO TO 40
-      IF (I .EQ. 1) GO TO 30
+   90 IF (J-I >= 1) GO TO 40
+      IF (I == 1) GO TO 30
       I = I-1
 C
   100 I = I+1
-      IF (I .EQ. J) GO TO 80
+      IF (I == J) GO TO 80
       LM = IPERM(I+1)
-      IF (DX(IPERM(I)) .LE. DX(LM)) GO TO 100
+      IF (DX(IPERM(I)) <= DX(LM)) GO TO 100
       K = I
 C
   110 IPERM(K+1) = IPERM(K)
       K = K-1
-      IF (DX(LM) .LT. DX(IPERM(K))) GO TO 110
+      IF (DX(LM) < DX(IPERM(K))) GO TO 110
       IPERM(K+1) = LM
       GO TO 100
 C
 C     Clean up
 C
-  120 IF (KFLAG .LE. -1) THEN
+  120 IF (KFLAG <= -1) THEN
          DO 130 I=1,NN
             DX(I) = -DX(I)
   130    CONTINUE
@@ -235,17 +235,17 @@ C
 C
 C     Rearrange the values of DX if desired
 C
-      IF (KK .EQ. 2) THEN
+      IF (KK == 2) THEN
 C
 C        Use the IPERM vector as a flag.
 C        If IPERM(I) < 0, then the I-th value is in correct location
 C
          DO 150 ISTRT=1,NN
-            IF (IPERM(ISTRT) .GE. 0) THEN
+            IF (IPERM(ISTRT) >= 0) THEN
                INDX = ISTRT
                INDX0 = INDX
                TEMP = DX(ISTRT)
-  140          IF (IPERM(INDX) .GT. 0) THEN
+  140          IF (IPERM(INDX) > 0) THEN
                   DX(INDX) = DX(IPERM(INDX))
                   INDX0 = INDX
                   IPERM(INDX) = -IPERM(INDX)
@@ -306,7 +306,7 @@ C***END PROLOGUE  DPPERM
       DOUBLE PRECISION DX(*), DTEMP
 C***FIRST EXECUTABLE STATEMENT  DPPERM
       IER=0
-      IF(N.LT.1)THEN
+      IF(N<1)THEN
          IER=1
          CALL XERMSG ('SLATEC', 'DPPERM',
      +    'The number of values to be rearranged, N, is not positive.',
@@ -318,8 +318,8 @@ C     CHECK WHETHER IPERM IS A VALID PERMUTATION
 C
       DO 100 I=1,N
          INDX=ABS(IPERM(I))
-         IF((INDX.GE.1).AND.(INDX.LE.N))THEN
-            IF(IPERM(INDX).GT.0)THEN
+         IF((INDX>=1).AND.(INDX<=N))THEN
+            IF(IPERM(INDX)>0)THEN
                IPERM(INDX)=-IPERM(INDX)
                GOTO 100
             ENDIF
@@ -336,12 +336,12 @@ C     USE THE IPERM VECTOR AS A FLAG.
 C     IF IPERM(I) > 0, THEN THE I-TH VALUE IS IN CORRECT LOCATION
 C
       DO 330 ISTRT = 1 , N
-         IF (IPERM(ISTRT) .GT. 0) GOTO 330
+         IF (IPERM(ISTRT) > 0) GOTO 330
          INDX = ISTRT
          INDX0 = INDX
          DTEMP = DX(ISTRT)
   320    CONTINUE
-         IF (IPERM(INDX) .GE. 0) GOTO 325
+         IF (IPERM(INDX) >= 0) GOTO 325
             DX(INDX) = DX(-IPERM(INDX))
             INDX0 = INDX
             IPERM(INDX) = -IPERM(INDX)
@@ -391,7 +391,7 @@ C***END PROLOGUE  IPPERM
       INTEGER IX(*), N, IPERM(*), I, IER, INDX, INDX0, ITEMP, ISTRT
 C***FIRST EXECUTABLE STATEMENT  IPPERM
       IER=0
-      IF(N.LT.1)THEN
+      IF(N<1)THEN
          IER=1
          CALL XERMSG ('SLATEC', 'IPPERM',
      +    'The number of values to be rearranged, N, is not positive.',
@@ -403,8 +403,8 @@ C     CHECK WHETHER IPERM IS A VALID PERMUTATION
 C
       DO 100 I=1,N
          INDX=ABS(IPERM(I))
-         IF((INDX.GE.1).AND.(INDX.LE.N))THEN
-            IF(IPERM(INDX).GT.0)THEN
+         IF((INDX>=1).AND.(INDX<=N))THEN
+            IF(IPERM(INDX)>0)THEN
                IPERM(INDX)=-IPERM(INDX)
                GOTO 100
             ENDIF
@@ -421,12 +421,12 @@ C     USE THE IPERM VECTOR AS A FLAG.
 C     IF IPERM(I) > 0, THEN THE I-TH VALUE IS IN CORRECT LOCATION
 C
       DO 330 ISTRT = 1 , N
-         IF (IPERM(ISTRT) .GT. 0) GOTO 330
+         IF (IPERM(ISTRT) > 0) GOTO 330
          INDX = ISTRT
          INDX0 = INDX
          ITEMP = IX(ISTRT)
   320    CONTINUE
-         IF (IPERM(INDX) .GE. 0) GOTO 325
+         IF (IPERM(INDX) >= 0) GOTO 325
             IX(INDX) = IX(-IPERM(INDX))
             INDX0 = INDX
             IPERM(INDX) = -IPERM(INDX)
@@ -509,7 +509,7 @@ C     assume integers are represented in the S-digit, base-A form
 C
 C                sign ( X(S-1)*A**(S-1) + ... + X(1)*A + X(0) )
 C
-C                where 0 .LE. X(I) .LT. A for I=0,...,S-1.
+C                where 0 <= X(I) < A for I=0,...,S-1.
 C     I1MACH( 7) = A, the base.
 C     I1MACH( 8) = S, the number of base-A digits.
 C     I1MACH( 9) = A**S - 1, the largest magnitude.
@@ -519,8 +519,8 @@ C     Assume floating-point numbers are represented in the T-digit,
 C     base-B form
 C                sign (B**E)*( (X(1)/B) + ... + (X(T)/B**T) )
 C
-C                where 0 .LE. X(I) .LT. B for I=1,...,T,
-C                0 .LT. X(1), and EMIN .LE. E .LE. EMAX.
+C                where 0 <= X(I) < B for I=1,...,T,
+C                0 < X(1), and EMIN <= E <= EMAX.
 C     I1MACH(10) = B, the base.
 C
 C   Single-Precision:
@@ -1346,7 +1346,7 @@ C     DATA IMACH(15) /       -127 /
 C     DATA IMACH(16) /        127 /
 C
 C***FIRST EXECUTABLE STATEMENT  I1MACH
-      IF (I .LT. 1  .OR.  I .GT. 16) GO TO 10
+      IF (I < 1  .OR.  I > 16) GO TO 10
 C
       I1MACH = IMACH(I)
       RETURN
@@ -1712,7 +1712,7 @@ C           PREFIX.
 C   891013  REVISED TO CORRECT COMMENTS.
 C   891214  Prologue converted to Version 4.0 format.  (WRB)
 C   900510  Changed test on NERR to be -9999999 < NERR < 99999999, but
-C           NERR .ne. 0, and on LEVEL to be -2 < LEVEL < 3.  Added
+C           NERR /= 0, and on LEVEL to be -2 < LEVEL < 3.  Added
 C           LEVEL=-1 logic, changed calls to XERSAV to XERSVE, and
 C           XERCTL to XERCNT.  (RWC)
 C   920501  Reformatted the REFERENCES section.  (WRB)
@@ -1733,8 +1733,8 @@ C       WE PRINT A FATAL ERROR MESSAGE AND TERMINATE FOR AN ERROR IN
 C          CALLING XERMSG.  THE ERROR NUMBER SHOULD BE POSITIVE,
 C          AND THE LEVEL SHOULD BE BETWEEN 0 AND 2.
 C
-      IF (NERR.LT.-9999999 .OR. NERR.GT.99999999 .OR. NERR.EQ.0 .OR.
-     *   LEVEL.LT.-1 .OR. LEVEL.GT.2) THEN
+      IF (NERR<-9999999 .OR. NERR>99999999 .OR. NERR==0 .OR.
+     *   LEVEL<-1 .OR. LEVEL>2) THEN
          CALL XERPRN (' ***', -1, 'FATAL ERROR IN...$$ ' //
      *      'XERMSG -- INVALID ERROR NUMBER OR LEVEL$$ '//
      *      'JOB ABORT DUE TO FATAL ERROR.', 72)
@@ -1750,7 +1750,7 @@ C
 C
 C       HANDLE PRINT-ONCE WARNING MESSAGES.
 C
-      IF (LEVEL.EQ.-1 .AND. KOUNT.GT.1) RETURN
+      IF (LEVEL==-1 .AND. KOUNT>1) RETURN
 C
 C       ALLOW TEMPORARY USER OVERRIDE OF THE CONTROL FLAG.
 C
@@ -1767,17 +1767,17 @@ C
 C       SKIP PRINTING IF THE CONTROL FLAG VALUE AS RESET IN XERCNT IS
 C       ZERO AND THE ERROR IS NOT FATAL.
 C
-      IF (LEVEL.LT.2 .AND. LKNTRL.EQ.0) GO TO 30
-      IF (LEVEL.EQ.0 .AND. KOUNT.GT.MAXMES) GO TO 30
-      IF (LEVEL.EQ.1 .AND. KOUNT.GT.MAXMES .AND. MKNTRL.EQ.1) GO TO 30
-      IF (LEVEL.EQ.2 .AND. KOUNT.GT.MAX(1,MAXMES)) GO TO 30
+      IF (LEVEL<2 .AND. LKNTRL==0) GO TO 30
+      IF (LEVEL==0 .AND. KOUNT>MAXMES) GO TO 30
+      IF (LEVEL==1 .AND. KOUNT>MAXMES .AND. MKNTRL==1) GO TO 30
+      IF (LEVEL==2 .AND. KOUNT>MAX(1,MAXMES)) GO TO 30
 C
 C       ANNOUNCE THE NAMES OF THE LIBRARY AND SUBROUTINE BY BUILDING A
 C       MESSAGE IN CHARACTER VARIABLE TEMP (NOT EXCEEDING 66 CHARACTERS)
 C       AND SENDING IT OUT VIA XERPRN.  PRINT ONLY IF CONTROL FLAG
 C       IS NOT ZERO.
 C
-      IF (LKNTRL .NE. 0) THEN
+      IF (LKNTRL /= 0) THEN
          TEMP(1:21) = 'MESSAGE FROM ROUTINE '
          I = MIN(LEN(SUBROU), 16)
          TEMP(22:21+I) = SUBROU(1:I)
@@ -1809,14 +1809,14 @@ C       NOTICE THAT THE LINE INCLUDING FOUR PREFIX CHARACTERS WILL NOT
 C       EXCEED 74 CHARACTERS.
 C       WE SKIP THE NEXT BLOCK IF THE INTRODUCTORY LINE IS NOT NEEDED.
 C
-      IF (LKNTRL .GT. 0) THEN
+      IF (LKNTRL > 0) THEN
 C
 C       THE FIRST PART OF THE MESSAGE TELLS ABOUT THE LEVEL.
 C
-         IF (LEVEL .LE. 0) THEN
+         IF (LEVEL <= 0) THEN
             TEMP(1:20) = 'INFORMATIVE MESSAGE,'
             LTEMP = 20
-         ELSEIF (LEVEL .EQ. 1) THEN
+         ELSEIF (LEVEL == 1) THEN
             TEMP(1:30) = 'POTENTIALLY RECOVERABLE ERROR,'
             LTEMP = 30
          ELSE
@@ -1826,8 +1826,8 @@ C
 C
 C       THEN WHETHER THE PROGRAM WILL CONTINUE.
 C
-         IF ((MKNTRL.EQ.2 .AND. LEVEL.GE.1) .OR.
-     *       (MKNTRL.EQ.1 .AND. LEVEL.EQ.2)) THEN
+         IF ((MKNTRL==2 .AND. LEVEL>=1) .OR.
+     *       (MKNTRL==1 .AND. LEVEL==2)) THEN
             TEMP(LTEMP+1:LTEMP+14) = ' PROG ABORTED,'
             LTEMP = LTEMP + 14
          ELSE
@@ -1837,7 +1837,7 @@ C
 C
 C       FINALLY TELL WHETHER THERE SHOULD BE A TRACEBACK.
 C
-         IF (LKNTRL .GT. 0) THEN
+         IF (LKNTRL > 0) THEN
             TEMP(LTEMP+1:LTEMP+20) = ' TRACEBACK REQUESTED'
             LTEMP = LTEMP + 20
          ELSE
@@ -1854,10 +1854,10 @@ C
 C       IF LKNTRL IS POSITIVE, WRITE THE ERROR NUMBER AND REQUEST A
 C          TRACEBACK.
 C
-      IF (LKNTRL .GT. 0) THEN
+      IF (LKNTRL > 0) THEN
          WRITE (TEMP, '(''ERROR NUMBER = '', I8)') NERR
          DO 10 I=16,22
-            IF (TEMP(I:I) .NE. ' ') GO TO 20
+            IF (TEMP(I:I) /= ' ') GO TO 20
    10    CONTINUE
 C
    20    CALL XERPRN (' *  ', -1, TEMP(1:15) // TEMP(I:23), 72)
@@ -1866,7 +1866,7 @@ C
 C
 C       IF LKNTRL IS NOT ZERO, PRINT A BLANK LINE AND AN END OF MESSAGE.
 C
-      IF (LKNTRL .NE. 0) THEN
+      IF (LKNTRL /= 0) THEN
          CALL XERPRN (' *  ', -1, ' ', 72)
          CALL XERPRN (' ***', -1, 'END OF MESSAGE', 72)
          CALL XERPRN ('    ',  0, ' ', 72)
@@ -1875,14 +1875,14 @@ C
 C       IF THE ERROR IS NOT FATAL OR THE ERROR IS RECOVERABLE AND THE
 C       CONTROL FLAG IS SET FOR RECOVERY, THEN RETURN.
 C
-   30 IF (LEVEL.LE.0 .OR. (LEVEL.EQ.1 .AND. MKNTRL.LE.1)) RETURN
+   30 IF (LEVEL<=0 .OR. (LEVEL==1 .AND. MKNTRL<=1)) RETURN
 C
 C       THE PROGRAM WILL BE STOPPED DUE TO AN UNRECOVERED ERROR OR A
 C       FATAL ERROR.  PRINT THE REASON FOR THE ABORT AND THE ERROR
 C       SUMMARY IF THE CONTROL FLAG AND THE MAXIMUM ERROR COUNT PERMIT.
 C
-      IF (LKNTRL.GT.0 .AND. KOUNT.LT.MAX(1,MAXMES)) THEN
-         IF (LEVEL .EQ. 1) THEN
+      IF (LKNTRL>0 .AND. KOUNT<MAX(1,MAXMES)) THEN
+         IF (LEVEL == 1) THEN
             CALL XERPRN
      *         (' ***', -1, 'JOB ABORT DUE TO UNRECOVERED ERROR.', 72)
          ELSE
@@ -1988,20 +1988,20 @@ C       ERROR MESSAGE UNIT.
 C
       N = I1MACH(4)
       DO 10 I=1,NUNIT
-         IF (IU(I) .EQ. 0) IU(I) = N
+         IF (IU(I) == 0) IU(I) = N
    10 CONTINUE
 C
 C       LPREF IS THE LENGTH OF THE PREFIX.  THE PREFIX IS PLACED AT THE
 C       BEGINNING OF CBUFF, THE CHARACTER BUFFER, AND KEPT THERE DURING
 C       THE REST OF THIS ROUTINE.
 C
-      IF ( NPREF .LT. 0 ) THEN
+      IF ( NPREF < 0 ) THEN
          LPREF = LEN(PREFIX)
       ELSE
          LPREF = NPREF
       ENDIF
       LPREF = MIN(16, LPREF)
-      IF (LPREF .NE. 0) CBUFF(1:LPREF) = PREFIX
+      IF (LPREF /= 0) CBUFF(1:LPREF) = PREFIX
 C
 C       LWRAP IS THE MAXIMUM NUMBER OF CHARACTERS WE WANT TO TAKE AT ONE
 C       TIME FROM MESSG TO PRINT ON ONE LINE.
@@ -2013,14 +2013,14 @@ C
       LENMSG = LEN(MESSG)
       N = LENMSG
       DO 20 I=1,N
-         IF (MESSG(LENMSG:LENMSG) .NE. ' ') GO TO 30
+         IF (MESSG(LENMSG:LENMSG) /= ' ') GO TO 30
          LENMSG = LENMSG - 1
    20 CONTINUE
    30 CONTINUE
 C
 C       IF THE MESSAGE IS ALL BLANKS, THEN PRINT ONE BLANK LINE.
 C
-      IF (LENMSG .EQ. 0) THEN
+      IF (LENMSG == 0) THEN
          CBUFF(LPREF+1:LPREF+1) = ' '
          DO 40 I=1,NUNIT
             WRITE(IU(I), '(A)') CBUFF(1:LPREF+1)
@@ -2043,12 +2043,12 @@ C       FOLLOWING ORDER.  WE ARE ATTEMPTING TO SET LPIECE TO THE NUMBER
 C       OF CHARACTERS THAT SHOULD BE TAKEN FROM MESSG STARTING AT
 C       POSITION NEXTC.
 C
-C       LPIECE .EQ. 0   THE NEW LINE SENTINEL DOES NOT OCCUR IN THE
+C       LPIECE == 0   THE NEW LINE SENTINEL DOES NOT OCCUR IN THE
 C                       REMAINDER OF THE CHARACTER STRING.  LPIECE
 C                       SHOULD BE SET TO LWRAP OR LENMSG+1-NEXTC,
 C                       WHICHEVER IS LESS.
 C
-C       LPIECE .EQ. 1   THE NEW LINE SENTINEL STARTS AT MESSG(NEXTC:
+C       LPIECE == 1   THE NEW LINE SENTINEL STARTS AT MESSG(NEXTC:
 C                       NEXTC).  LPIECE IS EFFECTIVELY ZERO, AND WE
 C                       PRINT NOTHING TO AVOID PRODUCING UNNECESSARY
 C                       BLANK LINES.  THIS TAKES CARE OF THE SITUATION
@@ -2057,25 +2057,25 @@ C                       EXACTLY 72 CHARACTERS FOLLOWED BY A NEW LINE
 C                       SENTINEL FOLLOWED BY MORE CHARACTERS.  NEXTC
 C                       SHOULD BE INCREMENTED BY 2.
 C
-C       LPIECE .GT. LWRAP+1  REDUCE LPIECE TO LWRAP.
+C       LPIECE > LWRAP+1  REDUCE LPIECE TO LWRAP.
 C
-C       ELSE            THIS LAST CASE MEANS 2 .LE. LPIECE .LE. LWRAP+1
+C       ELSE            THIS LAST CASE MEANS 2 <= LPIECE <= LWRAP+1
 C                       RESET LPIECE = LPIECE-1.  NOTE THAT THIS
-C                       PROPERLY HANDLES THE END CASE WHERE LPIECE .EQ.
+C                       PROPERLY HANDLES THE END CASE WHERE LPIECE ==
 C                       LWRAP+1.  THAT IS, THE SENTINEL FALLS EXACTLY
 C                       AT THE END OF A LINE.
 C
       NEXTC = 1
    50 LPIECE = INDEX(MESSG(NEXTC:LENMSG), NEWLIN)
-      IF (LPIECE .EQ. 0) THEN
+      IF (LPIECE == 0) THEN
 C
 C       THERE WAS NO NEW LINE SENTINEL FOUND.
 C
          IDELTA = 0
          LPIECE = MIN(LWRAP, LENMSG+1-NEXTC)
-         IF (LPIECE .LT. LENMSG+1-NEXTC) THEN
+         IF (LPIECE < LENMSG+1-NEXTC) THEN
             DO 52 I=LPIECE+1,2,-1
-               IF (MESSG(NEXTC+I-1:NEXTC+I-1) .EQ. ' ') THEN
+               IF (MESSG(NEXTC+I-1:NEXTC+I-1) == ' ') THEN
                   LPIECE = I-1
                   IDELTA = 1
                   GOTO 54
@@ -2084,21 +2084,21 @@ C
          ENDIF
    54    CBUFF(LPREF+1:LPREF+LPIECE) = MESSG(NEXTC:NEXTC+LPIECE-1)
          NEXTC = NEXTC + LPIECE + IDELTA
-      ELSEIF (LPIECE .EQ. 1) THEN
+      ELSEIF (LPIECE == 1) THEN
 C
 C       WE HAVE A NEW LINE SENTINEL AT MESSG(NEXTC:NEXTC+1).
 C       DON'T PRINT A BLANK LINE.
 C
          NEXTC = NEXTC + 2
          GO TO 50
-      ELSEIF (LPIECE .GT. LWRAP+1) THEN
+      ELSEIF (LPIECE > LWRAP+1) THEN
 C
 C       LPIECE SHOULD BE SET DOWN TO LWRAP.
 C
          IDELTA = 0
          LPIECE = LWRAP
          DO 56 I=LPIECE+1,2,-1
-            IF (MESSG(NEXTC+I-1:NEXTC+I-1) .EQ. ' ') THEN
+            IF (MESSG(NEXTC+I-1:NEXTC+I-1) == ' ') THEN
                LPIECE = I-1
                IDELTA = 1
                GOTO 58
@@ -2108,7 +2108,7 @@ C
          NEXTC = NEXTC + LPIECE + IDELTA
       ELSE
 C
-C       IF WE ARRIVE HERE, IT MEANS 2 .LE. LPIECE .LE. LWRAP+1.
+C       IF WE ARRIVE HERE, IT MEANS 2 <= LPIECE <= LWRAP+1.
 C       WE SHOULD DECREMENT LPIECE BY ONE.
 C
          LPIECE = LPIECE - 1
@@ -2122,7 +2122,7 @@ C
          WRITE(IU(I), '(A)') CBUFF(1:LPREF+LPIECE)
    60 CONTINUE
 C
-      IF (NEXTC .LE. LENMSG) GO TO 50
+      IF (NEXTC <= LENMSG) GO TO 50
       RETURN
       END
 
@@ -2196,18 +2196,18 @@ C***END PROLOGUE  XERSVE
       DATA KOUNTX/0/, NMSG/0/
 C***FIRST EXECUTABLE STATEMENT  XERSVE
 C
-      IF (KFLAG.LE.0) THEN
+      IF (KFLAG<=0) THEN
 C
 C        Dump the table.
 C
-         IF (NMSG.EQ.0) RETURN
+         IF (NMSG==0) RETURN
 C
 C        Print to each unit.
 C
          CALL XGETUA (LUN, NUNIT)
          DO 20 KUNIT = 1,NUNIT
             IUNIT = LUN(KUNIT)
-            IF (IUNIT.EQ.0) IUNIT = I1MACH(4)
+            IF (IUNIT==0) IUNIT = I1MACH(4)
 C
 C           Print the table header.
 C
@@ -2222,13 +2222,13 @@ C
 C
 C           Print number of other errors.
 C
-            IF (KOUNTX.NE.0) WRITE (IUNIT,9020) KOUNTX
+            IF (KOUNTX/=0) WRITE (IUNIT,9020) KOUNTX
             WRITE (IUNIT,9030)
    20    CONTINUE
 C
 C        Clear the error tables.
 C
-         IF (KFLAG.EQ.0) THEN
+         IF (KFLAG==0) THEN
             NMSG = 0
             KOUNTX = 0
          ENDIF
@@ -2242,16 +2242,16 @@ C
          SUB = SUBROU
          MES = MESSG
          DO 30 I = 1,NMSG
-            IF (LIB.EQ.LIBTAB(I) .AND. SUB.EQ.SUBTAB(I) .AND.
-     *         MES.EQ.MESTAB(I) .AND. NERR.EQ.NERTAB(I) .AND.
-     *         LEVEL.EQ.LEVTAB(I)) THEN
+            IF (LIB==LIBTAB(I) .AND. SUB==SUBTAB(I) .AND.
+     *         MES==MESTAB(I) .AND. NERR==NERTAB(I) .AND.
+     *         LEVEL==LEVTAB(I)) THEN
                   KOUNT(I) = KOUNT(I) + 1
                   ICOUNT = KOUNT(I)
                   RETURN
             ENDIF
    30    CONTINUE
 C
-         IF (NMSG.LT.LENTAB) THEN
+         IF (NMSG<LENTAB) THEN
 C
 C           Empty slot found for new message.
 C
@@ -2309,7 +2309,7 @@ C                on the value of N.  A value of zero refers to the
 C                default unit, as defined by the I1MACH machine
 C                constant routine.  Only IUNIT(1),...,IUNIT(N) are
 C                defined by XGETUA.  The values of IUNIT(N+1),...,
-C                IUNIT(5) are not defined (for N .LT. 5) or altered
+C                IUNIT(5) are not defined (for N < 5) or altered
 C                in any way by XGETUA.
 C        N     - the number of units to which copies of the
 C                error messages are being sent.  N will be in the
@@ -2330,7 +2330,7 @@ C***FIRST EXECUTABLE STATEMENT  XGETUA
       N = J4SAVE(5,0,.FALSE.)
       DO 30 I=1,N
          INDEX = I+4
-         IF (I.EQ.1) INDEX = 3
+         IF (I==1) INDEX = 3
          IUNITA(I) = J4SAVE(INDEX,0,.FALSE.)
    30 CONTINUE
       RETURN
