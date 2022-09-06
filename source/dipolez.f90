@@ -221,8 +221,8 @@ implicit none
      write(6,*)'Program stops here'
      stop
   end if
-  if(ifpar1!=ifpar2) then
-     write(6,*)'ifpar1!=ifpar2 -> there are not allowed transitions!'
+  if(ifpar1/=ifpar2) then
+     write(6,*)'ifpar1/=ifpar2 -> there are not allowed transitions!'
 !     write(6,*)'Program stops here'
 !     stop
   end if
@@ -351,7 +351,7 @@ subroutine read_kblocks(channel)
             write(6,*)'n3d2 is',n3d2
             end if
 
-               if(nth1!=nth2)then
+               if(nth1/=nth2)then
                   write(6,*)nth1,nth2
                   write(6,*)'---the number of angular grid points is not the same in both files'
                   write(6,*)'---the program will stop'
@@ -375,8 +375,8 @@ subroutine read_kblocks(channel)
 
                !if(.true.) then ! FOR NORM CHECK
                
-               if(sa!=0.0d0.or.sb!=0.d0) then
-!               if(sa!=100000.0d0.or.sb!=10000.0d0) then
+               if(sa/=0.0d0.or.sb/=0.d0) then
+!               if(sa/=100000.0d0.or.sb/=10000.0d0) then
 
                   if(.not.allocated(waves2)) then
 
@@ -756,8 +756,8 @@ deallocate(dipcxa,dipcya,dipcxb,dipcyb)
 pc1=pc1+1
 pc2=pc2+1
 enddo !cycle over columns r_grid
-    if(ispar1==0.and.isparloop!=0) pc1=pc1+1
-    if(ispar2==0.and.isparloop!=0) pc2=pc2+1
+    if(ispar1==0.and.isparloop/=0) pc1=pc1+1
+    if(ispar2==0.and.isparloop/=0) pc2=pc2+1
 enddo!cycle over lines   r_grid
 
 152 format(2f20.10)   
@@ -1005,7 +1005,7 @@ end subroutine r_to_q
       data zero,one/0.0d0,1.0d0/
 
       threej = zero
-      if (m1+m2+m3 != 0) return
+      if (m1+m2+m3 /= 0) return
       i1 = -j1+j2+j3+1
       if (i1 <= 0) return
       i2 = j1-j2+j3+1
@@ -1039,7 +1039,7 @@ end subroutine r_to_q
       threej = threej * sqrt(binom(j2+j2+1,i3)*binom(j1+j1+1,i2)&
              / (binom(j1+j2+j3+2,i3)*dble(j3+j3+1)&
              * binom(j1+j1+1,l1)*binom(j2+j2+1,l2)*binom(j3+j3+1,l3)))
-      if (mod(n3+imin,2) != 0) threej = - threej
+      if (mod(n3+imin,2) /= 0) threej = - threej
       return
       end
 
@@ -1201,7 +1201,7 @@ subroutine list_transfer
 
 !!!
 
-  if(nval1!=nval2)then
+  if(nval1/=nval2)then
      nval=min(nval1,nval2)
      write(6,*)'---the number of wavefunctions on each file is different.'
      write(6,*)'---calculations will use the lowest number:',nval
@@ -1211,7 +1211,7 @@ subroutine list_transfer
   end if
 
 
-  if(any((rgrid1!=rgrid2).or.(nr1!=nr2)))then
+  if(any((rgrid1/=rgrid2).or.(nr1/=nr2)))then
      write(6,*)'---the rgrid points are different.'
      write(6,*)'---the program will stop'
      stop

@@ -1,3 +1,9 @@
+
+      module oupb
+      implicit none
+        double precision xp0,xp1,xp2
+      end module oupb
+
       program DVR3DRJZ
       call dvr3d
       stop
@@ -44,14 +50,16 @@
 !     4. the eigenvalues are printed in both hartree & wavenumbers.
 !
 !     Rewritten into fortran 95 by Max Kostin and Jonathan Tennyson
+      use oupb
       implicit double precision (a-h,o-y), logical (z)
+
       common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
                     zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
                     zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
                     idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
                     ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
                     zpseg
-      common /oupb/   xp0,xp1,xp2
+
       namelist/prt/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
                     zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
                     zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zperp,&
@@ -175,6 +183,7 @@
 
 !     set up common /size/ & write control parameters of problem
 
+      use oupb
       implicit double precision (a-h,o-y), logical (z)
 
 !     common /size/ stores control parameters for the problem
@@ -214,7 +223,7 @@
 !     neval: number of eigenvalues which have to actually be supplied
 !            as output
 !     ncoord: number of vibrational coordinates explicitly considered
-!     if (ncoord != 3) some of the above are dummies, see below.
+!     if (ncoord /= 3) some of the above are dummies, see below.
 
       common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
                     npnt,nlim1,nlim2,neval,ncoord,&
@@ -227,7 +236,7 @@
                     idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
                     ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intveci,&
                     zpseg
-      common /oupb/   xp0,xp1,xp2
+
       character(len=8) title(9)
 !     read in control parameters of problem:
 
@@ -254,7 +263,7 @@
          idvr=nalf
          zmors1=zmors2
          ztheta=.false.
-         if (jrot != 0) zbisc=.true.
+         if (jrot /= 0) zbisc=.true.
 !        Q symmetry
 !        iq=0 -> q=0("+")
 !        iq=1 -> q=1("-")
@@ -525,7 +534,7 @@
          endif
          if (idia == 2) then
             idvr=nalf2
-            if (2*idvr != nalf) goto 960
+            if (2*idvr /= nalf) goto 960
          endif
       else
          write(6,1210)
@@ -533,10 +542,10 @@
          idvr=nalf
          ipar=0
       endif
-      if (jrot != 0) then
+      if (jrot /= 0) then
          jrot=abs(jrot)
          if (zrot) then
-            if (kmin != 0 .and. .not. zbisc) kmin=1
+            if (kmin /= 0 .and. .not. zbisc) kmin=1
             write(6,1220)
  1220 format(/5x,'***  vibrational part of rot-vib calculation  ***')
             write(6,1260) jrot
@@ -860,7 +869,7 @@
          else
             jdia=max(1,idia)
             jstart=kmin
-            if (mod(jstart,jdia) != ipar) jstart=jstart+1
+            if (mod(jstart,jdia) /= ipar) jstart=jstart+1
             nang=(maxleg-jstart)/jdia+1
             mbass=idvr*npnt1*npnt2
             if (idia == -2) mbass=idvr*max2d
@@ -924,7 +933,7 @@
          lincr = kz
       else
          lincr = 0
-         if (idia != 2) then
+         if (idia /= 2) then
             nidvr = idvr - kz
             nang  = nalf - kz
             nang2 = (nang+1)/2
@@ -1122,7 +1131,7 @@
       read(5,5)     re2,diss2,we2
       write(6,1000) xmass
  1000 FORMAT(/5X,'Vibrational nuclear mass in AMU:',3F12.6)
-      if (jrot!=0) write(6,1001) xmassr
+      if (jrot/=0) write(6,1001) xmassr
  1001 FORMAT( 5X,'Rotational  nuclear mass in AMU:',3F12.6/)
 !     compute the effective moments of inertia
       ur1 = amtoau/(g2*g2/xmass(1)+x1/xmass(2)+(x1-g2)**2/xmass(3))
@@ -1724,7 +1733,7 @@
        a(i)= cc/(dpn*pn1)
        csa= csa + a(i) + a(i)
   20  continue
-      if (2*nn2 != nn) csa=csa-a(nn2)
+      if (2*nn2 /= nn) csa=csa-a(nn2)
       return
       end
 
@@ -1910,7 +1919,7 @@
 
       jdia=max(1,idia)
       jj0=-jdia
-      if (.not.zperp .and. mod(jstart,jdia) != ipar0) then
+      if (.not.zperp .and. mod(jstart,jdia) /= ipar0) then
           jj0=jj0+1
           jstart=jstart+1
       endif
@@ -2202,7 +2211,7 @@
 !              have term * r1**(-2) term
                wterm = term * w1gama * ur1/urr1
             endif
-!     extra NBO term if vib mass != rot mass
+!     extra NBO term if vib mass /= rot mass
             if (kz > 0) then
                s1 = ur1/urr1-x1
                s2 = ur2/urr2-x1
@@ -2671,7 +2680,7 @@
         
 !        call dsyevd('V','L',nham,ham,maxham,eig,work,lwork,iwork,liwork,ifail)
         
-!        if (ifail != 0) write(6,100) ifail
+!        if (ifail /= 0) write(6,100) ifail
 !        return
 !100     format(' diagonalisation has failed with, ifail=',i3)
 !      end subroutine diag
@@ -2695,7 +2704,7 @@
       nnham=maxham*3
       call dsyev ('V','L',nham,ham,maxham,eig,work,nnham,ifail)
 
-      if (ifail != 0) write(6,100) ifail
+      if (ifail /= 0) write(6,100) ifail
       return
 100   format(' diagonalisation has failed with, ifail=',i3)
     END SUBROUTINE diag
@@ -2750,7 +2759,7 @@
       endif
       if (zpfun) then
          ip=jrot-kmin
-         if (jrot != 0 .and. ip != 1) goto 10
+         if (jrot /= 0 .and. ip /= 1) goto 10
          jdia=max(0,idia)
          jpar=min(jdia,ipar)
          isym=abs(min(0,idia))
@@ -2787,7 +2796,7 @@
          call outrow(ham3(1,l),nham3,iout2)
    60    continue
       endif
-      if (jrot != 0) return
+      if (jrot /= 0) return
       if (abs(idia) == 2 .and. ipar == 1) then
          ii=1
          ezero=x0
@@ -3101,7 +3110,7 @@
 
       xtscw=(dble(jrot * jrot + jrot)*(asw+bsw)*0.5d0+dble(kz*kz)& 
            *(csw-(bsw+asw)*0.5d0))*xp2
-      if (jrot != 0) then
+      if (jrot /= 0) then
          term  = dble(jrot * jrot + jrot - kz * kz) / x8
          term2 = dble(jrot * jrot + jrot - 3 * kz * kz) / x4
          if (abs(kz) == 1) then
@@ -3199,7 +3208,7 @@
 
 
 !     allow for j > 0 case
-      if (jrot != 0) then
+      if (jrot /= 0) then
         fact =  term + term2 / (x1 - xcos)
         if (kz == 1) fact = fact + term3 * (x1 + xcos)/(x1-xcos)
         ia = 0
@@ -3308,8 +3317,8 @@
       iprev=itotal
       inew=nham2
       do 20 ipos = itotal + nham2,1,-1
-        if(iprev != 0) then
-          if(inew != 0) then
+        if(iprev /= 0) then
+          if(inew /= 0) then
             if(eig2(inew) < eigtmp(iprev)) then
               eigtmp(ipos) = eigtmp(iprev)
               iprev = iprev - 1
@@ -3764,7 +3773,7 @@
       if (nham2 > 0) then
          do 5 kk=1,npnta
          call getrow(vecs1l(1,kk),nham2,iout2)
-         if (iv2l(ione) != 0) call outrow(vecs1l(1,kk),nham2,ivecs1)
+         if (iv2l(ione) /= 0) call outrow(vecs1l(1,kk),nham2,ivecs1)
     5    continue
       endif
    35 continue
@@ -4104,7 +4113,7 @@
       realkz = DBLE(kz)
 
 !     allow for j > 0 case
-      if (jrot != 0) then
+      if (jrot /= 0) then
 ! for q=0(+) term goes with -
 ! for q=1(-) term goes with +
          if(iq == 0)then

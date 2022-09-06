@@ -220,13 +220,13 @@
          else
             write(6,1014)
  1014 format(/5x,'Diagonalisation performed iteratively using F02FJF')
-            IF (TOLER != X0) WRITE(6,1060) TOLER
+            IF (TOLER /= X0) WRITE(6,1060) TOLER
  1060 FORMAT(5X,'EIGENVALUE CONVERGENCE TOLERANCE, TOLER =',D20.3)
             IF (TOLER == X0) WRITE(6,1070)
  1070 FORMAT(5X,'EIGENVALUES CONVERGED TO MACHINE ACCURACY')
          endif
       ENDIF
-      IF (IRES != 0) WRITE(6,1015) IRES
+      IF (IRES /= 0) WRITE(6,1015) IRES
  1015 FORMAT(/5X,'***** RESTART RUN, IRES =',I2,' *****')
       IF ( IRES == -1)WRITE(6,1016)
  1016 FORMAT(/5X,'***** TRANSFORMATION ONLY *****')
@@ -270,11 +270,11 @@
       IF (ZTRAN .AND. KMIN > 1) WRITE(6,1059) KVEC2
  1059 FORMAT( 5X,'SECOND SET            TO BE WRITTEN TO STREAM ',&
              'KVEC2 =',I4)
-      IF (TOLER != X0) WRITE(6,1066) TOLER
+      IF (TOLER /= X0) WRITE(6,1066) TOLER
  1066 FORMAT(/5X,'EIGENVALUE CONVERGENCE TOLERANCE, TOLER =',D20.3)
       IF (TOLER == X0) WRITE(6,1077)
  1077 FORMAT(/5X,'EIGENVALUE CONVERGENCE TO MACHINE ACCURACY')
-      IF (IDIA != 2) THEN
+      IF (IDIA /= 2) THEN
          IF (IDIA == 1) WRITE(6,1080)
  1080    FORMAT(/5X,'DIATOMIC ASSUMED HETRONUCLEAR')
          IF (IDIA == 0) WRITE(6,1085)
@@ -295,7 +295,7 @@
  1140 FORMAT(12X,'WITH SYMMETRIC |JK> + |J-K> FUNCTIONS IN BASIS')
       IF (KMIN > 1) WRITE(6,1150)
  1150 FORMAT(12X,'LOOP OVER SYMMETRIC AND ANTI-SYMMETRIC FUNCTIONS')
-      IF (KMIN > 0 .AND. KMIN0 != 1) GOTO 960
+      IF (KMIN > 0 .AND. KMIN0 /= 1) GOTO 960
       IF (ZEMBED) then
          WRITE(6,1160) 2
       else
@@ -426,7 +426,7 @@
   230 continue
       WRITE(6,1000) NBASS,EMIN,EVIBR
  1000 FORMAT(/,I9,'FUNCTIONS SELECTED FROM E =',D20.10,' TO',D20.10)
-      else  !if ires!=0
+      else  !if ires/=0
          read(IRF2) nbass,neval,neval2,ipar,idia,jrot,kmin,nblk
          read(IRF2) mvib
          if(ires <= -1 .OR. ZTRAN)then
@@ -731,7 +731,7 @@
       if (.not.zquad2) n2max=npnt2
       nrad=npnt1*npnt2
       IF (KMIN == 0) K=1
-      IF (KMIN != 0) K=0
+      IF (KMIN /= 0) K=0
       MOFF=0
       IDPT=1
 !     START A NEW BAND OF THE HAMILTONIAN MATRIX
@@ -752,7 +752,7 @@
       ENDIF
 
       maxlg2=maxleg+lincr
-      IF (MOD(maxlg2,JDIA) != IPAR) maxlg2=maxlg2-1
+      IF (MOD(maxlg2,JDIA) /= IPAR) maxlg2=maxlg2-1
 
       IF (MVIB(MOFF) > 0) THEN
 
@@ -873,7 +873,7 @@
 
       JSTART=KZ
       JJ0=-JDIA
-      IF (MOD(JSTART,JDIA) != IPAR) THEN
+      IF (MOD(JSTART,JDIA) /= IPAR) THEN
          JJ0=JJ0+1
          JSTART=JSTART+1
       ENDIF
@@ -1044,7 +1044,7 @@
       CALL F02FJF(IBASS,NEVAL,KEVAL,NOITS,TOLER,VECVEC,MATVEC,F02FJZ,&
                   KEVAL,VEC,IBASS,EVAL,WORK,LWORK,diag,NOFFD,&
                   MVIB,K1,IFAIL)
-      IF (IFAIL != 0) WRITE(6,900) IFAIL
+      IF (IFAIL /= 0) WRITE(6,900) IFAIL
   900 FORMAT(//5X,'F02FJF RETURNED IFAIL =',I3)
 
       WRITE(6,1000) NOITS
@@ -1091,9 +1091,9 @@
          call DSYEVX('V','I','U',ibass,vec,ibass,0.d0,0.d0,1,neval,&
                      0.d0,nfound,eval,evec,ibass, WORK, 8*ibass, IWORK,&
                      IWORK2, IFAIL )
-         IF (IFAIL != 0) WRITE(6,900) IFAIL
+         IF (IFAIL /= 0) WRITE(6,900) IFAIL
          write(6,*)' Found ',nfound,' evalues (out of ',neval,')'
-         IF (NEVAL!=nfound) stop
+         IF (NEVAL/=nfound) stop
          do i=1,neval
             do j=1,ibass
                vec(j,i)=evec(j,i)
@@ -1255,7 +1255,7 @@
       READ(JVEC) MVIB
 
 !     CHECK FOR COMPATABILITY
-      IF (JROT1 != ABS(JROT0)) THEN
+      IF (JROT1 /= ABS(JROT0)) THEN
           WRITE(6,900) JROT1,ABS(JROT0)
   900     FORMAT(/5X,'J LEVELS MISMATCHED',&
                  /5X,'JROT1 =',I3,'  JROT0 =',I3)
@@ -1266,7 +1266,7 @@
   910    FORMAT(/5X,'KMIN1 AND KMIN0 INCOMPATIBLE')
          STOP
       ENDIF
-      IF (IPAR != IPAR1) THEN
+      IF (IPAR /= IPAR1) THEN
          WRITE(6,920) IPAR,IPAR1
   920    FORMAT(/5X,'PARITIES MISMATCHED'/5X,'IPAR= ',I2,'  IPAR1= ',I2)
          STOP

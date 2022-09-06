@@ -230,7 +230,7 @@
 !          : for non-coriolis calculations, kmin= k.
 !     neval: number of eigenvalues supplied from rotlev or triatom
 !     ncoord: number of vibrational coordinates explicitly considered
-!     if (ncoord != 3) some of the above are dummies, see below.
+!     if (ncoord /= 3) some of the above are dummies, see below.
 !
       common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
                  npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
@@ -294,7 +294,7 @@
 
 !     check the bra and ket are consistent
 
-      if (idia1!=idia2) then
+      if (idia1/=idia2) then
           write(6,998) idia1,idia2
 998       format(//,5x,'** fatal ** diatomic mismatch',/&
                       5x,'idia1=',i2,'  idia2=',i2,/)
@@ -328,7 +328,7 @@
 !ccccccccccccccccc
       if (idia > -2) then
          if (zembed) then
-            if (ipar1!=ipar2 .and. idia==2) then
+            if (ipar1/=ipar2 .and. idia==2) then
                write(6,997) ipar1,ipar2
 997          format(//,5x,'** fatal ** parity mismatch, spin forbidden',&
                    /,5x,'ipar1=',i2,'  ipar2=',i2,/)
@@ -345,7 +345,7 @@
          zbisc=.true.
          zembed=.true.
          if (jrot1 == jrot2) then
-            if (ipar1!=ipar2) then
+            if (ipar1/=ipar2) then
                write(6,997) ipar1,ipar2
                stop
             endif
@@ -394,7 +394,7 @@
          else
             write(6,775) 1
          endif
-         if (nmax11 != nmax21) then
+         if (nmax11 /= nmax21) then
             write(6,875) 1,nmax11,nmax21
             stop
          else
@@ -410,7 +410,7 @@
          write(6,775) 2
       endif
 !cccccccccccccccccccccccccccccccccc
-      if (nmax12 != nmax22) then
+      if (nmax12 /= nmax22) then
           write(6,875) 2,nmax12,nmax22
           stop
       else
@@ -550,9 +550,9 @@
 !
          mbass1=(nrade+nrado)*jt
 !
-         if (2*jt != jk1) then
+         if (2*jt /= jk1) then
            if (ipar1 == 0) mbass1=mbass1+nrade
-           if (ipar1 != 0) mbass1=mbass1+nrado
+           if (ipar1 /= 0) mbass1=mbass1+nrado
          endif
 !
          mbass1=mbass1*lmax1
@@ -560,9 +560,9 @@
          jt=jk2/2
          mbass2=(nrade+nrado)*jt
 !
-         if (2*jt != jk2) then
+         if (2*jt /= jk2) then
            if (ipar2 == 0) mbass2=mbass2+nrade
-           if (ipar2 != 0) mbass2=mbass2+nrado
+           if (ipar2 /= 0) mbass2=mbass2+nrado
          endif
          mbass2=mbass2*lmax2
        endif
@@ -603,7 +603,7 @@
 !     stop otherwise.
 !
       itot= jrot1 + jrot2 + 1 + kmin1 + kmin2
-      if (mod(itot,2) != 0 .or. abs(jrot1 - jrot2) > 1) then
+      if (mod(itot,2) /= 0 .or. abs(jrot1 - jrot2) > 1) then
          write(6,9999)
 9999     format(/,/,5x,'selection rules violated',/)
          stop
@@ -620,7 +620,7 @@
 !
 !     check dimension of angular integration: should be even
 !
-      if (mod(npot,2)!=0) npot=npot+1
+      if (mod(npot,2)/=0) npot=npot+1
       nn2= npot/2
 ! set the number of anglular integartion points needed for the problem
       if (idia<2) then
@@ -913,7 +913,7 @@
            k2,kbeg2,jk2,1-ip,ibase2,xd,kk,nu,ipar2)
          xfac= x1
 
-         if (idia==-2 .and. mod((kk+ipar11)/2+(kk+ipar22)/2,2)!=0)&
+         if (idia==-2 .and. mod((kk+ipar11)/2+(kk+ipar22)/2,2)/=0)&
            xfac=-xfac
          call trans(tz,dipol,binom,dc1,dc2,k1,k2,xfac,nu,1)
          call wrscr(tz,tx,neval1*neval2,iscr,iblock)
@@ -974,21 +974,21 @@
 		if(kmin2==kmin1) then
 			call dsrd(dmiddle,dstemp,ibra,mbass2,nbass2(1),neval2,&
                                 1,kbeg2,jk2,1-ip,ibase2,xd,1,1,ipar2)
-            if(jk2 != 1)  call dsrd(dupper,dstemp,ibra,mbass2,nbass2(2),neval2,&
+            if(jk2 /= 1)  call dsrd(dupper,dstemp,ibra,mbass2,nbass2(2),neval2,&
                                 2,kbeg2,jk2,ip,ibase2,xd,2,1,ipar2)
 		else
 			call dsrd(dlower,dstemp,ibra,mbass2,nbass2(1),neval2,& 
 				1,kbeg2,jk2,ip,ibase2,xd,0,1,ipar2)
 			call dsrd(dmiddle,dstemp,ibra,mbass2,nbass2(2),neval2,& 
 				2,kbeg2,jk2,1-ip,ibase2,xd,1,1,ipar2)
-if(jk2 != 1) call dsrd(dupper,dstemp,ibra,mbass2,nbass2(3),neval2,& 
+if(jk2 /= 1) call dsrd(dupper,dstemp,ibra,mbass2,nbass2(3),neval2,& 
                    		3,kbeg2,jk2,ip,ibase2,xd,2,1,ipar2)
 		endif
 	else
 		if(kmin2==kmin1) then
 			call dsrd(dmiddle,dstemp,ibra,mbass2,nbass2(1),neval2,&
                            1,kbeg2,jk2,1-ip,ibase2,xd,0,1,ipar2)
-	if(jk2 != 1) call dsrd(dupper,dstemp,ibra,mbass2,nbass2(2),neval2,&
+	if(jk2 /= 1) call dsrd(dupper,dstemp,ibra,mbass2,nbass2(2),neval2,&
                            2,kbeg2,jk2,ip,ibase2,xd,1,1,ipar2)
 		else
 			call dsrd(dupper,dstemp,ibra,mbass2,nbass2(1),neval2,& 
@@ -1013,7 +1013,7 @@ if(jk2 <= 1) go to 108
         else
          xfac= -x1/sqrt(x2)
          if (kk1==0) xfac= -x1
-         if (idia==-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2)!=0)&
+         if (idia==-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2)/=0)&
            xfac=-xfac
          if (.not. zembed .and. idia < 0) xfac=-xfac
          !call dsrd(dc2,dstemp,ibra,mbass2,nbass2(k2),neval2,&
@@ -1042,7 +1042,7 @@ if(jk2 <= 1) go to 108
         else
          xfac= x1/sqrt(x2)
          if (kk2==0) xfac= x1
-         if (idia==-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2)!=0)&
+         if (idia==-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2)/=0)&
            xfac=-xfac
          if (.not. zembed .and. idia < 0) xfac=-xfac
          !call dsrd(dc2,dstemp,ibra,mbass2,nbass2(k2),neval2,&
@@ -1058,7 +1058,7 @@ if(jk2 <= 1) go to 108
 110   ip=1-ip
       dlower = dmiddle
       dmiddle = dupper
-      if (kbeg2!=jk2) then
+      if (kbeg2/=jk2) then
 	if (kmin1==kmin2) then
 		kk2 = kbeg2+(1 - INT((kmin1 + kmin2)/2))
 	else
@@ -1108,7 +1108,7 @@ if(jk2 <= 1) go to 108
          xfac= x1/sqrt(x2)
          if (k1==0.or.k2==0) xfac= x1
       endif
-      if (idia==-2 .and. mod((k1+ipar1)/2+(k2+ipar2)/2,2)!=0)&
+      if (idia==-2 .and. mod((k1+ipar1)/2+(k2+ipar2)/2,2)/=0)&
            xfac=-xfac
       call trans(tx,dipol,binom,dc1,dc2,k1,k2,xfac,nu,ipar1)
 
@@ -1602,12 +1602,12 @@ if(jk2 <= 1) go to 108
       jdia=max(idia,1)
       jj0=-jdia
       if (zembed) then
-         if (idia == 2 .and. mod(jstart,2) != ipar1) then !r2 case
+         if (idia == 2 .and. mod(jstart,2) /= ipar1) then !r2 case
            jj0=jj0+1
            jstart=jstart+1
          endif
       else
-         if (idia == 2 .and. mod(jstart,2) != jay_ipar) then !r1 case
+         if (idia == 2 .and. mod(jstart,2) /= jay_ipar) then !r1 case
             jj0=jj0+1
             jstart=jstart+1
          endif
@@ -1714,7 +1714,7 @@ if(jk2 <= 1) go to 108
 !     start the calculation
 
       x1= threej(j1,1,j2,kk1,nu,-kk2,binom,nbin)*xfac
-      if (mod(kk1,2) != 0) x1=-x1
+      if (mod(kk1,2) /= 0) x1=-x1
       if (zprint) write(6,*) 'j1, k1, nu, j2, k2 ',j1,kk1,nu,j2,kk2
       if (zprint) write(6,*) 'xfac, x1 =',xfac, x1
 
@@ -1800,7 +1800,7 @@ if(jk2 <= 1) go to 108
       data zero,one/0.0d0,1.0d0/
 
       threej = zero
-      if (m1+m2+m3 != 0) return
+      if (m1+m2+m3 /= 0) return
       i1 = -j1+j2+j3+1
       if (i1 <= 0) return
       i2 = j1-j2+j3+1
@@ -1834,7 +1834,7 @@ if(jk2 <= 1) go to 108
       threej = threej * sqrt(binom(j2+j2+1,i3)*binom(j1+j1+1,i2)&
              / (binom(j1+j2+j3+2,i3)*dble(j3+j3+1)&
              * binom(j1+j1+1,l1)*binom(j2+j2+1,l2)*binom(j3+j3+1,l3)))
-      if (mod(n3+imin,2) != 0) threej = - threej
+      if (mod(n3+imin,2) /= 0) threej = - threej
       return
       end
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc

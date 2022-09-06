@@ -159,43 +159,43 @@
      
 !check consistency on all params
 
-      if (iang_1!=iang_2) then
+      if (iang_1/=iang_2) then
          write(6,1200)' iang ',iang_1,iang_2
          stop
       else 
          iang=iang_1
       end if
-      if (idia_1!=idia_2) then
+      if (idia_1/=idia_2) then
          write(6,1200)' idia ',idia_1,idia_2
          stop
       else 
          idia=idia_1
       end if
-      if (ndvr_1!=ndvr_2) then
+      if (ndvr_1/=ndvr_2) then
          write(6,1200)' ndvr ',ndvr_1,ndvr_2
          stop
       else 
          ndvr=ndvr_1
       end if
-      if (nr_1!=nr_2) then
+      if (nr_1/=nr_2) then
          write(6,1200)' nr ',nr_1,nr_2
          stop
       else 
          nr=nr_1
       end if
-      if (jrot_1!=jrot_2) then
+      if (jrot_1/=jrot_2) then
          write(6,1200)' jrot ',jrot_1,jrot_2
          stop
       else 
          jrot=jrot_1
       end if
-      if (kmin0_1!=kmin0_2) then
+      if (kmin0_1/=kmin0_2) then
          write(6,1200)' kmin0',kmin0_1,kmin0_2
          stop
       else 
          kmin0=kmin0_1
       end if
-      if (nlim_1!=nlim_2) then
+      if (nlim_1/=nlim_2) then
          write(6,1200)' nlim ',nlim_1,nlim_2
          stop
       else 
@@ -367,7 +367,7 @@
 
 !     compute size of rotational secular problem
 
-!      if (nvib!=0) nvib=0
+!      if (nvib/=0) nvib=0
       if (nvib==0) nvib=max(mevala,mevalb)
       nviba=min(nvib,mevala)
       nvibb=min(nvib,mevalb)
@@ -663,7 +663,7 @@
       do ib=1,nkb
          nsum=nsum+ivb(ib)
       end do
-      if (nsum!=nbass) then
+      if (nsum/=nbass) then
          write(6,*)'Problem in state selection (zcut=F):'
          write(6,*)'Nbass = ',nbass
          write(6,*)'but checksum returned ... ',nsum
@@ -673,10 +673,10 @@
 
       emax=eviba(iva(1),1)
       do ia=1,nka
-         if (iva(ia)!=0) emax=max(emax,eviba(iva(ia),ia))
+         if (iva(ia)/=0) emax=max(emax,eviba(iva(ia),ia))
       end do
       do ib=1,nkb
-         if (ivb(ib)!=0) emax=max(emax,evibb(ivb(ib),ib))
+         if (ivb(ib)/=0) emax=max(emax,evibb(ivb(ib),ib))
       end do
 
       write(6,1000) nbass,emin,emax
@@ -1614,7 +1614,7 @@
 !#####################################################################
 !#########################################################################
 !######################################################################
-!======================================================================
+/======================================================================
 !######################################################################
       subroutine solrt2(radmee,radmoo,radmeo,iva,ivb,noffblk)
  
@@ -1709,9 +1709,9 @@
          is2=isa
          mvib2=iva(ia2)
          mn=mvib1*mvib2
-         if (abs(k1-k2)==2.and.mn!=0) then
+         if (abs(k1-k2)==2.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',iva(ia1),iva(ia2)
-         else if (k1==k2.and.mn!=0) then
+         else if (k1==k2.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,' diag',iva(ia1),iva(ia2)
          if (k1==1) & 
          write(6,1010)k1,iq1,is1,k2,iq2,is2,'  xdg',iva(ia1),iva(ia2)
@@ -1732,9 +1732,9 @@
          is2=isb
          mvib2=ivb(ib2)
          mn=mvib1*mvib2
-         if (abs(k1-k2)==2.and.mn!=0) then
+         if (abs(k1-k2)==2.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',ivb(ib1),ivb(ib2)
-         else if (k1==k2.and.mn!=0) then
+         else if (k1==k2.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,' diag',ivb(ib1),ivb(ib2)
          if (k1==1) & 
          write(6,1010)k1,iq1,is1,k2,iq2,is2,'  xdg',ivb(ib1),ivb(ib2)
@@ -1756,15 +1756,15 @@
          mvib2=ivb(ib)
          mn=mvib1*mvib2
 !   coriolis type
-         if (k1==k2.and.mn!=0) then
+         if (k1==k2.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,'  cor',iva(ia),ivb(ib)
          end if
 !   rot type
-         if (abs(k1-k2)==2.and.mn!=0) then
+         if (abs(k1-k2)==2.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',iva(ia),ivb(ib)
          end if
 ! xtra rotational term for k1=k2=1
-         if (k1==1.and.k2==1.and.mn!=0) then
+         if (k1==1.and.k2==1.and.mn/=0) then
          write(6,1010)k1,iq1,is1,k2,iq2,is2,' xrot',iva(ia),ivb(ib)
          end if
 
@@ -1824,7 +1824,7 @@
 !-----------------------------------------------------------
       if (k2==1) then !add extra diagonal term ....
          mn = mvib2*mvib2
-         if (mn!=0) then
+         if (mn/=0) then
       write(6,*)'calculating '
       write(6,1010)k2,iq2,is2,k2,iq2,is2,'  xdg',mvib2,mvib2
       angfac = -xsign(iqa)*dble(jjp1)/x4
@@ -1873,7 +1873,7 @@
       end do
 
          mn = mvib1*mvib2
-         if (mn!=0) then
+         if (mn/=0) then
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',mvib1,mvib2
          angfac = -sqrt(dble((jjp1-k2*(k2+1))*(jjp1-k2*(k2+3)-2)))/x4
@@ -1959,7 +1959,7 @@
 !-----------------------------------------------------------
       if (k2==1) then !add extra diagonal term ....
          mn = mvib2*mvib2
-         if (mn!=0) then
+         if (mn/=0) then
       write(6,*)'calculating '
       write(6,1010)k2,iq2,is2,k2,iq2,is2,'  xdg',mvib2,mvib2
          angfac = -xsign(iqb)*dble(jjp1)/x4
@@ -2006,7 +2006,7 @@
       end do
 
          mn = mvib1*mvib2
-         if (mn!=0) then
+         if (mn/=0) then
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',mvib1,mvib2
          angfac = -sqrt(dble((jjp1-k2*(k2+1))*(jjp1-k2*(k2+3)-2)))/x4
@@ -2120,10 +2120,10 @@
       end do
       j0=j
 
-! do extra off-k block if kmina!=kminb
-      if (k1!=k2) then
+! do extra off-k block if kmina/=kminb
+      if (k1/=k2) then
          mn = mvib1*mvib2  
-         if (mn!=0) then
+         if (mn/=0) then
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',mvib1,mvib2
       write(6,*)jp1,ip1
@@ -2177,7 +2177,7 @@
       k1=ka1
       k2=kb1
       mn=mvib1*mvib2
-      if (mn!=0) then
+      if (mn/=0) then
       ALLOCATE(offdg(mn))
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  cor',mvib1,mvib2
@@ -2265,7 +2265,7 @@
       mvib1=mviba1
       mvib2=mvibb2
       mn = mvib1*mvib2
-      if (mn!=0) then
+      if (mn/=0) then
       angfac = sqrt(dble((jjp1-k1*(k1+1))*(jjp1-k1*(k1+3)-2)))/x4
       angfac = xsign(iqb) * angfac
       if (k1 == 0 .or. k2 == 0) angfac =  angfac*sqrt2 
@@ -2290,7 +2290,7 @@
       mvib1=mvibb1
       mvib2=mviba2
       mn = mvib1*mvib2
-      if (mn!=0) then
+      if (mn/=0) then
       ALLOCATE(offdg(mn))
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  rot',mvib1,mvib2
@@ -2315,7 +2315,7 @@
       mvib1=mviba2
       mvib2=mvibb2
       mn = mvib1*mvib2
-      if (mn!=0) then
+      if (mn/=0) then
       write(6,*)'calculating '
       write(6,1010)k1,iq1,is1,k2,iq2,is2,'  cor',mvib1,mvib2
       write(6,*)jp2,ip2
@@ -2491,7 +2491,7 @@ end do !i2
 
       deallocate(vec)
 
-      IF (INFO != 0) then
+      IF (INFO /= 0) then
          WRITE(6,900) INFO
 900  FORMAT(//5X,'DSPEVX RETURNED INFO =',I3)
          WRITE(96,901) IFAIL
@@ -2536,7 +2536,7 @@ end do !i2
          mbeg=1
          do  k=1,nktot
             mvv=mvib(k)
-            if (mvv!=0) then
+            if (mvv/=0) then
             mend=mbeg+mvv-1
             write(jvec) ((evec(j,i),j=mbeg,mend),i=1,nevalp)
             mbeg=mbeg+mvv
@@ -2896,7 +2896,7 @@ end do !i2
          if (isa==1) nkbas_a=nkbas_odd
          if (isb==0) nkbas_b=nkbas_even
          if (isb==1) nkbas_b=nkbas_odd
-         if ((nkbas_b+nkbas_a)!=nkbas_tot) then
+         if ((nkbas_b+nkbas_a)/=nkbas_tot) then
             write(6,*)'problem in assigning 3d dimension...'
             stop
          end if
@@ -3022,13 +3022,13 @@ end do !i2
          j0=1
          iadd=0
 ! do extra ka block if necessary.....
-      if (kmina!=kminb) then
+      if (kmina/=kminb) then
 ! there is no point to skip as it should be the first block, however
 ! lets check this
          i=inda1(1)
          k=indk(i)
          mvib0=mvib(inda2(1))
-         if (k!=0) then
+         if (k/=0) then
             write(6,*)'Problem in dstorepb2 '
             write(6,*)' i =  ',i
             write(6,*)' k =  ',k
@@ -3540,7 +3540,7 @@ subroutine lagbasis(aa,nlag,dg,wlag,wln,zd,csx)
 
   CALL  DSTEV('V',nlag,dg,dg1,zd,nlag,work,info)
   
-  if (info!=0) then
+  if (info/=0) then
      write(6,*)'Problems with diagonalisation',info
      stop
   endif

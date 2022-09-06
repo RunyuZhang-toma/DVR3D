@@ -106,7 +106,7 @@
 !          : for non-coriolis calculations, kmin= k.
 !     neval: number of eigenvalues supplied from rotlev or triatom
 !     ncoord: number of vibrational coordinates explicitly considered
-!     if (ncoord != 3) some of the above are dummies, see below.
+!     if (ncoord /= 3) some of the above are dummies, see below.
 !     nprop: number of properties to be considered
 !     iprop: vector with the information on which properties
 !            will be considered in the run
@@ -258,9 +258,9 @@
          nrado=npnt1*(npnt1-1)/2
          jt=jk1/2
          mbass=(nrade+nrado)*jt
-         if (2*jt != jk1) then
+         if (2*jt /= jk1) then
            if (ipar == 0) mbass=mbass+nrade
-           if (ipar != 0) mbass=mbass+nrado
+           if (ipar /= 0) mbass=mbass+nrado
          endif
          mbass=mbass*lmax
        endif
@@ -286,7 +286,7 @@
       npot = lpot
       if (jrot > 0) then
          ltop = lpot
-         if (idia == 2 .and. mod(ltop,2) != ipar) ltop=ltop+1
+         if (idia == 2 .and. mod(ltop,2) /= ipar) ltop=ltop+1
          npot=((ltop+2)/2)*2
          nn2= npot/2
       endif
@@ -712,7 +712,7 @@
        a(i)= cc/(dpn*pn1)
        csa= csa + a(i) + a(i)
   20  continue
-      if (2*nn2 != nn) csa=csa-a(nn2)
+      if (2*nn2 /= nn) csa=csa-a(nn2)
       return
       end
 
@@ -1196,12 +1196,12 @@
            if (zform) then
               if (ztra) write(itra,308) jrot,s1,ie,xe1,xeh
               do n = 1,npropin
-                if(ztra .and. xprop(ie,n)!=x0) write(itra,*) xprop(ie,n)
+                if(ztra .and. xprop(ie,n)/=x0) write(itra,*) xprop(ie,n)
               end do
            else
               if (ztra) write(itra) jrot,s1,ie,xe1,xeh
               do n = 1,npropin
-                if(ztra .and. xprop(ie,n)!=x0) write(itra) xprop(ie,n)
+                if(ztra .and. xprop(ie,n)/=x0) write(itra) xprop(ie,n)
               end do
           endif
           write(6,308) jrot,s1,ie,xe1,(xprop(ie,n),n=1,npropin)

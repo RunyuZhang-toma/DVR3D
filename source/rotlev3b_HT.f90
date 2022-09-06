@@ -553,7 +553,7 @@ end subroutine read_8or9_radau
       mxblk2=nmax*(nmax-1)/2
       mbass0=ndvr*maxblk
 
-      if (kmin != kmin0 .and. kmin0 != 2) goto 960
+      if (kmin /= kmin0 .and. kmin0 /= 2) goto 960
       if (ires < 0) ztran=.true.
       if (ires > 0) zdiag=.true.
 
@@ -602,13 +602,13 @@ end subroutine read_8or9_radau
          else
             write(6,1014)
  1014 format(/5x,'Diagonalisation performed iteratively using f02fjf')
-            if (toler != x0) write(6,1016) toler
+            if (toler /= x0) write(6,1016) toler
  1016 format(5x,'Eigenvalue convergence tolerance, TOLER =',d12.3)
             if (toler == x0) write(6,1017)
  1017 format(5x,'Eigenvalues converged to machine accuracy')
          endif
       endif
-      if (ires != 0) write(6,1018) ires
+      if (ires /= 0) write(6,1018) ires
  1018 format(/5x,'***** restart run, IRES =',i2,' *****')
       if (ires < 0) write(6,1019)
  1019 format(/'      transformation only')
@@ -629,7 +629,7 @@ end subroutine read_8or9_radau
  1043     format(5x,'Printing of transformed vectors not requested')
       endif
       if (ires == 0) write(6,1051) 'IVEC',ivec
-      if (ires != 0) write(6,1051) 'IRTF1',irf1
+      if (ires /= 0) write(6,1051) 'IRTF1',irf1
  1051 format(/5x,'DVR3DRJZ data  to be read         from stream ',&
              a4,'  =',i4)
       if (nblk > 2) write(6,1052) ivec2
@@ -659,7 +659,7 @@ end subroutine read_8or9_radau
       if (ires == 0) write(6,1062) irf2
  1062 format( 5x,'Restart data file two to be written to stream ',&
              'IRF2  =',i4)
-      if (ires != 0) write(6,1063) irf2
+      if (ires /= 0) write(6,1063) irf2
  1063 format( 5x,'Restart data file two to be read from  stream ',&
              'IRF2  =',i4)
 
@@ -740,7 +740,7 @@ end subroutine read_8or9_radau
       if (k2 == 0 .and. kmin == 0) then
          call endiv(ivec,jrot+1)
          read(ivec,end=900) k2,maxleg,idvr,lincr
-         if (abs(k2) != 1) then
+         if (abs(k2) /= 1) then
             write(6,950) ivec,k2
   950       format(//' Last block on stream',i3,' has k =',i3,&
                     /' 1 expected: STOP')
@@ -1317,7 +1317,7 @@ end subroutine read_8or9_radau
       a(i)= cc/(dpn*pn1)
       csa= csa + a(i)*x2
   12  continue
-      if (2*nn2 != nn) csa = csa - a(nn2)
+      if (2*nn2 /= nn) csa = csa - a(nn2)
       return
       end
 
@@ -1385,7 +1385,7 @@ end subroutine read_8or9_radau
        a(i)= cc/(dpn*pn1)
        csa= csa + a(i) + a(i)
   20  continue
-      if (2*nn2 != nn) csa=csa-a(nn2)
+      if (2*nn2 /= nn) csa=csa-a(nn2)
       return
       end
 
@@ -2138,7 +2138,7 @@ end subroutine read_8or9_radau
       if (zdcore) then
           ifail=0
           call dsyev('V','U',ibass,vec,ibass,eval,diag,lwork,ifail)
-          if (ifail != 0) write(6,950) ifail
+          if (ifail /= 0) write(6,950) ifail
  950     format(/5x,'LAPACK routine SSYEV returned INFO =',i5)  
       else
          LWORK=3*KEVAL+MAX(KEVAL*KEVAL,NBASS+NBASS)
@@ -2286,7 +2286,7 @@ end subroutine read_8or9_radau
       call f02fjf(ibass,neval,keval,noits,toler,vecvec,matvec,f02fjz,&
                   keval,vec,ibass,eval,work,lwork,diag,noffd,&
                   mvib,ndiag,ifail)
-      if (ifail != 0) write(6,900) ifail
+      if (ifail /= 0) write(6,900) ifail
   900 format(//5x,'f02fjf returned ifail =',i3)
  
       write(6,1000) noits
@@ -2355,7 +2355,7 @@ end subroutine read_8or9_radau
       read(jvec) mvib
       nval=min(nval,neval)
 !     check for compatability
-      if (jrot1 != abs(jrot0)) then
+      if (jrot1 /= abs(jrot0)) then
           write(6,900) jrot1,abs(jrot0)
   900     format(/5x,'j levels mismatched',&
                  /5x,'jrot1 =',i3,'  jrot0 =',i3)
@@ -2368,7 +2368,7 @@ end subroutine read_8or9_radau
       endif
       if (itra == 2) ipar=1-ipar
       if (itra==1 .and. kmin0==2 .and. kmin1==0)  ipar=1-ipar
-      if (ipar != ipar1) then
+      if (ipar /= ipar1) then
          write(6,920) ipar,ipar1
   920    format(/5x,'parities mismatched'/5x,'ipar= ',i2,'  ipar1= ',i2)
          stop

@@ -359,14 +359,14 @@ read(5,101, end=92) temp, xmin, wmin, wmax, dwl, q
 
 write(6,206) temp
 206   format(/5x,'Temperature set to: ',f8.2,' K'//)
-if (xmin!=x0) then
+if (xmin/=x0) then
 write(6,207) xmin
 else
 write(6,208)
 endif
 207   format(5x,'Minimum relative intensity required = ',f8.6)
 208   format(5x,'All transitions printed out')
-if(wmax!=x0) then
+if(wmax/=x0) then
 write(6,209) wmin, wmax, dwl
 else
 write(6,210) wmin, dwl
@@ -457,7 +457,7 @@ goto 10
 ier = 0
 
 call dpsort(da(1,3), nr, iperm, 1, ier)
-if(ier != 0) then
+if(ier /= 0) then
 write(6,*) " ERROR returned by DPSORT", ier
 stop
 endif
@@ -465,10 +465,10 @@ endif
 do 698 ir=1,7
 
 call ipperm(ia(1,ir), nr, iperm, ier)
-if(ier != 0) write(6,*) " ERROR returned by ipperm ", ier
+if(ier /= 0) write(6,*) " ERROR returned by ipperm ", ier
 if(ir <= 4) then
 call dpperm(da(1,ir), nr, iperm, ier)
-if(ier != 0) write(6,*) " ERROR returned by dpperm ", ier
+if(ier /= 0) write(6,*) " ERROR returned by dpperm ", ier
 endif
 
 698 continue

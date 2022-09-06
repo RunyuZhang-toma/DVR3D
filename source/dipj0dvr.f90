@@ -54,7 +54,7 @@ do i=1,200
 enddo
 
 end program dipj0dvr
-!========================================================== rddata =====
+/========================================================== rddata =====
 ! This subroutine reads in the data needed from the various places: a
 ! data file on stream 5, iwave0, ivc0, and if iptot=2, iwave1 and iv1.
       subroutine rddata(title,r1,r2,theta,r11,r21,theta1,maxq)
@@ -143,29 +143,29 @@ end program dipj0dvr
       if (lket0 <= 0) lket0=1
       if (lbra1 <= 0) lbra1=1
       if (lket1 <= 0) lket1=1
-      if ((lbra0 > nbra0 .and. nbra0 != -1) .or. nbra0 == 0) then
+      if ((lbra0 > nbra0 .and. nbra0 /= -1) .or. nbra0 == 0) then
         lbra0=1
         nbra0=0
       endif
-      if ((lket0 > nket0 .and. nket0 != -1) .or. nket0 == 0) then
+      if ((lket0 > nket0 .and. nket0 /= -1) .or. nket0 == 0) then
         lket0=1
         nket0=0
       endif
-      if ((lbra1 > nbra1 .and. nbra1 != -1) .or. nbra1 == 0) then
+      if ((lbra1 > nbra1 .and. nbra1 /= -1) .or. nbra1 == 0) then
         lbra1=1
         nbra1=0
       endif
-      if ((lket1 > nket1 .and. nket1 != -1) .or. nket1 == 0) then
+      if ((lket1 > nket1 .and. nket1 /= -1) .or. nket1 == 0) then
         lket1=1
         nket1=0
       endif
-      if (nbra0 != 0 .and. nket0 != 0) then
+      if (nbra0 /= 0 .and. nket0 /= 0) then
         open (unit=ibra0,form='UNFORMATTED')
         open (unit=iket0,form='UNFORMATTED')
         open (unit=iwave0,form='UNFORMATTED')
         if (.not.zdone) open (unit=ivc0, form='UNFORMATTED')
       endif
-      if (nbra1 != 0 .and. nket0 != 0) then
+      if (nbra1 /= 0 .and. nket0 /= 0) then
         open (unit=ibra1,form='UNFORMATTED')
         open (unit=iket1,form='UNFORMATTED')
         open (unit=iwave1,form='UNFORMATTED')
@@ -206,7 +206,7 @@ end program dipj0dvr
           endif
         endif
       endif
-      if (idia != 2 .or. (idia == 2 .and. iptot != 2)) then
+      if (idia /= 2 .or. (idia == 2 .and. iptot /= 2)) then
         iptot=0
         nbra1=0
         nket1=0
@@ -263,11 +263,11 @@ end program dipj0dvr
         call getrow(r21,nr21,iwave1)
         call getrow(theta1,nthet1,iwave1)
         if (((zembed .and. .not.zemb1) .or. (.not.zembed .and. zemb1))     &
-     &  .or. idia != idia1 .or. ntheta != nthet1 .or. nr1 != nr11)   &
+     &  .or. idia /= idia1 .or. ntheta /= nthet1 .or. nr1 /= nr11)   &
      &  then
           write(6,*)' **** The two runs are incompatible ****'
           stop
-        elseif (zsame .and. nr2 != nr21) then
+        elseif (zsame .and. nr2 /= nr21) then
           write(6,*)' **** The two runs are incompatible ****'
           stop
         elseif (abs(xmass(1)-xmass1(1))/xmass(1) > tol .or.            &
@@ -323,7 +323,7 @@ end program dipj0dvr
 1001  format(5i5)
 1002  format(3f20.0)
       end
-!========================================================== message =====
+/========================================================== message =====
 ! This subroutine writes a header message giving information about the
 ! program and the wavefunctions used.
       subroutine messge(title)
@@ -359,18 +359,18 @@ end program dipj0dvr
         write(6,105)i,xmass(i),ex(i),ez(i)
 10    continue
 
-      if (iptot != 2) then
+      if (iptot /= 2) then
         write(6,106) lket0,nket0,lbra0,nbra0
       else
         write(6,107)
-        if (nket0 != 0 .and. nket1 != 0) then
+        if (nket0 /= 0 .and. nket1 /= 0) then
           write(6,108)lket0,nket0,lket1,nket1
         elseif (nket0 == 0) then
           write(6,109)'odd',lket1,nket1
         elseif (nket1 == 0) then
           write(6,109)'even',lket0,nket0
         endif
-        if (nbra0 != 0 .and. nbra1 != 0) then
+        if (nbra0 /= 0 .and. nbra1 /= 0) then
           write(6,110)lbra0,nbra0,lbra1,nbra1
         elseif (nbra0 == 0) then
           write(6,111)'odd',lbra1,nbra1
@@ -414,7 +414,7 @@ end program dipj0dvr
      &       i3,' points are used for functions with alpha=',i3,          &
      &       ' and beta=',f12.6//)
       end
-!== ======================================================== conver =====
+/== ======================================================== conver =====
       subroutine conver(r1,r2,xcos,x,z)
       implicit double precision(a-h,o-y),logical(z)
       parameter (x1=1d0)
@@ -491,7 +491,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== gtmain =====
+/== ======================================================== gtmain =====
 ! This routine allocates memory, & calls the real main program (inmain)
       subroutine gtmain(array,navail)
       implicit double precision(a-h,o-y),logical(z)
@@ -519,7 +519,7 @@ end program dipj0dvr
 ! dipz
       i4=i3+ntheta*nr1*nr2
       if (.not.zsame .and.                                                &
-     & (min(nbra0,nket1) != 0 .or. min(nbra1,nket0) != 0)) then
+     & (min(nbra0,nket1) /= 0 .or. min(nbra1,nket0) /= 0)) then
 ! dipx
         i3=i2+ntheta*nr1*nr2*nr21
 ! dipz
@@ -606,7 +606,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== inmain =====
+/== ======================================================== inmain =====
 ! This is the real main program, which calls all the other subroutines
 ! involved in this calculation
       subroutine inmain(phi,phibra,phiket,dipx,dipz,Tx,Tz,j,              &
@@ -624,7 +624,7 @@ end program dipj0dvr
       call timer(' ')
 
 ! Read in wavefunctions
-      if (max(nbra0,nket0) != 0) then
+      if (max(nbra0,nket0) /= 0) then
 
         if (zdone) then
           call rdphi(phi,evals(1),0,nr2,neval0)
@@ -640,7 +640,7 @@ end program dipj0dvr
         endif
       endif
 
-      if (iptot == 2 .and. max(nbra1,nket1) != 0) then
+      if (iptot == 2 .and. max(nbra1,nket1) /= 0) then
 
         if (zdone) then
           call rdphi(phi,evals(neval0+1),1,nr21,neval1)
@@ -692,7 +692,7 @@ end program dipj0dvr
 
         call timer(                                                              &
      &'Calculating transition intensities for odd-odd transitions took')
-      elseif (iptot == 2 .and. max(nbra1,nket1) != 0) then
+      elseif (iptot == 2 .and. max(nbra1,nket1) /= 0) then
 
 ! if even and odd blocks use different DVR points, calculating the
 ! transition intensities is slightly more complicated
@@ -721,7 +721,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== rdphi  =====
+/== ======================================================== rdphi  =====
 ! This subroutine reads in phi(a,b,c) from the stream supplied by DVR3D
 ! (iwave) and then stores it in two places for the bra and the ket
       subroutine rdphi(phi,evals,itime,mr2,neval)
@@ -777,7 +777,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== oldphi =====
+/== ======================================================== oldphi =====
 ! This subroutine works out phi(a,b,c) from the 1D 2D and 3D
 ! coefficients, and then stores it in two places for the bra and the ket
       subroutine oldphi(phi,array,evals,itime,neval)
@@ -849,7 +849,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== getphi =====
+/== ======================================================== getphi =====
       subroutine getphi(phi,j,iidum,k,c2d,ndim2d,c1d,c3d,cprod,         &
      &                  evals,n2d,n3d,npta,nptb,nptc,neval,ibra,iket,   &
      &                  iout,ivc,ivec1,ivec2,jbra,nbra,jket,nket,       &
@@ -892,7 +892,7 @@ end program dipj0dvr
         IF (NDIM2D(IGAMMA) == 0) GOTO 40
         DO 50 IALPHA=1,NPTA
           CALL GETROW(C1D(1,ialpha),NDIM2D(IGAMMA),IOUT)
-          if (j(igamma)!=0)                                   &
+          if (j(igamma)/=0)                                   &
      &      CALL OUTROW(C1D(1,ialpha),NDIM2D(IGAMMA),IVEC1)
 50      CONTINUE
 40    CONTINUE
@@ -924,7 +924,7 @@ end program dipj0dvr
           IF (NDIM2D(IGAMMA) == 0) GOTO 170
           CALL GETROW(C2D,NDIM2D(IGAMMA),IVEC2)
 170       DO 190 IALPHA=1,NPTA
-            IF (NDIM2D(IGAMMA) == 0 .OR. JJ != 1) GOTO 200
+            IF (NDIM2D(IGAMMA) == 0 .OR. JJ /= 1) GOTO 200
             CALL GETROW(C1D(1,ialpha),NDIM2D(IGAMMA),IVEC1)
 200         KDUM=0
             DO 210 IBETA=1,NPTB
@@ -978,7 +978,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== getmu  =====
+/== ======================================================== getmu  =====
 ! This subroutine calculates the dipoles along the x and z axes of the
 ! Eckart embedding coordinate system, and stores them
       subroutine getmu(dipx,dipz,r1,r2,theta,mr2)
@@ -998,7 +998,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== dipcal =====
+/== ======================================================== dipcal =====
 ! This subroutine calls dipd and hence obtains the dipole components
 ! along the axes of the embedding used for the wavefunctions.  It then
 ! converts these to components along the axes of the Eckart embedding
@@ -1029,7 +1029,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== getT   =====
+/== ======================================================== getT   =====
 ! This subroutine calculates the transition intensities from the
 ! wavefunctions and the dipoles
       subroutine getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,ibtime,iktime,    &
@@ -1071,14 +1071,14 @@ end program dipj0dvr
       rewind iket
 
       mket=min(jbra,jket)
-      if (ibtime != iktime) mket=jket
+      if (ibtime /= iktime) mket=jket
       mbra=min(jbra,jket)
-      if (ibtime != iktime) mbra=jbra
+      if (ibtime /= iktime) mbra=jbra
 
       do 10 lket=mket,nket
         call getrow(phiket,ntheta*nr1*mr2,iket)
         if (lket < jket) goto 10
-        if (ibtime != iktime .and. lket > min(nbra1,nket1) .and.        &
+        if (ibtime /= iktime .and. lket > min(nbra1,nket1) .and.        &
      &                               lket < max(lbra1,lket1)) goto 10
         rewind ibra
         do 20 lbra=mbra,nbra
@@ -1087,7 +1087,7 @@ end program dipj0dvr
           if (ibtime == iktime .and. lket < lbra .and.                   &
      &    nbra >= lket .and. lket >= jbra .and.                           &
      &    nket >= lbra .and. lbra >= jket) goto 20
-          if (ibtime != iktime .and..not.                                  &
+          if (ibtime /= iktime .and..not.                                  &
      &      ((nbra1 >= lket .and. lket >= lbra1 .and.                    &
      &        nket0 >= lbra .and. lbra >= lket0) .or.                    &
      &       (nket1 >= lket .and. lket>= lket1 .and.                     &
@@ -1098,7 +1098,7 @@ end program dipj0dvr
             do 30 iabc=1,ntheta*nr1*mr2
               tiz=tiz+phibra(iabc)*dipz(iabc)*phiket(iabc)
 30          continue
-          elseif (ibtime != iktime) then
+          elseif (ibtime /= iktime) then
             do 40 iabc=1,ntheta*nr1*mr2
               tix=tix+phibra(iabc)*dipx(iabc)*phiket(iabc)
 40          continue
@@ -1140,7 +1140,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== diffmu =====
+/== ======================================================== diffmu =====
 ! This subroutine calculates the dipoles along the x and z axes of the
 ! Eckart embedding coordinate system, and stores them
       subroutine diffmu(dipx,start,r1,theta,maxq)
@@ -1199,7 +1199,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== gettra =====
+/== ======================================================== gettra =====
 ! this routine calculates the transformation matrices for the r2 points
       subroutine gettra(transe,transo,q,wt,b,c,dnorme,dnormo,maxq)
       implicit double precision(a-h,o-y),logical(z)
@@ -1252,7 +1252,7 @@ end program dipj0dvr
      &       1x,'Computed',2x,e25.13,10x,e25.13/                           &
      &       1x,'Analytic',2x,e25.13,10x,e25.13)
       end
-!== ======================================================== basis  =====
+/== ======================================================== basis  =====
       subroutine basis(rbasis,q,dnorm,                                     &
      &                 A,idim,maxfn,npts)
       implicit double precision(a-h,o-y),logical(z)
@@ -1306,7 +1306,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== s14aaf =====
+/== ======================================================== s14aaf =====
       double precision FUNCTION S14AAF(xx,ifail)
 !     Mock-up of NAG routine of the same names for
 !     evaluating Gamma functions in the range (0,1)
@@ -1315,7 +1315,7 @@ end program dipj0dvr
       ifail=0
       RETURN
       END
-!== ======================================================== gammln =====
+/== ======================================================== gammln =====
       double precision FUNCTION GAMMLN(XX)
 !     Gamma function routine from Numerical Recipes p. 157
       DOUBLE PRECISION COF(6),STP,HALF,ONE,FPF,X,TMP,SER,xx
@@ -1333,7 +1333,7 @@ end program dipj0dvr
       GAMMLN=TMP+LOG(STP*SER)
       RETURN
       END
-!== ======================================================== glagpt =====
+/== ======================================================== glagpt =====
       subroutine glagpt(q,wt,b,c,alpha,csx,csa,tsx,npts)
 ! This subroutine calculates the quadrature points and weights for
 ! Gauss-Laguerre quadrature according to the routine given by Stroud and
@@ -1438,7 +1438,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== LGRECR =====
+/== ======================================================== LGRECR =====
       SUBROUTINE LGRECR(PN,DPN,PN1,X,NN,ALF,B,C)
 
 !     USES RECURRENCE RELATIONS TO SET UP POLYNOMIALS
@@ -1462,7 +1462,7 @@ end program dipj0dvr
       PN1= P1
       RETURN
       END
-!== ======================================================== LGROOT =====
+/== ======================================================== LGROOT =====
       SUBROUTINE LGROOT(X,NN,ALF,DPN,PN1,B,C,EPS)
 
 !     IMPROVES THE APPROXIMATE ROOT X; IN ADDITION OBTAINS
@@ -1486,7 +1486,7 @@ end program dipj0dvr
      &     /,5X,'CURRENT DIFFERENCE',D26.15,' & ROOT',D26.15)
       RETURN
       END
-!== ======================================================== getbas =====
+/== ======================================================== getbas =====
 ! this subroutine finds the quadrature points to be used in evaluating
 ! the dipole
       subroutine getbas(basise,basiso,reo,q,wt,b,c,dnorme,dnormo,maxq)
@@ -1580,7 +1580,7 @@ end program dipj0dvr
      &       1x,'Computed',2x,e25.13,10x,e25.13/                         &
      &       1x,'Analytic',2x,e25.13,10x,e25.13)
       end
-!== ======================================================== domult =====
+/== ======================================================== domult =====
 ! this routine calculates transition moments for the specific case when
 ! r2 is run last, and the bra and the ket use different functions for r2
       subroutine domult(dipx,transe,transo,basise,basiso,r1,r2,theta,    &
@@ -1628,7 +1628,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== diffT  =====
+/== ======================================================== diffT  =====
 ! this routine calculates transition moments for the specific case when
 ! r2 is run last, and the bra and the ket use different functions for r2
       subroutine diffT(phibra,phiket,dipx,evals,Tx,Tz)
@@ -1677,7 +1677,7 @@ end program dipj0dvr
 
       return
       end
-!== ======================================================== writeT =====
+/== ======================================================== writeT =====
 ! This subroutine writes out the transition intensities in the same
 ! format as DIPOLE does.
       subroutine writeT(Tx,Tz,evals)
@@ -1758,21 +1758,21 @@ end program dipj0dvr
 206   FORMAT(2(I4,1x,a1),3(3X,F10.3),5(2X,E13.6))
 207   FORMAT(//)
       end
-!== ======================================================== GETROW =====
+/== ======================================================== GETROW =====
       SUBROUTINE GETROW(VEC,NSIZE,ISTREAM)
       IMPLICIT DOUBLE PRECISION(A-H,O-Y),LOGICAL(Z)
       DIMENSION VEC(NSIZE)
       READ(ISTREAM) VEC
       RETURN
       END
-!== ======================================================== OUTROW =====
+/== ======================================================== OUTROW =====
       SUBROUTINE OUTROW(VEC,NSIZE,ISTREAM)
       IMPLICIT DOUBLE PRECISION(A-H,O-Y),LOGICAL(Z)
       DIMENSION VEC(NSIZE)
       WRITE(ISTREAM) VEC
       RETURN
       END
-!== ======================================================== timer  =====
+/== ======================================================== timer  =====
       subroutine timer(text)
       implicit double precision(a-h,o-y),logical(z)
       character text*(*)
@@ -1783,7 +1783,7 @@ end program dipj0dvr
 !     user=dble(time(1))
 !     system=dble(time(2))
 
-      if (ototal != 0d0) write(6,1000)text,user-ouser,system-osys,      &
+      if (ototal /= 0d0) write(6,1000)text,user-ouser,system-osys,      &
      &                                       total-ototal
 
       ouser=user
@@ -1795,7 +1795,7 @@ end program dipj0dvr
      &            /,10x,f20.3,' seconds of system time',                  &
      &            /,10x,f20.3,' seconds in total',/)
       end
-!========================================================== FCT    =====
+/========================================================== FCT    =====
       FUNCTION FCT(R1,R2,R3,NPA,C,INDEX,RO)
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION C(NPA),INDEX(3,NPA)
@@ -1809,7 +1809,7 @@ end program dipj0dvr
       DO 1 I=1,NPA
       F=1.
       DO 2 J=1,3
-        IF (INDEX(J,I)!=0) THEN
+        IF (INDEX(J,I)/=0) THEN
           F=F*Q(J)**INDEX(J,I)
         END IF
 2     CONTINUE
