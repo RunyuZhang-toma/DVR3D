@@ -158,13 +158,17 @@ program spect4
 !  Updated to f90 to use dynamic memory allocation and to preselect transitions
 !  by GJH & JT 2001.
 
-implicit double precision(a-h,o-y), logical(z)
+!implicit double precision(a-h,o-y), logical(z)
 character(len=8) title(9)
 namelist/prt/ zout, zsort, zspe, zpfun, itra, ilev, ispe, item, &
 wsmax,wsmin, emin, emax, jmax, smin, gz,zpseg
-common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
-common/base/ ibase1,ibase2
-common/timing/itime0
+!common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
+!common/base/ ibase1,ibase2
+!common/timing/itime0
+use logic
+use base
+use timing
+implicit none
 DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: ee1, ee2, ss
 data autocm/ 2.19474624d+05/, autode/ 2.5417662d0/
 
@@ -327,8 +331,11 @@ end
 subroutine spmain(ilev,ispe,nr,nmax1,nmax2,item,idia,gz)
 
 !     this is the effective main program of spectra
-implicit double precision(a-h,o-y), logical(z)
-common/logic/ zout, zsort, zspe, zpfun, zembedi,zpseg
+!implicit double precision(a-h,o-y), logical(z)
+!common/logic/ zout, zsort, zspe, zpfun, zembedi,zpseg
+use logic
+
+implicit none
 
 data dwl/0.0d0/,x1/1.0d0/,x0/0.0d0/
 
@@ -410,13 +417,16 @@ subroutine sortsp(nr, item, ispe)
 !     data printed out is in cm-1, debye**2 and sec-1.
 !     data written to ispe for spectm is in atomic units.
 
-implicit double precision(a-h,o-y), logical(z)
+!implicit double precision(a-h,o-y), logical(z)
 DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: da
 integer, allocatable, dimension(:,:) :: ia
 integer, allocatable, dimension(:) :: iperm
 
 
-common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
+!common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
+use logic
+
+implicit none
 
 !      fmem = (64*nr)/1048576.0d0
 fmem = 64.d0*dble(nr)/1048576.0d0 !Changed by Lorenzo Lodi, 10 June 2007
@@ -512,8 +522,11 @@ subroutine pfcalc(temp,emax,qerr,ge,go,nlev,q,ilev,idia,gz)
 
 !     the input stream is ilev, which is defaulted to stream 14.
 
-implicit double precision(a-h,o-y), logical(z)
-common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
+!implicit double precision(a-h,o-y), logical(z)
+!common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
+use logic
+
+implicit none
 
 double precision, allocatable, dimension(:) :: e
 !     program constants
@@ -635,14 +648,17 @@ ge, go, temp, q, nr, jdia, ispe, gz)
 !         j(w)= --------------------------------
 !                             4pi*q
 
-implicit double precision(a-h,o-y), logical(z)
+!implicit double precision(a-h,o-y), logical(z)
 double precision, allocatable, dimension(:,:) :: a
 integer, allocatable, dimension(:,:) :: iqnum
 namelist /spe/ emin1,emax1,jmax,zplot,zemit,iplot,zfreq,zeinst, &
 emin2,emax2,zprof,idat,zene,tinte,zlist,ilist, &
 zdop,prthr,npoints,xmolm
-common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
-common/base/ ibase1,ibase2
+!common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
+!common/base/ ibase1,ibase2
+use logic
+use base
+implicit none
 !     program constants
 data idat/19/,iplot/20/,ilist/36/, &
 hc/ 1.9864476d-16/, &
@@ -1195,8 +1211,11 @@ end
 subroutine timer
 !     prints current cpu time usage                                 #030
 
-implicit double precision (a-h,o-y)
-common/timing/itime0
+!implicit double precision (a-h,o-y)
+!common/timing/itime0
+use timing
+
+implicit none
 write(6,10)
 call SYSTEM_CLOCK(itime2,irate2,imax2)
 itime=(itime2-itime0)/irate2

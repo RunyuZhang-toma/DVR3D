@@ -24,14 +24,17 @@
 !     2. f02fjf to do iterative diagonalisation (nag routine).
 !     the program works in **** atomic units ***** 
 
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
 
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                    ndvr,iang,npnt,maxblk_odd,ibass,&
-                    nktot,kpar,iqpar
-      common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
-                    zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
-                    ,nploti,nplotf,ithre 
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+      !              ndvr,iang,npnt,maxblk_odd,ibass,&
+       !             nktot,kpar,iqpar
+      !common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
+      !              zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
+      !              ,nploti,nplotf,ithre 
+      use size
+      use outp
+      implicit none
                 namelist/prt/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,&
                     zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec & 
                     ,nploti,nplotf,ithre
@@ -53,7 +56,7 @@
 !#######################################################################
       block data
 !     stores defaults for namelist parameters                       #003
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
 
 !     outp holds information which controls the amount of printed output
 !     zpvec: print eigenvectors if zpvec = .true.
@@ -66,9 +69,12 @@
 !      iscr_2,iscr2_1,iscr_f  hamiltonian files                  always
 
 
-      common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
-                    zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
-                    ,nploti,nplotf,ithre 
+      !common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
+      !              zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
+      !              ,nploti,nplotf,ithre 
+ 
+      use outp
+      implicit none
           
       data thresh/0.1d0/,zpham/.false./,zpvec/.false./,idiag/2/,&
            ivec/26/,zvec/.false./,zplot/.false./,jvec/3/,iscr/1/,&
@@ -82,7 +88,7 @@
 
 !     set up common /size/ & write control parameters of problem    #004
 
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
 
 !     common /size/ stores control parameters for the problem
 !     nbass: maximum dimension of rotational secular problem
@@ -111,15 +117,19 @@
 !      integer, ALLOCATABLE, DIMENSION(:) :: indb1
 !      integer, ALLOCATABLE, DIMENSION(:) :: indb2
 
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                    ndvr,iang,npnt,maxblk_odd,ibass,&
-                    nktot,kpar,iqpar
-      common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
-                    zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
-                    ,nploti,nplotf,ithre 
-                common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
-          iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
-           nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb      
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+      !              ndvr,iang,npnt,maxblk_odd,ibass,&
+      !              nktot,kpar,iqpar
+      !common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
+       !             zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
+       !             ,nploti,nplotf,ithre 
+         !       common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
+         ! iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
+         !  nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb  
+      use size
+      use outp
+      use pb
+      implicit none    
      character(len=8) title(9)
 
       read(5,5)  nvib,neval,kpar,ibass,iqpar,npnt
@@ -427,17 +437,21 @@
 !     subroutine select determines which vibrational basis          #007
 !     functions are to be used
  
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
  
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                    ndvr,iang,npnt,maxblk_odd,ibass,&
-                    nktot,kpar,iqpar
-      common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
-                    zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
-                    ,nploti,nplotf,ithre 
-      common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
-          iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
-           nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb      
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+      !              ndvr,iang,npnt,maxblk_odd,ibass,&
+      !              nktot,kpar,iqpar
+      !common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
+      !              zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
+      !              ,nploti,nplotf,ithre 
+      !common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
+      !    iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
+      !     nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb 
+      use size
+      use outp
+      use pb
+      implicit none       
       real*8, allocatable :: eviba(:,:),evibb(:,:),mviba(:),mvibb(:)
       real*8, allocatable :: ea(:),eb(:)
       integer, allocatable :: iva(:),ivb(:)
@@ -756,17 +770,21 @@
 !     subroutine vrmain is the 'real' main program & contains       #006
 !     the calls to the various subroutines which set & solve hamil
 !
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
 
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                    ndvr,iang,npnt,maxblk_odd,ibass,&
-                    nktot,kpar,iqpar
-      common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
-                    zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
-                    ,nploti,nplotf,ithre 
-                common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
-          iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
-           nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+        !            ndvr,iang,npnt,maxblk_odd,ibass,&
+       !             nktot,kpar,iqpar
+      !common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
+       !             zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
+       !             ,nploti,nplotf,ithre 
+       !         common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
+       !   iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
+       !    nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb
+      use size
+      use outp
+      use pb
+      implicit none  
       integer, DIMENSION(nka) :: iva
       integer, DIMENSION(nkb) :: ivb
       integer, DIMENSION(nktot) :: mvib
@@ -827,17 +845,21 @@
 !     subroutine radint calculates the two-dimensional radial basis
 !     functions between two symmetrised orthogonal coordinates.
  
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
  
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                    ndvr,iang,npnt,maxblk_odd,ibass,&
-                    nktot,kpar,iqpar
-      common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
-                    zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
-                    ,nploti,nplotf,ithre 
-                common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
-          iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
-           nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+      !              ndvr,iang,npnt,maxblk_odd,ibass,&
+      !              nktot,kpar,iqpar
+      !common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
+      !              zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
+      !              ,nploti,nplotf,ithre 
+      !          common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
+      !    iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
+      !     nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb
+      use size
+      use outp
+      use pb
+      implicit none  
 
       real*8, DIMENSION(nr) :: rmb
       real*8, DIMENSION(nr) :: rma
@@ -893,11 +915,14 @@
 !     angin_pl_pl calculates the angular integral between blocks k and k+2 
 !     for ++ block
  
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
  
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                   ndvr,iang,npnt,maxblk_odd,ibass,&
-                   nktot,kpar,iqpar
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+      !             ndvr,iang,npnt,maxblk_odd,ibass,&
+      !             nktot,kpar,iqpar
+      use size
+      
+      implicit none  
 
       real*8, DIMENSION(nang1,nang1) :: pleg1
       real*8, DIMENSION(nang2,nang2) :: pleg2
@@ -983,11 +1008,14 @@
 !     angin_pl_pl calculates the angular integral between blocks k and k+2 
 !     for ++ block
  
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
  
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                   ndvr,iang,npnt,maxblk_odd,ibass,&
-                   nktot,kpar,iqpar
+     ! common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+      !             ndvr,iang,npnt,maxblk_odd,ibass,&
+       !            nktot,kpar,iqpar
+      use size
+      
+      implicit none  
 
       real*8, DIMENSION(nang1,nang1) :: pleg1
       real*8, DIMENSION(nang2,nang2) :: pleg2
@@ -1089,11 +1117,14 @@
 !     angin_pl_pl calculates the angular integral between blocks k and k+2 
 !     for ++ block
  
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
  
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                   ndvr,iang,npnt,maxblk_odd,ibass,&
-                   nktot,kpar,iqpar
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+      !             ndvr,iang,npnt,maxblk_odd,ibass,&
+      !             nktot,kpar,iqpar
+      use size
+      
+      implicit none  
 
       real*8, DIMENSION(nang1,nang1) :: pleg1
       real*8, DIMENSION(nang2,nang2) :: pleg2
@@ -1190,11 +1221,14 @@
 !     angin_pl_pl calculates the angular integral between blocks k and k+2 
 !     for ++ block
  
-      implicit double precision (a-h,o-y), logical (z)
+      ! double precision (a-h,o-y), logical (z)
  
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                   ndvr,iang,npnt,maxblk_odd,ibass,&
-                   nktot,kpar,iqpar
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+       !            ndvr,iang,npnt,maxblk_odd,ibass,&
+        !           nktot,kpar,iqpar
+      use size
+     
+      implicit none  
 
       real*8, DIMENSION(nang1,nang1) :: pleg1
       real*8, DIMENSION(nang2,nang2) :: pleg2
@@ -1277,11 +1311,14 @@
 !     required for the coriolis coupling term for orthogonal (radau)
 !     coordinates in the bisector embedding. 
  
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
  
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                    ndvr,iang,npnt,maxblk_odd,ibass,&
-                    nktot,kpar,iqpar
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+      !              ndvr,iang,npnt,maxblk_odd,ibass,&
+      !              nktot,kpar,iqpar
+      use size
+     
+      implicit none
 
       DIMENSION iv1(ndvr),iv2(ndvr)
       real*8, DIMENSION(ndvr,ndvr) :: fbrmat
@@ -1425,16 +1462,21 @@
  
 !     subroutine loadh loads the hamiltonian matrix from disk
  
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                    ndvr,iang,npnt,maxblk_odd,ibass,&
-                    nktot,kpar,iqpar
-      common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
-                    zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
-                    ,nploti,nplotf,ithre 
-                common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
-          iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
-           nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb
+      !implicit double precision (a-h,o-y), logical (z)
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+      !              ndvr,iang,npnt,maxblk_odd,ibass,&
+       !             nktot,kpar,iqpar
+      !common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
+       !             zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
+       !             ,nploti,nplotf,ithre 
+       !         common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
+       !   iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
+       !    nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb
+      use size
+      use outp
+      use pb
+     
+      implicit none
       integer,  DIMENSION(nktot) :: mvib
       integer,  DIMENSION(nktot) :: n0
       real*8, dimension(kss) :: hamil
@@ -1622,17 +1664,22 @@
 !     including the computation of the k dependent angular matrix
 !     elements
  
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
  
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                    ndvr,iang,npnt,maxblk_odd,ibass,&
-                    nktot,kpar,iqpar
-      common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
-                    zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
-                    ,nploti,nplotf,ithre 
-      common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
-          iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
-           nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+      !              ndvr,iang,npnt,maxblk_odd,ibass,&
+      !              nktot,kpar,iqpar
+      !common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
+      !              zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
+      !              ,nploti,nplotf,ithre 
+      !common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
+      !    iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
+      !     nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb
+      use size
+      use outp
+      use pb
+     
+      implicit none
       integer, DIMENSION(nka) :: iva
       integer, DIMENSION(nkb) :: ivb
       real*8, DIMENSION(maxblk_even) :: radmee
@@ -2438,17 +2485,22 @@ end do !i2
 !          hamil * vec = eval * vec
 !     by using some lapack routines if they work.
  
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
       character JOB*1
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                    ndvr,iang,npnt,maxblk_odd,ibass,&
-                    nktot,kpar,iqpar
-      common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
-                    zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
-                    ,nploti,nplotf,ithre 
-      common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
-          iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
-           nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+      !              ndvr,iang,npnt,maxblk_odd,ibass,&
+      !              nktot,kpar,iqpar
+      !common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
+      !             zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
+     !               ,nploti,nplotf,ithre 
+     ! common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
+      !    iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
+      !     nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb
+      use size
+      use outp
+      use pb
+     
+      implicit none
       real*8, DIMENSION(ksize) :: EVAL
       real*8, DIMENSION(ksize) :: EVALCM
       real*8, DIMENSION(8*ksize) :: work
@@ -2826,16 +2878,21 @@ end do !i2
 !  A more elaborate version will be programmed when and if necessary.
 
 
-      implicit double precision(a-h,o-y), logical(z)
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                    ndvr,iang,npnt,maxblk_odd,ibass,&
-                    nktot,kpar,iqpar
-      common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
-                    zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
-                    ,nploti,nplotf,ithre 
-                common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
-          iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
-           nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb
+      !implicit double precision(a-h,o-y), logical(z)
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+       !             ndvr,iang,npnt,maxblk_odd,ibass,&
+       !             nktot,kpar,iqpar
+      !common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
+       !             zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
+       !             ,nploti,nplotf,ithre 
+       !         common /pb/ inda1(100),inda2(100),indb1(100),indb2(100),indk(100),&
+       !   iqa,iqb,isa,isb,ipa,ipb,kmina,kminb,nka,nkb,nbassa,nbassb,&
+       !    nskipka,nskipkb,mevala,mevalb,ibassa,ibassb,nviba,nvibb
+      use size
+      use outp
+      use pb
+     
+      implicit none
       integer, DIMENSION(nktot) :: MVIB
       real*8, DIMENSION(neval) :: ENERGY
       real*8, DIMENSION(nr) :: r
@@ -3264,13 +3321,17 @@ end do !i2
 !#######################################################################
       subroutine jtran2(coeffbr,coeffdvr,mvib,pleg,is,iv,nkbas,ifort)
   
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
-                    ndvr,iang,npnt,maxblk_odd,ibass,&
-                    nktot,kpar,iqpar
-      common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
-                    zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
-                    ,nploti,nplotf,ithre 
+      !implicit double precision (a-h,o-y), logical (z)
+      !common /size/ nbass,neval,idia,nr,maxblk_even,jrot,&
+       !             ndvr,iang,npnt,maxblk_odd,ibass,&
+       !             nktot,kpar,iqpar
+     ! common /outp/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,idiag,&
+       !             zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec,iscr &
+       !             ,nploti,nplotf,ithre 
+      use size
+      use pb
+     
+      implicit none
           
       real*8, DIMENSION(ndvr,iang) :: pleg
       real*8, DIMENSION(nkbas,mvib) :: coeffdvr

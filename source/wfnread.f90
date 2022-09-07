@@ -36,8 +36,10 @@ end program reader
 
 !###################################################################
 subroutine read_8or9_jacobi
-  implicit double precision (a-h,o-y), logical (z)
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  !implicit double precision (a-h,o-y), logical (z)
+  !common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  use size
+  implicit none
 
   integer :: ifile, jk
   integer, allocatable ::  nbass(:), lmin(:), lbass(:)
@@ -99,8 +101,10 @@ end subroutine read_8or9_jacobi
 !##################################################################
 
 subroutine read_26_jacobi
-  implicit double precision (a-h,o-y), logical (z)
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  !implicit double precision (a-h,o-y), logical (z)
+  !common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  use size
+  implicit none
 
   integer :: ifile, jk,mbass0,lmin,lbass,nbass
 !  double precision, allocatable:: r1(:), r2(:), e(:), d(:), plegd(:,:)
@@ -167,8 +171,10 @@ end subroutine read_26_jacobi
 !###################################################################
 
 subroutine read_26_radau
-  implicit double precision (a-h,o-y), logical (z)
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  !implicit double precision (a-h,o-y), logical (z)
+  !common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  use size
+  implicit none
 
   integer :: ifile, jk
   integer, allocatable ::  nbass(:), lmin(:), lbass(:), iv(:)
@@ -217,8 +223,10 @@ end subroutine read_26_radau
 !###################################################################
 
 subroutine read_8or9_radau
-  implicit double precision (a-h,o-y), logical (z)
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  !implicit double precision (a-h,o-y), logical (z)
+  !common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  use size
+  implicit none
 
   integer :: ifile, jk
   integer, allocatable ::  nbass(:), lmin(:), lbass(:)

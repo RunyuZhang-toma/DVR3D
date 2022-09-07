@@ -37,8 +37,10 @@ end program hosetaylor
 !###################################################################
 
 subroutine read_26_radau
-  implicit double precision (a-h,o-y), logical (z)
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  !implicit double precision (a-h,o-y), logical (z)
+  !common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  use size
+  implicit none
 
   integer :: ifile, jk
   integer, allocatable ::  nbass(:), lmin(:), lbass(:), iv(:)
@@ -187,8 +189,10 @@ end subroutine read_26_radau
 !###################################################################
 
 subroutine read_8or9_radau
-  implicit double precision (a-h,o-y), logical (z)
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  !implicit double precision (a-h,o-y), logical (z)
+  !common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  use size
+  implicit none
 
   integer :: ifile, jk
   integer, allocatable ::  nbass(:), lmin(:), lbass(:)

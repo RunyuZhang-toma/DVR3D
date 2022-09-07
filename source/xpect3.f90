@@ -11,13 +11,17 @@
 !     expectation values of vib-rot eigenfunctions with respect
 !     the properties defined by subroutine prop.
 !
-      implicit double precision (a-h,o-y), logical (z)
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
+      !implicit double precision (a-h,o-y), logical (z)
+      !common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
+      !               zfit,zform,iket,itra,itra0,ilev
       namelist/prt/ zprint,ztra,zstart,zfit,zform,&
                      iket,itra,itra0,ilev
-      common /timing/ itime0
-      common /mass/ xmass(3),g1,g2,zembed,zbisc 
+      !common /timing/ itime0
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc 
+      use logic
+      use timing
+      use mass
+      implicit none
       character(len=8) title(9)
 
       write(6,200)
@@ -56,7 +60,7 @@
       
 !**************************************************002
     block data
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
 !
 !     block data stores the default values of the logical control
 !     parameters and the ground zero energy.
@@ -65,8 +69,11 @@
 !
 !RK   Changed zfit=.false. as default.
 !
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
+      !common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
+       !              zfit,zform,iket,itra,itra0,ilev
+      use logic
+      
+      implicit none
       data zncor/.false./, zprint/.false./,zfit/.false./,&
            ztra/.true./, zstart/.false./,&
            iket/11/,itra/12/,itra0/28/,ilev/14/,zform/.true./
@@ -85,7 +92,7 @@
 !     angular functions must be set by the user, and are inputted on
 !     stream 5 (five).
 !
-      implicit double precision (a-h,o-y),logical (z)
+      !implicit double precision (a-h,o-y),logical (z)
 !
 !     the following size parameters have these functions:
 !
@@ -111,15 +118,20 @@
 !     iprop: vector with the information on which properties
 !            will be considered in the run
 !
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+       !           lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
+       !           nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
+      !common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
+       !              zfit,zform,iket,itra,itra0,ilev
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      use dim
+      use logic
+      use mass
+      use pot
+      implicit none
 
-      parameter (mxprop=1000)
-      common /pot/ iprop(mxprop)
+      !parameter (mxprop=1000)
+      !common /pot/ iprop(mxprop)
 !     save masses & g in case they are needed in the properties routine
 !
 !     read in control parameters of problem:
@@ -298,12 +310,16 @@
 !**************************************************004
       subroutine core
 !
-      implicit double precision (a-h,o-y), logical (z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
+      !implicit double precision (a-h,o-y), logical (z)
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+      !            lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
+      !            nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
+      !common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
+       !              zfit,zform,iket,itra,itra0,ilev
+      use dim
+      use logic
+      
+      implicit none
 
 
       integer, dimension (jk1) :: nbass1,lmin1
@@ -324,13 +340,17 @@
 !     it calculates nbmax, the largest value of nbass, neeeded to
 !     dimension the space needed for the d-coefficients.
 !
-      implicit double precision(a-h,o-y),logical (z)
+      !implicit double precision(a-h,o-y),logical (z)
 
       integer, dimension (jk) :: nbass,lmin,lbass
 
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
+      !               zfit,zform,iket,itra,itra0,ilev
+   
+      use logic
+      use mass
+      implicit none
       if (zprint) write(6,205) jk,mbass
 205   format(//,'   j + kmin =',i3,'   mbass=',i6,/)
 
@@ -365,16 +385,22 @@
 !     in this part, all data etc for the ket are labelled 1;
 !     all data etc for the bra are labelled 2.
 !
-      implicit double precision (a-h,o-y), logical (z)
-      common /timing/ itime0
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
-      parameter (mxprop=1000)
-      common /pot/ iprop(mxprop)
+      !implicit double precision (a-h,o-y), logical (z)
+      !common /timing/ itime0
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+       !           lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
+       !           nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
+       !              zfit,zform,iket,itra,itra0,ilev
+      use dim
+      use logic
+      use timing
+      use mass
+      use pot
+      implicit none
+      !parameter (mxprop=1000)
+      !common /pot/ iprop(mxprop)
 
       integer, dimension (jk1) :: nbass1,lmin1
       double precision, dimension(neval) :: eh
@@ -564,10 +590,13 @@
 !     subroutine lagpt obtains values of the dipole at the radial
 !     dvr points and angular integration points
 
-      implicit double precision(a-h,o-y), logical (z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar
+     ! implicit double precision(a-h,o-y), logical (z)
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+      !            lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
+      !            nn2,lmax,npropin,nprt,jrot,idia,ipar
+      use dim
+      
+      implicit none
  
       double precision, dimension(nrade*npot,npropin) :: d0
       double precision, dimension(npnt1) :: r1
@@ -766,14 +795,18 @@
 !     if read directly from dvr3d (i.e. j <= 0), then transform to an
 !     fbr in theta
 
-      implicit double precision (a-h,o-y), logical(z)
+      !implicit double precision (a-h,o-y), logical(z)
 
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar
+      !common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
+       !              zfit,zform,iket,itra,itra0,ilev
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+      !            lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
+      !            nn2,lmax,npropin,nprt,jrot,idia,ipar
+      use dim
+      use logic
+      use mass
+      implicit none
       double precision, dimension(neval,nbass) :: d
       double precision, allocatable :: temp(:),plegd(:)
       integer, dimension(max(npot,lmax))  :: iv
@@ -852,14 +885,18 @@
 !     if read directly from dvr3d (i.e. j <= 0), then transform to an
 !     fbr in theta
 
-      implicit double precision (a-h,o-y), logical(z)
+      !implicit double precision (a-h,o-y), logical(z)
 
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar
+      !common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
+      !               zfit,zform,iket,itra,itra0,ilev
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+      !            lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
+      !            nn2,lmax,npropin,nprt,jrot,idia,ipar
+      use dim
+      use logic
+      use mass
+      implicit none
       integer, dimension (jk) :: lmin1
       double precision, dimension(neval,nbass) :: d,temp
       double precision, dimension(npot,npot) :: plegd
@@ -1004,13 +1041,17 @@
 
 !     it uses a fast matrix multiplication routine mxmb.
 
-      implicit double precision (a-h,o-y), logical (z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
+      !implicit double precision (a-h,o-y), logical (z)
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+       !           lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
+       !           nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
+       !              zfit,zform,iket,itra,itra0,ilev
+      use dim
+      use logic
+      use mass
+      implicit none
       double precision, dimension(nv1,npropin) :: t   
 
       double precision, dimension(npot*nrade,npropin) :: d0
@@ -1087,15 +1128,20 @@
 !
 !     outpt2 outputs the data at the end of a property calculation
 !
-      implicit double precision(a-h,o-y), logical(z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
-      parameter (mxprop=1000)
-      common /pot/ iprop(mxprop)
+      !implicit double precision(a-h,o-y), logical(z)
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+       !           lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
+       !           nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
+       !              zfit,zform,iket,itra,itra0,ilev
+      use dim
+      use logic
+      use mass
+      use pot
+      implicit none
+      !parameter (mxprop=1000)
+      !common /pot/ iprop(mxprop)
       double precision, dimension (neval) :: eh
       double precision, dimension (neval) :: ehtmp
       double precision, dimension (nv1,npropin) :: props,xprop
@@ -1309,8 +1355,11 @@
 !     subroutine to print out the property integrals calculated
 !     in subroutine lagpt for debugging purposes.
 !
-      implicit double precision (a-h,o-y), logical (z)
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !implicit double precision (a-h,o-y), logical (z)
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+    
+      use mass
+      implicit none
       double precision, dimension (nrad,npropin) :: dz0
       double precision, dimension (nrad,npropin,lpot) :: dz1
       write(6,200)

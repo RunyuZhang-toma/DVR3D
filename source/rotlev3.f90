@@ -28,15 +28,18 @@
 !     Fortan90 version with dynamic arrays by Max Kostin & Jonathan Tennyson
 
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
 
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                    KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                    kbass,npnt1,npnt2,npntt
-      COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                    iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
-                    zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,&
-                    zpseg
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+      !              KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+      !              kbass,npnt1,npnt2,npntt
+      !COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
+      !              iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
+      !              zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,&
+      !              zpseg
+      use size
+      use outp
+      implicit none
       NAMELIST/PRT/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
                     iscr,ires,irf1,irf2,&
                     zpham,zpvec,zdcore,zvec,zpfun,zdiag,ztran,zptra,&
@@ -66,7 +69,7 @@
 !##############################################################################
       BLOCK DATA
 !     STORES DEFAULTS FOR NAMELIST PARAMETERS  
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
 
 !     OUTP HOLDS INFORMATION WHICH CONTROLS THE AMOUNT OF PRINTED OUTPUT
 !     TOLER: CONVERGENCE TOLERANCE FOR THE ITERATIVE DIAGONALISER
@@ -100,9 +103,11 @@
 !      IRES  = -2 with kmin=2  transform 2nd set of vectors
 !      RESTART AFTER ZDIAG=FALSE RUN, IWAVE=IRF1 and IRF2 REQUIRED
 
-      COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                    iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
-                    zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      !COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
+      !              iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
+       !             zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      use outp
+      implicit none
       DATA TOLER/0.0D0/,THRESH/0.1D0/,ZPHAM/.FALSE./,ZPVEC/.FALSE./,&
            iwave/26/,ZVEC/.FALSE./,JVEC/3/,JVEC2/2/,ISCR/10/,IRES/0/,&
            ZTRAN/.FALSE./,KVEC/8/,KVEC2/9/,ZPTRA/.FALSE./,jscr/7/,&
@@ -115,7 +120,7 @@
 
 !     SET UP COMMON /SIZE/ & WRITE CONTROL PARAMETERS OF PROBLEM 
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
 
 !     COMMON /SIZE/ STORES CONTROL PARAMETERS FOR THE PROBLEM
 !     NBASS: MAXIMUM DIMENSION OF ROTATIONAL SECULAR PROBLEM
@@ -144,12 +149,16 @@
 !     npnt2: number of r2 dvr points
 !     npntt: (maximum) number of theta dvr points
 
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                    KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                    kbass,npnt1,npnt2,npntt
-      COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                    iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
-                    zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+      !              KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+       !             kbass,npnt1,npnt2,npntt
+      !COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
+       !             iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
+       !             zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      use size
+      use outp
+      implicit none
+      
       CHARACTER(len=8) TITLE(9)
       DOUBLE PRECISION, DIMENSION(3) :: xmass
       DATA X0/0.0D0/
@@ -315,14 +324,17 @@
 !     SUBROUTINE SELECT DETERMINES WHICH VIBRATIONAL BASIS   
 !     FUNCTIONS ARE TO BE USED
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
 
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                   KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                   kbass,npnt1,npnt2,npntt
-      COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                    iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
-                    zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+      !             KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+      !             kbass,npnt1,npnt2,npntt
+      !COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
+       !             iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
+       !             zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra
+      use size
+      use outp
+      implicit none
 
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: EVIB
       INTEGER, ALLOCATABLE, DIMENSION(:) :: IV,MVIB
@@ -496,14 +508,17 @@
 !     SUBROUTINE VRMAIN IS THE 'REAL' MAIN PROGRAM & CONTAINS     
 !     THE CALLS TO THE VARIOUS SUBROUTINES WHICH SET & SOLVE HAMIL
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
 
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                    KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                    kbass,npnt1,npnt2,npntt
-      COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                    iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
-                    zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+       !             KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+      !              kbass,npnt1,npnt2,npntt
+      !COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
+      !!              iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
+       !             zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      use size
+      use outp
+      implicit none
 
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: DIAG,eval
@@ -645,11 +660,14 @@
       SUBROUTINE WRTHO(DIAG,OFFDG,MVIB)
 !     PRINT HAMILTONIAN MATRIX  (out of core version)
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y)
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Y)
 
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                    KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                    kbass,npnt1,npnt2,npntt
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+       !             KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+      !              kbass,npnt1,npnt2,npntt
+      use size
+   
+      implicit none
       
       DOUBLE PRECISION, DIMENSION(NBASS) :: DIAG
       DOUBLE PRECISION, DIMENSION(LOFF) :: OFFDG
@@ -693,14 +711,17 @@
 !     N RUNS OVER R2 RADIAL BASIS FUNCTIONS
 !     IBASS RUNS OVER # OF BASIS FUNCTION IN THE SECULAR PROBLEM
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
 
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                    KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                    kbass,npnt1,npnt2,npntt
-      COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                    iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
-                    zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+      !              KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+      !              kbass,npnt1,npnt2,npntt
+      !COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
+      !              iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
+      !              zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      use size
+      use outp
+      implicit none
 
       DOUBLE PRECISION, DIMENSION(nlim) :: rm2
       DIMENSION MVIB(NBLK)
@@ -853,13 +874,16 @@
       subroutine jtran(coef,mvib,pleg,maxleg,idvr,kz,dvrvec,nrad,&
                       ibass2,jdia,lincr,jstart)
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                    KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                    kbass,npnt1,npnt2,npntt
-      COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                    iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
-                    zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+      !              KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+      !              kbass,npnt1,npnt2,npntt
+      !COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
+      !              iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
+      !              zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      use size
+      use outp
+      implicit none
 
       DOUBLE PRECISION, DIMENSION(0:MAXLEG,idvr) :: PLEG
       DOUBLE PRECISION, DIMENSION(idvr,nrad) :: dvrvec
@@ -922,13 +946,16 @@
 
 !     SUBROUTINE loadh loads the Hamiltonian matrix from disk
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                   KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                   kbass,npnt1,npnt2,npntt
-      COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                   iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
-                   zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+      !             KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+      !             kbass,npnt1,npnt2,npntt
+      !COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
+       !            iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
+      !             zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      use size
+      use outp
+      implicit none
 
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, dimension(*) :: diag
@@ -992,13 +1019,16 @@
 !          HAMIL * VEC = EVAL * VEC
 !     BY USING ITERATIVE NAG ROUTINE F02FJF TO DO DIAGONALISATIONS.
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                    KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                    kbass,npnt1,npnt2,npntt
-      COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                    iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
-                    zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+      !              KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+      !              kbass,npnt1,npnt2,npntt
+      !COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
+      !              iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
+       !             zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      use size
+      use outp
+      implicit none
       double precision, external :: vecvec
       external matvec,f02fjz
       save eshift
@@ -1064,13 +1094,16 @@
 !     BY USING ITERATIVE NAG ROUTINE F02FJF TO DO DIAGONALISATIONS.
 !     or in core         Lapack routine dsyev
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                    KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                    kbass,npnt1,npnt2,npntt
-      COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                    iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
-                    zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+      !              KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+       !             kbass,npnt1,npnt2,npntt
+      !COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
+       !             iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
+      !              zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      use size
+      use outp
+      implicit none
 
       DOUBLE PRECISION, DIMENSION(neval) :: eval
       DOUBLE PRECISION, DIMENSION(neval) :: evalcm
@@ -1223,10 +1256,13 @@
 !     STEP INTO ONES FOR THE FIRST STEP BASIS AND STORES THE
 !     RESULTS IN A FORM SUITABLE FOR program DIPOLE3.
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                    KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                    kbass,npnt1,npnt2,npntt
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+      !              KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+      !              kbass,npnt1,npnt2,npntt
+      use size
+  
+      implicit none
 
 
       DIMENSION MVIB(lblk),NKBAS(lblk),lmin(lblk),lbasis(lblk)
@@ -1370,13 +1406,16 @@
 !     `Transformation' step for J=1f special case      
 !     RESULTS IN A FORM SUITABLE FOR program DIPOLE3.
 
-      IMPLICIT DOUBLE PRECISION(A-H,O-Y), LOGICAL(Z)
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                    KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                    kbass,npnt1,npnt2,npntt
-      COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                    iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
-                    zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      !IMPLICIT DOUBLE PRECISION(A-H,O-Y), LOGICAL(Z)
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+       !             KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+       !             kbass,npnt1,npnt2,npntt
+      !COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
+      !              iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
+      !              zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      use size
+      use outp
+      implicit none
 
       DOUBLE PRECISION, DIMENSION(max(mbass,neval,(npntt+1)**2)) :: B
       DOUBLE PRECISION, DIMENSION(neval) :: eval
@@ -1538,10 +1577,13 @@
 !     HAMIL CONTAINS ARRAYS DIAG & OFFDG RELYING ON THEM BEING
 !     ADJACENT IN THE DYNAMIC STORE ALLOCATION
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                    KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                    kbass,npnt1,npnt2,npntt
+      !IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      !COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
+       !             KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
+       !             kbass,npnt1,npnt2,npntt
+      use size
+      
+      implicit none
       DOUBLE PRECISION, DIMENSION(NBASS) :: W,Z
       DOUBLE PRECISION, DIMENSION(*) :: HAMIL
       DIMENSION MVIB(NBLK)

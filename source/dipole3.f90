@@ -140,13 +140,18 @@
 !
 !    for |j' - j"| = 1, then ipar1 and ipar2 must be different.
 !
-      implicit double precision (a-h,o-y), logical (z)
-      common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,zpseg
+      !implicit double precision (a-h,o-y), logical (z)
+      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,zpseg
       namelist/prt/ zprint, zpmin, ztra, zstart,&
                     iket, ibra, itra, iscr, ires, nblock,zuvvis,zpseg
-      common /head/ title
-      common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
-      common/timing/itime0
+      !common /head/ title
+      !common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
+      !common/timing/itime0
+      use logic
+      use head
+      use stream
+      use timing
+      implicit none
       character(len=8) title(9)
 
       write(6,200)
@@ -179,7 +184,7 @@
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **002
       block data
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
 !
 !     block data stores the default values of the logical control
 !     parameters and the ground zero energy.
@@ -187,9 +192,12 @@
 !     the bra input stream, ibra, and the output stream for program
 !     spectrum, itra.
 !
-      common /logic/zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-              zpseg
-      common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
+      !common /logic/zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
+       !       zpseg
+      !common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
+      use logic
+      use stream
+      implicit none
       data zmors1/.true./, zprint/.false./, ztra/.true./,&
            zmors2/.true./, zpmin /.false./, ires/0/, nblock/1000/,&
            zstart/.false./, iket/11/, ibra/12/, itra/13/, iscr/24/,&
@@ -209,7 +217,7 @@
 !     angular functions must be set by the user, and are inputted on
 !     stream 5 (five).
 !
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
 !
 !     the following size parameters have these functions:
 !
@@ -232,13 +240,18 @@
 !     ncoord: number of vibrational coordinates explicitly considered
 !     if (ncoord /= 3) some of the above are dummies, see below.
 !
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                 npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-                 kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-              zpseg
-      common/sym/ idia,ipar1,ipar2,jrot1,jrot2
-      common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+       !          npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
+       !          kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
+      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
+        !      zpseg
+      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      !common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
+      use dim
+      use logic
+      use sym
+      use stream
+      implicit none
 !     save masses, g's and embedding in case they are needed
 !     in the dipole routine
       common /mass/ xmass(3),g1,g2,zembed,zbisc
@@ -636,11 +649,14 @@
 !                                                **004
       subroutine main
 !
-      implicit double precision (a-h,o-y), logical (z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                 npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-                 kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
+      !implicit double precision (a-h,o-y), logical (z)
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+      !           npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
+      !           kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
+      !common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
+      use dim
+      use stream
+      implicit none
       integer, allocatable, dimension(:):: nbass1,nbass2
       allocate(nbass1(jk1))
       allocate(nbass2(jk2))
@@ -674,9 +690,11 @@
 !     it calculates nbmax, the largest value of nbass, neeeded to
 !     dimension the space needed for the d-coefficients.
 !
-      implicit logical (z)
-      common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-              zpseg
+      !implicit logical (z)
+      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
+        !      zpseg
+      use logic
+      implicit none
 
 !       dimension nbass(jk),lmin(jk),lbass(jk)
       integer, dimension(jk) :: nbass
@@ -725,14 +743,20 @@
 !     All data etc for the ket are labelled 1;
 !     all data etc for the bra are labelled 2.
 
-      implicit double precision (a-h,o-y), logical (z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                 npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-                 kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2
-      common/sym/ idia,ipar1,ipar2,jrot1,jrot2
-      common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !implicit double precision (a-h,o-y), logical (z)
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+       !          npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
+      !           kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
+      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2
+      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      !common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      use dim
+      use logic
+      use sym
+      use stream
+      use mass
+      implicit none
 
       !dimension nbass1(jk1)
       !dimension nbass2(jk2)
@@ -1158,11 +1182,14 @@ if(jk2 <= 1) go to 108
 !     subroutine lagpt obtains values of the dipole at the radial
 !     dvr points and angular integration points
 
-      implicit double precision(a-h,o-y), logical (z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                 npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-                 kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      !implicit double precision(a-h,o-y), logical (z)
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+       !          npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
+       !          kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
+      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      use dim
+      use sym
+      implicit none
 
       double precision, dimension(*) :: d0
       double precision, dimension(npnt1) :: r1
@@ -1253,10 +1280,13 @@ if(jk2 <= 1) go to 108
 !     for the polynomial part of associated legendre functions.
 !     a factor of sin(theta)**m has NOT been removed from all functions.
 
-      implicit double precision (a-h,o-y), logical (z)
+      !implicit double precision (a-h,o-y), logical (z)
 
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      use mass
+      use sym
+      implicit none
 
       double precision, dimension(ipot,0:lmax) :: pleg
       double precision, dimension(ipot) :: x
@@ -1429,15 +1459,20 @@ if(jk2 <= 1) go to 108
 
 !     subroutine to read d coefficients from dstore data
 
-      implicit double precision (a-h,o-y), logical(z)
+      !implicit double precision (a-h,o-y), logical(z)
       parameter (iz=1)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                 npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-                 kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-              zpseg
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+        !         npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
+       !          kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
+      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
+      !        zpseg
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      use dim
+      use logic
+      use mass
+      use sym
+      implicit none
 
       double precision, dimension(ne,max(nrade*ipot,nbass)) :: d
       double precision, dimension(ne,nbass) :: temp
@@ -1580,12 +1615,17 @@ if(jk2 <= 1) go to 108
       subroutine jtran(coef,nrad,mvib,pleg,maxleg,idvr,kz,dvrvec,&
                         ivec,ipar,iv,iang,ibass,ibase,nu,temp,jay_ipar)
 
-      implicit double precision (a-h,o-y), logical (z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                 npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-                 kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      common/sym/ idia,ipar1,ipar2,jrot1,jrot2
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !implicit double precision (a-h,o-y), logical (z)
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+      !           npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
+      !           kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
+      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      use dim
+      use sym
+      use mass
+      implicit none
+
 
       double precision, dimension(0:maxleg,idvr) :: pleg
       double precision, dimension(iang,*) :: dvrvec
@@ -1676,13 +1716,17 @@ if(jk2 <= 1) go to 108
 !     Adapted to run in parallel on SGI Origin machines by Greg Harris
 !     In this case NCPUS should be set to the number of processors.
 
-      implicit double precision (a-h,o-y), logical (z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                 npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-                 kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-              zpseg
-      common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      !implicit double precision (a-h,o-y), logical (z)
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+      !           npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
+      !           kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
+      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
+      !        zpseg
+      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      use dim
+      use logic
+      use sym
+      implicit none
       parameter (NCPUS=1)
 
       double precision, dimension(neval1,neval2) :: t
@@ -1849,15 +1893,21 @@ if(jk2 <= 1) go to 108
 !     and line strengths for program spectrum to calculate
 !     simulated spectra
 
-      implicit double precision (a-h,o-y), logical (z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                 npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-                 kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-              zpseg
-      common/sym/ idia,ipar1,ipar2,jrot1,jrot2
-      common /head/ title
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !implicit double precision (a-h,o-y), logical (z)
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+      !           npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
+      !           kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
+      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
+      !        zpseg
+      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      !common /head/ title
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      use dim
+      use logic
+      use sym
+      use head
+      use mass
+      implicit none
 
       double precision, dimension(neval1,neval2) :: tz,tx
       double precision, dimension(neval1) :: e1
@@ -2012,15 +2062,21 @@ end if
 !     spectrum to simulate laboratory or interstellar spectra.
 !     the output data is in atomic units.
 
-      implicit double precision(a-h,o-y), logical(z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                 npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-                 kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-              zpseg
-      common/sym/ idia,ipar1,ipar2,jrot1,jrot2
-      common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
+      !implicit double precision(a-h,o-y), logical(z)
+      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+       !          npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
+      !           kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
+      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
+      !        zpseg
+      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+      !common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
+      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+      use sym
+      use mass
+      use logic
+      use stream
+      use dim
+      implicit none
 
       double precision, dimension(neval1) :: e1
       double precision, dimension(neval2) :: e2
@@ -2113,8 +2169,10 @@ end if
 !!    COORDINATES. ALLOWANCE MUST BE MADE FOR THE NUMBERING OF THE ATOMS
 !!    Additionally, the zbisc option is included.
 !!
-!     IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
-!     COMMON /MASS/ XMASS(3),G1,G2,zembed,zbisc
+!     !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+!     !COMMON /MASS/ XMASS(3),G1,G2,zembed,zbisc
+      use mass
+      implicit none
 !     LOGICAL FIRST/.TRUE./
 !     SAVE FIRST
 
