@@ -27,18 +27,10 @@
 !     the program works in **** atomic units ***** :
 !     Fortan90 version with dynamic arrays by Max Kostin & Jonathan Tennyson
 
-      !implicit double precision (a-h,o-y), logical (z)
-
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-      !              nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-      !              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-       !             zdiag,zdcore,iscr,ires,irf1,irf2
+    
       namelist/prt/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
                     zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
                     zdiag,zdcore,iscr,ires,irf1,irf2
-      !common/timing/itime0
       use size
       use outp
       use timing
@@ -92,7 +84,6 @@ end if
 !#######################################################################
       block data
 !     stores defaults for namelist parameters                       #003
-      !implicit double precision (a-h,o-y), logical (z)
 
 !     outp holds information which controls the amount of printed output
 !     toler: convergence tolerance for the iterative diagonaliser
@@ -126,10 +117,6 @@ end if
 !          = -2 perform second transformation only
 !          = -3 perform first  transformation only
 ! (restart after zdiag=.false. run, ivec=irf1 and irf2 required)
-
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-       !             zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-        !            zdiag,zdcore,iscr,ires,irf1,irf2
       
       use outp
     
@@ -510,8 +497,6 @@ end subroutine read_8or9_radau
 
 !     set up common /size/ & write control parameters of problem    #004
 
-      !implicit double precision (a-h,o-y), logical (z)
-
 !     common /size/ stores control parameters for the problem
 !     nbass: maximum dimension of rotational secular problem
 !     ibass: actual dimension of rotational secular problem
@@ -537,12 +522,6 @@ end subroutine read_8or9_radau
 !     loff : space required for all the off-diagonal blocks
 !     loff0: space required for the largest off-diagonal block
 
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-      !              nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-      !              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-      !              zdiag,zdcore,iscr,ires,irf1,irf2
       use size
       use outp
    
@@ -705,14 +684,6 @@ end subroutine read_8or9_radau
 !     subroutine select determines which vibrational basis          #007
 !     functions are to be used
  
-      !implicit double precision (a-h,o-y), logical (z)
- 
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-       !             nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-      !              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-      !              zdiag,zdcore,iscr,ires,irf1,irf2
       use size
       use outp
   
@@ -915,14 +886,6 @@ end subroutine read_8or9_radau
 !     subroutine vrmain is the 'real' main program & contains       #006
 !     the calls to the various subroutines which set & solve hamil
 !
-      !implicit double precision (a-h,o-y), logical (z)
-
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-       !             nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-       !             zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-      !              zdiag,zdcore,iscr,ires,irf1,irf2
       use size
       use outp
   
@@ -1071,15 +1034,6 @@ end subroutine read_8or9_radau
  
 !     subroutine radint calculates the two-dimensional radial basis
 !     functions between two symmetrised orthogonal coordinates.
- 
-      !implicit double precision (a-h,o-y), logical (z)
- 
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-      !              nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-      !              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-      !              zdiag,zdcore,iscr,ires,irf1,irf2
       use size
       use outp
   
@@ -1133,15 +1087,7 @@ end subroutine read_8or9_radau
 !     coordinates in the bisector embedding. this is done by first
 !     evaluating the matrix element in an fbr using gaussian quadrature
 !     and then transforming to the appropriate dvrs.
- 
-      !implicit double precision (a-h,o-y), logical (z)
- 
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !             kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-      !             nblk,loff,loff0,mbass0
       use size
-    
-  
       implicit  none
 
       DIMENSION iv1(ndvr),iv2(ndvr)
@@ -1234,15 +1180,7 @@ end subroutine read_8or9_radau
 !     coordinates in the bisector embedding. this is done by first
 !     evaluating the matrix element in an fbr using gaussian quadrature
 !     and then transforming to the appropriate dvrs.
- 
-      !implicit double precision (a-h,o-y), logical (z)
- 
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-       !             kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-       !             nblk,loff,loff0,mbass0
       use size
-
-  
       implicit  none
 
       DIMENSION iv1(ndvr),iv2(ndvr)
@@ -1613,17 +1551,8 @@ end subroutine read_8or9_radau
       subroutine loadh(diag,mvib,hamil,itime)
  
 !     subroutine loadh loads the hamiltonian matrix from disk
- 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-       !             nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-       !             zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-      !              zdiag,zdcore,iscr,ires,irf1,irf2
       use size
       use outp
-  
       implicit  none
 
       DIMENSION MVIB(NBLK)
@@ -1762,18 +1691,8 @@ end subroutine read_8or9_radau
 !     subroutine solrt sets up non-zero parts of hamiltonian        #010
 !     including the computation of the k dependent angular matrix
 !     elements
- 
-      !implicit double precision (a-h,o-y), logical (z)
- 
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-      !              nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-      !              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-      !              zdiag,zdcore,iscr,ires,irf1,irf2
       use size
       use outp
-  
       implicit  none
 
       DIMENSION MVIB(NBLK)
@@ -2110,17 +2029,8 @@ end subroutine read_8or9_radau
 !     construct off-diagonal matrix elements from radial and angular
 !     matrix elements and first step vectors.
 !     New algorithm introduced. JT June 2012.
-
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,& 
-      !              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,& 
-      !              zdiag,zdcore,iscr,ires,irf1,irf2
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,& 
-      !              nblk,loff,loff0,mbass0
       use size
       use outp
-  
       implicit  none
 
       DOUBLE PRECISION, DIMENSION(mn) :: offdg
@@ -2162,17 +2072,8 @@ end subroutine read_8or9_radau
 !     subroutine diag solves the eigenvalue problem:                #012
 !          hamil * vec = eval * vec
 !     by using iterative nag routine f02fjf to do diagonalisations.
- 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-       !             kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-      !              nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-       !             zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-       !             zdiag,zdcore,iscr,ires,irf1,irf2
       use size
       use outp
-  
       implicit  none
 
       DOUBLE PRECISION, DIMENSION(NEVAL) :: EVAL
@@ -2282,17 +2183,8 @@ end subroutine read_8or9_radau
 !     subroutine dgiter solves the eigenvalue problem:
 !          hamil * vec = eval * vec
 !     by using iterative nag routine f02fjf to do diagonalisations.
- 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-       !             nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-      !              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-      !              zdiag,zdcore,iscr,ires,irf1,irf2
       use size
       use outp
-  
       implicit  none
       double precision, external :: vecvec
       external matvec,f02fjz
@@ -2357,17 +2249,8 @@ end subroutine read_8or9_radau
 !     step into ones for the first step basis and stores the
 !     results in a form suitable for program dipole3.
 !     This version treats each k-block seperately.
- 
-      !implicit double precision(a-h,o-y), logical(z)
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-      !              nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-      !              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-      !              zdiag,zdcore,iscr,ires,irf1,irf2
       use size
       use outp
-  
       implicit  none
 
       DIMENSION MVIB(nblk),NKBAS(nblk),lmin(nblk),lbasis(nblk)
@@ -2499,17 +2382,8 @@ end subroutine read_8or9_radau
                         
 !     `Transformation' step for J=1f special case      
 !     RESULTS IN A FORM SUITABLE FOR program DIPOLE3.
-
-      !implicit double precision(a-h,o-y), logical(z)
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-      !              nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-      !              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-       !             zdiag,zdcore,iscr,ires,irf1,irf2
       use size
       use outp
-  
       implicit  none
 
       DOUBLE PRECISION, DIMENSION(3) :: XMASS
@@ -2627,17 +2501,8 @@ end subroutine read_8or9_radau
  
 !     take the dvr vectors from unit ivec and transform them to fbr in
 !     theta. also construct pointer arrays for dipole3.
- 
-      !implicit double precision(a-h,o-y), logical(z)
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-       !             kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-       !             nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-      !              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-      !              zdiag,zdcore,iscr,ires,irf1,irf2
       use size
       use outp
-  
       implicit  none
 
       DOUBLE PRECISION, DIMENSION(*) :: fbrvec
@@ -2683,17 +2548,8 @@ end subroutine read_8or9_radau
 
 !#######################################################################
       subroutine jtran(coef,mvib,pleg,idvr,nrad,nang,ibass1,iv,nkbas)
-  
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-      !              nblk,loff,loff0,mbass0
-      !common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-      !              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-      !              zdiag,zdcore,iscr,ires,irf1,irf2
       use size
       use outp
-  
       implicit  none
 
       DOUBLE PRECISION, DIMENSION(ndvr,idvr) :: pleg
@@ -2768,14 +2624,7 @@ end subroutine read_8or9_radau
 !     note:
 !     hamil contains arrays diag & offdg relying on them being
 !     adjacent in the dynamic store allocation
- 
-      !implicit double precision (a-h,o-z)
-      !common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-      !              kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-      !              nblk,loff,loff0,mbass0
       use size
-     
-  
       implicit  none
 
       DOUBLE PRECISION, DIMENSION(IBASS) :: W,Z
@@ -2824,7 +2673,8 @@ end subroutine read_8or9_radau
 !###########################
 
       subroutine nftim(text)
-      common/timing/itime0
+      use timing
+      implicit none
       character text*(*)
       write(6,10)
       write(6,*) 'Time at ',text,' is.........'

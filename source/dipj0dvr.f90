@@ -7,15 +7,12 @@ program dipj0dvr
 !
 use sizes
 use diffs
-!implicit double precision(a,b,d-h,o-y),logical(z),character(c)
 implicit none
 parameter (navail=500000)
 parameter (maxq=500)
 character*80 title
 character c1,c2
 dimension array(navail)
-!common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,ntheta,nr1,nr2,neval0,neval1
-!common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
 
 ! this subroutine reads all the controlling data for the job
 call rddata(title,array(1),array(1+maxq),array(1+maxq*2),array(1+maxq*3),array(1+maxq*4),array(1+maxq*5),maxq)
@@ -61,29 +58,19 @@ end program dipj0dvr
 ! This subroutine reads in the data needed from the various places: a
 ! data file on stream 5, iwave0, ivc0, and if iptot=2, iwave1 and iv1.
       subroutine rddata(title,r1,r2,theta,r11,r21,theta1,maxq)
-      !implicit double precision(a-h,o-y),logical(z)
    
       parameter (tol=1d-8)
       parameter (amtoau=1.6605402d-27/0.91093897d-30)
       character*80 title
       dimension r1(maxq),r2(maxq),theta(maxq),r11(maxq),r21(maxq), &
      &          theta1(maxq),xmass1(3)
-      !common/logic/zembed,iptot,idia,zdone
       use logic
-      !common/stream/ibra0,ibra1,iket0,iket1,iwave0,iwave1, &
-     !&              ivc0,ivc1,ione,itwo
       use stream
-      !common/mass/xmass(3),g1,g2
       use stream
-      !common/eqm/ex(3),ez(3),tmass
       use eqm
       use sizes
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1, &
-     !&             ntheta,nr1,nr2,neval0,neval1
-      common/old/ztheta,zr2r1, npta, nptb, nptc, max2d, max3d, &
-     &           zthet1,zr2r11,npta1,nptb1,nptc1,max2d1,max3d1
+      use old
       use diffs
-      !common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
       implicit none
       namelist/prt/ibra0,iket0,iwave0,ivc0,ibra1,iket1,iwave1,ivc1, &
      &             zsame,iptot,zdone,ione,itwo
@@ -339,20 +326,13 @@ end program dipj0dvr
 ! This subroutine writes a header message giving information about the
 ! program and the wavefunctions used.
       subroutine messge(title)
-      !implicit double precision(a-h,o-y),logical(z)
     
       character*80 title
-      !common/logic/zembed,iptot,idia,zdone
-      !common/mass/xmass(3),g1,g2
-      !common/eqm/ex(3),ez(3),tmass
       use logic
       use mass
       use eqm
       use sizes
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,  &
-     !&             ntheta,nr1,nr2,neval0,neval1
       use diffs
-      !common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
       implicit none
 
       write(6,100)('*',i=1,78),('*',i=1,78),title
@@ -435,13 +415,9 @@ end program dipj0dvr
       end
 /== ======================================================== conver =====
       subroutine conver(r1,r2,xcos,x,z)
-      !implicit double precision(a-h,o-y),logical(z)
  
       parameter (x1=1d0)
       double precision x(3),z(3),zint
-      !common/logic/zembed,iptot,idia,zdone
-      !common/mass/xmass(3),g1,g2
-      !common/eqm/ex(3),ez(3),tmass
       use logic
       use mass
       use eqm
@@ -518,20 +494,12 @@ end program dipj0dvr
 /== ======================================================== gtmain =====
 ! This routine allocates memory, & calls the real main program (inmain)
       subroutine gtmain(array,navail)
-      !implicit double precision(a-h,o-y),logical(z)
    
       dimension array(navail)
-      !common/logic/zembed,iptot,idia,zdone
       use logic
-
       use sizes
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,        &
-     !&             ntheta,nr1,nr2,neval0,neval1
-      !common/old/ztheta,zr2r1, npta, nptb, nptc, max2d, max3d,             &
-     !&           zthet1,zr2r11,npta1,nptb1,nptc1,max2d1,max3d1
       use diffs
       use old
-      !common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
       implicit none
 
 ! check that enough memory has been allocated.
@@ -642,19 +610,16 @@ end program dipj0dvr
 ! involved in this calculation
       subroutine inmain(phi,phibra,phiket,dipx,dipz,Tx,Tz,j,              &
      &                  evals,r1,r2,theta,r21)
-      !implicit double precision(a-h,o-y),logical(z)
+
 
 ! note: the dimensions of c1d, c2d and c3d may not seem to be correct
 ! here but enough space has been left for them so it doesn't matter
       dimension evals(neval0+neval1)
-      !common/logic/zembed,iptot,idia,zdone
       use logic
       use sizes
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,        &
-     !&             ntheta,nr1,nr2,neval0,neval1
+
       use diffs
-      !common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
-      !common/time/ouser,osys,ototal
+    
       use time
       implicit none
 
@@ -762,15 +727,13 @@ end program dipj0dvr
 ! This subroutine reads in phi(a,b,c) from the stream supplied by DVR3D
 ! (iwave) and then stores it in two places for the bra and the ket
       subroutine rdphi(phi,evals,itime,mr2,neval)
-      !implicit double precision(a-h,o-y),logical (z)
+
      
       dimension phi(ntheta*nr1*mr2),evals(neval)
-      !common/stream/ibra0,ibra1,iket0,iket1,iwave0,iwave1,                          &
-     !&              ivc0,ivc1,ione,itwo
+     
       use sizes
       use stream
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,                  &
-    ! &             ntheta,nr1,nr2,neval0,neval1
+      
       data autocm/2.19474624D+05/
       implicit none
 
@@ -822,27 +785,18 @@ end program dipj0dvr
 ! This subroutine works out phi(a,b,c) from the 1D 2D and 3D
 ! coefficients, and then stores it in two places for the bra and the ket
       subroutine oldphi(phi,array,evals,itime,neval)
-      !implicit double precision(a-h,o-y),logical(z)
+   
       
       dimension array((2+2*nptb)*nptc+max2d+npta*max2d+              &
      &                                     max3d*(1+npta*nptb))
-      !common/logic/zembed,iptot,idia,zdone
-      !common/stream/ibra0,ibra1,iket0,iket1,iwave0,iwave1,            &
-    ! &              ivc0,ivc1,ione,itwo
-      !common/mass/xmass(3),g1,g2
-      !common/old/ztheta,zr2r1, npta, nptb, nptc, max2d, max3d,         &
-     !&           zthet1,zr2r11,npta1,nptb1,nptc1,max2d1,max3d1
-      !common/eqm/ex(3),ez(3),tmass
+     
       use sizes
       use logic
       use stream
       use mass
       use old
       use eqm
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,    &
-     !&             ntheta,nr1,nr2,neval0,neval1
       use diffs
-      !common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
       implicit none
 
       if (itime == 0) then
@@ -904,7 +858,7 @@ end program dipj0dvr
      &                  evals,n2d,n3d,npta,nptb,nptc,neval,ibra,iket,   &
      &                  iout,ivc,ivec1,ivec2,jbra,nbra,jket,nket,       &
      &                  ztheta,zr2r1)
-      !implicit double precision(a-h,o-y),logical (z)
+    
       implicit none
       dimension phi(npta*nptb*nptc),j(nptc),iidum(nptb*nptc),            &
      &          k(nptb,nptc),c2d(n2d),ndim2d(nptc),c1d(n2d,npta),        &
@@ -1033,13 +987,10 @@ end program dipj0dvr
 ! This subroutine calculates the dipoles along the x and z axes of the
 ! Eckart embedding coordinate system, and stores them
       subroutine getmu(dipx,dipz,r1,r2,theta,mr2)
-      !implicit double precision(a-h,o-y),logical (z)
 
       dimension dipx(ntheta,nr1,mr2),dipz(ntheta,nr1,mr2),r1(nr1),        &
      &          r2(nr2),theta(ntheta)
       use sizes
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,        &
-     !&             ntheta,nr1,nr2,neval0,neval1
       implicit none
 
       do 10 ir2=1,mr2
@@ -1059,10 +1010,9 @@ end program dipj0dvr
 ! (see Le Sueur, CR,  Miller, S, Tennyson, J & Sutcliffe, BT; Mol Phys
 ! (1992) 76, 1147 for the theory behind this conversion)
       subroutine dipcal(r1,r2,xcos,dipx,dipz)
-      !implicit double precision(a-h,o-y),logical (z)
+    
       double precision x(3),z(3)
-      !common/mass/xmass(3),g1,g2
-      !common/eqm/ex(3),ez(3),tmass
+  
       use mass
       use eqm
       implicit none
@@ -1091,21 +1041,17 @@ end program dipj0dvr
 ! wavefunctions and the dipoles
       subroutine getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,ibtime,iktime,    &
      &                mr2)
-      !implicit double precision(a-h,o-y),logical(z)
+    
       dimension phibra(ntheta*nr1*mr2),phiket(ntheta*nr1*mr2),               &
      &          dipx(ntheta*nr1*mr2),dipz(ntheta*nr1*mr2),                   &
      &          evals(neval0+neval1),                                        &
      &          Tx(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2),     &
      &          Tz(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2)
-      !common/logic/zembed,iptot,idia,zdone
-      !common/stream/ibra0,ibra1,iket0,iket1
+     
       use logic
       use stream
       use sizes
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,          &
-     !&             ntheta,nr1,nr2,neval0,neval1
       use diffs
-      !common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
       implicit none
 
       if (ibtime == iktime .and. ibtime == 0) then
@@ -1206,15 +1152,13 @@ end program dipj0dvr
 ! This subroutine calculates the dipoles along the x and z axes of the
 ! Eckart embedding coordinate system, and stores them
       subroutine diffmu(dipx,start,r1,theta,maxq)
-      !implicit double precision(a-h,o-y),logical (z)
       dimension dipx(ntheta,nr1,nr2,nr21),r1(nr1),theta(ntheta),            &
      &          start(nr2*nr2+nr21*nr21+(nr2+nr21+1)*(nqe+nqo)+             &
      &                6*maxq+nr2+nr21)
       use sizes
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,        &
-     !&             ntheta,nr1,nr2,neval0,neval1
+     
       use diffs
-      !common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
+     
       implicit none
 
 ! set up arrays
@@ -1267,16 +1211,13 @@ end program dipj0dvr
 /== ======================================================== gettra =====
 ! this routine calculates the transformation matrices for the r2 points
       subroutine gettra(transe,transo,q,wt,b,c,dnorme,dnormo,maxq)
-      !implicit double precision(a-h,o-y),logical(z)
+    
       parameter(toler=1d-8)
       dimension transe(nr2,nr2),transo(nr21,nr21),                          &
      &          q(maxq),wt(maxq),b(maxq),c(maxq),dnorme(nr2),               &
      &          dnormo(nr21)
       use sizes
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,          &
-    ! &             ntheta,nr1,nr2,neval0,neval1
       use diffs
-      !common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
       implicit none
 
       call glagpt(q,wt,b,c,alphae+0.5d0,csx,csa,tsx,nr2)
@@ -1560,16 +1501,12 @@ end program dipj0dvr
 ! this subroutine finds the quadrature points to be used in evaluating
 ! the dipole
       subroutine getbas(basise,basiso,reo,q,wt,b,c,dnorme,dnormo,maxq)
-      !implicit double precision(a-h,o-y),logical(z)
       parameter(toler=1d-8)
       dimension basise(nr2,nqe+nqo),basiso(nr21,nqe+nqo),            &
      &          reo(nqe+nqo),q(2*maxq),wt(2*maxq),b(maxq),c(maxq),   &
      &          dnorme(nr2),dnormo(nr21)
       use sizes
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,  &
-     !&             ntheta,nr1,nr2,neval0,neval1
       use diffs
-      !common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
       implicit none
 
       if (nqe > 0)                                               &
@@ -1658,16 +1595,13 @@ end program dipj0dvr
 ! r2 is run last, and the bra and the ket use different functions for r2
       subroutine domult(dipx,transe,transo,basise,basiso,r1,r2,theta,    &
      &                  crunch)
-      !implicit double precision(a-h,o-y),logical(z)
+
       dimension dipx(ntheta,nr1,nr2,nr21),transe(nr2,nr2),                &
      &          transo(nr21,nr21),basise(nr2,nqe+nqo),                    &
      &          basiso(nr21,nqe+nqo),r1(nr1),r2(nqe+nqo),theta(ntheta),   &
      &          crunch(nr2,nr21,nqe+nqo)
       use sizes
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,        &
-     !&             ntheta,nr1,nr2,neval0,neval1
       use diffs
-      !common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
       implicit none
 
       divide=2d0
@@ -1708,18 +1642,13 @@ end program dipj0dvr
 ! this routine calculates transition moments for the specific case when
 ! r2 is run last, and the bra and the ket use different functions for r2
       subroutine diffT(phibra,phiket,dipx,evals,Tx,Tz)
-      !implicit double precision(a-h,o-y),logical(z)
       dimension phibra(ntheta*nr1,nr2),phiket(ntheta*nr1,nr21),             &
      &          dipx(ntheta*nr1,nr2,nr21),evals(neval0+neval1),             &
      &          Tx(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2),    &
      &          Tz(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2)
-      !common/stream/ibra0,ibra1,iket0,iket1
       use sizes
       use stream
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,         &
-     !&             ntheta,nr1,nr2,neval0,neval1
       use diffs
-      !common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
       implicit none
 
       rewind ibra0
@@ -1761,7 +1690,6 @@ end program dipj0dvr
 ! This subroutine writes out the transition intensities in the same
 ! format as DIPOLE does.
       subroutine writeT(Tx,Tz,evals)
-      !implicit double precision (a-h,o-y),logical (z)
       character c1, c2;
       parameter(AUTOCM= 2.19474624D+05)
 ! AUTODE CONVERTS ATOMIC UNITS TO DEBYE
@@ -1771,11 +1699,8 @@ end program dipj0dvr
       dimension Tx(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2),  &
      &          Tz(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2),  &
      &          evals(neval0+neval1)
-      !common/logic/zembed,iptot,idia,zdone
       use logic
       use sizes
-      !common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1,        &
-     !&             ntheta,nr1,nr2,neval0,neval1
       implicit none
 
       WRITE(6,200)
@@ -1857,9 +1782,7 @@ end program dipj0dvr
       END
 /== ======================================================== timer  =====
       subroutine timer(text)
-      !implicit double precision(a-h,o-y),logical(z)
       character text*(*)
-      !common/time/ouser,osys,ototal
       use time
       implicit none
 

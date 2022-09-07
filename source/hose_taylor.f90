@@ -7,7 +7,8 @@ program hosetaylor
 !
 ! OUTPUT FORMAT IS: J, ENERGY, KA, KC, MAX(|<PSI|PSI>|^2),  IPAR, KMIN, MOD(QUANTA OF NU3,2)
 !
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  use size
+  implicit none
 
 ! file is assumed to be attached to unit 26
   ifile=26
@@ -37,8 +38,6 @@ end program hosetaylor
 !###################################################################
 
 subroutine read_26_radau
-  !implicit double precision (a-h,o-y), logical (z)
-  !common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
   use size
   implicit none
 
@@ -189,8 +188,6 @@ end subroutine read_26_radau
 !###################################################################
 
 subroutine read_8or9_radau
-  !implicit double precision (a-h,o-y), logical (z)
-  !common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
   use size
   implicit none
 

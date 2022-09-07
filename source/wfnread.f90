@@ -3,7 +3,8 @@ program reader
 ! At present it just echos the reads to standard output but 
 ! it can adapted for other functions such as plotting wavefunctions
 
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  use size
+  implicit none
 
 ! file is assumed to be attached to unit 26
   ifile=26
@@ -36,8 +37,6 @@ end program reader
 
 !###################################################################
 subroutine read_8or9_jacobi
-  !implicit double precision (a-h,o-y), logical (z)
-  !common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
   use size
   implicit none
 
@@ -101,8 +100,6 @@ end subroutine read_8or9_jacobi
 !##################################################################
 
 subroutine read_26_jacobi
-  !implicit double precision (a-h,o-y), logical (z)
-  !common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
   use size
   implicit none
 
@@ -171,8 +168,6 @@ end subroutine read_26_jacobi
 !###################################################################
 
 subroutine read_26_radau
-  !implicit double precision (a-h,o-y), logical (z)
-  !common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
   use size
   implicit none
 
@@ -223,8 +218,6 @@ end subroutine read_26_radau
 !###################################################################
 
 subroutine read_8or9_radau
-  !implicit double precision (a-h,o-y), logical (z)
-  !common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
   use size
   implicit none
 

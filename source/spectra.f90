@@ -158,13 +158,9 @@ program spect4
 !  Updated to f90 to use dynamic memory allocation and to preselect transitions
 !  by GJH & JT 2001.
 
-!implicit double precision(a-h,o-y), logical(z)
 character(len=8) title(9)
 namelist/prt/ zout, zsort, zspe, zpfun, itra, ilev, ispe, item, &
 wsmax,wsmin, emin, emax, jmax, smin, gz,zpseg
-!common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
-!common/base/ ibase1,ibase2
-!common/timing/itime0
 use logic
 use base
 use timing
@@ -331,8 +327,6 @@ end
 subroutine spmain(ilev,ispe,nr,nmax1,nmax2,item,idia,gz)
 
 !     this is the effective main program of spectra
-!implicit double precision(a-h,o-y), logical(z)
-!common/logic/ zout, zsort, zspe, zpfun, zembedi,zpseg
 use logic
 
 implicit none
@@ -417,13 +411,10 @@ subroutine sortsp(nr, item, ispe)
 !     data printed out is in cm-1, debye**2 and sec-1.
 !     data written to ispe for spectm is in atomic units.
 
-!implicit double precision(a-h,o-y), logical(z)
 DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: da
 integer, allocatable, dimension(:,:) :: ia
 integer, allocatable, dimension(:) :: iperm
 
-
-!common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
 use logic
 
 implicit none
@@ -522,10 +513,7 @@ subroutine pfcalc(temp,emax,qerr,ge,go,nlev,q,ilev,idia,gz)
 
 !     the input stream is ilev, which is defaulted to stream 14.
 
-!implicit double precision(a-h,o-y), logical(z)
-!common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
 use logic
-
 implicit none
 
 double precision, allocatable, dimension(:) :: e
@@ -648,14 +636,11 @@ ge, go, temp, q, nr, jdia, ispe, gz)
 !         j(w)= --------------------------------
 !                             4pi*q
 
-!implicit double precision(a-h,o-y), logical(z)
 double precision, allocatable, dimension(:,:) :: a
 integer, allocatable, dimension(:,:) :: iqnum
 namelist /spe/ emin1,emax1,jmax,zplot,zemit,iplot,zfreq,zeinst, &
 emin2,emax2,zprof,idat,zene,tinte,zlist,ilist, &
 zdop,prthr,npoints,xmolm
-!common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
-!common/base/ ibase1,ibase2
 use logic
 use base
 implicit none
@@ -1211,10 +1196,8 @@ end
 subroutine timer
 !     prints current cpu time usage                                 #030
 
-!implicit double precision (a-h,o-y)
-!common/timing/itime0
-use timing
 
+use timing
 implicit none
 write(6,10)
 call SYSTEM_CLOCK(itime2,irate2,imax2)

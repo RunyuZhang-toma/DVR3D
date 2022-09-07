@@ -48,14 +48,6 @@
 !
 !     Rewritten into fortran 95 by Max Kostin and Jonathan Tennyson
       use oupb
-      !implicit double precision (a-h,o-y), logical (z)
-
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-      !              idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-      !              zpseg
 
       namelist/prt/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
                     zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
@@ -63,7 +55,6 @@
                     idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
                     ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
                     zpseg
-      !common/timing/itime0
       use outp
       use timing
       implicit none
@@ -92,7 +83,6 @@
 !##############################################################################
       block data
 !     stores defaults for namelist parameters  
-      !implicit logical (z)
 
 !  zpham[f] = t requests printing of the hamiltonian matrix.
 !  zprad[f] = t requests printing of the radial matrix elements.
@@ -160,12 +150,6 @@
 !  iwave[26]    stores the wavefunction amplitudes at the grid points when
 !               ztran = t.
 !
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,& 
-        !            zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,& 
-       !             zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,& 
-        !            idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,& 
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
       use outp
       implicit none
       data zpham/.false./,zprad/.false./,zpvec/.false./,zrot/.true./,& 
@@ -186,7 +170,6 @@
 !     set up common /size/ & write control parameters of problem
 
       use oupb
-      !implicit double precision (a-h,o-y), logical (z)
 
 !     common /size/ stores control parameters for the problem
 !     npnt1: number of (gauss-laguerre) dvr points in r1
@@ -227,17 +210,7 @@
 !     ncoord: number of vibrational coordinates explicitly considered
 !     if (ncoord /= 3) some of the above are dummies, see below.
 
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-       !             npnt,nlim1,nlim2,neval,ncoord,&
-       !             jrot,kmin,idia,ipar,&
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-       !             ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-       !             zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-       !             zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intveci,&
-       !             zpseg
+
       use size
       use outp
       implicit none
@@ -671,22 +644,6 @@
 !     the calls to the various subroutines which set & solve the
 !     intermediate and the final hamiltonians.
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,& 
-      !              npnt,nlim1,nlim2,neval,ncoord,& 
-      !              jrot,kmin,idia,ipar,& 
-      !              max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,& 
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      !common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,& 
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,& 
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,& 
-      !              idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,& 
-      !              ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
-      !common /mass/ xmass(3),g1,g2,xmassr(3)
-      !common /oupb/   xp0,xp1,xp2
       use size
       use split1
       use split2
@@ -1064,30 +1021,15 @@
 
 !     read in masses & set constants for radial basis sets          #007
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-       !             npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-       !             ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !!              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-      !              idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
-      !common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      !common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      !common /oupb/   xp0,xp1,xp2
       use size
       use outp
       use split1
       use split2
       use oupb
+      use mass
       implicit none
 
 !     save masses & g in case they are needed in the potential routine
-      common /mass/ xmass(3),g1,g2,xmassr(3)
 !     amtoau converts amu (proton masses) to au (electron masses).
       data amtoau/1.8228883d03/
       data x0,xp5,x1,x4/0.0d0,0.5d0,1.0d0,4.0d0/
@@ -1250,21 +1192,6 @@
 !     and pseudo-normalisation array:
 !       dnorm(m) = sqrt((m-1)! * binom(npnt+iu,npnt-m))
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-      !              max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-      !              idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-      !              ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
-      !common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      !common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      !common /oupb/   xp0,xp1,xp2
       use size
       use outp
       use split1
@@ -1559,16 +1486,6 @@
 !     keints calculates analytic kinetic energy integrals over r    #012
 !     for morse oscillator-like functions
 
-      !implicit double precision (a-h,o-y), logical (z)
-
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-       !             zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
-
-      !common /oupb/   xp0,xp1,xp2
       use outp
       use oupb
       implicit none
@@ -1606,15 +1523,6 @@
 !     keint2 calculates analytic kinetic energy integrals over r2   #013
 !     and moment of intertia integral for spherical oscillator functions
 
-      !implicit double precision (a-h,o-y), logical (z)
-
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-       !             zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-       !             zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
-       !common /oupb/   xp0,xp1,xp2
       use outp
       use oupb
       implicit none
@@ -1819,13 +1727,7 @@
 !     takes the points & weights generated by legpt for the half-range
 !     and creates new arrays for the full-range (-1,+1).
 
-      !implicit double precision (a-h,o-y)
-
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-       !             jrot,kmin,idia,ipar,&
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-       !             ndima,ndimb,ndimc,iq,emax1,emax2
+   
       use size
       implicit none
 
@@ -1920,19 +1822,6 @@
 !     this subroutine sets up the lower triangle of the transformed
 !     angular momentum matrix l(alpha,alpha')
 
-      !implicit double precision (a-h,o-y), logical (z) 
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-        !            npnt,nlim1,nlim2,neval,ncoord,&
-        !            jrot,kmin,idia,ipar,&
-        !            max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-       !             ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-       !             zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-        !            zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-        !            idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-        !            ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-        !            zpseg
-      !common /oupb/   xp0,xp1,xp2
       use oupb
       use size
       use outp
@@ -1995,19 +1884,6 @@
 !     symmetrised radau coordinates.
 !     written by james henderson
 
-      !implicit double precision(a-h,o-y),logical(z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-      !              max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-      !              idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-      !              ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-      !              zpseg
-      !common /oupb/   xp0,xp1,xp2
       use size
       use outp
       use oupb
@@ -2207,21 +2083,6 @@
 !#########################################################################
       subroutine mkham1(ham1,xlmatr,i1,i2,term,r1,r2,xalf,xk1,xk2,kz)
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-       !             npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-      !              max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-       !             zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-       !             zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
-      !common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      !common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      !common /oupb/   xp0,xp1,xp2
       use size
       use outp
       use split1
@@ -2320,19 +2181,6 @@
 
 !####################################################################
       subroutine mkham2(ham2,eigs1d,vecs1d,xk1,xk2,iv1,ione,nham2)
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-      !              idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
-      !common /oupb/   xp0,xp1,xp2
       use size
       use outp
       use oupb
@@ -2403,21 +2251,6 @@
 
 !     build the final 3-d hamiltonian matrix.
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-       !             jrot,kmin,idia,ipar,&
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-       !             ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-      !              idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-      !              zpseg
-      !common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      !common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use oupb
       use outp
@@ -2661,19 +2494,6 @@
 
 !     load the final 3-d hamiltonian matrix.
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-       !             npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-      !              idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-      !              ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-      !              zpseg
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use outp
       use oupb
@@ -2749,13 +2569,6 @@
       SUBROUTINE diag(ham,maxham,nham,eig)
 
 !     diagonalise the appropriate hamiltonian matrices
-      !implicit real*8 (a-h,o-y), logical (z)
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zplot,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,idip,idipd,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,iwvpb,iplot,&
-       !             zpseg
       use outp
       implicit none
 
@@ -2774,19 +2587,6 @@
 !########################################################################
       subroutine diag3d(ham3,nham3,eval,kz)
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-       !             jrot,kmin,idia,ipar,&
-      !              max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-      !              idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-      !              ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-      !              zpseg
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use outp
       use oupb
@@ -2887,19 +2687,6 @@
 
 !     this routine chooses the max3d lowest eigenvalues from eigs2.
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-      !              max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use outp
       use oupb
@@ -2998,19 +2785,6 @@
 !     these eigenvalues & their corresponding vectors are then saved
 !     to disk.
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-      !              max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-      !              idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-      !              ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-      !              zpseg
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use outp
       use oupb
@@ -3074,19 +2848,6 @@
 !     these eigenvalues & their corresponding vectors are then saved
 !     to disk.
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-       !             ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-       !             zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-      !              zpseg
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use outp
       use oupb
@@ -3143,19 +2904,6 @@
 !     symmetrised radau coordinates.
 !     written by nic fulton, feb 1993.
 
-      !implicit double precision(a-h,o-y),logical(z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-        !            npnt,nlim1,nlim2,neval,ncoord,&
-       !             jrot,kmin,idia,ipar,&
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-        !            ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-       !             zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-       !             zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use outp
       use oupb
@@ -3262,15 +3010,6 @@
 !    ***********************************************************************
 
       subroutine blc2d1(xcos,r,hr,ham2,nham2,term,term2,term3,xtscw,kz)
-      !implicit double precision(a-h,o-y),logical(z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,& 
-       !             npnt,nlim1,nlim2,neval,ncoord,& 
-       !             jrot,kmin,idia,ipar,&
-      !              max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,max1dv,& 
-       !             ndima,ndimb,ndimc,& 
-      !              emax1,emax2
-      !common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use split1
       use oupb
@@ -3367,19 +3106,6 @@
 
 !     this routine chooses the max3d lowest eigenvalues from eigs2.
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-       !             npnt,nlim1,nlim2,neval,ncoord,&
-       !             jrot,kmin,idia,ipar,&
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-       !             ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-       !             zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use outp
       use oupb
@@ -3476,19 +3202,6 @@
 !     these eigenvalues & their corresponding vectors are then saved
 !     in the array vecs1d.
 
-      !implicit double precision(a-h,o-y),logical(z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-       !             ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-       !             zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-      !              ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use outp
       use oupb
@@ -3537,19 +3250,6 @@
 !     singular region of theta = 0 is not sampled when j > 0.
 !     also calculate which angular grid points are redundant.
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-       !             jrot,kmin,idia,ipar,&
-      !              max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-       !             zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-       !             zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-      !              ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-      !              zpseg
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use outp
       use oupb
@@ -3612,19 +3312,6 @@
 !***********************************************************************
 
       subroutine bloc3d(htheta,ham3,eigs2d,vecs2d,iv2,nv2,ham2,nham3,r)
-      !implicit double precision(a-h,o-y),logical(z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-      !              max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-       !             ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-       !             ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-       !             zpseg
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use outp
       use oupb
@@ -3671,14 +3358,6 @@
 !    ***********************************************************************
 
       subroutine blc2d2(r,igamma,igammp,htheta,ham2,nham2)
-      !implicit double precision(a-h,o-y),logical(z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-       !             npnt,nlim1,nlim2,neval,ncoord,& 
-       !             jrot,kmin,idia,ipar,& 
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,& 
-       !             ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use split1
       use oupb
@@ -3765,22 +3444,6 @@
 !     ***********************************************************************
 
       subroutine transr(iv2,vecs2d,ham3,eig3,nham3,nbass)
-      !implicit double precision(a-h,o-y),logical(z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,& 
-      !              npnt,nlim1,nlim2,neval,ncoord,& 
-      !              jrot,kmin,idia,ipar,& 
-      !              max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,& 
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,& 
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,& 
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,& 
-      !              idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,& 
-      !              ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-      !              zpseg
-     
-      !common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      !common /mass/ xmass(3),g1,g2,xmassr(3)
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use outp
       use split1
@@ -3828,23 +3491,6 @@
 !     if ztran then this routine transforms the sets of 1d, 2d and 3d
 !     coefficients to psi, the wavefunction amplitudes at the dvr points
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-      !              max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-      !              zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-      !              idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-      !              ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-      !              zpseg
-     
-      !common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      !common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      !common /mass/ xmass(3),g1,g2,xmassr(3)
-      !common  /oupb/   xp0,xp1,xp2
       use size
       use split1
       use split2
@@ -4101,7 +3747,8 @@
       return
       end
       subroutine nftim(text)
-      common/timing/itime0
+      use timing
+      implicit none
       character text*(*)
       write(6,10)
       write(6,*) 'Time at ',text,' is.........'
@@ -4121,18 +3768,7 @@
 !     molecular plane.
 !     written by max kostin, 2001.
 
-      !implicit double precision(a-h,o-y),logical(z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-      !              npnt,nlim1,nlim2,neval,ncoord,&
-      !              jrot,kmin,idia,ipar,&
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-      !              ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-       !             zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-      !              zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-       !             idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-      !              ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-      !              zpseg
+
       use size
       use outp
  
@@ -4219,13 +3855,6 @@
 
 
       subroutine z_blc2d1(xcos,r,hr,ham2,nham2,term,term2,kz)
-      !implicit double precision(a-h,o-y),logical(z)
-      !common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-       !             npnt,nlim1,nlim2,neval,ncoord,&
-       !             jrot,kmin,idia,ipar,&
-       !             max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-       !             ndima,ndimb,ndimc,iq,emax1,emax2
-      !common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
       use size
       use split1
       implicit none

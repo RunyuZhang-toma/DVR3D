@@ -1711,13 +1711,6 @@ end if
         use workdata     
         implicit none
         integer :: ie2
-!        common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-!             npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-!             kmin1,kmin2,jk1,jk2,nval1,nval2,nn2,ibase1,ibase2,ipot
-!        common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2
-!        common/sym/ idia,ifpar1,ifpar2,jrot1,jrot2
-!      common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
-!      common /mass/ xmass(3),g1,g2,zembed,zbisc
       
       real(8), dimension(nval1) :: e1
       real(8), dimension(nval2) :: e2

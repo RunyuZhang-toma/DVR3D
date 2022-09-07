@@ -140,13 +140,8 @@
 !
 !    for |j' - j"| = 1, then ipar1 and ipar2 must be different.
 !
-      !implicit double precision (a-h,o-y), logical (z)
-      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,zpseg
       namelist/prt/ zprint, zpmin, ztra, zstart,&
                     iket, ibra, itra, iscr, ires, nblock,zuvvis,zpseg
-      !common /head/ title
-      !common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
-      !common/timing/itime0
       use logic
       use head
       use stream
@@ -184,7 +179,6 @@
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **002
       block data
-      !implicit double precision (a-h,o-y), logical (z)
 !
 !     block data stores the default values of the logical control
 !     parameters and the ground zero energy.
@@ -192,9 +186,6 @@
 !     the bra input stream, ibra, and the output stream for program
 !     spectrum, itra.
 !
-      !common /logic/zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-       !       zpseg
-      !common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
       use logic
       use stream
       implicit none
@@ -217,7 +208,6 @@
 !     angular functions must be set by the user, and are inputted on
 !     stream 5 (five).
 !
-      !implicit double precision (a-h,o-y), logical (z)
 !
 !     the following size parameters have these functions:
 !
@@ -240,21 +230,15 @@
 !     ncoord: number of vibrational coordinates explicitly considered
 !     if (ncoord /= 3) some of the above are dummies, see below.
 !
-      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-       !          npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-       !          kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-        !      zpseg
-      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
-      !common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
+
       use dim
       use logic
       use sym
       use stream
+      use mass
       implicit none
 !     save masses, g's and embedding in case they are needed
 !     in the dipole routine
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
 
       double precision, dimension(3) :: xm1,xm2
 
@@ -649,11 +633,6 @@
 !                                                **004
       subroutine main
 !
-      !implicit double precision (a-h,o-y), logical (z)
-      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-      !           npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-      !           kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      !common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
       use dim
       use stream
       implicit none
@@ -690,9 +669,6 @@
 !     it calculates nbmax, the largest value of nbass, neeeded to
 !     dimension the space needed for the d-coefficients.
 !
-      !implicit logical (z)
-      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-        !      zpseg
       use logic
       implicit none
 
@@ -743,14 +719,7 @@
 !     All data etc for the ket are labelled 1;
 !     all data etc for the bra are labelled 2.
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-       !          npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-      !           kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2
-      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
-      !common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
-      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+
       use dim
       use logic
       use sym
@@ -1182,11 +1151,6 @@ if(jk2 <= 1) go to 108
 !     subroutine lagpt obtains values of the dipole at the radial
 !     dvr points and angular integration points
 
-      !implicit double precision(a-h,o-y), logical (z)
-      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-       !          npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-       !          kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
       use dim
       use sym
       implicit none
@@ -1280,10 +1244,7 @@ if(jk2 <= 1) go to 108
 !     for the polynomial part of associated legendre functions.
 !     a factor of sin(theta)**m has NOT been removed from all functions.
 
-      !implicit double precision (a-h,o-y), logical (z)
 
-      !common /mass/ xmass(3),g1,g2,zembed,zbisc
-      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
       use mass
       use sym
       implicit none
@@ -1459,15 +1420,7 @@ if(jk2 <= 1) go to 108
 
 !     subroutine to read d coefficients from dstore data
 
-      !implicit double precision (a-h,o-y), logical(z)
       parameter (iz=1)
-      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-        !         npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-       !          kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-      !        zpseg
-      !common /mass/ xmass(3),g1,g2,zembed,zbisc
-      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
       use dim
       use logic
       use mass
@@ -1615,12 +1568,6 @@ if(jk2 <= 1) go to 108
       subroutine jtran(coef,nrad,mvib,pleg,maxleg,idvr,kz,dvrvec,&
                         ivec,ipar,iv,iang,ibass,ibase,nu,temp,jay_ipar)
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-      !           npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-      !           kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
-      !common /mass/ xmass(3),g1,g2,zembed,zbisc
       use dim
       use sym
       use mass
@@ -1716,19 +1663,12 @@ if(jk2 <= 1) go to 108
 !     Adapted to run in parallel on SGI Origin machines by Greg Harris
 !     In this case NCPUS should be set to the number of processors.
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-      !           npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-      !           kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-      !        zpseg
-      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
+
       use dim
       use logic
       use sym
       implicit none
       parameter (NCPUS=1)
-
       double precision, dimension(neval1,neval2) :: t
       double precision, dimension(*) :: dipol
       double precision, dimension(nbin,nbin) :: binom
@@ -1893,15 +1833,6 @@ if(jk2 <= 1) go to 108
 !     and line strengths for program spectrum to calculate
 !     simulated spectra
 
-      !implicit double precision (a-h,o-y), logical (z)
-      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-      !           npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-      !           kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-      !        zpseg
-      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
-      !common /head/ title
-      !common /mass/ xmass(3),g1,g2,zembed,zbisc
       use dim
       use logic
       use sym
@@ -2062,15 +1993,7 @@ end if
 !     spectrum to simulate laboratory or interstellar spectra.
 !     the output data is in atomic units.
 
-      !implicit double precision(a-h,o-y), logical(z)
-      !common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-       !          npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
-      !           kmin1,kmin2,jk1,jk2,neval1,neval2,nn2,ibase1,ibase2,ipot
-      !common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2,zuvvis,&
-      !        zpseg
-      !common/sym/ idia,ipar1,ipar2,jrot1,jrot2
-      !common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
-      !common /mass/ xmass(3),g1,g2,zembed,zbisc
+
       use sym
       use mass
       use logic
@@ -2153,7 +2076,8 @@ end if
       subroutine timer
 !     prints current cpu time usage                                 #030
 !     needs a subroutine which can access the machine clock
-      common/timing/itime0
+      using timing
+      implicit none
 
       call SYSTEM_CLOCK(itime2,irate2,imax2)
       itime=(itime2-itime0)/irate2
@@ -2169,8 +2093,6 @@ end if
 !!    COORDINATES. ALLOWANCE MUST BE MADE FOR THE NUMBERING OF THE ATOMS
 !!    Additionally, the zbisc option is included.
 !!
-!     !IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
-!     !COMMON /MASS/ XMASS(3),G1,G2,zembed,zbisc
       use mass
       implicit none
 !     LOGICAL FIRST/.TRUE./

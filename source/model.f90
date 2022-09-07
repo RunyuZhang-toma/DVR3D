@@ -193,7 +193,6 @@ end module eqm
 module old
 implicit none
 !constant count: integer 10， logical 4.
-
      integer :: npta
      integer :: nptb
      integer :: nptc
@@ -612,7 +611,7 @@ end module oupb
 module pot
 implicit none
      parameter (mxprop=1000)
-     integer :: iprop()
+     integer :: iprop(mxprop)
      ! dimension  iprop(mxprop)
 end module pot
 
