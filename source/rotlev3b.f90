@@ -1,3 +1,6 @@
+include "model.f90"
+include "temp.f90"
+
 !     dummy main program                                           #001
       call rotlev3b
       stop
@@ -26,13 +29,17 @@
 !     or dsyev to do in core diagonalisation (lapack f90 routine).
 !     the program works in **** atomic units ***** :
 !     Fortan90 version with dynamic arrays by Max Kostin & Jonathan Tennyson
-      use size
-      use outp
-      use timing
-      implicit none
+
+      
       namelist/prt/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
                     zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
                     zdiag,zdcore,iscr,ires,irf1,irf2
+   
+      use size
+      use outp
+      use timing
+      use com
+      implicit none
 
      INTEGER :: count_0, count_rate, count_max, walltime , tstart, tend
       
@@ -61,6 +68,7 @@
 !#######################################################################
       block data
 !     stores defaults for namelist parameters                       #003
+      implicit double precision (a-h,o-y), logical (z)
 
 !     outp holds information which controls the amount of printed output
 !     toler: convergence tolerance for the iterative diagonaliser
@@ -94,13 +102,12 @@
 !          = -2 perform second transformation only
 !          = -3 perform first  transformation only
 ! (restart after zdiag=.false. run, ivec=irf1 and irf2 required)
+
       use outp
+
+      use data1temp
+      use com
       implicit none
-      data toler/0.0d0/,thresh/0.1d0/,zpham/.false./,zpvec/.false./,&
-           ivec/26/,zvec/.false./,jvec/3/,jvec2/2/,iscr/1/,ires/0/,&
-           ivec2/4/,zpfun/.false./,ilev/14/,kvec/8/,kvec2/9/,&
-           zdiag/.true./,ztran/.false./,zptra/.false./,zdcore/.false./,&
-           irf1/21/,irf2/22/
       end
 
 !########################################################################
@@ -108,6 +115,7 @@
 
 !     set up common /size/ & write control parameters of problem    #004
 
+      
 
 !     common /size/ stores control parameters for the problem
 !     nbass: maximum dimension of rotational secular problem
@@ -134,11 +142,14 @@
 !     loff : space required for all the off-diagonal blocks
 !     loff0: space required for the largest off-diagonal block
 
-      use outp
+     
       use size
+      use outp
+      use com
+      use DGROTtemp
       implicit none
       character(len=8) title(9)
-      data x0/0.0d0/
+ 
 
       open(unit=ivec,form='unformatted')
       open(unit=irf2,form='unformatted')
@@ -295,8 +306,9 @@
 !     subroutine select determines which vibrational basis          #007
 !     functions are to be used
  
-      use outp
       use size
+      use outp
+      use com
       implicit none
       
       DOUBLE PRECISION, DIMENSION(NVIB,NBLK) :: EVIB
@@ -496,15 +508,18 @@
 !     subroutine vrmain is the 'real' main program & contains       #006
 !     the calls to the various subroutines which set & solve hamil
 !
-      use outp
       use size
+      use outp
+      use com
+      use DGROTtemp
       implicit none
+      integer :: mvib,nkbas,lmin,lbasis,idvr
 
       DIMENSION MVIB(NBLK),nkbas(NBLK), lmin(NBLK),lbasis(NBLK)
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: DIAG,eval
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: vec
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: radmee,radmoo,radmeo,radmoe
-      data x0/0.0d0/
+
 
       if (abs(ires) == 2) goto 100
       if (ires < 0) then
@@ -643,8 +658,10 @@
  
 !     subroutine radint calculates the two-dimensional radial basis
 !     functions between two symmetrised orthogonal coordinates.
-      use outp
+ 
       use size
+      use outp
+      use com
       implicit none
 
       DOUBLE PRECISION, DIMENSION(nmax) :: rm2
@@ -695,9 +712,14 @@
 !     coordinates in the bisector embedding. this is done by first
 !     evaluating the matrix element in an fbr using gaussian quadrature
 !     and then transforming to the appropriate dvrs.
-    
+ 
       use size
+      use ccmaintemp
+      
+      use com
       implicit none
+      integer :: mn,iv1,iv2,nang1,nang2
+      DOUBLE PRECISION :: k1,angfac
 
       DIMENSION iv1(ndvr),iv2(ndvr)
       DOUBLE PRECISION, DIMENSION(ndvr,ndvr) :: fbrmat,pleg1,pleg2
@@ -705,7 +727,6 @@
       DOUBLE PRECISION, DIMENSION(npnt) :: xalf,walf
       DOUBLE PRECISION, DIMENSION(nang1,npnt) :: plega
       DOUBLE PRECISION, DIMENSION(nang2,npnt) :: plegb
-      data x0/0.0d0/,xp5/0.5d0/,x1/1.0d0/,x2/2.0d0/,toler/1.0d-8/
  
 !     first: set up an npnt gauss-associated legendre quadrature scheme
       realk = dble(k1)
@@ -789,9 +810,13 @@
 !     coordinates in the bisector embedding. this is done by first
 !     evaluating the matrix element in an fbr using gaussian quadrature
 !     and then transforming to the appropriate dvrs.
-      
+ 
       use size
+      use dmaintemp
+      use com
       implicit none
+      integer :: mn,iv1,iv2,nang1,nang2
+      DOUBLE PRECISION :: k1,angfac
 
       DIMENSION iv1(ndvr),iv2(ndvr)
       DOUBLE PRECISION, DIMENSION(ndvr,ndvr) :: fbrmat,pleg1,pleg2
@@ -800,7 +825,7 @@
       DOUBLE PRECISION, DIMENSION(nang1,npnt) :: plega
       DOUBLE PRECISION, DIMENSION(nang2,npnt) :: plegb 
  
-      data x0/0.0d0/,x1/1.0d0/
+
 !     evaluate the polynomials at the quadrature points
       call asleg(plegb,fbrmat,nang2-1,xalf,npnt,k1+2)
 !     now compute the fbr matrix elements
@@ -846,10 +871,12 @@
 !     integration formulas", 1966, prentice hall, page 29.
 !     note that for our purposes, alf= bta= nu.
  
-      implicit double precision(a-h,o-z)
+
+      integer :: nn,nn2
+      DOUBLE PRECISION :: alf,bta,csa,tsa
       DOUBLE PRECISION, DIMENSION(nn) :: x,a,b,c
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/,eps/1.0d-12/,&
-           x3/3.0d0/,x4/4.0d0/,x8/8.0d0/
+      use gaslegtemp
+      implicit none
       fn= dble(nn)
       csa= x0
       c(1) = 0.0d0
@@ -912,10 +939,12 @@
 !     note that for our purposes, alf= bta= nu.
 
 
-      implicit real*8(a-h,o-z)
+      integer :: nn,nn2
+      real*8 :: alf,bta,csa,tsa
+
       real*8, dimension(nn) :: x,a,b,c,xt
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/,x3/3.0d0/,x4/4.0d0/,& 
-           eps/1.0d-12/,xstep/1.0d-6/
+      use gaslegtemp
+      implicit none
       fn= dble(nn)
       csa= x0
       c(1) = x0
@@ -977,7 +1006,9 @@
 !          dpn = derivative of p(n) at x
 !          pn1 = value of p(n-1) at x.
  
-      implicit double precision(a-h,o-z)
+      integer :: nn
+      DOUBLE PRECISION :: x,alf,bta,dpn,pn1,eps
+      implicit none
       DOUBLE PRECISION, DIMENSION(nn) :: b,c
       iter= 0
 1     iter= iter + 1
@@ -992,9 +1023,11 @@
 !**********************************************************************c
  
       subroutine recur(pn,dpn,pn1,x,nn,alf,bta,b,c)
-      implicit double precision(a-h,o-z)
       DOUBLE PRECISION, DIMENSION(nn) :: b,c
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
+      integer :: nn
+      DOUBLE PRECISION :: pn,dpn,pn1,x,alf,bta
+      use dmaintemp
+      implicit none
       p1= x1
       p= x + (alf-bta)/(alf + bta + x2)
       dp1= x0
@@ -1022,9 +1055,11 @@
 !     this enables us to use jacobi integration with alf = bta = m,
 !     using routines refived from beidenharn and louck.
  
-      implicit double precision (a-h,o-z)
+      double precision :: pleg,pnorm,X
+      integer :: lmax,nn2,m
       dimension pleg(0:lmax,nn2),x(nn2),pnorm(0:lmax)
-      data x1/1.0d0/,x2/2.0d0/
+      use dmaintemp
+      implicit none
 
       if (m < 0) goto 999
       do 10 i=1,nn2
@@ -1161,14 +1196,18 @@
       subroutine loadh(diag,mvib,hamil,itime)
  
 !     subroutine loadh loads the hamiltonian matrix from disk
-      use outp
+ 
       use size
+      use outp
+      use com
+      use dmaintemp
       implicit none
+      integer :: mvib,itime
 
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, dimension(*) :: diag
       DOUBLE PRECISION, dimension(ibass,ibass) :: hamil
-      data x0/0.0d0/
+   
       if (zdcore) then
          hamil=x0
          ist2=0
@@ -1301,8 +1340,11 @@
 !     subroutine solrt sets up non-zero parts of hamiltonian        #010
 !     including the computation of the k dependent angular matrix
 !     elements
-      use outp
+ 
       use size
+      use outp
+      use com
+      use SOLRTtemp
       implicit none
 
       DIMENSION MVIB(NBLK)
@@ -1314,7 +1356,6 @@
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: DIAG,OFFDG
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: COEF1,COEF2,angmat
  
-      data x2/2.0d0/,x16/16.0d0/,sqrt2/1.4142135623731d0/
 
       ALLOCATE(COEF1(MBASS,NVIB),COEF2(MBASS,NVIB),angmat(iang,iang),&
                pleg1(ndvr,ndvr),pleg2(ndvr,ndvr),diag(nbass),offdg(loff0),&
@@ -1639,16 +1680,20 @@
 !     construct off-diagonal matrix elements from radial and angular
 !     matrix elements and first step vectors.
 !     New algorithm introduced. JT June 2012.
-      use outp
+
       use size
+      use outp
+      use com
+      use DGitertemp
       implicit none
+      integer :: mn,nmax1,iq,iq1,iq2,iang11,iang1,iang2,mvib1,mvib2,ibass1,ibass2
 
       DOUBLE PRECISION, DIMENSION(mn) :: offdg
       DOUBLE PRECISION, DIMENSION(*) :: coef1,coef2
       DOUBLE PRECISION, DIMENSION(*) :: radmat
       DOUBLE PRECISION, DIMENSION(iang11,iang11) :: angmat
       DOUBLE PRECISION, DIMENSION(iang1,mvib2) :: pdg
-      data x0/0.0d0/,x1/1.0d0/
+ 
       offdg = x0
       ir1=0
       ir2=0
@@ -1682,9 +1727,14 @@
 !     subroutine diag solves the eigenvalue problem:                #012
 !          hamil * vec = eval * vec
 !     by using iterative nag routine f02fjf to do diagonalisations.
-      use outp
+ 
       use size
+      use outp
+      use com
+      use DGROTtemp
       implicit none
+      integer :: mvib,lwork
+      DOUBLE PRECISION :: k1,ezero
 
       DOUBLE PRECISION, DIMENSION(NEVAL) :: EVAL
       DOUBLE PRECISION, DIMENSION(*) :: DIAG
@@ -1692,7 +1742,7 @@
       DIMENSION MVIB(NBLK),IBIG(IBASS)
 
 !          autocm converts atomic units (hartree) to cm-1.
-      data autocm/2.19474624d+05/,x0/0.0d0/
+
 
       if (zdcore) then
           ifail=0
@@ -1793,11 +1843,15 @@
 !     subroutine dgiter solves the eigenvalue problem:
 !          hamil * vec = eval * vec
 !     by using iterative nag routine f02fjf to do diagonalisations.
-      use outp
+ 
       use size
+      use outp
+      use com
+      use DGitertemp
       implicit none
       double precision, external :: vecvec
       external matvec,f02fjz
+      integer :: mvib,lwork
 
       DOUBLE PRECISION, DIMENSION(KEVAL) :: EVAL
       DOUBLE PRECISION, DIMENSION(*) :: DIAG
@@ -1805,8 +1859,6 @@
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, DIMENSION(lwork) :: WORK
 
-      data x0/0.0d0/,x1/1.0d0/,emax/1.0d50/,noffd/1/
- 
 !     create some starting vectors by using the diagonal elements
       vec=x0
       esmall=-emax
@@ -1859,9 +1911,13 @@
 !     step into ones for the first step basis and stores the
 !     results in a form suitable for program dipole3.
 !     This version treats each k-block seperately.
-      use outp
+ 
       use size
+      use outp
+      use com
+      use DGitertemp
       implicit none
+      integer :: mvib,itra,nkbas,lmin,lbasis,idvr
 
       DIMENSION MVIB(nblk),NKBAS(nblk),lmin(nblk),lbasis(nblk)
 !      DOUBLE PRECISION, DIMENSION(3) :: XMASS
@@ -1884,7 +1940,6 @@
       allocate(c(nvib,neval))
       allocate(r(nmax))
       
-      data x0/0.0d0/,x1/1.0d0/
  
       write(6,1000) ivec,jvec,kvec
  1000 format('1'/5x,'eigenvector transformation:',&
@@ -1986,10 +2041,14 @@
                         
 !     `Transformation' step for J=1f special case      
 !     RESULTS IN A FORM SUITABLE FOR program DIPOLE3.
-      use outp
-      use size
-      implicit none
 
+      use size
+      use outp
+      use com
+      use DGROTtemp
+      implicit none
+      integer :: itra,idvr
+      DOUBLE PRECISION :: ezero
 
       DOUBLE PRECISION, DIMENSION(3) :: XMASS
       DOUBLE PRECISION, DIMENSION(mbass) :: d
@@ -1997,7 +2056,6 @@
       DOUBLE PRECISION, DIMENSION(nmax) :: r
       DOUBLE PRECISION, DIMENSION((ndvr+1)**2) :: pleg
       DIMENSION ivt(ndvr)
-      data autocm/2.19474624d+05/
  
 !     read dvr3d header
       rewind ivec
@@ -2106,9 +2164,12 @@
  
 !     take the dvr vectors from unit ivec and transform them to fbr in
 !     theta. also construct pointer arrays for dipole3.
-      use outp
+ 
       use size
+      use outp
+      use com
       implicit none
+      integer :: nkbas,mvib,iv1,itra,idvr
 
       DOUBLE PRECISION, DIMENSION(*) :: fbrvec
       DOUBLE PRECISION, DIMENSION(ndvr,idvr) :: pleg
@@ -2153,16 +2214,19 @@
 
 !#######################################################################
       subroutine jtran(coef,mvib,pleg,idvr,nrad,nang,ibass1,iv,nkbas)
-      use outp
+  
       use size
+      use outp
+      use com
+      use DGROTtemp
       implicit none
+      integer :: mvib,idvr,nrad,nang,ibass1,iv,nkbas
 
       DOUBLE PRECISION, DIMENSION(ndvr,idvr) :: pleg
       DOUBLE PRECISION, DIMENSION(iang,nrad) :: dvrvec
       DOUBLE PRECISION, DIMENSION(nkbas,mvib) :: coef
       DOUBLE PRECISION, DIMENSION(nrad) :: sumk
       DIMENSION iv(nang)
-      data x0/0.0d0/
 
 !     transform back to the original fbr-type basis in the
 !     associated legendre functions
@@ -2229,8 +2293,12 @@
 !     note:
 !     hamil contains arrays diag & offdg relying on them being
 !     adjacent in the dynamic store allocation
+ 
       use size
+     
+      use com
       implicit none
+      integer :: iflag,n,noffd,mvib,ndiag
 
       DOUBLE PRECISION, DIMENSION(IBASS) :: W,Z
       DOUBLE PRECISION, DIMENSION(*) :: HAMIL
@@ -2279,7 +2347,6 @@
 
       subroutine nftim(text)
       use timing
-      implicit none
       character text*(*)
       write(6,10)
       write(6,*) 'Time at ',text,' is.........'

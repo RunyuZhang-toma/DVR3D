@@ -1,3 +1,5 @@
+include "model.f90"
+include "temp.f90"
 program spect4
 
 !  this program is designed to handle the output from programs dipole
@@ -158,15 +160,19 @@ program spect4
 !  Updated to f90 to use dynamic memory allocation and to preselect transitions
 !  by GJH & JT 2001.
 
+
 character(len=8) title(9)
 namelist/prt/ zout, zsort, zspe, zpfun, itra, ilev, ispe, item, &
 wsmax,wsmin, emin, emax, jmax, smin, gz,zpseg
+
 use logic
 use base
 use timing
+use com
 implicit none
+
 DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: ee1, ee2, ss
-data autocm/ 2.19474624d+05/, autode/ 2.5417662d0/
+use specttemp
 
 !     set time zero for timer
 call SYSTEM_CLOCK(itime0,irate2,imax2)
@@ -328,10 +334,10 @@ subroutine spmain(ilev,ispe,nr,nmax1,nmax2,item,idia,gz)
 
 !     this is the effective main program of spectra
 use logic
-
+use com
 implicit none
 
-data dwl/0.0d0/,x1/1.0d0/,x0/0.0d0/
+use dmaintemp
 
 !     sort out the spectrum on frequencies
 
@@ -411,12 +417,14 @@ subroutine sortsp(nr, item, ispe)
 !     data printed out is in cm-1, debye**2 and sec-1.
 !     data written to ispe for spectm is in atomic units.
 
+
 DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: da
 integer, allocatable, dimension(:,:) :: ia
 integer, allocatable, dimension(:) :: iperm
 
-use logic
 
+use logic
+use com
 implicit none
 
 !      fmem = (64*nr)/1048576.0d0
@@ -514,15 +522,13 @@ subroutine pfcalc(temp,emax,qerr,ge,go,nlev,q,ilev,idia,gz)
 !     the input stream is ilev, which is defaulted to stream 14.
 
 use logic
+use com
 implicit none
 
 double precision, allocatable, dimension(:) :: e
 !     program constants
 !     autocm converts atomic units to wavenumbers
-data x0/0.0d0/,x1/1.0d0/,&
-hc/ 1.9864476d-16/, &
-bk/ 1.3806581d-16/, &
-autocm/ 2.19474624d+05/
+use dmaintemp
 allocate(e(nlev))
 
 rewind ilev
@@ -636,12 +642,14 @@ ge, go, temp, q, nr, jdia, ispe, gz)
 !         j(w)= --------------------------------
 !                             4pi*q
 
+
 double precision, allocatable, dimension(:,:) :: a
 integer, allocatable, dimension(:,:) :: iqnum
 namelist /spe/ emin1,emax1,jmax,zplot,zemit,iplot,zfreq,zeinst, &
 emin2,emax2,zprof,idat,zene,tinte,zlist,ilist, &
 zdop,prthr,npoints,xmolm
-use logic
+
+use com
 use base
 implicit none
 !     program constants
@@ -1196,9 +1204,8 @@ end
 subroutine timer
 !     prints current cpu time usage                                 #030
 
-
+implicit double precision (a-h,o-y)
 use timing
-implicit none
 write(6,10)
 call SYSTEM_CLOCK(itime2,irate2,imax2)
 itime=(itime2-itime0)/irate2

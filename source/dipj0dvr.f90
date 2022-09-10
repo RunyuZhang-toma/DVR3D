@@ -1,3 +1,5 @@
+include "model.f90"
+include "temp.f90"
 program dipj0dvr
 !
 ! This program calculates transition intensities between vibrations, by
@@ -5,14 +7,16 @@ program dipj0dvr
 ! Sutcliffe BT, Mol Phys (1992) 76,1147.  The vibrational wavefunctions
 ! have been obtained using DVR theory in the program DVR3D.
 !
-use sizes
-use diffs
-implicit none
 parameter (navail=500000)
 parameter (maxq=500)
 character*80 title
 character c1,c2
 dimension array(navail)
+use dipj0dvrtemp
+use sizes
+use diffs
+use com
+implicit none
 
 ! this subroutine reads all the controlling data for the job
 call rddata(title,array(1),array(1+maxq),array(1+maxq*2),array(1+maxq*3),array(1+maxq*4),array(1+maxq*5),maxq)
@@ -54,33 +58,30 @@ do i=1,200
 enddo
 
 end program dipj0dvr
-/========================================================== rddata =====
+!========================================================== rddata =====
 ! This subroutine reads in the data needed from the various places: a
 ! data file on stream 5, iwave0, ivc0, and if iptot=2, iwave1 and iv1.
       subroutine rddata(title,r1,r2,theta,r11,r21,theta1,maxq)
-   
       parameter (tol=1d-8)
       parameter (amtoau=1.6605402d-27/0.91093897d-30)
       character*80 title
       dimension r1(maxq),r2(maxq),theta(maxq),r11(maxq),r21(maxq), &
      &          theta1(maxq),xmass1(3)
-      use logic
-      use stream
-      use stream
-      use eqm
-      use sizes
-      use old
-      use diffs
-      implicit none
       namelist/prt/ibra0,iket0,iwave0,ivc0,ibra1,iket1,iwave1,ivc1, &
      &             zsame,iptot,zdone,ione,itwo
+      use diffs
+      use old
+      use sizes
+      use eqm
+      use mass
+      use stream
+      use logic
+      use com
+      use rddatatemp
+      implicit none
+      double precision :: title,r1,r2,theta,r11,r21,theta1
+      integer :: maxq
       
-
-      data ibra0,iket0,iwave0,ivc0,ibra1,iket1,iwave1,ivc1,ione,itwo &
-     &    /51,   52,   26,    54,  61,   62,   63,    64,  71,  72/
-      data zembed,zsame/.true.,.true./
-      data zdone/.true./
-      data iptot/0/
 
       read(5,prt)
       read(5,1000)title
@@ -322,17 +323,17 @@ end program dipj0dvr
 1001  format(5i5)
 1002  format(3f20.0)
       end
-/========================================================== message =====
+!========================================================== message =====
 ! This subroutine writes a header message giving information about the
 ! program and the wavefunctions used.
       subroutine messge(title)
-    
       character*80 title
       use logic
       use mass
       use eqm
       use sizes
       use diffs
+      use com
       implicit none
 
       write(6,100)('*',i=1,78),('*',i=1,78),title
@@ -413,15 +414,17 @@ end program dipj0dvr
      &       i3,' points are used for functions with alpha=',i3,          &
      &       ' and beta=',f12.6//)
       end
-/== ======================================================== conver =====
+!== ======================================================== conver =====
       subroutine conver(r1,r2,xcos,x,z)
- 
       parameter (x1=1d0)
       double precision x(3),z(3),zint
       use logic
       use mass
       use eqm
+      use com
       implicit none
+      double precision :: r1,r2,xcos,x
+      logic :: z
 
       do 10 i=1,3
         x(i)=0d0
@@ -491,16 +494,19 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== gtmain =====
+!== ======================================================== gtmain =====
 ! This routine allocates memory, & calls the real main program (inmain)
       subroutine gtmain(array,navail)
-   
+      double precision :: array
+      integer :: navail
       dimension array(navail)
-      use logic
-      use sizes
       use diffs
       use old
+      use sizes
+      use logic
+      use com
       implicit none
+
 
 ! check that enough memory has been allocated.
       ibegin=nr1+nr2+ntheta+1
@@ -605,23 +611,24 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== inmain =====
+!== ======================================================== inmain =====
 ! This is the real main program, which calls all the other subroutines
 ! involved in this calculation
       subroutine inmain(phi,phibra,phiket,dipx,dipz,Tx,Tz,j,              &
      &                  evals,r1,r2,theta,r21)
-
-
 ! note: the dimensions of c1d, c2d and c3d may not seem to be correct
 ! here but enough space has been left for them so it doesn't matter
       dimension evals(neval0+neval1)
+      use time
+      use diffs
       use logic
       use sizes
-
-      use diffs
-    
-      use time
+      use com
+      use inmaintemp
       implicit none
+      double precision :: phi,phibra,phiket,dipx,dipz,Tx,Tz,evals,r1,r2,theta,r21
+      integer :: j
+
 
       call timer(' ')
 
@@ -723,19 +730,19 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== rdphi  =====
+!== ======================================================== rdphi  =====
 ! This subroutine reads in phi(a,b,c) from the stream supplied by DVR3D
 ! (iwave) and then stores it in two places for the bra and the ket
       subroutine rdphi(phi,evals,itime,mr2,neval)
-
-     
+      implicit double precision(a-h,o-y),logical (z)
       dimension phi(ntheta*nr1*mr2),evals(neval)
-     
-      use sizes
+      use rdphitemp
       use stream
-      
-      data autocm/2.19474624D+05/
+      use sizes
+      use com
       implicit none
+      double precision :: phi,evals
+      integer :: itime,mr2,neval
 
       if (itime == 0) then
         iwave=iwave0
@@ -781,23 +788,23 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== oldphi =====
+!== ======================================================== oldphi =====
 ! This subroutine works out phi(a,b,c) from the 1D 2D and 3D
 ! coefficients, and then stores it in two places for the bra and the ket
       subroutine oldphi(phi,array,evals,itime,neval)
-   
-      
       dimension array((2+2*nptb)*nptc+max2d+npta*max2d+              &
      &                                     max3d*(1+npta*nptb))
-     
-      use sizes
-      use logic
-      use stream
-      use mass
-      use old
-      use eqm
       use diffs
+      use sizes
+      use eqm
+      use old
+      use mass
+      use stream
+      use logic
+      use oldphitemp
       implicit none
+      double precision :: phi,array,evals
+      integer :: itime,neval
 
       if (itime == 0) then
         ibra=ibra0
@@ -853,13 +860,15 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== getphi =====
+!== ======================================================== getphi =====
       subroutine getphi(phi,j,iidum,k,c2d,ndim2d,c1d,c3d,cprod,         &
      &                  evals,n2d,n3d,npta,nptb,nptc,neval,ibra,iket,   &
      &                  iout,ivc,ivec1,ivec2,jbra,nbra,jket,nket,       &
      &                  ztheta,zr2r1)
-    
+      use getphitemp
       implicit none
+      
+      
       dimension phi(npta*nptb*nptc),j(nptc),iidum(nptb*nptc),            &
      &          k(nptb,nptc),c2d(n2d),ndim2d(nptc),c1d(n2d,npta),        &
      &          c3d(n3d),evals(neval),cprod(n3d,npta,nptb)
@@ -983,16 +992,17 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== getmu  =====
+!== ======================================================== getmu  =====
 ! This subroutine calculates the dipoles along the x and z axes of the
 ! Eckart embedding coordinate system, and stores them
       subroutine getmu(dipx,dipz,r1,r2,theta,mr2)
-
       dimension dipx(ntheta,nr1,mr2),dipz(ntheta,nr1,mr2),r1(nr1),        &
      &          r2(nr2),theta(ntheta)
-      use sizes
-      implicit none
-
+     use getmutemp
+     use sizes
+     use com
+     implicit none
+      
       do 10 ir2=1,mr2
       do 10 ir1=1,nr1
       do 10 itheta=1,ntheta
@@ -1003,18 +1013,18 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== dipcal =====
+!== ======================================================== dipcal =====
 ! This subroutine calls dipd and hence obtains the dipole components
 ! along the axes of the embedding used for the wavefunctions.  It then
 ! converts these to components along the axes of the Eckart embedding
 ! (see Le Sueur, CR,  Miller, S, Tennyson, J & Sutcliffe, BT; Mol Phys
 ! (1992) 76, 1147 for the theory behind this conversion)
       subroutine dipcal(r1,r2,xcos,dipx,dipz)
-    
       double precision x(3),z(3)
-  
       use mass
       use eqm
+      use com
+      use dipcaltemp
       implicit none
 
       call conver(r1,r2,xcos,x,z)
@@ -1036,22 +1046,22 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== getT   =====
+!== ======================================================== getT   =====
 ! This subroutine calculates the transition intensities from the
 ! wavefunctions and the dipoles
       subroutine getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,ibtime,iktime,    &
      &                mr2)
-    
       dimension phibra(ntheta*nr1*mr2),phiket(ntheta*nr1*mr2),               &
      &          dipx(ntheta*nr1*mr2),dipz(ntheta*nr1*mr2),                   &
      &          evals(neval0+neval1),                                        &
      &          Tx(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2),     &
      &          Tz(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2)
-     
+      use diffs
+      use sizes
       use logic
       use stream
-      use sizes
-      use diffs
+      use com
+      use getTtemp
       implicit none
 
       if (ibtime == iktime .and. ibtime == 0) then
@@ -1148,18 +1158,19 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== diffmu =====
+!== ======================================================== diffmu =====
 ! This subroutine calculates the dipoles along the x and z axes of the
 ! Eckart embedding coordinate system, and stores them
       subroutine diffmu(dipx,start,r1,theta,maxq)
       dimension dipx(ntheta,nr1,nr2,nr21),r1(nr1),theta(ntheta),            &
      &          start(nr2*nr2+nr21*nr21+(nr2+nr21+1)*(nqe+nqo)+             &
      &                6*maxq+nr2+nr21)
-      use sizes
-     
+      use diffmutemp
       use diffs
-     
+      use sizes
+      use com
       implicit none
+
 
 ! set up arrays
       istart=1
@@ -1208,17 +1219,19 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== gettra =====
+!== ======================================================== gettra =====
 ! this routine calculates the transformation matrices for the r2 points
       subroutine gettra(transe,transo,q,wt,b,c,dnorme,dnormo,maxq)
-    
       parameter(toler=1d-8)
       dimension transe(nr2,nr2),transo(nr21,nr21),                          &
      &          q(maxq),wt(maxq),b(maxq),c(maxq),dnorme(nr2),               &
      &          dnormo(nr21)
+      use gettratemp
       use sizes
       use diffs
+      use com
       implicit none
+
 
       call glagpt(q,wt,b,c,alphae+0.5d0,csx,csa,tsx,nr2)
       call basis(transe,q,dnorme,alphae,nr2-1,nr2-1,nr2)
@@ -1261,12 +1274,12 @@ end program dipj0dvr
      &       1x,'Computed',2x,e25.13,10x,e25.13/                           &
      &       1x,'Analytic',2x,e25.13,10x,e25.13)
       end
-/== ======================================================== basis  =====
+!== ======================================================== basis  =====
       subroutine basis(rbasis,q,dnorm,                                     &
      &                 A,idim,maxfn,npts)
-      implicit double precision(a-h,o-y),logical(z)
-    
       dimension rbasis(0:idim,npts),q(npts),dnorm(0:maxfn)
+      use basistemp
+      implicit none
 
       alpha=A+0.5d0
 
@@ -1316,7 +1329,7 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== s14aaf =====
+!== ======================================================== s14aaf =====
       double precision FUNCTION S14AAF(xx,ifail)
 !     Mock-up of NAG routine of the same names for
 !     evaluating Gamma functions in the range (0,1)
@@ -1325,13 +1338,11 @@ end program dipj0dvr
       ifail=0
       RETURN
       END
-/== ======================================================== gammln =====
+!== ======================================================== gammln =====
       double precision FUNCTION GAMMLN(XX)
 !     Gamma function routine from Numerical Recipes p. 157
       DOUBLE PRECISION COF(6),STP,HALF,ONE,FPF,X,TMP,SER,xx
-      DATA COF,STP/76.18009173D0,-86.50532033D0,24.01409822D0,         &
-     &    -1.231739516D0,.120858003D-2,-.536382D-5,2.50662827465D0/
-      DATA HALF,ONE,FPF/0.5D0,1.0D0,5.5D0/
+      use gaujactemp
       X=XX-ONE
       TMP=X+FPF
       TMP=(X+HALF)*LOG(TMP)-TMP
@@ -1343,7 +1354,7 @@ end program dipj0dvr
       GAMMLN=TMP+LOG(STP*SER)
       RETURN
       END
-/== ======================================================== glagpt =====
+!== ======================================================== glagpt =====
       subroutine glagpt(q,wt,b,c,alpha,csx,csa,tsx,npts)
 ! This subroutine calculates the quadrature points and weights for
 ! Gauss-Laguerre quadrature according to the routine given by Stroud and
@@ -1369,11 +1380,12 @@ end program dipj0dvr
 ! the top instead & the extra factor of Gamma(n+alpha+1) is transferred
 ! to the normalisation constants.  This is in order to avoid overflow.
 !
-      implicit double precision(a-h,o-y),logical(z)
       dimension q(npts),wt(npts),b(npts),c(npts)
-      
+      use glagpttemp
+      use com
+      implicit none
 
-      data eps/1d-12/
+      
 
 ! zero calculated sum of points
       csx=0d0
@@ -1449,13 +1461,14 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== LGRECR =====
+!== ======================================================== LGRECR =====
       SUBROUTINE LGRECR(PN,DPN,PN1,X,NN,ALF,B,C)
 
 !     USES RECURRENCE RELATIONS TO SET UP POLYNOMIALS
 !     THIS ROUTINE IS DUE TO STROUD & SECREST
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y)
+      use LGRECRtemp
+      IMPLICIT none
       DIMENSION B(NN),C(NN)
       P1 = 1.0D0
       P = X - ALF - 1.0D0
@@ -1473,7 +1486,7 @@ end program dipj0dvr
       PN1= P1
       RETURN
       END
-/== ======================================================== LGROOT =====
+!== ======================================================== LGROOT =====
       SUBROUTINE LGROOT(X,NN,ALF,DPN,PN1,B,C,EPS)
 
 !     IMPROVES THE APPROXIMATE ROOT X; IN ADDITION OBTAINS
@@ -1481,7 +1494,8 @@ end program dipj0dvr
 !          PN1 = VALUE OF P(N-1) AT X
 !     THIS ROUTINE IS DUE TO STROUD & SECREST
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Y)
+      use LGRECRtemp
+      IMPLICIT none
       parameter (itmax=10)
       DIMENSION B(NN),C(NN)
 
@@ -1497,7 +1511,7 @@ end program dipj0dvr
      &     /,5X,'CURRENT DIFFERENCE',D26.15,' & ROOT',D26.15)
       RETURN
       END
-/== ======================================================== getbas =====
+!== ======================================================== getbas =====
 ! this subroutine finds the quadrature points to be used in evaluating
 ! the dipole
       subroutine getbas(basise,basiso,reo,q,wt,b,c,dnorme,dnormo,maxq)
@@ -1505,8 +1519,10 @@ end program dipj0dvr
       dimension basise(nr2,nqe+nqo),basiso(nr21,nqe+nqo),            &
      &          reo(nqe+nqo),q(2*maxq),wt(2*maxq),b(maxq),c(maxq),   &
      &          dnorme(nr2),dnormo(nr21)
-      use sizes
       use diffs
+      use sizes
+      use com
+      use getbastemp
       implicit none
 
       if (nqe > 0)                                               &
@@ -1590,18 +1606,19 @@ end program dipj0dvr
      &       1x,'Computed',2x,e25.13,10x,e25.13/                         &
      &       1x,'Analytic',2x,e25.13,10x,e25.13)
       end
-/== ======================================================== domult =====
+!== ======================================================== domult =====
 ! this routine calculates transition moments for the specific case when
 ! r2 is run last, and the bra and the ket use different functions for r2
       subroutine domult(dipx,transe,transo,basise,basiso,r1,r2,theta,    &
      &                  crunch)
-
       dimension dipx(ntheta,nr1,nr2,nr21),transe(nr2,nr2),                &
      &          transo(nr21,nr21),basise(nr2,nqe+nqo),                    &
      &          basiso(nr21,nqe+nqo),r1(nr1),r2(nqe+nqo),theta(ntheta),   &
      &          crunch(nr2,nr21,nqe+nqo)
-      use sizes
       use diffs
+      use sizes
+      use com
+      use domulttemp
       implicit none
 
       divide=2d0
@@ -1638,7 +1655,7 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== diffT  =====
+!== ======================================================== diffT  =====
 ! this routine calculates transition moments for the specific case when
 ! r2 is run last, and the bra and the ket use different functions for r2
       subroutine diffT(phibra,phiket,dipx,evals,Tx,Tz)
@@ -1646,10 +1663,13 @@ end program dipj0dvr
      &          dipx(ntheta*nr1,nr2,nr21),evals(neval0+neval1),             &
      &          Tx(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2),    &
      &          Tz(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2)
+      use diffTtemp
+      use diffs
       use sizes
       use stream
-      use diffs
+      use com
       implicit none
+
 
       rewind ibra0
       do 200 ne=min(lbra0,lket0),max(nbra0,nket0)
@@ -1686,10 +1706,11 @@ end program dipj0dvr
 
       return
       end
-/== ======================================================== writeT =====
+!== ======================================================== writeT =====
 ! This subroutine writes out the transition intensities in the same
 ! format as DIPOLE does.
       subroutine writeT(Tx,Tz,evals)
+      DOUBLE PRECISION :: Tx,Tz,evals
       character c1, c2;
       parameter(AUTOCM= 2.19474624D+05)
 ! AUTODE CONVERTS ATOMIC UNITS TO DEBYE
@@ -1699,8 +1720,10 @@ end program dipj0dvr
       dimension Tx(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2),  &
      &          Tz(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2),  &
      &          evals(neval0+neval1)
+      use diffTtemp
       use logic
       use sizes
+      use com
       implicit none
 
       WRITE(6,200)
@@ -1766,28 +1789,31 @@ end program dipj0dvr
 206   FORMAT(2(I4,1x,a1),3(3X,F10.3),5(2X,E13.6))
 207   FORMAT(//)
       end
-/== ======================================================== GETROW =====
+!== ======================================================== GETROW =====
       SUBROUTINE GETROW(VEC,NSIZE,ISTREAM)
-      IMPLICIT DOUBLE PRECISION(A-H,O-Y),LOGICAL(Z)
+      integer :: NSIZE,ISTREAM
+      DOUBLE PRECISION :: VEC
+      implicit none
       DIMENSION VEC(NSIZE)
       READ(ISTREAM) VEC
       RETURN
       END
-/== ======================================================== OUTROW =====
+!== ======================================================== OUTROW =====
       SUBROUTINE OUTROW(VEC,NSIZE,ISTREAM)
-      IMPLICIT DOUBLE PRECISION(A-H,O-Y),LOGICAL(Z)
+      integer :: NSIZE,ISTREAM
+      DOUBLE PRECISION :: VEC
+      implicit none
       DIMENSION VEC(NSIZE)
       WRITE(ISTREAM) VEC
       RETURN
       END
-/== ======================================================== timer  =====
+!== ======================================================== timer  =====
       subroutine timer(text)
       character text*(*)
       use time
-      implicit none
-
       real*4 etime,time(2)
-      data total/0.0/,user/0.0/,system/0.0/
+      use timertemp
+      implicit none
 !     total=dble(etime(time))
 !     user=dble(time(1))
 !     system=dble(time(2))
@@ -1804,9 +1830,11 @@ end program dipj0dvr
      &            /,10x,f20.3,' seconds of system time',                  &
      &            /,10x,f20.3,' seconds in total',/)
       end
-/========================================================== FCT    =====
-      FUNCTION FCT(R1,R2,R3,NPA,C,INDEX,RO)
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+!========================================================== FCT    =====
+      FUNCTION FCT(R1,R2,R3,NPA,C,NPA,RO)
+      DOUBLE PRECISION :: R1,R2,R3,C,RO
+      integer :: NPA,NPA
+      implicit none
       DIMENSION C(NPA),INDEX(3,NPA)
       DIMENSION Q(3),R(3),RO(3)
       R(1)= R1

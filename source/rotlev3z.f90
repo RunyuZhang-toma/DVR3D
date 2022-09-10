@@ -1,3 +1,6 @@
+include "model.f90"
+include "temp.f90"
+
 !     dummy main program                                           #001
       call rotlev3z
       stop
@@ -23,9 +26,11 @@
 !        and files on stream ivec, ivec2 (& ivec1, ivec3) from DVR3DRJZ
 !     2. f02fjf to do iterative diagonalisation (nag routine).
 !     the program works in **** atomic units ***** 
+
       use size
       use outp
-      implicit none
+      use com
+      implicit none 
                 namelist/prt/ thresh,zpham,zpvec,zvec,ztran,zptra,zcut,&
                     zpfun,zplot,ilev,ivec,ivec1,jvec,kvecpb,kvec & 
                     ,nploti,nplotf,ithre
@@ -47,6 +52,7 @@
 !#######################################################################
       block data
 !     stores defaults for namelist parameters                       #003
+      implicit double precision (a-h,o-y), logical (z)
 
 !     outp holds information which controls the amount of printed output
 !     zpvec: print eigenvectors if zpvec = .true.
@@ -57,8 +63,11 @@
 !      ivec2,ivec3    input  eigenvalues & eigenvectors        nktot > 2
 !      iscr,iscr_1,iscr-diag,
 !      iscr_2,iscr2_1,iscr_f  hamiltonian files                  always
+
+
+      
       use outp
-      implicit none
+
           
       data thresh/0.1d0/,zpham/.false./,zpvec/.false./,idiag/2/,&
            ivec/26/,zvec/.false./,zplot/.false./,jvec/3/,iscr/1/,&
@@ -72,7 +81,9 @@
 
 !     set up common /size/ & write control parameters of problem    #004
 
+     
 
+!     common /size/ stores control parameters for the problem
 !     nbass: maximum dimension of rotational secular problem
 !     ibass: actual dimension of rotational secular problem
 !     mbass: maximum size of vibrational problem (excluding linear geom)
@@ -98,10 +109,12 @@
 !      integer, ALLOCATABLE, DIMENSION(:) :: inda2
 !      integer, ALLOCATABLE, DIMENSION(:) :: indb1
 !      integer, ALLOCATABLE, DIMENSION(:) :: indb2
+  
       use size
       use outp
       use pb
-      implicit none    
+      use com
+      implicit none   
      character(len=8) title(9)
 
       read(5,5)  nvib,neval,kpar,ibass,iqpar,npnt
@@ -411,8 +424,9 @@
  
       use size
       use outp
+      use com
       use pb
-      implicit none       
+      implicit none     
       real*8, allocatable :: eviba(:,:),evibb(:,:),mviba(:),mvibb(:)
       real*8, allocatable :: ea(:),eb(:)
       integer, allocatable :: iva(:),ivb(:)
@@ -733,13 +747,14 @@
 !
       use size
       use outp
+      use com
       use pb
-      implicit none  
+      use DGROTtemp
+      implicit none
       integer, DIMENSION(nka) :: iva
       integer, DIMENSION(nkb) :: ivb
       integer, DIMENSION(nktot) :: mvib
       real*8, ALLOCATABLE, DIMENSION(:) :: radmee,radmoo,radmeo
-      data x0/0.0d0/
 
       ksize=0
       do ia=1,nka
@@ -794,10 +809,12 @@
  
 !     subroutine radint calculates the two-dimensional radial basis
 !     functions between two symmetrised orthogonal coordinates.
+ 
       use size
       use outp
+      use com
       use pb
-      implicit none  
+      implicit none
 
       real*8, DIMENSION(nr) :: rmb
       real*8, DIMENSION(nr) :: rma
@@ -852,8 +869,15 @@
 
 !     angin_pl_pl calculates the angular integral between blocks k and k+2 
 !     for ++ block
+ 
       use size
-      implicit none  
+     
+      use com
+      use ccmaintemp
+      
+      implicit none
+      real*8 :: k1,k2,angfac
+      integer :: nang1,nang2
 
       real*8, DIMENSION(nang1,nang1) :: pleg1
       real*8, DIMENSION(nang2,nang2) :: pleg2
@@ -865,7 +889,6 @@
       real*8, DIMENSION(nang1,npnt) :: plega
       real*8, DIMENSION(nang2,npnt) :: plegb
 
-      data x0/0.0d0/,xp5/0.5d0/,x1/1.0d0/,x2/2.0d0/
  
 !     first: set up an npnt gauss-associated legendre quadrature scheme
       angmat=0.d0
@@ -938,8 +961,16 @@
 
 !     angin_pl_pl calculates the angular integral between blocks k and k+2 
 !     for ++ block
+ 
       use size
-      implicit none  
+      
+      use com
+      use ccmaintemp
+    
+      implicit none
+      
+      real*8 :: k1,k2,angfac
+      integer :: nang1,nang2
 
       real*8, DIMENSION(nang1,nang1) :: pleg1
       real*8, DIMENSION(nang2,nang2) :: pleg2
@@ -951,7 +982,6 @@
       real*8, DIMENSION(nang1,npnt) :: plega
       real*8, DIMENSION(nang2,npnt) :: plegb
 
-      data x0/0.0d0/,xp5/0.5d0/,x1/1.0d0/,x2/2.0d0/
  
 !     first: set up an npnt gauss-associated legendre quadrature scheme
       angmat=0.d0
@@ -1040,8 +1070,16 @@
 
 !     angin_pl_pl calculates the angular integral between blocks k and k+2 
 !     for ++ block
+ 
       use size
-      implicit none  
+    
+      use com
+      use ccmaintemp
+   
+      implicit none
+      
+      real*8 :: k1,k2,angfac
+      integer :: nang1,nang2
 
       real*8, DIMENSION(nang1,nang1) :: pleg1
       real*8, DIMENSION(nang2,nang2) :: pleg2
@@ -1053,7 +1091,6 @@
       real*8, DIMENSION(nang1,npnt) :: plega
       real*8, DIMENSION(nang2,npnt) :: plegb
 
-      data x0/0.0d0/,xp5/0.5d0/,x1/1.0d0/,x2/2.0d0/
  
 !     first: set up an npnt gauss-associated legendre quadrature scheme
       angmat=0.d0
@@ -1139,7 +1176,15 @@
 !     for ++ block
  
       use size
-      implicit none  
+    
+      use com
+      
+      use ccmaintemp
+      
+      implicit none
+      
+      real*8 :: k1,k2,angfac
+      integer :: nang1,nang2
 
       real*8, DIMENSION(nang1,nang1) :: pleg1
       real*8, DIMENSION(nang2,nang2) :: pleg2
@@ -1151,7 +1196,6 @@
       real*8, DIMENSION(nang1,npnt) :: plega
       real*8, DIMENSION(nang2,npnt) :: plegb
 
-      data x0/0.0d0/,xp5/0.5d0/,x1/1.0d0/,x2/2.0d0/
  
 !     first: set up an npnt gauss-associated legendre quadrature scheme
       angmat=0.d0
@@ -1221,8 +1265,17 @@
 !     calculates the angular integral between blocks k and k
 !     required for the coriolis coupling term for orthogonal (radau)
 !     coordinates in the bisector embedding. 
+ 
       use size
+
+      use com
+    
+      use ccmaintemp
+      
       implicit none
+      
+      real*8 :: k1,k2,angfac
+      integer :: nang1,nang2
 
       DIMENSION iv1(ndvr),iv2(ndvr)
       real*8, DIMENSION(ndvr,ndvr) :: fbrmat
@@ -1232,7 +1285,7 @@
       real*8, DIMENSION(0:1) :: xsign
       real*8, DIMENSION(nang1,npnt) :: plega,plegw
 
-      data x0/0.0d0/,xp5/0.5d0/,x4/4.0d0/
+
 !     evaluate the polynomials at the quadrature points
       angmat=0.d0
       realk = dble(k1)
@@ -1325,7 +1378,10 @@
 
       subroutine wrtho(diag,offdg,mvib,nbass,nktot)
 !     print hamiltonian matrix                                      #009
-      implicit double precision (a-h,o-y)
+      
+      integer :: mvib,nbass,nktot
+      double precision :: diag,offdg
+      implicit none
       dimension diag(nbass),offdg(*),mvib(nktot)
       write(6,1010) diag
  1010 format('1',5x,'hamiltonian matrix: diagonal elements',&
@@ -1365,17 +1421,22 @@
       subroutine loadh(mvib,hamil,noffblk,ksize,kss)
  
 !     subroutine loadh loads the hamiltonian matrix from disk
+ 
       use size
       use outp
+      use com
       use pb
+      use ccmaintemp
       implicit none
+      integer :: noffblk
+      real*8 :: ksize,kss
       integer,  DIMENSION(nktot) :: mvib
       integer,  DIMENSION(nktot) :: n0
       real*8, dimension(kss) :: hamil
       real*8, dimension(ksize) :: diagt
       real*8, ALLOCATABLE, DIMENSION(:) :: diag
       real*8, ALLOCATABLE, DIMENSION(:) :: offdg
-      data x0/0.0d0/
+     
 
       hamil=x0
       cm=219474.631d0
@@ -1529,7 +1590,8 @@
 !#########################################################################
      subroutine load_diag(diag,nk,ipr)
 
-      implicit double precision (a-h,o-y), logical (z)
+      integer :: nk,ipr
+      implicit none
 
       real*8, DIMENSION(nk) :: diag
 
@@ -1548,16 +1610,19 @@
 !#####################################################################
 !#########################################################################
 !######################################################################
-/======================================================================
+!======================================================================
 !######################################################################
       subroutine solrt2(radmee,radmoo,radmeo,iva,ivb,noffblk)
  
 !     subroutine solrt2 sets up non-zero parts of hamiltonian        #010
 !     including the computation of the k dependent angular matrix
 !     elements
+ 
       use size
       use outp
+      use com
       use pb
+      use ccmaintemp
       implicit none
       integer, DIMENSION(nka) :: iva
       integer, DIMENSION(nkb) :: ivb
@@ -1577,7 +1642,6 @@
       integer, ALLOCATABLE, DIMENSION(:) :: ivb1,ivb2
 
 
-      data x0/0.0d0/,sqrt2/1.4142135623731d0/,xp5/0.5d0/,x4/4.0d0/
 
 
 !     nktot - number of K
@@ -2287,7 +2351,9 @@
 !#####################################################################
       subroutine rdcoef(coef,idim,mev,iv)
 !     read first step vector array coef from unit iv
-      implicit double precision (a-h,o-y), logical (z)
+      integer :: idim,mev,iv
+      double precision :: coef
+      implicit none
       dimension coef(idim,mev),ro(idim)
  
       do i=1,mev
@@ -2312,15 +2378,14 @@
 !     construct off-diagonal matrix elements from radial and angular
 !     matrix elements and first step vectors.
  
-      implicit double precision (a-h,o-y), logical (z)
-
       real*8, DIMENSION(mn) :: offdg
       real*8, DIMENSION(*) :: coef1
       real*8, DIMENSION(*) :: coef2
       real*8, DIMENSION(iang1,iang2) :: angmat
       real*8, DIMENSION(*) :: radmat
- 
-      data x0/0.0d0/
+      integer :: mn,nr,iq,iq1,iq2,iang11,iang1,iang2,mvib1,mvib2,ibass1,ibass2
+      implicit none
+      use dmaintemp
 !     zero the off-diagonal block
       offdg = x0
 
@@ -2363,11 +2428,12 @@ end do !i2
 !     subroutine diag solves the eigenvalue problem:                #012
 !          hamil * vec = eval * vec
 !     by using some lapack routines if they work.
-
-      character JOB*1
+ 
       use size
       use outp
+      use com
       use pb
+      use diag3dtemp
       implicit none
       real*8, DIMENSION(ksize) :: EVAL
       real*8, DIMENSION(ksize) :: EVALCM
@@ -2380,8 +2446,7 @@ end do !i2
       integer, dimension(ksize) :: ibig
 
 !          autocm converts atomic units (hartree) to cm-1.
-      data autocm/2.19474316d+05/
-      data x0/0.0d0/
+     
 
       ifail=0          
       info=0
@@ -2579,7 +2644,7 @@ end do !i2
       REAL(KIND=real_kind) :: x(nn),bass(0:nb,nn)
       REAL(KIND=real_kind), ALLOCATABLE :: A1n(:),A2n(:),A3n(:),&
       &                                    A4n(:)
-      DATA x0,x1,x2/0.0d0,1.0d0,2.0d0/
+      use dmaintemp
       lmd=alf+bet+x1
       ALLOCATE(A1n(nb),A2n(nb),A3n(nb),A4n(nb))
       DO n=1,nb
@@ -2616,7 +2681,7 @@ end do !i2
       REAL(KIND=real_kind)::alfbet,an,bn,r1,r2,r3
       REAL(KIND=real_kind)::c1,c2,c3,p1,p2,p3,pp,temp,z,z1
       REAL(KIND=real_kind),EXTERNAL :: gammln
-      DATA x1,x2,x3/1.0d0,2.0d0,3.0d0/
+      use gaslegtemp
 
 !      write(6,*)'entering gaujac.........'
 !      write(6,*)alf,alf**2
@@ -2693,9 +2758,7 @@ end do !i2
        REAL(KIND=real_kind)::GAMMLN,XX
        REAL(KIND=real_kind)::SER,STP,TMP,X,COF(6)
        REAL(KIND=real_kind)::HALF,ONE,FPF
-       DATA COF,STP/76.18009173D0,-86.50532033D0,24.01409822D0,&
-      &    -1.231739516D0,.120858003D-2,-.536382D-5,2.50662827465D0/
-       DATA HALF,ONE,FPF/0.5D0,1.0D0,5.5D0/
+       use gaujactemp
        X=XX-ONE
        TMP=X+FPF
        TMP=(X+HALF)*LOG(TMP)-TMP
@@ -2718,7 +2781,7 @@ end do !i2
        REAL(KIND=real_kind) :: norm(0:nn)
        REAL(KIND=real_kind) :: a1,a2,a3,a4
        REAL(KIND=real_kind), EXTERNAL :: gammln
-       DATA x1,x2/1.0d0,2.0d0/
+       use dmaintemp
        lmd=alf+bet+x1
        do n=0,nn
           a1=gammln(DBLE(n+1))
@@ -2745,8 +2808,10 @@ end do !i2
 !  it and exits.
 !  A more elaborate version will be programmed when and if necessary.
 
+
       use size
       use outp
+      use com
       use pb
       implicit none
       integer, DIMENSION(nktot) :: MVIB
@@ -3050,7 +3115,8 @@ end do !i2
 !#######################################################################
       subroutine skipblock(nskip,ivpb)
 
-      implicit double precision(a-h,o-y), logical(z)
+      integer :: i,nskip,ivpb
+      implicit none
 
       do i=1,nskip
          read(ivpb)
@@ -3178,7 +3244,10 @@ end do !i2
       subroutine jtran2(coeffbr,coeffdvr,mvib,pleg,is,iv,nkbas,ifort)
   
       use size
-      use pb
+      use outp
+      use dmaintemp
+      use com
+    
       implicit none
           
       real*8, DIMENSION(ndvr,iang) :: pleg
@@ -3186,7 +3255,6 @@ end do !i2
       real*8, DIMENSION(nkbas,mvib) :: coeffbr
       real*8, allocatable :: sumt(:,:)
       DIMENSION iv(iang)
-      data x0/0.0d0/
 
       nrad=nr*(nr+1-2*is)/2
 
@@ -3233,8 +3301,8 @@ real*8 r(nr),wt(nr)
 real*8, allocatable, dimension(:) :: y
 real*8, allocatable, dimension(:,:) :: dz
 
-data x0,xp5,x1,x4/0.0d0,0.5d0,1.0d0,4.0d0/
-data amtoau/1.8228883d03/
+use ccmaintemp
+use DGROTtemp
 
       if (idia >= 1) then
 !        scattering coordinates
@@ -3484,9 +3552,7 @@ FUNCTION gammaln(xx)
   real*8 :: gammaln
 
   SAVE cof,stp
-  DATA cof,stp/76.18009172947146d0,-86.50532032941677d0,&
-       24.01409824083091d0,-1.231739572450155d0,.1208650973866179d-2,&
-       -.5395239384953d-5,2.5066282746310005d0/
+  use gaujactemp
   
   x=xx
   y=x
@@ -3510,7 +3576,7 @@ SUBROUTINE LAGPTNEW(ir,Y,R,WT,DZ,npnt,nmax,zmorse,RE,BETA,A,IU)
   IMPLICIT real*8(A-H,O-Y), LOGICAL (Z)
   dimension Y(NPNT),R(NPNT),WT(NPNT), dz(npnt,npnt),& !wt2(npnt),&
        DNORMNEW(0:NMAX),BASS(0:NMAX,NPNT),wln(npnt)!,f(0:NMAX,NPNT)
-  DATA X0,XP5,X1,X2/0.0D0,0.5D0,1.0D0,2.0D0/,TOLER/1.0D-8/
+  use ccmaintemp
   !
   myid=0
 !

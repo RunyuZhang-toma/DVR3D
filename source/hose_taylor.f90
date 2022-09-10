@@ -1,3 +1,6 @@
+include "model.f90"
+include "temp.f90"
+
 program hosetaylor
 ! THIS PROGRAM CALCULATES |<PSI|PSI>|^2 FOR EACH VALUE OF K. 
 ! IT THEN PRINTS OUT THE LARGEST COMPONENT AND THE PREDICTED VALUE OF Kc AND Kc
@@ -7,8 +10,7 @@ program hosetaylor
 !
 ! OUTPUT FORMAT IS: J, ENERGY, KA, KC, MAX(|<PSI|PSI>|^2),  IPAR, KMIN, MOD(QUANTA OF NU3,2)
 !
-  use size
-  implicit none
+  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
 
 ! file is assumed to be attached to unit 26
   ifile=26
@@ -39,6 +41,7 @@ end program hosetaylor
 
 subroutine read_26_radau
   use size
+  use com
   implicit none
 
   integer :: ifile, jk
@@ -189,6 +192,7 @@ end subroutine read_26_radau
 
 subroutine read_8or9_radau
   use size
+  use com
   implicit none
 
   integer :: ifile, jk

@@ -1,4 +1,5 @@
-
+include "model.f90"
+include "temp.f90"
 !MODULE DEFINITIONS--------------------------------------------
 
 module input
@@ -84,6 +85,7 @@ end module workdata
 program dipole
   use input
   use workdata
+  use com
 !  
   implicit none
   integer :: i,channel(2)
@@ -131,6 +133,7 @@ end program dipole
 subroutine read_input(channel)
 use input
 use workdata
+use com
 implicit none
 integer :: channel(2)
   ! setting the default values for the prt control group
@@ -189,6 +192,7 @@ end subroutine read_input
 subroutine read_lists(channel)
 ! complicated stuff starts here
 use lists
+use com
 implicit none
 integer :: channel(2),i
 
@@ -210,6 +214,7 @@ end subroutine read_lists
 subroutine input_verify
 use input
 use workdata
+use com
 implicit none
 
   if(nval1<nv1+ibase1.or.nval2<nv2+ibase2)then
@@ -242,6 +247,7 @@ subroutine read_head(channel)
 !here is the complicated stuff
   use input
   use lists
+  use com
   implicit none
   integer :: channel
   integer :: i,j,mi    ! loop index
@@ -290,6 +296,7 @@ subroutine read_kblocks(channel)
   use input
   use lists
   use workdata
+  use com
   implicit none
   integer,intent(in) ::  channel(2)
   integer :: mi ! meaningless integer
@@ -455,6 +462,7 @@ subroutine read_kblocks(channel)
 subroutine commongrid
 use input
 use workdata
+use com
 implicit none
 integer :: i
 
@@ -533,6 +541,7 @@ end subroutine dipcpb
 subroutine dipc(i,j)
   use input
   use workdata
+  use com
   implicit none
   integer :: i,j,k
 
@@ -588,6 +597,7 @@ end subroutine dipc
 subroutine polin
   use input
   use workdata
+  use com
   implicit none
   integer :: i,j,count
 
@@ -620,6 +630,7 @@ end subroutine polin
 subroutine dipole_int(sa,sb)
   use input
   use workdata
+  use com
 !  
   implicit none
   integer :: i,j,k,l,m1,m2,n,pc1,pc2,aux1,aux2,n2r1,n2r2,j1,j2,m,index
@@ -776,6 +787,7 @@ end subroutine dipole_int
 subroutine dipole_add
   use input
   use workdata
+  use com
   implicit none
   integer :: i,j,k,m1,m2,tau
   real(8) :: sum1
@@ -980,9 +992,11 @@ end subroutine r_to_q
 !     setfa! initialises binomial array:
 !        binom(i+1,j+1) = i! / (j! * (i-j)!)
 
-      implicit double precision (a-h,o-y), logical (z)
+      integer nbin
+      use dmaintemp
+      implicit none
       double precision, dimension(nbin,nbin) :: binom      
-      data x1/1.0d0/
+ 
       binom(1,1) = x1
       binom(2,1) = x1
       binom(2,2) = x1
@@ -999,10 +1013,12 @@ end subroutine r_to_q
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       function threej(j1,j2,j3,m1,m2,m3,binom,nbin)
 
-      implicit double precision(a-h,o-z)
+      integer :: j1,j2,j3,m1,m2,m3,nbin
+      use threejtemp
+      implicit none
       
       double precision, dimension(nbin,nbin) :: binom      
-      data zero,one/0.0d0,1.0d0/
+
 
       threej = zero
       if (m1+m2+m3 /= 0) return
@@ -1084,7 +1100,9 @@ end function delta
 !#######################################################################
       subroutine skipblock(nskip,ivpb)
                                       
-      implicit double precision(a-h,o-y), logical(z)
+ 
+      integer :: nskip,ivpb
+      implicit none
       do i=1,nskip
          read(ivpb)
          end do
@@ -1096,7 +1114,8 @@ end function delta
 !#######################################################################
       subroutine backblock(nskip,ivpb)
 
-      implicit double precision(a-h,o-y), logical(z)
+      integer :: nskip,ivpb
+      implicit none
       do i=1,nskip
          backspace(ivpb)
          end do
@@ -1117,6 +1136,7 @@ end function delta
 subroutine list_transfer
 
   use lists
+  use com
   use workdata
   implicit none
   integer :: j
@@ -1228,6 +1248,7 @@ end subroutine list_transfer
 
 subroutine readrgrid(channel)
   use lists
+  use com
   implicit none
   integer :: channel 
   integer :: i,j
@@ -1257,6 +1278,7 @@ end subroutine readrgrid
 
 subroutine readeigs(channel)
   use lists
+  use com
   implicit none
 
   integer :: j,channel
@@ -1311,6 +1333,7 @@ end subroutine readeigs
 
       SUBROUTINE jac_basis(nn,nb,alf,bet,x,basis)
       USE constants
+      use com
       IMPLICIT NONE
       INTEGER :: n,i,nb,nn
       REAL(KIND=real_kind) :: alf, bet
@@ -1334,6 +1357,7 @@ end subroutine readeigs
 
       SUBROUTINE jacgt(x,bass,alf,bet,nn,nb)
       USE constants
+      use com
       IMPLICIT NONE
       INTEGER :: n,I,nn,nb
       REAL(KIND=real_kind),EXTERNAL :: gammln
@@ -1367,6 +1391,7 @@ end subroutine readeigs
 
       SUBROUTINE gaujac(x,w,n,alf,bet)
       USE constants
+      use com
       IMPLICIT NONE
       INTEGER :: n
       REAL(KIND=real_kind):: alf,bet,x1,x2,x3
@@ -1447,9 +1472,8 @@ end subroutine readeigs
        REAL(KIND=real_kind)::GAMMLN,XX
        REAL(KIND=real_kind)::SER,STP,TMP,X,COF(6)
        REAL(KIND=real_kind)::HALF,ONE,FPF
-       DATA COF,STP/76.18009173D0,-86.50532033D0,24.01409822D0,&
-      &    -1.231739516D0,.120858003D-2,-.536382D-5,2.50662827465D0/
-       DATA HALF,ONE,FPF/0.5D0,1.0D0,5.5D0/
+       
+       use gaujactemp
        X=XX-ONE
        TMP=X+FPF
        TMP=(X+HALF)*LOG(TMP)-TMP
@@ -1466,6 +1490,7 @@ end subroutine readeigs
 
        SUBROUTINE norms2(norm,nn,alf,bet)
        USE constants
+       use com
        IMPLICIT NONE
        INTEGER :: n,nn
        REAL(KIND=real_kind) :: alf, bet,lmd,x1,x2,norm1
@@ -1581,7 +1606,9 @@ subroutine spect
   
 
   use input
+  use com
   use workdata
+  use specttemp
   implicit none
   integer :: nn2,ie1,ie2
   real(8) :: autocm,autode,detosec,x0 
@@ -1591,9 +1618,7 @@ subroutine spect
 !  real(8), dimension(nval2) :: xe2
 !  character(len=8)  title(9)
   
-  data autocm/2.19474624d+05/,x0/0.0d0/,&  
-       autode/2.5417662d0/,&
-       detosec/3.136186d-07/
+
   !     autocm converts atomic units to wavenumbers
   !     autode converts atomic units to debye
   !     detose! converts from s(f-i) in debye**2 to seconds
@@ -1709,8 +1734,16 @@ end if
      !     the output data is in atomic units.
         use input
         use workdata     
+        use com
         implicit none
         integer :: ie2
+!        common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
+!             npot,nbin,nbmax1,nbmax2,mbass1,mbass2,mbass,&
+!             kmin1,kmin2,jk1,jk2,nval1,nval2,nn2,ibase1,ibase2,ipot
+!        common /logic/ zmors1,znco1,znco2,zprint,zpmin,ztra,zstart,zmors2
+!        common/sym/ idia,ifpar1,ifpar2,jrot1,jrot2
+!      common /stream/ iket, ibra, itra, iscr, ires, mblock, nblock
+!      common /mass/ xmass(3),g1,g2,zembed,zbisc
       
       real(8), dimension(nval1) :: e1
       real(8), dimension(nval2) :: e2
@@ -1743,7 +1776,8 @@ end if
 !                                                **028
       subroutine outrow(row,nrow,iunit)
 
-      implicit double precision (a-h,o-y)
+      integer :: nrow,iunit
+      implicit none
       double precision, dimension(nrow) :: row
       write(iunit) row
       return

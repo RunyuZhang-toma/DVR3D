@@ -1,3 +1,5 @@
+include "model.f90"
+include "temp.f90"
 !  Xpect takes expectation values of operators defined in prop.
 !  Version considers diagonal case only. Nikolai Zobov (2002)
     program leek
@@ -11,11 +13,14 @@
 !     expectation values of vib-rot eigenfunctions with respect
 !     the properties defined by subroutine prop.
 !
+    
       namelist/prt/ zprint,ztra,zstart,zfit,zform,&
                      iket,itra,itra0,ilev
+      
       use logic
-      use timing
+      use com
       use mass
+      use timing
       implicit none
       character(len=8) title(9)
 
@@ -55,6 +60,7 @@
       
 !**************************************************002
     block data
+ 
 !
 !     block data stores the default values of the logical control
 !     parameters and the ground zero energy.
@@ -64,6 +70,8 @@
 !RK   Changed zfit=.false. as default.
 !
       use logic
+      use com
+      
       implicit none
       data zncor/.false./, zprint/.false./,zfit/.false./,&
            ztra/.true./, zstart/.false./,&
@@ -83,6 +91,7 @@
 !     angular functions must be set by the user, and are inputted on
 !     stream 5 (five).
 !
+
 !
 !     the following size parameters have these functions:
 !
@@ -108,9 +117,11 @@
 !     iprop: vector with the information on which properties
 !            will be considered in the run
 !
-      use dim
+      
       use logic
+      use com
       use mass
+      use dim
       use pot
       implicit none
 
@@ -292,8 +303,10 @@
 !**************************************************004
       subroutine core
 !
-      use dim
       use logic
+      use com
+   
+      use dim
       implicit none
 
 
@@ -316,9 +329,13 @@
 !     dimension the space needed for the d-coefficients.
 !
 
+
       integer, dimension (jk) :: nbass,lmin,lbass
+
       use logic
+      use com
       use mass
+    
       implicit none
       if (zprint) write(6,205) jk,mbass
 205   format(//,'   j + kmin =',i3,'   mbass=',i6,/)
@@ -354,13 +371,17 @@
 !     in this part, all data etc for the ket are labelled 1;
 !     all data etc for the bra are labelled 2.
 !
-      use dim
+      
+      parameter (mxprop=1000)
+
       use logic
-      use timing
+      use com
       use mass
+      use dim
+      use timing
       use pot
+      use ccmaintemp
       implicit none
-      !parameter (mxprop=1000)
 
       integer, dimension (jk1) :: nbass1,lmin1
       double precision, dimension(neval) :: eh
@@ -377,7 +398,7 @@
 
 !     array for dsrd
       integer, dimension (max(npot,lmax)) :: iv
-      data x0/0.0d0/,xp5/0.5d0/
+  
 
       allocate(d0(nrade*npot,npropin), dc1(neval*nbmax1/lmax*npot))
 
@@ -550,7 +571,12 @@
 !     subroutine lagpt obtains values of the dipole at the radial
 !     dvr points and angular integration points
 
+  
+      use com
+      
       use dim
+      use ccmaintemp
+      
       implicit none
  
       double precision, dimension(nrade*npot,npropin) :: d0
@@ -559,8 +585,6 @@
       double precision, dimension(npot) :: xd,wtd,b,c
       double precision, dimension(npropin) :: prin,trin
  
-      data x0/0.0d0/,toler/1.0d-8/,xp5/0.5d0/,&
-           x1/1.0d0/,x2/2.0d0/,x3/3.0d0/,x4/4.0d0/
 
 !     set up points & weights for npot point angular integration
 
@@ -722,9 +746,13 @@
       
 !**************************************************020
       subroutine recur(pn,dpn,pn1,x,nn,alf,bta,b,c)
-      implicit double precision(a-h,o-z)
       double precision, dimension(nn) :: b,c
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
+      integer :: nn
+      double precision :: pn,dpn,pn1,x,alf,bta
+
+      use ccmaintemp
+      implicit none
+
       p1= x1
       p= x + (alf-bta)/(alf + bta + x2)
       dp1= x0
@@ -749,9 +777,12 @@
 !     subroutine to read d coefficients from dstore data
 !     if read directly from dvr3d (i.e. j <= 0), then transform to an
 !     fbr in theta
-      use dim
+
       use logic
+      use com
       use mass
+      use dim
+     
       implicit none
       double precision, dimension(neval,nbass) :: d
       double precision, allocatable :: temp(:),plegd(:)
@@ -830,17 +861,19 @@
 !     subroutine to read d coefficients from dstore data
 !     if read directly from dvr3d (i.e. j <= 0), then transform to an
 !     fbr in theta
-      use dim
+
       use logic
+      use com
       use mass
+      use dim
+      use ccmaintemp
+     
       implicit none
       integer, dimension (jk) :: lmin1
       double precision, dimension(neval,nbass) :: d,temp
       double precision, dimension(npot,npot) :: plegd
       double precision, dimension(npot) :: xd,wtd
 
-      data x0/0.0d0/,x1/1.0d0/
-     
       temp = d
       d = x0 
 
@@ -906,14 +939,14 @@
 !     for the polynomial part of associated legendre functions.
 !     a factor of sin(theta)**m has NOT been removed from all functions.
 
-      implicit double precision (a-h,o-z)
+      integer :: lmax,nn2,m
 
       double precision, dimension(nn2,0:lmax) :: pleg
       double precision, dimension(nn2) :: x
       double precision, dimension(0:lmax) :: pnorm
 
-      data x1/1.0d0/,x2/2.0d0/
-
+      use ccmaintemp
+      implicit none
       if (m < 0) goto 999
       do 10 i=1,nn2
       if (abs(x(i)) > x1) goto 999
@@ -977,10 +1010,15 @@
 !     trans is called by x3main for each k-k' overlap integral.
 
 !     it uses a fast matrix multiplication routine mxmb.
-      use dim
+
       use logic
+      use com
       use mass
+      use dim
+      
       implicit none
+      integer :: ndbass
+
       double precision, dimension(nv1,npropin) :: t   
 
       double precision, dimension(npot*nrade,npropin) :: d0
@@ -1057,9 +1095,13 @@
 !
 !     outpt2 outputs the data at the end of a property calculation
 !
-      use dim
+   
+      
+      parameter (mxprop=1000)
       use logic
+      use com
       use mass
+      use dim
       use pot
       implicit none
       double precision, dimension (neval) :: eh
@@ -1248,7 +1290,8 @@
 !                                                **027
       subroutine getrow(row,nrow,iunit)
 !
-      implicit double precision (a-h,o-y)
+      integer :: nrow,iunit
+      implicit none
       double precision, dimension(nrow) :: row
       read(iunit) row
       return
@@ -1256,7 +1299,8 @@
 !                                                **028
       subroutine outrow(row,nrow,iunit)
 !
-      implicit double precision (a-h,o-y)
+      integer :: nrow,iunit
+      implicit none
       double precision, dimension(nrow) :: row
       write(iunit) row
       return
@@ -1264,7 +1308,8 @@
 !                                                **028a
       subroutine outro2(row,nrow,iunit)
 !
-      implicit double precision (a-h,o-y)
+      integer :: nrow,iunit
+      implicit none
       double precision, dimension(nrow) :: row
       write(iunit,*) row
       return
@@ -1275,8 +1320,10 @@
 !     subroutine to print out the property integrals calculated
 !     in subroutine lagpt for debugging purposes.
 !
-    
+
+      use com
       use mass
+     
       implicit none
       double precision, dimension (nrad,npropin) :: dz0
       double precision, dimension (nrad,npropin,lpot) :: dz1

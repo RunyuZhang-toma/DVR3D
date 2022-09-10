@@ -9,6 +9,26 @@
 !             divided by the common group
 !Dependency: Folder source
 !===================================================================================================
+!include 'common.f90'
+
+module com
+implicit none
+integer :: idia
+integer :: ipar
+integer :: npnt1
+integer :: npnt2
+integer :: jrot
+integer :: kmin
+integer :: neval
+integer :: irate2
+integer :: imax2
+integer :: itime2
+integer :: itime
+end module com
+
+module temp
+implicit none
+end module temp
 
 module sizes
 implicit none
@@ -35,16 +55,14 @@ end module sizes
 module diffs
 implicit none
 !constant count: integer 3, real 4, ligical 1.
-
     integer :: nqe
     integer :: nqo
     integer :: nr21
-
-    real(kind=dp) :: alphae
-    real(kind=dp) :: betae
-    real(kind=dp) :: alphao
-    real(kind=dp) :: betao
-
+    double precision alphae
+    !double precision :: alphae
+    double precision :: betae
+    double precision :: alphao
+    double precision :: betao
     logical zsame
 end module diffs
 
@@ -55,7 +73,7 @@ implicit none
 !constant count: integer 6, ligical 22.
 
     integer :: iptot
-    integer :: idia
+    !integer :: idia
     integer :: iket = 11      ! input stream for the ket.
     integer :: itra = 13      ! output stream to program spectrm (if ztra).
                               ! note that for all times other than the dipole assumes 
@@ -70,7 +88,7 @@ implicit none
     integer :: itra0
     integer :: ilev = 14      ! stream for final eigenvalues (formatted).
 
-    logical :: zembed = .true.     ! T z axis is along r2, = f z axis is along r1.
+    !logical :: zembed = .true.     ! T z axis is along r2, = f z axis is along r1.
     logical :: zdone = .true.      ! T use morse oscillator-like functions for r_1 coordinate;
                                    ! F use spherical oscillator functions.
     logical :: zmors1 = .true.     ! T use morse oscillator-like functions for r_1 coordinate;
@@ -100,6 +118,7 @@ implicit none
                                    ! DVR3DRJZ and ROTLEV3/3B.
                                    ! if zpfun false, the partition function
                                    ! is set to q read in below.
+    integer :: len
 
     logical :: zncor = .false.
     logical :: zfit = .false.
@@ -163,13 +182,13 @@ module mass
 implicit none
 !constant count: real 5, logical 2.
 
-     real(kind=dp) :: xmass(3)
-     real(kind=dp) :: xmassr(3)
-     real(kind=dp) :: g1
-     real(kind=dp) :: g2
-     real(kind=dp) :: ezero
+     double precision :: xmass(3)
+     double precision :: xmassr(3)
+     double precision :: g1
+     double precision :: g2
+     double precision :: ezero
 
-     logical :: zembed = .true.    ! T z axis is along r2, = f z axis is along r1.
+     !logical :: zembed = .true.    ! T z axis is along r2, = f z axis is along r1.
                                    ! only used if J > 0 ZBISC = in JHMAIN ie if zbisc=f and zperp=f.
 
      logical :: zbisc              ! T place the Z-axis along the bisector
@@ -182,9 +201,9 @@ module eqm
 implicit none
 !constant count: real 3.
 
-     real(kind=dp) :: ex(3)
-     real(kind=dp) :: ez(3)
-     real(kind=dp) :: tmass
+     double precision :: ex(3)
+     double precision :: ez(3)
+     double precision :: tmass
 
 end module eqm
 
@@ -221,9 +240,9 @@ module time
 implicit none
 !constant count: real 3.
 
-     real(kind=dp) :: ouser
-     real(kind=dp) :: osys
-     real(kind=dp) :: ototal
+     double precision :: ouser
+     double precision :: osys
+     double precision :: ototal
 
 end module time
 
@@ -233,7 +252,7 @@ module head
 implicit none
 !constant count: real 1.
 
-     real(kind=dp) :: title
+     double precision :: title
 
 end module head
 
@@ -253,7 +272,7 @@ module sym
 implicit none
 !constant count: integer 5.
 
-     integer :: idia     ! 1 scattering coordinates heteronuclear diatomic
+     !integer :: idia     ! 1 scattering coordinates heteronuclear diatomic
                          ! 2 scattering coordinates homonuclear diatomic
                          ! -1 radau  coordinates hetronuclear diatomic
                          ! -2 radau  coordinates homonuclear  diatomic
@@ -264,6 +283,7 @@ implicit none
      integer :: jrot1
      integer :: jrot2
 
+
 end module sym
 
 !===================================================================================================
@@ -272,7 +292,7 @@ module dim
 implicit none
 !constant count: integer 33.
 
-     integer :: neval         ! number of eigenvalues which have to actually be supplied as output
+     !integer :: neval         ! number of eigenvalues which have to actually be supplied as output
      integer :: lpot
      integer :: ncoord        ! number of vibrational coordinates explicitly considered
                               ! ncoord = 2: atom-diatom problem with diatom rigid
@@ -281,8 +301,8 @@ implicit none
                               ! ncoord=3: all paramters required
 
      integer :: npnt          ! max(npnt1,npnt2) number of gauss-associated legendre grid points requested
-     integer :: npnt1         ! number of (gauss-laguerre) dvr points in r1
-     integer :: npnt2         ! number of (gauss-laguerre) dvr points in r2
+     !integer :: npnt1         ! number of (gauss-laguerre) dvr points in r1
+     !integer :: npnt2         ! number of (gauss-laguerre) dvr points in r2
      integer :: nrade
      integer :: nrado
      integer :: npot          ! number of Gauss-Legendre integration points used
@@ -304,13 +324,12 @@ implicit none
      integer :: ibase1        ! number of lowest ket eigenfunctions skipped
      integer :: ibase2        ! number of lowest bra eigenfunctions skipped
      integer :: ipot
-     integer :: nn2
      integer :: lmax
      integer :: npropin
      integer :: nprt
-     integer :: jrot          ! total angular momentum of the molecule
-     integer :: idia
-     integer :: ipar          ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
+     !integer :: jrot          ! total angular momentum of the molecule
+     !integer :: idia
+     !integer :: ipar          ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
      integer :: nv1           ! number of bra eigenfunctions considered
                               ! if this is input as zero, all available
                               ! ket eigenfunctions will be considered when computing transitions.
@@ -323,7 +342,7 @@ end module dim
 module outp
 implicit none
 !constant count: integer 30, real 2, logical 34.
-
+     !use com
      integer :: kvecpb = 9
      integer :: ivec1 = 27
      integer :: idiag = 2
@@ -371,21 +390,14 @@ implicit none
      integer :: nplotf = 0
      integer :: ithre = -8
 
-     real(kind=dp) :: toler = 0.0D0     ! convergence tolerance for the iterative diagonaliser
-                                        ! toler = 0.0 gives machine accuracy
 
-     real(kind=dp) :: thresh = 0.1D0    ! threshold for printing a coefficient if zpvec=.true.
-
-     logical :: zpham = .false.    ! T request printing of the hamiltonian matrix
+     logical :: zpham    ! T request printing of the hamiltonian matrix
      logical :: zplot = .false.
      logical :: zprad = .false.    ! T request printing of the radial matrix elements
      logical :: zpvec = .false.    ! T request printing of the eigenvectors
      logical :: zrot = .true.      ! F do vibrational part of rotational calculation by looping over k
      logical :: zladd = .true.     ! T NALF kept constant as k increases
                                    ! F NALF decreases with k (=f has a bug), (only if zrot = .true.)
-
-     logical :: zembed = .true.    ! T z axis is along r2, = f z axis is along r1.
-                                   ! only used if J > 0 ZBISC = in JHMAIN ie if zbisc=f and zperp=f.
 
      logical :: zmors2 = .true.    ! T use morse oscillator-like functions for r_2 coordinate;
                                    ! F use spherical oscillator functions.
@@ -445,6 +457,16 @@ implicit none
      logical :: zptra = .false.    ! print the transformed vectors.
      logical :: zdcore = .false.   ! T for in core diagonalisation
      logical :: z1da = .false.
+     data zpham/.false./,zprad/.false./,zpvec/.false./,zrot/.true./,& 
+           zladd/.true./,zembed/.true./,zmors2/.true./,& 
+           zpmin/.false./,zvec/.false./,zquad2/.true./,zcut/.false./,& 
+           zdiag/.true./,zlmat/.false./,zall/.false./,& 
+           zp1d/.false./,zp2d/.false./,zr2r1/.true./,ztheta/.true./,& 
+           zmors1/.true./,ztran/.false./,ztwod/.false./,zperp/.false./,& 
+            zx/.false./,zs0/.false./,zs1/.false./,zpseg/.false./,& 
+           ieigs1/7/,ivecs1/3/,ieigs2/2/,ivecs2/4/,ivint/17/,& 
+           iband/15/,intvec/16/,idiag1/20/,idiag2/21/,iout1/24/,& 
+           iout2/25/,iwave/26/,zlin/.false./,zpfun/.false./,ilev/14/
    
 
 end module outp
@@ -455,8 +477,8 @@ module size
 implicit none
 !constant count: integer 69, real 2.
 
-     integer :: npnt1    ! number of (gauss-laguerre) dvr points in r1
-     integer :: npnt2    ! number of (gauss-laguerre) dvr points in r2
+     !integer :: npnt1    ! number of (gauss-laguerre) dvr points in r1
+     !integer :: npnt2    ! number of (gauss-laguerre) dvr points in r2
      integer :: nktot    ! number of k values
      integer :: kpar
      integer :: iqpar
@@ -472,25 +494,25 @@ implicit none
      integer :: npnt     ! max(npnt1,npnt2) number of gauss-associated legendre grid points requested
      integer :: nlim1    ! nmax1+1*(nmax1+1+1)/2
      integer :: nlim2    ! nmax2+1*(nmax2+1+1)/2
-     integer :: neval    ! number of eigenvalues which have to actually be supplied as output
+     !integer :: neval    ! number of eigenvalues which have to actually be supplied as output
      integer :: ncoord   ! number of vibrational coordinates explicitly considered
                          ! ncoord = 2: atom-diatom problem with diatom rigid
                          ! ncoord=2: also need lmax,lpot,idia,kmin
                          ! ncoord = 3: full 3-d triatomic problem
                          ! ncoord=3: all paramters required
 
-     integer :: jrot     ! total angular momentum of the molecule
-     integer :: kmin     ! zrot=t, kmin=1 sym. rot. basis, =0 anti-sym.
+     !integer :: jrot     ! total angular momentum of the molecule
+     !integer :: kmin     ! zrot=t, kmin=1 sym. rot. basis, =0 anti-sym.
                          ! kmin=2 loop over both sym & anti-sym (zbisc=t only)
                          ! zrot=f, kmin=fixed value of k
 
-     integer :: idia     ! 1 scattering coordinates heteronuclear diatomic
+     !integer :: idia     ! 1 scattering coordinates heteronuclear diatomic
                          ! 2 scattering coordinates homonuclear diatomic
                          ! -1 radau  coordinates hetronuclear diatomic
                          ! -2 radau  coordinates homonuclear  diatomic
                          ! 0 radau   coordinates with the z axis perpendicular to the molecular plane.
 
-     integer :: ipar     ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
+     !integer :: ipar     ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
      integer :: max2d    ! upper bound on size of intermediate 2d hamiltonian
      integer :: max3d    ! upper bound on size of full 3d hamiltonian
      integer :: max2d2   ! max2d for smaller block (zbisc=t only)
@@ -505,36 +527,36 @@ implicit none
      integer :: ndimb    ! set equal to npntb at the start - used for dimensioning
      integer :: ndimc    ! set equal to npntc at the start - used for dimensioning
      integer :: iq
-     integer :: idia     ! 1 scattering coordinates heteronuclear diatomic
+     !integer :: idia     ! 1 scattering coordinates heteronuclear diatomic
                          ! 2 scattering coordinates homonuclear diatomic
                          ! -1 radau  coordinates hetronuclear diatomic
                          ! -2 radau  coordinates homonuclear  diatomic
                          ! 0 radau   coordinates with the z axis perpendicular to the molecular plane.
-     integer :: ipar     ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
+     !integer :: ipar     ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
      integer :: lmax
-     integer :: npnt1    ! number of (gauss-laguerre) dvr points in r1
-     integer :: npnt2    ! number of (gauss-laguerre) dvr points in r2
-     integer :: jrot     ! total angular momentum of the molecule
-     integer :: kmin     ! zrot=t, kmin=1 sym. rot. basis, =0 anti-sym.
+     !integer :: npnt1    ! number of (gauss-laguerre) dvr points in r1
+     !integer :: npnt2    ! number of (gauss-laguerre) dvr points in r2
+     !integer :: jrot     ! total angular momentum of the molecule
+     !integer :: kmin     ! zrot=t, kmin=1 sym. rot. basis, =0 anti-sym.
                          ! kmin=2 loop over both sym & anti-sym (zbisc=t only)
                          ! zrot=f, kmin=fixed value of k
-     integer :: neval    ! number of eigenvalues which have to actually be supplied as output
+     !integer :: neval    ! number of eigenvalues which have to actually be supplied as output
      integer :: jk
      integer :: ifile
      integer :: NBASS    ! maximum dimension of rotational secular problem
      integer :: MBASS    ! maximum size of vibrational problem (excluding linear geom)
      integer :: IBASS    ! actual dimension of rotational secular problem
-     integer :: NEVAL    ! number of eigenvalues which have to actually be supplied as output
-     integer :: IPAR     ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
-     integer :: IDIA     ! 1 scattering coordinates heteronuclear diatomic
+     !integer :: NEVAL    ! number of eigenvalues which have to actually be supplied as output
+     !integer :: IPAR     ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
+     !integer :: IDIA     ! 1 scattering coordinates heteronuclear diatomic
                          ! 2 scattering coordinates homonuclear diatomic
                          ! -1 radau  coordinates hetronuclear diatomic
                          ! -2 radau  coordinates homonuclear  diatomic
                          ! 0 radau   coordinates with the z axis perpendicular to the molecular plane.
 
      integer :: nlim
-     integer :: jrot     ! total rotational angular momentum
-     integer :: KMIN     ! zrot=t, kmin=1 sym. rot. basis, =0 anti-sym.
+     !integer :: jrot     ! total rotational angular momentum
+     !integer :: KMIN     ! zrot=t, kmin=1 sym. rot. basis, =0 anti-sym.
                          ! kmin=2 loop over both sym & anti-sym (zbisc=t only)
                          ! zrot=f, kmin=fixed value of k
                          
@@ -546,8 +568,8 @@ implicit none
      integer :: LOFF     ! space required for all the off-diagonal blocks
      integer :: LOFF0    ! space required for the largest off-diagonal block
      integer :: kbass
-     integer :: npnt1    ! number of (gauss-laguerre) dvr points in r1
-     integer :: npnt2    ! number of (gauss-laguerre) dvr points in r2
+     !integer :: npnt1    ! number of (gauss-laguerre) dvr points in r1
+     !integer :: npnt2    ! number of (gauss-laguerre) dvr points in r2
      integer :: npntt
      integer :: kmax
      integer :: ndvr     ! maximum dimension of theta dvr grid used in vibrational problem
@@ -555,8 +577,8 @@ implicit none
      integer :: mxblk2   ! size of vibrational radial problem (odd  basis)
      integer :: mbass0   ! maximum size of vibrational problem (excluding linear geom)
 
-     real(kind=dp) :: emax1
-     real(kind=dp) :: emax2
+     double precision :: emax1
+     double precision :: emax2
      
 end module size
 
@@ -567,13 +589,13 @@ implicit none
 !constant count: integer 1, real 7.
      integer :: iu1
 
-     real(kind=dp) :: re1
-     real(kind=dp) :: diss1
-     real(kind=dp) :: we1
-     real(kind=dp) :: beta1
-     real(kind=dp) :: ur1
-     real(kind=dp) :: urr1
-     real(kind=dp) :: a1
+     double precision :: re1
+     double precision :: diss1
+     double precision :: we1
+     double precision :: beta1
+     double precision :: ur1
+     double precision :: urr1
+     double precision :: a1
 
 end module split1
 
@@ -584,13 +606,13 @@ implicit none
 !constant count: integer 1, real 7.
      integer :: iu2
 
-     real(kind=dp) :: re2
-     real(kind=dp) :: diss2
-     real(kind=dp) :: we2
-     real(kind=dp) :: beta2
-     real(kind=dp) :: ur2
-     real(kind=dp) :: urr2
-     real(kind=dp) :: a2
+     double precision :: re2
+     double precision :: diss2
+     double precision :: we2
+     double precision :: beta2
+     double precision :: ur2
+     double precision :: urr2
+     double precision :: a2
 
 end module split2
 
@@ -600,9 +622,9 @@ module oupb
 implicit none
 !constant count: real 3.
 
-     real(kind=dp) :: xp0
-     real(kind=dp) :: xp1
-     real(kind=dp) :: xp2
+     double precision :: xp0
+     double precision :: xp1
+     double precision :: xp2
 
 end module oupb
 
@@ -610,7 +632,7 @@ end module oupb
 
 module pot
 implicit none
-     parameter (mxprop=1000)
+     integer, parameter :: mxprop = 1000
      integer :: iprop(mxprop)
      ! dimension  iprop(mxprop)
 end module pot

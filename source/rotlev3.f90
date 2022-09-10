@@ -1,3 +1,6 @@
+include "model.f90"
+include "temp.f90"
+
 !     DUMMY MAIN PROGRAM                                   
 
       CALL ROTLEV
@@ -28,14 +31,15 @@
 !     Fortan90 version with dynamic arrays by Max Kostin & Jonathan Tennyson
 
 
- 
-      use size
-      use outp
-      implicit none
+      
       NAMELIST/PRT/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
                     iscr,ires,irf1,irf2,&
                     zpham,zpvec,zdcore,zvec,zpfun,zdiag,ztran,zptra,&
                     zpseg
+      use size
+      use outp
+      use com
+      implicit none
    
       WRITE(6,1000)
  1000 FORMAT(5x,'PROGRAM ROTLEV3 (VERSION OF March 2002):',/)
@@ -61,6 +65,7 @@
 !##############################################################################
       BLOCK DATA
 !     STORES DEFAULTS FOR NAMELIST PARAMETERS  
+      IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
 
 !     OUTP HOLDS INFORMATION WHICH CONTROLS THE AMOUNT OF PRINTED OUTPUT
 !     TOLER: CONVERGENCE TOLERANCE FOR THE ITERATIVE DIAGONALISER
@@ -94,13 +99,14 @@
 !      IRES  = -2 with kmin=2  transform 2nd set of vectors
 !      RESTART AFTER ZDIAG=FALSE RUN, IWAVE=IRF1 and IRF2 REQUIRED
 
-      use outp
-      implicit none
       DATA TOLER/0.0D0/,THRESH/0.1D0/,ZPHAM/.FALSE./,ZPVEC/.FALSE./,&
            iwave/26/,ZVEC/.FALSE./,JVEC/3/,JVEC2/2/,ISCR/10/,IRES/0/,&
            ZTRAN/.FALSE./,KVEC/8/,KVEC2/9/,ZPTRA/.FALSE./,jscr/7/,&
            ZPFUN/.FALSE./,ILEV/14/,ZDIAG/.TRUE./,zdcore/.false./,&
            z1da/.false./,IRF1/21/,IRF2/22/,zpseg/.false./
+      use outp
+      use com
+      implicit none
       END
 
 !####################################################################################
@@ -138,11 +144,12 @@
 
       use size
       use outp
+      use com
+      use dmaintemp
       implicit none
-      
       CHARACTER(len=8) TITLE(9)
       DOUBLE PRECISION, DIMENSION(3) :: xmass
-      DATA X0/0.0D0/
+    
 
       if (zpseg==.true.) then 
       OPEN(UNIT=iwave,FORM='UNFORMATTED',recordtype='segmented')
@@ -305,8 +312,10 @@
 !     SUBROUTINE SELECT DETERMINES WHICH VIBRATIONAL BASIS   
 !     FUNCTIONS ARE TO BE USED
 
+     
       use size
       use outp
+      use com
       implicit none
 
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: EVIB
@@ -483,14 +492,17 @@
 
       use size
       use outp
+      use com
+      use dmaintemp
       implicit none
+      integer :: MVIB,maxleg
 
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: DIAG,eval
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: vec
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: cvec,dvec
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: bvec
-      data x0/0.0d0/
+ 
 
     
       if (ztran .and. zpseg) open(unit=jscr,form='unformatted',recordtype='segmented')
@@ -626,8 +638,9 @@
 !     PRINT HAMILTONIAN MATRIX  (out of core version)
 
       use size
-   
+      use com
       implicit none
+      integer :: MVIB
       
       DOUBLE PRECISION, DIMENSION(NBASS) :: DIAG
       DOUBLE PRECISION, DIMENSION(LOFF) :: OFFDG
@@ -673,7 +686,10 @@
 
       use size
       use outp
+      use com
+      use SOLRTtemp
       implicit none
+      integer :: MVIB,maxleg
 
       DOUBLE PRECISION, DIMENSION(nlim) :: rm2
       DIMENSION MVIB(NBLK)
@@ -681,7 +697,7 @@
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: TCOF,DIAG,OFFDG
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: COEF1,COEF2
 
-      data x0/0.0d0/,sqrt2/1.4142135623731d0/
+      
 
       ALLOCATE(TCOF(NVIB),COEF1(MBASS,NVIB),COEF2(MBASS,NVIB),&
                pleg((maxleg+1)*npntt),dvrvec(mbass),diag(nbass),offdg(loff0))
@@ -828,6 +844,8 @@
 
       use size
       use outp
+      use com
+      use SOLRTtemp
       implicit none
 
       DOUBLE PRECISION, DIMENSION(0:MAXLEG,idvr) :: PLEG
@@ -835,7 +853,7 @@
       DOUBLE PRECISION, DIMENSION(mbass,mvib) :: coef
       DOUBLE PRECISION, DIMENSION(nrad) :: sumk
 
-      DATA X0/0.0D0/
+
 
 !     DVR3DRJ: TRANSFORM BACK TO THE ORIGINAL FBR-TYPE BASIS IN THE
 !     ASSOCIATED LEGENDRE FUNCTIONS
@@ -893,13 +911,17 @@
 
       use size
       use outp
+      use com
+      use SOLRTtemp
       implicit none
+      integer :: mvib,itime
+      
 
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, dimension(*) :: diag
       DOUBLE PRECISION, dimension(ibass,ibass) :: hamil
 
-      data x0/0.0d0/
+
 
       REWIND ISCR
 
@@ -959,6 +981,8 @@
 
       use size
       use outp
+      use com
+      USE DGitertemp
       implicit none
       double precision, external :: vecvec
       external matvec,f02fjz
@@ -970,7 +994,7 @@
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, DIMENSION(lwork) :: WORK
               
-      DATA X0/0.0D0/,X1/1.0D0/,EMAX/1.0D50/
+      
 
 !     CREATE SOME STARTING VECTORS BY USING THE DIAGONAL ELEMENTS
       vec=x0
@@ -1025,9 +1049,10 @@
 !     BY USING ITERATIVE NAG ROUTINE F02FJF TO DO DIAGONALISATIONS.
 !     or in core         Lapack routine dsyev
 
-
       use size
       use outp
+      use com
+      use DGROTtemp
       implicit none
 
       DOUBLE PRECISION, DIMENSION(neval) :: eval
@@ -1039,7 +1064,7 @@
       DIMENSION MVIB(NBLK),IBIG(IBASS)
 
 !          AUTOCM CONVERTS ATOMIC UNITS (HARTREE) TO CM-1.
-      DATA AUTOCM/2.19474624D+05/,x0/0.0d0/
+      
 
       ip=0 
       if (zdcore) then
@@ -1181,9 +1206,10 @@
 !     STEP INTO ONES FOR THE FIRST STEP BASIS AND STORES THE
 !     RESULTS IN A FORM SUITABLE FOR program DIPOLE3.
 
-
       use size
-  
+      use DGitertemp
+ 
+      use com
       implicit none
 
 
@@ -1194,7 +1220,7 @@
       DOUBLE PRECISION, DIMENSION(KEVAL) :: ENERGY
       DOUBLE PRECISION, DIMENSION(3) :: XMASS
 
-      DATA X0/0.0D0/,x1/1.0d0/
+
 
       WRITE(6,1000) iwave,jscr,jvec,KVEC
  1000 FORMAT(5X,'EIGENVECTOR TRANSFORMATION:',&
@@ -1330,12 +1356,14 @@
 
       use size
       use outp
+      use com
+      use DGROTtemp
       implicit none
 
       DOUBLE PRECISION, DIMENSION(max(mbass,neval,(npntt+1)**2)) :: B
       DOUBLE PRECISION, DIMENSION(neval) :: eval
       DOUBLE PRECISION, DIMENSION(3) :: XMASS
-      DATA AUTOCM/2.19474624D+05/
+
 
 !     Read DVR3D header
       rewind iwave
@@ -1477,7 +1505,10 @@
 
 !     VECVEC RETURNS THE DOT PRODUCT W.Z FOR F02FJF                 
 
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+     
+      integer :: IFLAG,N
+      DOUBLE PRECISION :: D1,D2,D3,D4
+      implicit none
       DOUBLE PRECISION, DIMENSION(N) :: W,Z
       VECVEC=dDOT(N,W,1,Z,1)
       RETURN
@@ -1493,7 +1524,10 @@
 !     ADJACENT IN THE DYNAMIC STORE ALLOCATION
 
       use size
+    
+      use com
       implicit none
+      integer :: IFLAG,N,NOFFD,MVIB,K1
       DOUBLE PRECISION, DIMENSION(NBASS) :: W,Z
       DOUBLE PRECISION, DIMENSION(*) :: HAMIL
       DIMENSION MVIB(NBLK)

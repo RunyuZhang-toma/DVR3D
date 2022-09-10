@@ -1,5 +1,5 @@
-
-   
+include "model.f90"
+include "temp.f90"
 
       program DVR3DRJZ
       call dvr3d
@@ -47,16 +47,18 @@
 !     4. the eigenvalues are printed in both hartree & wavenumbers.
 !
 !     Rewritten into fortran 95 by Max Kostin and Jonathan Tennyson
-      use oupb
-
+   
       namelist/prt/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
                     zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
                     zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zperp,&
                     idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
                     ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
                     zpseg
+
       use outp
+      use oupb
       use timing
+      use com
       implicit none
 
       write(6,1000)
@@ -150,18 +152,11 @@
 !  iwave[26]    stores the wavefunction amplitudes at the grid points when
 !               ztran = t.
 !
+  
+      use dattemp
       use outp
+      use com
       implicit none
-      data zpham/.false./,zprad/.false./,zpvec/.false./,zrot/.true./,& 
-           zladd/.true./,zembed/.true./,zmors2/.true./,& 
-           zpmin/.false./,zvec/.false./,zquad2/.true./,zcut/.false./,& 
-           zdiag/.true./,zlmat/.false./,zall/.false./,& 
-           zp1d/.false./,zp2d/.false./,zr2r1/.true./,ztheta/.true./,& 
-           zmors1/.true./,ztran/.false./,ztwod/.false./,zperp/.false./,& 
-            zx/.false./,zs0/.false./,zs1/.false./,zpseg/.false./,& 
-           ieigs1/7/,ivecs1/3/,ieigs2/2/,ivecs2/4/,ivint/17/,& 
-           iband/15/,intvec/16/,idiag1/20/,idiag2/21/,iout1/24/,& 
-           iout2/25/,iwave/26/,zlin/.false./,zpfun/.false./,ilev/14/
       end
 
 !############################################################################
@@ -169,7 +164,7 @@
 
 !     set up common /size/ & write control parameters of problem
 
-      use oupb
+
 
 !     common /size/ stores control parameters for the problem
 !     npnt1: number of (gauss-laguerre) dvr points in r1
@@ -210,11 +205,11 @@
 !     ncoord: number of vibrational coordinates explicitly considered
 !     if (ncoord /= 3) some of the above are dummies, see below.
 
-
       use size
       use outp
+      use oupb
+      use com
       implicit none
-
       character(len=8) title(9)
 !     read in control parameters of problem:
 
@@ -644,12 +639,14 @@
 !     the calls to the various subroutines which set & solve the
 !     intermediate and the final hamiltonians.
 
+      
+      use mass
       use size
       use split1
       use split2
-      use outp
-      use mass
       use oupb
+      use oupb
+      use ccmaintemp
       implicit none
 
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: dnorm1
@@ -681,8 +678,7 @@
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: sjwalf
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: pjac
  
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/,x8/8.0d0/,xp5/0.5d0/,&
-           toler/1.0d-8/
+     
 
      ALLOCATE(dnorm1(0:nmax1),r1m2(nlim1),dnorm2(0:nmax2),&
                r2m2(nlim2),bass1(0:nmax1,npnt1),bass2(0:nmax2,npnt2),&
@@ -1021,18 +1017,20 @@
 
 !     read in masses & set constants for radial basis sets          #007
 
+     
+!     save masses & g in case they are needed in the potential routine
       use size
       use outp
       use split1
       use split2
       use oupb
       use mass
-      implicit none
+      use com
+      use setcontemp
 
-!     save masses & g in case they are needed in the potential routine
+      implicit none
 !     amtoau converts amu (proton masses) to au (electron masses).
-      data amtoau/1.8228883d03/
-      data x0,xp5,x1,x4/0.0d0,0.5d0,1.0d0,4.0d0/
+      
 
 !     read cos(theta) for fixed angle 2-d calculation
 
@@ -1192,18 +1190,22 @@
 !     and pseudo-normalisation array:
 !       dnorm(m) = sqrt((m-1)! * binom(npnt+iu,npnt-m))
 
+   
       use size
       use outp
       use split1
       use split2
       use oupb
+      use com
+      use setcontemp
+
       implicit none
 
       double precision, dimension(0:nmax1) :: dnorm1
       double precision, dimension(0:nmax2) :: dnorm2
       double precision, dimension(npnt+1) :: fact
+      double precision :: cc1,cc2
 
-      data xp5/0.5d0/,x1/1.0d0/
       fact(1) = x1
       count = x1
       do 10 i=1,npnt
@@ -1250,11 +1252,13 @@
       subroutine norms(dnorm,fact,cc,alf,npnt,nmax)
 !     set up factors for normalising the radial basis functions     #022
 
-      implicit double precision (a-h,o-y)
-
       double precision, dimension(0:nmax) :: dnorm
       double precision, dimension(npnt+1) :: fact
       double precision, dimension(npnt+1) :: bin
+      integer :: npnt,nmax
+      double precision :: cc,alf
+      use dmaintemp
+      implicit none
 
       data x1/1.0d0/
       count = dble(npnt) + alf
@@ -1283,7 +1287,12 @@
 !     npnt gauss laguerre integration and sets up basis
 !     functions at the integration points.
 
-      implicit double precision(a-h,o-y), logical (z)
+      subroutine lagpt(ir,y,r,wt,b,c,cc,bass,dnorm,npnt,nmax,zmorse,&
+      integer :: npnt,nmax,iu,ir
+      logic :: zmorse
+      use lagpttemp
+      double precision :: re,beta,a,r,cc
+
 
       double precision, dimension(npnt+1) :: b
       double precision, dimension(npnt+1) :: c
@@ -1293,7 +1302,6 @@
       double precision, dimension(0:nmax) :: dnorm
       double precision, dimension(0:nmax,npnt) :: bass
          
-      data x0,xp5,x1,x2/0.0d0,0.5d0,1.0d0,2.0d0/,toler/1.0d-8/
 
       if (zmorse) alf=dble(iu)
       if (.not. zmorse) alf = a + xp5
@@ -1365,13 +1373,17 @@
 !     calculates weights divided by gamma(nn+alf+1)
 !     this is an initialsation entry
 
-      implicit double precision (a-h,o-y)
+     
+      integer :: nn
+      double precision :: alf,csx,csa,tsx,cc
       double precision, dimension(nn) :: x
       double precision, dimension(nn) :: a
       double precision, dimension(nn+1) :: b
-      double precision, dimension(nn+1) :: c      
+      double precision, dimension(nn+1) :: c
 
-      data eps/1.0d-12/,x1/1.0d0/
+
+      use laguertemp
+      implicit none
       csx=0.0d0
       csa=0.0d0
       fa=alf+1.0d0
@@ -1432,12 +1444,15 @@
 !          pn1 = value of p(n-1) at x
 !     this routine is due to stroud & secrest (see subroutine laguer)
 
-      implicit double precision (a-h,o-y)
+      
+      double precision :: x,alf,dpn,pn1,eps
+      integer :: nn
 
       double precision, dimension(nn+1) :: b
       double precision, dimension(nn+1) :: c     
 
-      data itmax/10/
+      use itmaxtemp
+      implicit none
       iter=0
     1 iter=iter+1
       call lgrecr(p,dpn,pn1,x,nn,alf,b,c)
@@ -1458,6 +1473,8 @@
 !     this routine is due to stroud & secrest (see subroutine laguer)
 
       implicit double precision (a-h,o-y)
+      integer :: nn
+      double precision :: pn,dpn,pn1,x,alf
 
       double precision, dimension(nn+1) :: b
       double precision, dimension(nn+1) :: c     
@@ -1486,12 +1503,15 @@
 !     keints calculates analytic kinetic energy integrals over r    #012
 !     for morse oscillator-like functions
 
+      use recurtemp
       use outp
       use oupb
+      use com
       implicit none
+      integer :: nlim,nmax,iu
+      double precision :: fke
       double precision, dimension(nlim) ::  hbl
 
-      data x0/0.0d0/
       index = 0
       do 10 n2=1,nmax+1
         do 20 n1=1,n2
@@ -1523,15 +1543,20 @@
 !     keint2 calculates analytic kinetic energy integrals over r2   #013
 !     and moment of intertia integral for spherical oscillator functions
 
-      use outp
-      use oupb
-      implicit none
+   
+       use ccmaintemp
+       use outp
+       use oupb
+       use com
+       implicit none
+       integer :: nlim,nmax,npnt
+       double precision :: fke,alf
 
       double precision, dimension(nlim) :: hbl
       double precision, dimension(nlim) :: rm2
       double precision, dimension(*) :: dnorm
 
-      data x0/0.0d0/,xp5/0.5d0/,x1/1.0d0/
+
       gam = fke / (alf + xp5)
       do 10 n1=1,npnt
          gam = gam /(dble(n1)+alf+xp5)
@@ -1584,7 +1609,8 @@
 !                                                       ~  ~~~  ~
 !     (note that the radial basis functions are already normalised)
 
-      implicit double precision (a-h,o-y), logical (z)
+      integer :: npnt,nmax,nlim
+      implicit none
 
       double precision, dimension(npnt,npnt) :: xk
       double precision, dimension(nlim) :: hbl
@@ -1619,10 +1645,12 @@
 !     note that for our purposes, alf= bta= nu.
 
 
-      implicit double precision(a-h,o-z)
+      
+      double precision :: alf,bta,csa,tsa
+      integer :: nn,nn2
       double precision, dimension(nn) :: x,a,b,c,xt
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/,x3/3.0d0/,x4/4.0d0/,&
-           eps/1.0d-12/
+      use jacobitemp
+      implicit none
       fn= dble(nn)
       csa= x0
       c(1) = x0
@@ -1683,7 +1711,9 @@
 !          dpn = derivative of p(n) at x
 !          pn1 = value of p(n-1) at x.
 
-      implicit double precision(a-h,o-z)
+      double precision :: x,alf,bta,dpn,pn1,eps
+      integer :: nn
+      implicit none
       double precision, dimension(nn) :: b
       double precision, dimension(nn) :: c
    
@@ -1729,7 +1759,9 @@
 
    
       use size
+      use com
       implicit none
+      integer :: nang,nang2
 
       double precision, dimension(idvr) :: xalf,walf
 
@@ -1756,11 +1788,13 @@
 !     using routines derived from beidenharn and louck.
 
       implicit double precision (a-h,o-z)
+      integer :: lmax,nn2,kz,lincr
       double precision, dimension(0:lmax,nn2) :: pleg
       double precision, dimension(nn2) :: x
       double precision, dimension(0:lmax) :: pnorm
+      use aslegtemp
 
-      data x1/1.0d0/,x2/2.0d0/
+
       m = kz
       if (m<0) goto 999
       do 10 i=1,nn2
@@ -1822,16 +1856,20 @@
 !     this subroutine sets up the lower triangle of the transformed
 !     angular momentum matrix l(alpha,alpha')
 
-      use oupb
+      
       use size
       use outp
+      use oupb
+      use com
+      use dmaintemp
       implicit none
+
 
       double precision, dimension(idvr,idvr) :: xlmatr
       double precision, dimension(0:maxleg,idvr) :: pleg
       double precision, dimension(idvr) :: walf
 
-      data x0/0.0d0/
+ 
 
       if(zperp) then      
         jstart = 0
@@ -1887,6 +1925,7 @@
       use size
       use outp
       use oupb
+      use com
       implicit none
 
       double precision, dimension(npnt1) :: r1
@@ -2083,11 +2122,13 @@
 !#########################################################################
       subroutine mkham1(ham1,xlmatr,i1,i2,term,r1,r2,xalf,xk1,xk2,kz)
 
+ 
+      use split1
+      use split2 
       use size
       use outp
-      use split1
-      use split2
-      use oupb
+      use com
+      use mkham1temp
       implicit none
 
       double precision, dimension(ndima,ndima) :: ham1
@@ -2098,7 +2139,6 @@
       double precision, dimension(npnt1,npnt1) :: xk1
       double precision, dimension(npnt2,npnt2) :: xk2
 
-      data x0/0.0d0/,xp5/0.50d0/,x1/1.0d0/
 
 !     zero ham1
       ham1 = x0
@@ -2181,9 +2221,11 @@
 
 !####################################################################
       subroutine mkham2(ham2,eigs1d,vecs1d,xk1,xk2,iv1,ione,nham2)
+    
       use size
       use outp
       use oupb
+      use com
       implicit none
 
       double precision, dimension(max2d,max2d) :: ham2
@@ -2251,11 +2293,14 @@
 
 !     build the final 3-d hamiltonian matrix.
 
+     
       use size
-      use oupb
       use outp
       use split1
       use split2
+      use com
+      use oupb
+      use mkham1temp
       implicit none
 
       double precision, dimension(ndima*ndimb,max2d) :: cint
@@ -2274,7 +2319,7 @@
       double precision, dimension(nham3) :: work3
       double precision, dimension(npnt2,npnt2) :: r2m2t
 
-      data xp5/0.50d0/
+      
 
 !     if zdiag = .false. want eigs2d now
       if (.not. zdiag) then
@@ -2494,9 +2539,11 @@
 
 !     load the final 3-d hamiltonian matrix.
 
+   
       use size
       use outp
       use oupb
+      use com
       implicit none
 
       dimension iv2(ndimc),ndim2d(npntc)
@@ -2569,7 +2616,9 @@
       SUBROUTINE diag(ham,maxham,nham,eig)
 
 !     diagonalise the appropriate hamiltonian matrices
+  
       use outp
+      use com
       implicit none
 
       real*8, dimension(maxham,nham) :: ham
@@ -2590,6 +2639,8 @@
       use size
       use outp
       use oupb
+      use com
+      use diag3dtemp
       implicit none
 
       double precision, dimension(nham3,nham3) :: ham3
@@ -2597,8 +2648,7 @@
       double precision, dimension(nham3) :: evalcm
 
 !     autocm converts atomic units (hartree) to cm-1.
-      data autocm/2.19474624d+05/
-      data x0/0.0d0/
+     
       if (zrot) then
          write(6,1040) jrot,kz
  1040    format(/5x,'Solutions with J =',i3,' k =',i3)
@@ -2687,9 +2737,12 @@
 
 !     this routine chooses the max3d lowest eigenvalues from eigs2.
 
+     
       use size
       use outp
       use oupb
+      use com
+      use specttemp
       implicit none
 
       double precision, dimension(max2d,ndimc) :: eigs2
@@ -2697,7 +2750,7 @@
       dimension ndim2d(ndimc)
       double precision, dimension(max2d,max2d) :: ham2
 
-      data autocm/2.19474624d+05/
+    
 
       eigmin = eigs2(1,1)
       nhamsm = 0
@@ -2788,6 +2841,8 @@
       use size
       use outp
       use oupb
+      use com
+      use specttemp
       implicit none
 
       double precision, dimension(ndima,ndima) :: ham1
@@ -2795,7 +2850,7 @@
       double precision, dimension(max2d) :: eigs1d
       double precision, dimension(max2d,ndima) :: vecs1d
 
-      data autocm/2.19474624d+05/
+
 !     change emax1 to hartree for the selection
       emaxau=emax1/autocm
 
@@ -2851,12 +2906,13 @@
       use size
       use outp
       use oupb
+      use com
+      use specttemp
       implicit none
 
       double precision, dimension(max2d,max2d) :: ham2
       double precision, dimension(nham2) :: eig2
 
-      data autocm/2.19474624d+05/
 !     change emax2 to hartree for the selection
       emaxau=emax2/autocm
 
@@ -2907,6 +2963,8 @@
       use size
       use outp
       use oupb
+      use com
+      use nfmaintemp
       implicit none
 
       double precision, dimension(npnt,npnt) :: hr
@@ -2921,7 +2979,7 @@
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eig3
       INTEGER, ALLOCATABLE, DIMENSION(:,:) ::iv2
       INTEGER, ALLOCATABLE, DIMENSION(:) ::nv2
-      data x4/4.0d0/,x8/8.0d0/,x16/1.6d1/
+   
 
       ALLOCATE(ham2(max2d,max2d),eig2(max2d),iv2(2,nalf),& 
                vecs2d(max2d,max3d),eigs2d(max3d),nv2(nalf))
@@ -3010,16 +3068,20 @@
 !    ***********************************************************************
 
       subroutine blc2d1(xcos,r,hr,ham2,nham2,term,term2,term3,xtscw,kz)
+      
       use size
       use split1
       use oupb
+      use com
+      use ccmaintemp
       implicit none
+      double precision :: term,term2,term3,xtscw,kz,xcos
 
       double precision, dimension(npnt,npnt) :: hr
       double precision, dimension(npnt,npnt) :: hrpb
       double precision, dimension(npnt) :: r
       double precision, dimension(nham2,nham2) :: ham2
-      data xp5/0.5d0/,x1/1.0d0/
+
       factr2 = sqrt(xp5)
 
       ham2 = 0.0d0
@@ -3109,8 +3171,11 @@
       use size
       use outp
       use oupb
+      use com
+      use diag3dtemp
+  
       implicit none
-      
+      integer :: igamma,iv2,nham2
 
       double precision, dimension(nham2) :: eig2
       double precision, dimension(nham2,nham2) :: ham2
@@ -3120,7 +3185,7 @@
       double precision, dimension(max2d,max3d) :: vecs2d
       dimension nv2(nalf)
       save itotal
-      data autocm/2.19474624d+05/
+
 
       if (igamma == 1) then
          itotal = 0
@@ -3205,7 +3270,11 @@
       use size
       use outp
       use oupb
+      use com
+      use diag3dtemp
+  
       implicit none
+      integer :: igamma,iv2,nham2
 
       double precision, dimension(nham2) :: eig2
       double precision, dimension(nham2,nham2) :: ham2
@@ -3213,7 +3282,7 @@
       double precision, dimension(max3d) :: eigs2d
       double precision, dimension(max2d,max3d) :: vecs2d
       save npos
-      data autocm /2.19474624d+05/
+ 
       if (igamma == 1) npos = 1
 
 !     change emax2 to hartree for the selection
@@ -3253,7 +3322,10 @@
       use size
       use outp
       use oupb
+      use com
+  
       implicit none
+      integer :: iv,nbass
 
       dimension iv(2,nalf)
 
@@ -3315,7 +3387,10 @@
       use size
       use outp
       use oupb
+      use com
+  
       implicit none
+      integer :: iv2,nv2,nham3
 
       double precision, dimension(nalf,nalf) ::  htheta
       double precision, dimension(nham3,nham3) ::  ham3
@@ -3359,14 +3434,18 @@
 
       subroutine blc2d2(r,igamma,igammp,htheta,ham2,nham2)
       use size
-      use split1
+      use outp
       use oupb
+      use com
+      use mkham1temp
+  
       implicit none
+      integer :: igamma,igammp,nham2
 
       double precision, dimension(nalf,nalf) ::  htheta
       double precision, dimension(npnt) :: r
       double precision, dimension(nham2,nham2) :: ham2
-      data xp5 /0.5d0/
+ 
       factr2 = sqrt(xp5)
 
       ham2 = 0.0d0
@@ -3420,7 +3499,9 @@
 ! this routine does hb = hb + va^T * ha * vb
 ! could be replaced by blas?
 
-      implicit double precision(a-h,o-y),logical(z)
+      
+      integer :: idima,jdima,jdimb,nvecln,ndim
+      implicit none
       double precision, dimension(nvecln,jdima) ::  veca
       double precision, dimension(nvecln,jdimb) :: vecb
       double precision, dimension(idima,idimb) :: hama
@@ -3444,14 +3525,19 @@
 !     ***********************************************************************
 
       subroutine transr(iv2,vecs2d,ham3,eig3,nham3,nbass)
+   
       use size
       use outp
+      use oupb
+      use com
       use split1
       use mass
-      use oupb
+  
       implicit none
+      integer :: iv2,nham3,nbass
 
       dimension iv2(2,nalf)
+ 
       double precision, dimension(max2d,max3d) :: vecs2d
       double precision, dimension(nham3,nham3) :: ham3
       double precision, dimension(nham3) :: eig3
@@ -3491,13 +3577,17 @@
 !     if ztran then this routine transforms the sets of 1d, 2d and 3d
 !     coefficients to psi, the wavefunction amplitudes at the dvr points
 
+     
       use size
+      use outp
+      use oupb
+      use com
       use split1
       use split2
       use mass
-      use outp
-      use oupb
+  
       implicit none
+      integer :: iv1l,iv2l,ndim2l
 
       double precision, dimension(max2d,ndima) :: vecs1l
       double precision, dimension(max2d,max2d) :: vecs2l
@@ -3748,7 +3838,6 @@
       end
       subroutine nftim(text)
       use timing
-      implicit none
       character text*(*)
       write(6,10)
       write(6,*) 'Time at ',text,' is.........'
@@ -3768,11 +3857,12 @@
 !     molecular plane.
 !     written by max kostin, 2001.
 
-
+     
       use size
       use outp
- 
+      use com
       implicit none
+      double precision :: kz
 
       double precision, dimension(npnt,npnt) :: hr
       double precision, dimension(nalf,nalf) :: htheta
@@ -3855,14 +3945,20 @@
 
 
       subroutine z_blc2d1(xcos,r,hr,ham2,nham2,term,term2,kz)
+      
       use size
-      use split1
+      use split1 
+      use com
+      use setcontemp
       implicit none
+      double precision :: xcos,term,term2,kz
+      integer :: nham2
+
 
       double precision, dimension(npnt,npnt) :: hr
       double precision, dimension(npnt) :: r
       double precision, dimension(nham2,nham2) :: ham2
-      data xp5/0.5d0/,x1/1.0d0/,x4/4.0d0/
+  
       factr2 = sqrt(xp5)
 
       ham2 = 0.0d0
@@ -3983,7 +4079,7 @@
       REAL(KIND=real_kind) :: alf, bet,lmd, x0,x1,x2
       REAL(KIND=real_kind) :: x(nn),bass(0:nb,nn)
       REAL(KIND=real_kind) :: A1n(nb),A2n(nb),A3n(nb),A4n(nb)
-      DATA x0,x1,x2/0.0d0,1.0d0,2.0d0/
+      use dmaintemp
       lmd=alf+bet+x1
       DO n=1,nb
          A1n(n)=x2*(n+x1)*(n+lmd)*(x2*n+lmd-x1)
@@ -4089,9 +4185,7 @@
        REAL(KIND=real_kind)::GAMMLN,XX
        REAL(KIND=real_kind)::SER,STP,TMP,X,COF(6)
        REAL(KIND=real_kind)::HALF,ONE,FPF
-       DATA COF,STP/76.18009173D0,-86.50532033D0,24.01409822D0,&
-      &    -1.231739516D0,.120858003D-2,-.536382D-5,2.50662827465D0/
-       DATA HALF,ONE,FPF/0.5D0,1.0D0,5.5D0/
+       use gaujactemp
        X=XX-ONE
        TMP=X+FPF
        TMP=(X+HALF)*LOG(TMP)-TMP
@@ -4115,7 +4209,7 @@
        REAL(KIND=real_kind) :: norm(0:nn)
        REAL(KIND=real_kind) :: a1,a2,a3,a4
        REAL(KIND=real_kind), EXTERNAL :: gammln
-       DATA x1,x2/1.0d0,2.0d0/
+       use dmaintemp
        lmd=alf+bet+x1
        do n=0,nn
           a1=gammln(DBLE(n+1))

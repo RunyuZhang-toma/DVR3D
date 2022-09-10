@@ -1,3 +1,6 @@
+include "model.f90"
+include "temp.f90"
+
       program shallot
       call dipole3b
       stop
@@ -142,10 +145,13 @@
 !
       namelist/prt/ zprint, zpmin, ztra, zstart,&
                     iket, ibra, itra, iscr, ires, nblock,zuvvis,zpseg
+      
       use logic
       use head
       use stream
+      use head
       use timing
+      use com
       implicit none
       character(len=8) title(9)
 
@@ -186,13 +192,13 @@
 !     the bra input stream, ibra, and the output stream for program
 !     spectrum, itra.
 !
+
       use logic
       use stream
+      use com
+      use datatemp
       implicit none
-      data zmors1/.true./, zprint/.false./, ztra/.true./,&
-           zmors2/.true./, zpmin /.false./, ires/0/, nblock/1000/,&
-           zstart/.false./, iket/11/, ibra/12/, itra/13/, iscr/24/,&
-           zuvvis/.false./,zpseg/.false./
+
       end
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **003
@@ -230,19 +236,21 @@
 !     ncoord: number of vibrational coordinates explicitly considered
 !     if (ncoord /= 3) some of the above are dummies, see below.
 !
+!     save masses, g's and embedding in case they are needed
+!     in the dipole routine
 
       use dim
       use logic
       use sym
       use stream
       use mass
+      use com
+      use insizetemp
       implicit none
-!     save masses, g's and embedding in case they are needed
-!     in the dipole routine
 
       double precision, dimension(3) :: xm1,xm2
 
-      data toler/1.0d-3/
+      
 !
 !     read in control parameters of problem:
 !     ncoord = 2: atom-diatom problem with diatom rigid
@@ -635,6 +643,7 @@
 !
       use dim
       use stream
+      use com
       implicit none
       integer, allocatable, dimension(:):: nbass1,nbass2
       allocate(nbass1(jk1))
@@ -670,13 +679,19 @@
 !     dimension the space needed for the d-coefficients.
 !
       use logic
+      use com
       implicit none
+      integer :: mbass
+      integer :: jk
+      integer :: nbmax
+      integer :: ivec
 
 !       dimension nbass(jk),lmin(jk),lbass(jk)
       integer, dimension(jk) :: nbass
       integer, allocatable, dimension(:) :: lmin, lbass
       allocate( lmin(jk) )
       allocate( lbass(jk) )
+      
 
       if (zprint) write(6,205) jk,mbass
 205   format(//,'   j + kmin =',i3,'   mbass=',i7,/)
@@ -719,12 +734,13 @@
 !     All data etc for the ket are labelled 1;
 !     all data etc for the bra are labelled 2.
 
-
       use dim
       use logic
       use sym
       use stream
       use mass
+      use com
+      use dmaintemp
       implicit none
 
       !dimension nbass1(jk1)
@@ -741,7 +757,6 @@
       double precision, allocatable, dimension(:,:)  :: tz,tx,sint
       double precision, allocatable, dimension(:) :: dstemp, dc1, dc2, dlower, dmiddle, dupper
 
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
       write(*,*) 'checkpoint 1dmain: Allocating'
       write(*,*) 'Iam in dmain. size(nbass1)=', size(nbass1)
       write(*,*) 'Iam in dmain. size(nbass2)=', size(nbass2)
@@ -1128,9 +1143,12 @@ if(jk2 <= 1) go to 108
 !     setfa! initialises binomial array:
 !        binom(i+1,j+1) = i! / (j! * (i-j)!)
 
-      implicit double precision (a-h,o-y), logical (z)
+
       double precision, dimension(nbin,nbin) :: binom
-      data x1/1.0d0/
+      integer :: nbin
+      use dmaintemp
+      implicit none
+ 
       binom(1,1) = x1
       binom(2,1) = x1
       binom(2,2) = x1
@@ -1151,8 +1169,10 @@ if(jk2 <= 1) go to 108
 !     subroutine lagpt obtains values of the dipole at the radial
 !     dvr points and angular integration points
 
-      use dim
       use sym
+      use dim
+      use com
+      use lagpttemp
       implicit none
 
       double precision, dimension(*) :: d0
@@ -1160,9 +1180,8 @@ if(jk2 <= 1) go to 108
       double precision, dimension(npnt2) :: r2
       double precision, dimension(npot) :: xd,wtd
       double precision, allocatable, dimension(:) :: b,c
+      integer :: nu
 
-      data x0/0.0d0/,toler/1.0d-8/,&
-           x1/1.0d0/,x2/2.0d0/,x3/3.0d0/,x4/4.0d0/
 
        allocate( b(npot) )
        allocate( c(npot) )
@@ -1244,16 +1263,17 @@ if(jk2 <= 1) go to 108
 !     for the polynomial part of associated legendre functions.
 !     a factor of sin(theta)**m has NOT been removed from all functions.
 
-
+      use aslegtemp
       use mass
       use sym
+      use com
       implicit none
+      integer :: lmax,ipot,m 
 
       double precision, dimension(ipot,0:lmax) :: pleg
       double precision, dimension(ipot) :: x
       double precision, dimension(0:lmax) :: pnorm
 
-      data x1/1.0d0/,x2/2.0d0/
 
       do 10 i=1,ipot
 
@@ -1323,10 +1343,11 @@ if(jk2 <= 1) go to 108
 !     integration formulas", 1966, prentice hall, page 29.
 !     note that for our purposes, alf= bta= nu.
 
-      implicit double precision(a-h,o-z)
+      use jacobitemp
+      implicit none
+      integer :: nn
+      double precision :: alf,bta,csa,tsa
       double precision, dimension(nn) :: x,a,b,c
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/,x3/3.0d0/,x4/4.0d0/,x6/6.0d0/,&
-          x8/8.0d0/,eps/1.0d-12/
       fn= dble(nn)
       nn2= nn/2
       csa= x0
@@ -1380,6 +1401,8 @@ if(jk2 <= 1) go to 108
 !          pn1 = value of p(n-1) at x.
 
       implicit double precision(a-h,o-z)
+      integer :: nn
+      double precision :: x,alf,bta,dpn,pn1,eps
       double precision, dimension(nn) :: b,c
       iter= 0
 1     iter= iter + 1
@@ -1393,9 +1416,10 @@ if(jk2 <= 1) go to 108
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **020
       subroutine recur(pn,dpn,pn1,x,nn,alf,bta,b,c)
-      implicit double precision(a-h,o-z)
       double precision, dimension(nn) :: b,c
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
+      use recurtemp
+      implicit none
+      double precision :: pn,dpn,pn1,x,alf,bta
       p1= x1
       p= x + (alf-bta)/(alf + bta + x2)
       dp1= x0
@@ -1421,11 +1445,17 @@ if(jk2 <= 1) go to 108
 !     subroutine to read d coefficients from dstore data
 
       parameter (iz=1)
+     
+      use dsrdtemp
       use dim
       use logic
       use mass
       use sym
+      use com
       implicit none
+      
+      double precision :: xd
+      integer :: ivec,mmbass,nbass,ne,jk,ipar,ibase,nu,jay_ipar,kneed,kbeg,kk
 
       double precision, dimension(ne,max(nrade*ipot,nbass)) :: d
       double precision, dimension(ne,nbass) :: temp
@@ -1433,7 +1463,6 @@ if(jk2 <= 1) go to 108
       double precision, allocatable, dimension(:,:) :: plegd
       integer, allocatable, dimension(:) :: iv
 
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
 
       nang=nbass/nrade
       if (ipar==1 .and. zbisc) nang=nbass/nrado
@@ -1568,11 +1597,14 @@ if(jk2 <= 1) go to 108
       subroutine jtran(coef,nrad,mvib,pleg,maxleg,idvr,kz,dvrvec,&
                         ivec,ipar,iv,iang,ibass,ibase,nu,temp,jay_ipar)
 
+      use jtrantemp
       use dim
       use sym
       use mass
+      use com
       implicit none
 
+      integer :: nrad,mvib,maxleg,idvr,kz,ivec,ipar,iv,iang,ibass,ibase,nu,jay_ipar
 
       double precision, dimension(0:maxleg,idvr) :: pleg
       double precision, dimension(iang,*) :: dvrvec
@@ -1581,7 +1613,7 @@ if(jk2 <= 1) go to 108
       dimension iv(idvr)
       double precision, dimension(iang,*) :: temp
 
-      data x0/0.0d0/
+
 
 !     transform back to the original fbr-type basis in the
 !     associated legendre functions
@@ -1663,12 +1695,18 @@ if(jk2 <= 1) go to 108
 !     Adapted to run in parallel on SGI Origin machines by Greg Harris
 !     In this case NCPUS should be set to the number of processors.
 
-
+    
+      use transtemp
       use dim
       use logic
       use sym
+      use com
       implicit none
+      integer :: k1,k2,nu,ipar
+      double precision :: xfac
+
       parameter (NCPUS=1)
+
       double precision, dimension(neval1,neval2) :: t
       double precision, dimension(*) :: dipol
       double precision, dimension(nbin,nbin) :: binom
@@ -1676,7 +1714,7 @@ if(jk2 <= 1) go to 108
       double precision, dimension(neval2,*) :: dc2
       double precision, allocatable, dimension(:,:,:) :: ttemp
 
-      data x0/0.0d0/
+  
 
       if (ncpus > 1) then
          allocate(ttemp(neval1,neval2,ncpus))
@@ -1779,9 +1817,11 @@ if(jk2 <= 1) go to 108
       function threej(j1,j2,j3,m1,m2,m3,binom,nbin)
 
       implicit double precision(a-h,o-z)
+      integer :: j1,j2,j3,m1,m2,m3,binom,nbin
+      use threejtemp
+      implicit none
 
       double precision, dimension(nbin,nbin) :: binom
-      data zero,one/0.0d0,1.0d0/
 
       threej = zero
       if (m1+m2+m3 /= 0) return
@@ -1833,11 +1873,14 @@ if(jk2 <= 1) go to 108
 !     and line strengths for program spectrum to calculate
 !     simulated spectra
 
+
       use dim
       use logic
       use sym
       use head
       use mass
+      use com
+      use specttemp
       implicit none
 
       double precision, dimension(neval1,neval2) :: tz,tx
@@ -1848,9 +1891,7 @@ if(jk2 <= 1) go to 108
       double precision :: ezeroup, te
 
       character(len=8)  title(9)
-      data autocm/2.19474624d+05/,x0/0.0d0/,&
-           autode/2.5417662d0/,&
-           detosec/3.136186d-07/
+
 !     autocm converts atomic units to wavenumbers
 !     autode converts atomic units to debye
 !     detose! converts from s(f-i) in debye**2 to seconds
@@ -1993,17 +2034,19 @@ end if
 !     spectrum to simulate laboratory or interstellar spectra.
 !     the output data is in atomic units.
 
-
-      use sym
-      use mass
-      use logic
-      use stream
+     
       use dim
+      use logic
+      use sym
+      use stream
+      use mass
+      use com
       implicit none
 
       double precision, dimension(neval1) :: e1
       double precision, dimension(neval2) :: e2
       double precision, dimension(neval1,neval2) :: sint
+      double precision :: gz
 
       if (znco1.and.znco2) then
          j1= jk1
@@ -2037,7 +2080,8 @@ end if
 !                                                **027
       subroutine getrow(row,nrow,iunit)
 
-      implicit double precision (a-h,o-y)
+      integer :: nrow,iunit
+      implicit none
       double precision, dimension(nrow) :: row
       read(iunit) row
       return
@@ -2046,7 +2090,8 @@ end if
 !                                                **028
       subroutine outrow(row,nrow,iunit)
 
-      implicit double precision (a-h,o-y)
+      integer :: nrow,iunit
+      implicit none
       double precision, dimension(nrow) :: row
       write(iunit) row
       return
@@ -2054,7 +2099,8 @@ end if
 !cccccccccccccccccccccccccccccccccccccc
       subroutine rdscr(t1,t2,ndim,iscr,iblock)
 !     read restart data stored on unit iscr
-      implicit double precision (a-h,o-y), logical (z)
+      integer :: ndim,iscr,iblock
+      implicit none
       double precision, dimension(ndim) :: t1,t2
       read(iscr) iblock
       read(iscr) t1
@@ -2064,7 +2110,8 @@ end if
 !cccccccccccccccccccccccccccccccccccccccc
       subroutine wrscr(t1,t2,ndim,iscr,iblock)
 !     write restart data to unit iscr
-      implicit double precision (a-h,o-y), logical (z)
+      integer :: ndim,iscr,iblock
+      implicit none
       double precision, dimension(ndim) :: t1,t2
       rewind iscr
       write(iscr) iblock
@@ -2076,8 +2123,7 @@ end if
       subroutine timer
 !     prints current cpu time usage                                 #030
 !     needs a subroutine which can access the machine clock
-      using timing
-      implicit none
+      use timing
 
       call SYSTEM_CLOCK(itime2,irate2,imax2)
       itime=(itime2-itime0)/irate2
@@ -2093,8 +2139,8 @@ end if
 !!    COORDINATES. ALLOWANCE MUST BE MADE FOR THE NUMBERING OF THE ATOMS
 !!    Additionally, the zbisc option is included.
 !!
-      use mass
-      implicit none
+!     IMPLICIT DOUBLE PRECISION (A-H,O-Y), LOGICAL (Z)
+!     COMMON /MASS/ XMASS(3),G1,G2,zembed,zbisc
 !     LOGICAL FIRST/.TRUE./
 !     SAVE FIRST
 

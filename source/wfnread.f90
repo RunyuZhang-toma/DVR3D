@@ -1,10 +1,11 @@
+include "model.f90"
+include "temp.f90"
 program reader
 ! This is a small utility to read the wavefunction files.
 ! At present it just echos the reads to standard output but 
 ! it can adapted for other functions such as plotting wavefunctions
 
-  use size
-  implicit none
+  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
 
 ! file is assumed to be attached to unit 26
   ifile=26
@@ -38,6 +39,7 @@ end program reader
 !###################################################################
 subroutine read_8or9_jacobi
   use size
+  use com
   implicit none
 
   integer :: ifile, jk
@@ -101,6 +103,7 @@ end subroutine read_8or9_jacobi
 
 subroutine read_26_jacobi
   use size
+  use com
   implicit none
 
   integer :: ifile, jk,mbass0,lmin,lbass,nbass
@@ -169,6 +172,7 @@ end subroutine read_26_jacobi
 
 subroutine read_26_radau
   use size
+  use com
   implicit none
 
   integer :: ifile, jk
@@ -219,6 +223,7 @@ end subroutine read_26_radau
 
 subroutine read_8or9_radau
   use size
+  use com
   implicit none
 
   integer :: ifile, jk
