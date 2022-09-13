@@ -1,6 +1,6 @@
 !MODULE DEFINITIONS--------------------------------------------
-module logic
-  save
+module spectra_seg_logic
+  !save
 !constant count: integer 6, ligical 22.
 
     logical :: zembed      ! T z axis is along r2, = f z axis is along r1.
@@ -11,22 +11,23 @@ module logic
                                    ! DVR3DRJZ and ROTLEV3/3B.
                                    ! if zpfun false, the partition function
                                    ! is set to q read in below.
-    logical :: zpseg
-end module logic
+end module spectra_seg_logic
 
-module base
-   save
+module spectra_seg_base
+   !save
 !constant count: integer 2.
 
     integer :: ibase1 ! number of lowest ket eigenfunctions skipped
     integer :: ibase2 ! number of lowest bra eigenfunctions skipped
 
-end module base
-module timing
+end module spectra_seg_base
+
+module spectra_seg_timing
    save
      integer :: itime0
-end module timing
+end module spectra_seg_timing
 ! END MODULE DEFINITIONS--------------------------------------------
+
 
 
 
@@ -190,20 +191,18 @@ program spect4
 !  Updated to f90 to use dynamic memory allocation and to preselect transitions
 !  by GJH & JT 2001.
 
-use logic
-use base
-use timing
+use spectra_seg_logic
+use spectra_seg_base
+use spectra_seg_timing
 implicit none
-character(len=8) title(9)
 DOUBLE PRECISION :: autocm,autode
-DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: ee1, ee2, ss
-INTEGER :: ITRA,ILEV,ISPE,ITEM,JMAX,irate2,IMAX2,J,MAXR,NR,NMAX1,NMAX2,J1,J2,KMIN1,KMIN2,NEVAL1,NEVAL2,IDIA,IPAR,ISYM,IE2,IPAR1,IE1
-DOUBLE PRECISION :: WSMAX,WSMIN,EMIN,EMAX,SMIN,GZ,WSMA,EMI,EMA,smi,WSMI,EE,W,ABS,GE,GO,XMIN,WMIN,WMAX,TEMP
-namelist/prt/ zout, zsort, zspe, zpfun, itra, ilev, ispe, item, &
-wsmax,wsmin, emin, emax, jmax, smin, gz
 autocm = 2.19474624d+05
 autode = 2.5417662d0
+character(len=8) title(9)
+namelist/prt/ zout, zsort, zspe, zpfun, itra, ilev, ispe, item, &
+wsmax,wsmin, emin, emax, jmax, smin, gz
 
+DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: ee1, ee2, ss
 
 
 !     set time zero for timer
@@ -215,7 +214,6 @@ zout= .false.
 zsort= .true.
 zspe= .true.
 zpfun= .true.
-zpseg=.false.
 itra= 13
 ilev= 14
 ispe= 15
@@ -255,11 +253,7 @@ maxr=0
 nr= 0
 nmax1= 0
 nmax2= 0
-if (zpseg==.true.) then
-   open(unit=ispe,form='unformatted',recordtype='segmented') !* 
-else 
-   open(unit=ispe,form='unformatted') !* 
-end if 
+open(unit=ispe,form='unformatted',recordtype='segmented')
 if(zsort) then
 write(6,1000) wsmin,wsmax,emin,emax,smin,jmax
 1000    format(/5x,'Sorting requested, list preselected using:', &
@@ -275,13 +269,8 @@ wsma=wsmax/autocm
 emi=(emin+GZ)/autocm
 ema=(emax+GZ)/autocm
 smi=smin/autode**2
-if (zpseg==.true.) then 
-   open(unit=itra,form='unformatted',recordtype='segmented') !* 
-   open(unit=item,form='unformatted',recordtype='segmented') !* 
-else 
-   open(unit=itra,form='unformatted') !* 
-   open(unit=item,form='unformatted') !* 
-end if 
+open(unit=itra,form='unformatted',recordtype='segmented')
+open(unit=item,form='unformatted',recordtype='segmented')
 rewind itra
 10       read(itra,end=90) j1,j2,kmin1,kmin2,neval1,neval2, &
 idia,ipar,isym,gz,zembed,ibase1,ibase2
@@ -300,7 +289,6 @@ if(neval1.gt.nmax1) nmax1= neval1
 if(neval2.gt.nmax2) nmax2= neval2
 read(itra) ee1
 read(itra) ee2
-!ddprint*,"ee1,ee2"
 if(idia.eq.-2.and.mod(j1,2).eq.1.and.ipar1.eq.0) then
 ipar1=mod(ipar1+j1,2)
 else if(idia.eq.-2.and.mod(j1,2).eq.1.and.ipar1.eq.1) then
@@ -365,14 +353,16 @@ end
 subroutine spmain(ilev,ispe,nr,nmax1,nmax2,item,idia,gz)
 
 !     this is the effective main program of spectra
-use logic
+use spectra_seg_logic
 
 implicit none
-DOUBLE PRECISION :: dwl,x1,x0,GE,GO,TEMP,XMIN,WMIN,WMAX,q,EMAX,QERR,GZ,FMEM,DBLE
-INTEGER :: NR,ITEM,ISPE,NLEV,NMAX1,NMAX2,MAX,JDIA,ILEV,IR,IDIA
+DOUBLE PRECISION :: dwl,x1,x0
 dwl = 0.0d0
 x1 = 1.0d0
 x0 = 0.0d0
+
+
+
 !     sort out the spectrum on frequencies
 
 if (zsort) call sortsp(nr, item, ispe)
@@ -450,16 +440,15 @@ subroutine sortsp(nr, item, ispe)
 !     this subroutine sorts the dipole data on ascending frequencies.
 !     data printed out is in cm-1, debye**2 and sec-1.
 !     data written to ispe for spectm is in atomic units.
-
-use logic
+use spectra_seg_logic
 
 implicit none
+
 DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: da
 integer, allocatable, dimension(:,:) :: ia
 integer, allocatable, dimension(:) :: iperm
 
-INTEGER :: NR,ISPE,IR,ITEM,IPAR1,J2,KMIN2,IE2,J1,KMIN1,IE1,IBASS1,IBASS2,IER,IC,I20,IBASE1,IBASE2
-DOUBLE PRECISION :: FMEM,DVLE,E2,E1,W,S
+
 
 
 !      fmem = (64*nr)/1048576.0d0
@@ -556,23 +545,19 @@ subroutine pfcalc(temp,emax,qerr,ge,go,nlev,q,ilev,idia,gz)
 
 !     the input stream is ilev, which is defaulted to stream 14.
 
-use logic
+use spectra_seg_logic
 
 implicit none
-DOUBLE PRECISION :: hc,x1,x0,autocm,TK,BK,TEMP,C1,Q,EMAX,GROT,ABS,GG,GE,GO,GZ,QEND,QERR
-INTEGER :: ILEV,JMAX,J,K,ID,IPAR,ISYM,NEVAL,IDIA,IP,MOD,NLEV,I
-
+DOUBLE PRECISION :: hc,x1,x0,autocm
+hc = 1.9864476d-16
+x1 = 1.0d0
+x0 = 0.0d0
+autocm = 2.19474624d+05
 double precision, allocatable, dimension(:) :: e
 !     program constants
 !     autocm converts atomic units to wavenumbers
 
 allocate(e(nlev))
-
-rewind ilev
-hc = 1.9864476d-16
-x1 = 1.0d0
-x0 = 0.0d0
-autocm = 2.19474624d+05
 
 rewind ilev
 
@@ -584,8 +569,8 @@ q= x0
 
 jmax= 0
 emax= x0
-10    read(ilev,*,end=90) j, k, id, ipar, isym, neval !read(ilev,838,end=90) j, k, id, ipar, isym, neval
-!838   format(6i6)
+10    read(ilev,838,end=90) j, k, id, ipar, isym, neval
+838   format(6i4)
 if(idia.eq.-1 .or. idia.eq.0) then
 ip= isym
 else
@@ -684,18 +669,13 @@ ge, go, temp, q, nr, jdia, ispe, gz)
 !               (2j'+1)*gg*hcw*exp(-hcw'/kt)*aif
 !         j(w)= --------------------------------
 !                             4pi*q
-use logic
-use base
-implicit none
-DOUBLE PRECISION :: hc,pi,bk,autocm,autode,detosc,conv,EMIN1,EMAX1,EMIN2,emax2,TINTE,PRTHR,xmolm,FMEM,DBLE,E2,E1,W,WMIN,GZ,C1,TEMP,C2,Q,XMAX,XINT,WMAX,GG,GE,GO,ACUR,XMAX1,XMIN,AA,XVAL,FMIN,FMAX,DWL
-integer :: idat,iplot,ilist,JMAX,npoints,NR,NSKIP,NTRANS,NREAD,ISPE,J2,K2,IE2,J1,K1,IE1,IR,IC,JDIA,IPAR,INC,NEG,JM,I20
-LOGICAL :: zplot,zemit,ZFREQ,zeinst,ZPROF,ZENE,ZLIST,ZDOP
 
-double precision, allocatable, dimension(:,:) :: a
-integer, allocatable, dimension(:,:) :: iqnum
-namelist /spe/ emin1,emax1,jmax,zplot,zemit,iplot,zfreq,zeinst, &
-emin2,emax2,zprof,idat,zene,tinte,zlist,ilist, &
-zdop,prthr,npoints,xmolm
+
+use spectra_seg_logic
+use spectra_seg_base
+implicit none
+
+DOUBLE PRECISION :: hc,pi,bk,autocm,autode,detosc,conv
 hc = 1.9864476d-16
 pi = 3.1415927d0
 bk = 1.3806581d-16
@@ -703,9 +683,15 @@ autocm = 2.19474624d+05
 autode = 2.5417662d0
 detosc = 3.136186d-07
 conv = 4.162034d-19
+integer :: idat,iplot,ilist
 idat = 19
 iplot = 20
 ilist = 36
+double precision, allocatable, dimension(:,:) :: a
+integer, allocatable, dimension(:,:) :: iqnum
+namelist /spe/ emin1,emax1,jmax,zplot,zemit,iplot,zfreq,zeinst, &
+emin2,emax2,zprof,idat,zene,tinte,zlist,ilist, &
+zdop,prthr,npoints,xmolm
 
 
 !     detocg converts from debye to c.g.s. units.
@@ -1214,8 +1200,8 @@ function dop_half(T,nu_cm, molm)
 implicit none
 
 double precision T, Nu_cm,molm, dop_half,  C
+c= 3.5682149d-7
 
-data C /3.5682149d-7/
 
 dop_half=C*sqrt(T/Molm)*nu_cm
 
@@ -1248,7 +1234,7 @@ subroutine timer
 !     prints current cpu time usage                                 #030
 
 implicit double precision (a-h,o-y)
-integer :: itime0
+use spectra_seg_timing
 write(6,10)
 call SYSTEM_CLOCK(itime2,irate2,imax2)
 itime=(itime2-itime0)/irate2

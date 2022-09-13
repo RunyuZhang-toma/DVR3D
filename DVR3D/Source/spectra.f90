@@ -1,3 +1,24 @@
+
+module spectra_logic
+
+    logical :: zout
+    logical :: zsort
+    logical :: zspe
+    logical :: zpfun
+    logical :: zembed
+    logical :: zpseg
+
+end module
+
+module spectra_base
+    integer :: ibase1
+    integer :: ibase2
+end module spectra_base
+
+module spectra_timing
+    integer :: itime0
+end module spectra_timing
+
 program spect4
 
 !  this program is designed to handle the output from programs dipole
@@ -157,14 +178,14 @@ program spect4
 !
 !  Updated to f90 to use dynamic memory allocation and to preselect transitions
 !  by GJH & JT 2001.
-
-implicit double precision(a-h,o-y), logical(z)
-character(len=8) title(9)
+use spectra_logic
+use spectra_base
+use spectra_timing
 namelist/prt/ zout, zsort, zspe, zpfun, itra, ilev, ispe, item, &
 wsmax,wsmin, emin, emax, jmax, smin, gz,zpseg
-common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
-common/base/ ibase1,ibase2
-common/timing/itime0
+implicit double precision(a-h,o-y), logical(z)
+character(len=8) title(9)
+
 DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: ee1, ee2, ss
 data autocm/ 2.19474624d+05/, autode/ 2.5417662d0/
 
@@ -248,7 +269,7 @@ rewind itra
 10       read(itra,end=90) j1,j2,kmin1,kmin2,neval1,neval2, &
 idia,ipar,isym,gz,zembed,ibase1,ibase2
 maxr=maxr+neval1*neval2
-if (max(j1,j2)>jmax) then
+if (max(j1,j2).gt.jmax) then
 do 9 ie2=1,neval2+2
 read(itra)
 9           continue
@@ -258,28 +279,28 @@ endif
 allocate(ee1(neval1), ee2(neval2), ss(neval1))
 
 ipar1=ipar
-if(neval1>nmax1) nmax1= neval1
-if(neval2>nmax2) nmax2= neval2
+if(neval1.gt.nmax1) nmax1= neval1
+if(neval2.gt.nmax2) nmax2= neval2
 read(itra) ee1
 read(itra) ee2
 !ddprint*,"ee1,ee2"
-if(idia==-2.and.mod(j1,2)==1.and.ipar1==0) then
+if(idia.eq.-2.and.mod(j1,2).eq.1.and.ipar1.eq.0) then
 ipar1=mod(ipar1+j1,2)
-else if(idia==-2.and.mod(j1,2)==1.and.ipar1==1) then
+else if(idia.eq.-2.and.mod(j1,2).eq.1.and.ipar1.eq.1) then
 ipar1=0
 endif
 do 1 ie2=1,neval2
 read(itra) ss
 ee=ee2(ie2)
-if (ee<emi .or. ee>ema) goto 1
+if (ee.lt.emi .or. ee.gt.ema) goto 1
 do 2 ie1=1,neval1
 
-if (ee1(ie1)<emi) goto 2
-if (ee1(ie1)>ema) goto 1
-if (ss(ie1)<smi) goto 2
+if (ee1(ie1).lt.emi) goto 2
+if (ee1(ie1).gt.ema) goto 1
+if (ss(ie1).lt.smi) goto 2
 w= ee - ee1(ie1)
-if (abs(w)>=wsmi .and. abs(w)<=wsma) then
-if (w>=0.0d0) then
+if (abs(w).ge.wsmi .and. abs(w).le.wsma) then
+if (w.ge.0.0d0) then
 write(item) ipar1,j2,kmin2,ie2,j1,kmin1,ie1, &
 ee2(ie2),ee1(ie1),w,ss(ie1),ibase2,ibase1
 else
@@ -300,7 +321,7 @@ close(unit=itra)
 write(6,1010) maxr,itra,nr,item
 1010 format(/,i10,' transition records read from unit ITRA =',i3, &
 /,i10,' selected and      written to unit ITEM =',I3)
-if (nr<=0) then
+if (nr.le.0) then
 write(6,900)
 900       format(/'No lines selected: stop')
 stop
@@ -327,8 +348,8 @@ end
 subroutine spmain(ilev,ispe,nr,nmax1,nmax2,item,idia,gz)
 
 !     this is the effective main program of spectra
+use spectra_logic
 implicit double precision(a-h,o-y), logical(z)
-common/logic/ zout, zsort, zspe, zpfun, zembedi,zpseg
 
 data dwl/0.0d0/,x1/1.0d0/,x0/0.0d0/
 
@@ -344,7 +365,7 @@ read(ispe) zembed
 
 read(5,101) ge, go
 101   format(6f10.0)
-if(ge<=x0 .and. go<=x0) then
+if(ge.le.x0 .and. go.le.x0) then
 ge= x1
 go= x1
 endif
@@ -359,14 +380,14 @@ read(5,101, end=92) temp, xmin, wmin, wmax, dwl, q
 
 write(6,206) temp
 206   format(/5x,'Temperature set to: ',f8.2,' K'//)
-if (xmin/=x0) then
+if (xmin.ne.x0) then
 write(6,207) xmin
 else
 write(6,208)
 endif
 207   format(5x,'Minimum relative intensity required = ',f8.6)
 208   format(5x,'All transitions printed out')
-if(wmax/=x0) then
+if(wmax.ne.x0) then
 write(6,209) wmin, wmax, dwl
 else
 write(6,210) wmin, dwl
@@ -385,7 +406,7 @@ write(6,211) q, qerr
 211      format(/5x,'Partition function Q =',d12.5,/, &
 5x,'estimated error in Q =',d12.5,' %')
 else
-if (q <= x0) q=x1
+if (q .le. x0) q=x1
 write(6,2061) q
 2061    format(/5x,' Partition function set to Q =',d12.5)
 endif
@@ -409,14 +430,12 @@ subroutine sortsp(nr, item, ispe)
 !     this subroutine sorts the dipole data on ascending frequencies.
 !     data printed out is in cm-1, debye**2 and sec-1.
 !     data written to ispe for spectm is in atomic units.
+use spectra_logic
 
 implicit double precision(a-h,o-y), logical(z)
 DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: da
 integer, allocatable, dimension(:,:) :: ia
 integer, allocatable, dimension(:) :: iperm
-
-
-common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
 
 !      fmem = (64*nr)/1048576.0d0
 fmem = 64.d0*dble(nr)/1048576.0d0 !Changed by Lorenzo Lodi, 10 June 2007
@@ -457,7 +476,7 @@ goto 10
 ier = 0
 
 call dpsort(da(1,3), nr, iperm, 1, ier)
-if(ier /= 0) then
+if(ier .ne. 0) then
 write(6,*) " ERROR returned by DPSORT", ier
 stop
 endif
@@ -465,10 +484,10 @@ endif
 do 698 ir=1,7
 
 call ipperm(ia(1,ir), nr, iperm, ier)
-if(ier /= 0) write(6,*) " ERROR returned by ipperm ", ier
-if(ir <= 4) then
+if(ier .ne. 0) write(6,*) " ERROR returned by ipperm ", ier
+if(ir .le. 4) then
 call dpperm(da(1,ir), nr, iperm, ier)
-if(ier /= 0) write(6,*) " ERROR returned by dpperm ", ier
+if(ier .ne. 0) write(6,*) " ERROR returned by dpperm ", ier
 endif
 
 698 continue
@@ -511,9 +530,8 @@ subroutine pfcalc(temp,emax,qerr,ge,go,nlev,q,ilev,idia,gz)
 !     taken from the file supplied by programs triatom and rotlev.
 
 !     the input stream is ilev, which is defaulted to stream 14.
-
+use spectra_logic
 implicit double precision(a-h,o-y), logical(z)
-common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
 
 double precision, allocatable, dimension(:) :: e
 !     program constants
@@ -536,10 +554,10 @@ jmax= 0
 emax= x0
 10    read(ilev,*,end=90) j, k, id, ipar, isym, neval !read(ilev,838,end=90) j, k, id, ipar, isym, neval
 !838   format(6i6)
-if(idia==-1 .or. idia==0) then
+if(idia.eq.-1 .or. idia.eq.0) then
 ip= isym
 else
-if(idia==2.and..not.zembed) then
+if(idia.eq.2.and..not.zembed) then
 ipar= ipar + j + k + 1
 ipar= mod(ipar,2)
 endif
@@ -548,14 +566,14 @@ endif
 write(6,202) neval,j, ip, k
 202   format(i8,' levels with j=',i3,' ip=',i2,' kmin=',i2,'  included')
 !     check array e is big enough, if not make it bigger...
-if (neval > nlev) then
+if (neval .gt. nlev) then
 deallocate(e)
 nlev=neval
 allocate(e(nlev))
 endif
 
 read(ilev,*) (e(i), i=1,neval)
-if(j>jmax) then
+if(j.gt.jmax) then
 emax= e(1)
 jmax= j
 endif
@@ -563,8 +581,8 @@ endif
 !     calculate the partition coefficient
 !     first: degeneracy factors
 grot=dble(2*j+1)
-if(abs(idia) == 2) then
-if(ip==0 .or. ip==2) then
+if(abs(idia) .eq. 2) then
+if(ip.eq.0 .or. ip.eq.2) then
 gg= ge*grot
 else
 gg= go*grot
@@ -581,7 +599,7 @@ write(6,203) gz, emax
 203   format(/5x,'Ground zero energy           = ',f13.5,' cm-1',/, &
 5x,'Lowest energy in jmax levels = ',f13.5,' cm-1')
 
-if(q<=x0) q= x1
+if(q.le.x0) q= x1
 qend= dble(2*jmax+1)*exp(-emax*c1)
 qerr= 100.0d0*qend/q
 
@@ -634,6 +652,8 @@ ge, go, temp, q, nr, jdia, ispe, gz)
 !               (2j'+1)*gg*hcw*exp(-hcw'/kt)*aif
 !         j(w)= --------------------------------
 !                             4pi*q
+use spectra_logic
+use spectra_base
 
 implicit double precision(a-h,o-y), logical(z)
 double precision, allocatable, dimension(:,:) :: a
@@ -641,8 +661,7 @@ integer, allocatable, dimension(:,:) :: iqnum
 namelist /spe/ emin1,emax1,jmax,zplot,zemit,iplot,zfreq,zeinst, &
 emin2,emax2,zprof,idat,zene,tinte,zlist,ilist, &
 zdop,prthr,npoints,xmolm
-common/logic/ zout, zsort, zspe, zpfun, zembed,zpseg
-common/base/ ibase1,ibase2
+
 !     program constants
 data idat/19/,iplot/20/,ilist/36/, &
 hc/ 1.9864476d-16/, &
@@ -727,12 +746,12 @@ read(ispe)
 10    read(ispe,end=90,err=99) ipar, j2, k2, ie2, j1, k1, ie1, e2, e1, w
 nread= nread+1
 w= w*autocm
-if(w<wmin) then
+if(w.lt.wmin) then
 nskip= nskip + 1
 goto 10
 endif
-if(wmax>0.0) then
-if(w<=wmax) then
+if(wmax.gt.0.0) then
+if(w.le.wmax) then
 ntrans= ntrans + 1
 else
 goto 90
@@ -772,9 +791,9 @@ c2= conv/q
 
 xmax= 0.0d0
 xint= 0.0d0
-if(jdia==2) then
+if(jdia.eq.2) then
 do 3 ir=1,ntrans
-if(iqnum(ir,1)==0.or.iqnum(ir,1)==2) then
+if(iqnum(ir,1).eq.0.or.iqnum(ir,1).eq.2) then
 gg= ge
 else
 gg= go
@@ -783,7 +802,7 @@ acur= c2*gg*a(ir,3)*a(ir,4)* &
 (exp(-a(ir,2)*c1) - exp(-a(ir,1)*c1))
 a(ir,5)= acur
 xint= xint + acur
-if(acur>xmax) xmax= acur
+if(acur.gt.xmax) xmax= acur
 3        continue
 else
 do 4 ir=1,ntrans
@@ -792,7 +811,7 @@ acur= c2*a(ir,3)*a(ir,4)* &
 a(ir,5)= acur
 xint= xint + acur
 
-if(acur>xmax) xmax= acur
+if(acur.gt.xmax) xmax= acur
 4        continue
 endif
 goto 41
@@ -802,10 +821,10 @@ goto 41
 40    c2= hc*detosc/(4.0d0*pi*q)
 xmax= 0.0d0
 xint= 0.0d0
-if(jdia==2) then
+if(jdia.eq.2) then
 do 43 ir=1,ntrans
 w= a(ir,3)
-if(iqnum(ir,1)==0.or.iqnum(ir,1)==2) then
+if(iqnum(ir,1).eq.0.or.iqnum(ir,1).eq.2) then
 gg= ge
 else
 gg= go
@@ -818,7 +837,7 @@ acur= w*w*w*gg*a(ir,4)*detosc
 endif
 a(ir,5)= acur
 xint= xint + acur
-if(acur>xmax) xmax= acur
+if(acur.gt.xmax) xmax= acur
 43       continue
 else
 do 44 ir=1,ntrans
@@ -831,7 +850,7 @@ acur= w*w*w*a(ir,4)*detosc
 endif
 a(ir,5)= acur
 xint= xint + acur
-if(acur>xmax) xmax= acur
+if(acur.gt.xmax) xmax= acur
 44       continue
 endif
 41    continue
@@ -842,29 +861,29 @@ inc= 0
 neg= 0
 xmax1= 0.0d0
 do 5 ir= 1,ntrans
-if(jmax>-1.and.iqnum(ir,5)>jmax) goto 5
-if(a(ir,2)<emin1) goto 5
-if(a(ir,2)>emax1) goto 5
-if(a(ir,1)<emin2) goto 5
-if(a(ir,1)>emax2) goto 5
-if(a(ir,5)>xmax1) xmax1= a(ir,5)
+if(jmax.gt.-1.and.iqnum(ir,5).gt.jmax) goto 5
+if(a(ir,2).lt.emin1) goto 5
+if(a(ir,2).gt.emax1) goto 5
+if(a(ir,1).lt.emin2) goto 5
+if(a(ir,1).gt.emax2) goto 5
+if(a(ir,5).gt.xmax1) xmax1= a(ir,5)
 5     continue
 
 do 6 ir= 1,ntrans
 a(ir,6)= a(ir,5)/xmax1
-if(a(ir,6)<xmin) goto 7
-if(jmax>-1.and.iqnum(ir,5)>jmax) goto 7
-if(a(ir,2)<emin1) goto 7
-if(a(ir,2)>emax1) goto 7
-if(a(ir,1)<emin2) goto 7
-if(a(ir,1)>emax2) goto 7
+if(a(ir,6).lt.xmin) goto 7
+if(jmax.gt.-1.and.iqnum(ir,5).gt.jmax) goto 7
+if(a(ir,2).lt.emin1) goto 7
+if(a(ir,2).gt.emax1) goto 7
+if(a(ir,1).lt.emin2) goto 7
+if(a(ir,1).gt.emax2) goto 7
 inc= inc + 1
 goto 6
 7     continue
 neg= neg + 1
 6     continue
 
-if(jmax==-1) then
+if(jmax.eq.-1) then
 jm=500
 else
 jm= jmax
@@ -909,30 +928,30 @@ write(6,203)
 !204   format(i3,2x,2i3,i4,1x,2i3,i4,3f13.6,1x,e16.8,3e11.3)
 204   format(i3,2x,2i5,i5,1x,2i5,i5,3f14.6,1x,e16.8,3e15.6) ! Changed by Lorenzo Lodi, 10 June 2007
 do 8 ir=1,ntrans
-if(jmax>-1.and.iqnum(ir,5)>jmax) goto 8
-if(a(ir,2)<emin1) goto 8
-if(a(ir,2)>emax1) goto 8
-if(a(ir,1)<emin2) goto 8
-if(a(ir,1)>emax2) goto 8
-if(a(ir,6)<xmin) goto 8
+if(jmax.gt.-1.and.iqnum(ir,5).gt.jmax) goto 8
+if(a(ir,2).lt.emin1) goto 8
+if(a(ir,2).gt.emax1) goto 8
+if(a(ir,1).lt.emin2) goto 8
+if(a(ir,1).gt.emax2) goto 8
+if(a(ir,6).lt.xmin) goto 8
 w= a(ir,3)
 aa= w*w*w*a(ir,4)*detosc/dble(2*iqnum(ir,2) + 1)
 iqnum(ir,3) = abs(iqnum(ir,3) - 1)
 iqnum(ir,6) = abs(iqnum(ir,6) - 1)
 
 !###EDIT EAMON CONWAY... WRITE TO ZLIST ABSOLUTE INTENSITY > XMIN  INSTEAD OF RELATIVE INTENSITY
-if (zlist .and. (a(ir,5) > xmin   )) &
+if (zlist .and. (a(ir,5) .gt. xmin   )) &
 write(ilist,204) (iqnum(ir,ic),ic=1,7),(a(ir,ic),ic=1,6),aa
 
 
 !if (zlist) &
 !write(ilist,204) (iqnum(ir,ic),ic=1,7),(a(ir,ic),ic=1,6),aa
-if(a(ir,6)>=prthr) then
+if(a(ir,6).ge.prthr) then
 write(6,204) (iqnum(ir,ic),ic=1,7),(a(ir,ic),ic=1,6),aa
 i20= i20 + 1
 endif
 if(zplot.and..not.zprof) then
-if( a(ir,6) >=tinte) then
+if( a(ir,6) .ge.tinte) then
 if ( zfreq ) then
 xval= a(ir,3)
 else
@@ -946,7 +965,7 @@ iqnum(ir,2),iqnum(ir,5)
 endif
 endif
 endif
-if(i20==20) then
+if(i20.eq.20) then
 write(6,200)
 i20= 0
 endif
@@ -1125,7 +1144,7 @@ else
 delw= (10000.0d0/wl(i))-w
 endif
 
-if(abs(delw)>10.0d0*hw) goto 12
+if(abs(delw).gt.10.0d0*hw) goto 12
 xarg= delw/hw
 xx= x*exp(-xarg*xarg*xln2)  ! Guassian line profile, ....
 f(i)= f(i) + (xx*fac)       ! normalise and bin.
@@ -1192,11 +1211,11 @@ dimension row(nrow)
 write(iunit) row
 return
 end
+
 subroutine timer
 !     prints current cpu time usage                                 #030
-
+use spectra_timing
 implicit double precision (a-h,o-y)
-common/timing/itime0
 write(6,10)
 call SYSTEM_CLOCK(itime2,irate2,imax2)
 itime=(itime2-itime0)/irate2

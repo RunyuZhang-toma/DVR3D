@@ -1,3 +1,56 @@
+
+module xpect3_logic
+      logical :: zmors1
+      logical :: zncor = .false.
+      logical :: zprint = .false.
+      logical :: ztra = .true.
+      logical :: zstart = .false.
+      logical :: zmors2
+      logical :: zfit = .false.
+      logical :: zform = .true.
+      integer :: iket = 11
+      integer :: itra = 12
+      integer :: itra0 = 28
+      integer :: ilev = 14
+
+end module xpect3_logic
+
+module xpect3_timing
+      integer :: itime0
+end module xpect3_timing
+
+module xpect3_mass
+      logical :: zembed
+      logical :: zbisc
+      double precision :: xmass(3)
+      double precision :: g1, g2
+end module xpect3_mass
+
+module xpect3_dim
+      integer :: ncoord
+      integer :: npnt
+      integer :: npnt1
+      integer :: npnt2
+      integer :: nrade
+      integer :: nrado
+      integer :: lpot
+      integer :: npot
+      integer :: nbmax1
+      integer :: mbass
+      integer :: kmin1
+      integer :: jk1
+      integer :: neval
+      integer :: nn2
+      integer :: lmax
+      integer :: npropin
+      integer :: nprt
+      integer :: jrot
+      integer :: idia
+      integer :: ipar
+      integer :: nv1
+
+end module xpect3_dim
+
 !  Xpect takes expectation values of operators defined in prop.
 !  Version considers diagonal case only. Nikolai Zobov (2002)
     program leek
@@ -10,14 +63,13 @@
 !     xpect3, and the various subroutines it calls, calculate the
 !     expectation values of vib-rot eigenfunctions with respect
 !     the properties defined by subroutine prop.
-!
+!     
+      use xpect3_logic
+      use xpect3_mass
+      use xpect3_timing
       implicit double precision (a-h,o-y), logical (z)
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
       namelist/prt/ zprint,ztra,zstart,zfit,zform,&
                      iket,itra,itra0,ilev
-      common /timing/ itime0
-      common /mass/ xmass(3),g1,g2,zembed,zbisc 
       character(len=8) title(9)
 
       write(6,200)
@@ -55,22 +107,6 @@
     end subroutine xpect3
       
 !**************************************************002
-    block data
-      implicit double precision (a-h,o-y), logical (z)
-!
-!     block data stores the default values of the logical control
-!     parameters and the ground zero energy.
-!     it also stores the default values of the ket input stream, iket,
-!     and the output stream itra.
-!
-!RK   Changed zfit=.false. as default.
-!
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
-      data zncor/.false./, zprint/.false./,zfit/.false./,&
-           ztra/.true./, zstart/.false./,&
-           iket/11/,itra/12/,itra0/28/,ilev/14/,zform/.true./
-    end
       
 !**************************************************003
     subroutine insize
@@ -85,6 +121,9 @@
 !     angular functions must be set by the user, and are inputted on
 !     stream 5 (five).
 !
+      use xpect3_logic
+      use xpect3_mass
+      use xpect3_timing
       implicit double precision (a-h,o-y),logical (z)
 !
 !     the following size parameters have these functions:
@@ -106,18 +145,11 @@
 !          : for non-coriolis calculations, kmin= k.
 !     neval: number of eigenvalues supplied from rotlev or triatom
 !     ncoord: number of vibrational coordinates explicitly considered
-!     if (ncoord /= 3) some of the above are dummies, see below.
+!     if (ncoord .ne. 3) some of the above are dummies, see below.
 !     nprop: number of properties to be considered
 !     iprop: vector with the information on which properties
 !            will be considered in the run
 !
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-
       parameter (mxprop=1000)
       common /pot/ iprop(mxprop)
 !     save masses & g in case they are needed in the properties routine
@@ -157,15 +189,15 @@
       read(iket) re1,diss1,we1,re2,diss2,we2
 
       ncoord=3
-      if (idia > -2) then
-         if (nmax11 == 1) ncoord=2
+      if (idia .gt. -2) then
+         if (nmax11 .eq. 1) ncoord=2
          zbisc=.false.
       else
          zbisc=.true.
          zembed=.true.
       endif
 
-      if (zfit .and. max(jrot,ipar) > 0) write(6,1005) itra0
+      if (zfit .and. max(jrot,ipar) .gt. 0) write(6,1005) itra0
  1005 format(  5x,'Ground state data read from       stream ',&
              'itra0 =',i4)
        write(6,1006) ilev
@@ -186,45 +218,45 @@
       write(*,*)lpot,npropin,nprt,nv1,neval
  108  format(5i5)
 
-      if (nv1 > neval) then
+      if (nv1 .gt. neval) then
          write(6,*)'NV1 > NEVAL! (NV1 MUST BE <= NEVAL)'
          write(6,*)'STOPPING!'
          stop
-      else if (nv1 == 0) then
+      else if (nv1 .eq. 0) then
          nv1 = neval
       endif
 
 
-      if (npropin == 0) then
+      if (npropin .eq. 0) then
          write(6,*)'NO PROPERTIES TO BE CONSIDERED! (NPROPIN = 0)'
          write(6,*)'STOPPING!'
          stop
       endif
 
-      if (npropin > mxprop) then
+      if (npropin .gt. mxprop) then
         write(6,9999) npropin,mxprop
 9999    format(/,5x,'npropin =',i3,' requested, but mxprop =',i3,&
                /,5x,' ***** stop *****')
       endif
-      if (nprt < npropin)then
+      if (nprt .lt. npropin)then
          write(6,*)'WARNING NPROPIN SHOULD BE LESS THAN OR EQUAL TO NPRT!'
          write(6,*)'SETTING TO NPROPIN!'
          nprt=npropin
       endif
 
-      if (lpot == 0) lpot = lmax+jrot+mod(lmax+jrot,2)
+      if (lpot .eq. 0) lpot = lmax+jrot+mod(lmax+jrot,2)
       if (jrot == 0) lpot = lmax
 
       iprop = 0
       read(5,101) (iprop(i),i=1,npropin)
  101  format(20i5)
 
-      if (iprop(1) <= 0) then
+      if (iprop(1) .le. 0) then
          do i=1,npropin
             iprop(i)=i 
          enddo
       else
-         if (iprop(npropin)==0)then
+         if (iprop(npropin).eq.0)then
             write(*,*)'WARNING NUMBER OF PROPERTIES CONSIDERED MUST BE EQUAL'
             write(*,'(A,I4)')' TO NPROPIN! SETTING TO 1, ...,',NPROPIN
          endif
@@ -242,14 +274,14 @@
 !     are we doing a non coriolis problem?
 !     set up jk for the two cases and total basis set sizes
 !
-      if (jrot==0) kmin1= 1
+      if (jrot.eq.0) kmin1= 1
       if (zncor) then
          jk1= 1
          jrot=abs(jrot)
       else
          jk1= jrot + kmin1
       endif
-      if (idia > -2) then
+      if (idia .gt. -2) then
          nrade=npnt1*npnt2
          nrado=nrade
          mbass=nrade*jk1*lmax
@@ -258,9 +290,9 @@
          nrado=npnt1*(npnt1-1)/2
          jt=jk1/2
          mbass=(nrade+nrado)*jt
-         if (2*jt /= jk1) then
-           if (ipar == 0) mbass=mbass+nrade
-           if (ipar /= 0) mbass=mbass+nrado
+         if (2*jt .ne. jk1) then
+           if (ipar .eq. 0) mbass=mbass+nrade
+           if (ipar .ne. 0) mbass=mbass+nrado
          endif
          mbass=mbass*lmax
        endif
@@ -286,7 +318,7 @@
       npot = lpot
       if (jrot > 0) then
          ltop = lpot
-         if (idia == 2 .and. mod(ltop,2) /= ipar) ltop=ltop+1
+         if (idia .eq. 2 .and. mod(ltop,2) .ne. ipar) ltop=ltop+1
          npot=((ltop+2)/2)*2
          nn2= npot/2
       endif
@@ -298,13 +330,9 @@
 !**************************************************004
       subroutine core
 !
+      use xpect3_logic
+      use xpect3_dim
       implicit double precision (a-h,o-y), logical (z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
-
 
       integer, dimension (jk1) :: nbass1,lmin1
 
@@ -324,19 +352,18 @@
 !     it calculates nbmax, the largest value of nbass, neeeded to
 !     dimension the space needed for the d-coefficients.
 !
+      use xpect3_mass
+      use xpect3_logic
       implicit double precision(a-h,o-y),logical (z)
 
       integer, dimension (jk) :: nbass,lmin,lbass
 
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
       if (zprint) write(6,205) jk,mbass
 205   format(//,'   j + kmin =',i3,'   mbass=',i6,/)
 
 !     read in the basis function labels
       read(ivec) mbass0,lmin,lbass,nbass
-      if (mbass0>mbass) goto 999
+      if (mbass0.gt.mbass) goto 999
 
 !     generate the sub-index arrays and  find nbmax
 
@@ -365,14 +392,11 @@
 !     in this part, all data etc for the ket are labelled 1;
 !     all data etc for the bra are labelled 2.
 !
+      use xpect3_timing
+      use xpect3_dim
+      use xpect3_mass
+      use xpect3_logic
       implicit double precision (a-h,o-y), logical (z)
-      common /timing/ itime0
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
       parameter (mxprop=1000)
       common /pot/ iprop(mxprop)
 
@@ -399,9 +423,9 @@
 !     read in radial dvr grid points 
 
       call getrow(r1,npnt1,iket)
-      if (idia > -2)  call getrow(r2,npnt2,iket)
-      if (jk1 <= 1) then !jrot==0) then
-        !if (idia == -1) then
+      if (idia .gt. -2)  call getrow(r2,npnt2,iket)
+      if (jk1 .le. 1) then !jrot==0) then
+        !if (idia .eq. -1) then
          read(iket) xalf
          read(iket) 
          read(iket)
@@ -410,7 +434,7 @@
             do i=1,lmax
                xalf(2*lmax+1-i) = -xalf(i)
             end do
-         else if (idia == -2) then
+         else if (idia .eq. -2) then
             read(iket)
             read(iket)
          endif
@@ -522,7 +546,7 @@
         call lagpt(d0,r1,r2,xd,wtd)
 
         do 10 k1= 1,jk1
-        if(nbass1(k1)==0) goto 10
+        if(nbass1(k1).eq.0) goto 10
         ndbass = nbass1(k1)*npot/lmax
         ibass = nbass1(k1)*neval
         kz = k1 -  kmin1
@@ -602,7 +626,7 @@
       write(6,1010) csa,tsa
  1010 format(/,5x,'computed sum of weights',d26.15,&
              /,5x,'exact    sum of weights',d26.15//)
-      if (abs((csa-tsa)/tsa) > toler) goto 930
+      if (abs((csa-tsa)/tsa) .gt. toler) goto 930
 !     define other integration points
       do i=1,nn2
         j=i+nn2
@@ -620,7 +644,7 @@
       icall = 0
       ii = 0
       do i2=1,npnt2
-         if (idia == -2) then
+         if (idia .eq. -2) then
            rr2=r1(i2)
            i0=i2
          else
@@ -656,6 +680,7 @@
       stop
       end
 
+!===========================================================================
       subroutine jacobi(nn,nn2,x,a,alf,bta,b,c,csa,tsa)
 
 !     calculates zeros x(i) of the nn'th order jacobi polynomial
@@ -671,7 +696,7 @@
       fn= dble(nn)
       csa= x0
       beta= x1
-      if (alf==1) beta = beta/x6
+      if (alf.eq.1) beta = beta/x6
       cc= beta*x2**(alf+bta+x1)
 !      tsa= cc/x2
       tsa= cc
@@ -689,19 +714,19 @@
  30   continue
       call recur(p,dp,pn1,xxx,nn,alf,bta,b,c)
 
-      if (pm1*p < x0) then
+      if (pm1*p .lt. x0) then
          pm1 = -pm1
          ii = ii +1
          xt(ii)=xxx
       endif
 
-      if (ii == nn2) then
+      if (ii .eq. nn2) then
          do 40 i=1,nn2
          call recur(ptemp,dp,pn1,xt(i),nn,alf,bta,b,c)
 40      continue
       else
          xxx=xxx-0.0001
-         if (xxx > -0.0002) goto 30
+         if (xxx .gt. -0.0002) goto 30
          write(6,*) "Incorrect number",ii-1," of zeros found in JACOBI"
          stop
       endif 
@@ -712,7 +737,7 @@
        a(i)= cc/(dpn*pn1)
        csa= csa + a(i) + a(i)
   20  continue
-      if (2*nn2 /= nn) csa=csa-a(nn2)
+      if (2*nn2 .ne. nn) csa=csa-a(nn2)
       return
       end
 
@@ -730,7 +755,7 @@
       call recur(p,dp,pn1,x,nn,alf,bta,b,c)
       d = p/dp
       x = x - d
-      if (abs(d) > eps .and. iter < 10) goto 1
+      if (abs(d) .gt. eps .and. iter .lt. 10) goto 1
       dpn= dp
       return
       end
@@ -763,22 +788,17 @@
       subroutine dsrd(d,ivec,mmbass,nbass,jk,iv,ibass)
 
 !     subroutine to read d coefficients from dstore data
-!     if read directly from dvr3d (i.e. j <= 0), then transform to an
+!     if read directly from dvr3d (i.e. j .le. 0), then transform to an
 !     fbr in theta
-
+      use xpect3_logic
+      use xpect3_mass
+      use xpect3_dim
       implicit double precision (a-h,o-y), logical(z)
-
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar
       double precision, dimension(neval,nbass) :: d
       double precision, allocatable :: temp(:),plegd(:)
       integer, dimension(max(npot,lmax))  :: iv
       
-      if (jk>1) then
+      if (jk.gt.1) then
          nread = nbass/npot*lmax
          d = 0.0d0
          read(ivec) ((d(i,j),j=1,nread),i=1,neval)
@@ -796,7 +816,7 @@
             read(ivec)
 30       continue
          if (.not. zbisc) read(ivec)
-         if(idia>-2) then
+         if(idia.gt.-2) then
            rewind ivec
            do i=1,7
              read(ivec)
@@ -849,17 +869,13 @@
 
 !     rest of dsrd
 !     subroutine to read d coefficients from dstore data
-!     if read directly from dvr3d (i.e. j <= 0), then transform to an
+!     if read directly from dvr3d (i.e. j .le. 0), then transform to an
 !     fbr in theta
-
+      use xpect3_logic
+      use xpect3_mass
+      use xpect3_dim
       implicit double precision (a-h,o-y), logical(z)
 
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar
       integer, dimension (jk) :: lmin1
       double precision, dimension(neval,nbass) :: d,temp
       double precision, dimension(npot,npot) :: plegd
@@ -940,9 +956,9 @@
 
       data x1/1.0d0/,x2/2.0d0/
 
-      if (m < 0) goto 999
+      if (m .lt. 0) goto 999
       do 10 i=1,nn2
-      if (abs(x(i)) > x1) goto 999
+      if (abs(x(i)) .gt. x1) goto 999
       pmm = x1
       fact = x1
       somx2=sqrt((x1-x(i))*(x1+x(i)))
@@ -1003,14 +1019,10 @@
 !     trans is called by x3main for each k-k' overlap integral.
 
 !     it uses a fast matrix multiplication routine mxmb.
-
+      use xpect3_logic
+      use xpect3_mass
+      use xpect3_dim
       implicit double precision (a-h,o-y), logical (z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
       double precision, dimension(nv1,npropin) :: t   
 
       double precision, dimension(npot*nrade,npropin) :: d0
@@ -1087,13 +1099,11 @@
 !
 !     outpt2 outputs the data at the end of a property calculation
 !
+      use xpect3_logic
+      use xpect3_mass
+      use xpect3_dim
       implicit double precision(a-h,o-y), logical(z)
-      common/dim/ ncoord,npnt,npnt1,npnt2,nrade,nrado,&
-                  lpot,npot,nbmax1,mbass,kmin1,jk1,neval,&
-                  nn2,lmax,npropin,nprt,jrot,idia,ipar,nv1
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
-      common /logic/ zmors1,zncor,zprint,ztra,zstart,zmors2,&
-                     zfit,zform,iket,itra,itra0,ilev
+
       parameter (mxprop=1000)
       common /pot/ iprop(mxprop)
       double precision, dimension (neval) :: eh
@@ -1130,13 +1140,13 @@
 204   format(5x,'ground zero =',d16.8,' cm-1')
 
 !
-      if (ipar==0.and.kmin1==1) then
+      if (ipar.eq.0.and.kmin1.eq.1) then
          s1 = 'a1' 
-      else if (ipar==1.and.kmin1==0) then
+      else if (ipar.eq.1.and.kmin1.eq.0) then
          s1 = 'b2' 
-      else if (ipar==1.and.kmin1==1) then
+      else if (ipar.eq.1.and.kmin1.eq.1) then
          s1 = 'a2' 
-      else if (ipar==0.and.kmin1==0) then
+      else if (ipar.eq.0.and.kmin1.eq.0) then
          s1 = 'b1'
       end if
 
@@ -1196,12 +1206,12 @@
            if (zform) then
               if (ztra) write(itra,308) jrot,s1,ie,xe1,xeh
               do n = 1,npropin
-                if(ztra .and. xprop(ie,n)/=x0) write(itra,*) xprop(ie,n)
+                if(ztra .and. xprop(ie,n).ne.x0) write(itra,*) xprop(ie,n)
               end do
            else
               if (ztra) write(itra) jrot,s1,ie,xe1,xeh
               do n = 1,npropin
-                if(ztra .and. xprop(ie,n)/=x0) write(itra) xprop(ie,n)
+                if(ztra .and. xprop(ie,n).ne.x0) write(itra) xprop(ie,n)
               end do
           endif
           write(6,308) jrot,s1,ie,xe1,(xprop(ie,n),n=1,npropin)
@@ -1219,11 +1229,11 @@
 
         if (.not. ztra) return
 
-          if (idia > 0) then
+          if (idia .gt. 0) then
             isym=0
           else
             isym=abs(idia)
-            if (ipar == 1) isym=-isym
+            if (ipar .eq. 1) isym=-isym
           endif
 
         if (zform) then
@@ -1309,8 +1319,8 @@
 !     subroutine to print out the property integrals calculated
 !     in subroutine lagpt for debugging purposes.
 !
+      use xpect3_mass
       implicit double precision (a-h,o-y), logical (z)
-      common /mass/ xmass(3),g1,g2,zembed,zbisc
       double precision, dimension (nrad,npropin) :: dz0
       double precision, dimension (nrad,npropin,lpot) :: dz1
       write(6,200)

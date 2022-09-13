@@ -30,16 +30,17 @@ end module size
 
 module outp
    save
-     integer :: ilev           ! stream for final eigenvalues (formatted).
+     
+     integer :: ilev  = 14         ! stream for final eigenvalues (formatted).
                                    ! holds input/output of eigenvalues used if zpfun = .true.
-     integer :: jvec            ! holds output first  set eigenvalues & vectors used if zvec=.true.
-     integer :: jvec2          ! holds output second set                        zvec=.true.
-     integer :: kvec            ! holds output first  set transformed vectors used if ztran=.true.
-     integer :: kvec2           ! holds output second set   used if ztran=.true.
-     integer :: iscr           ! scratch file used for restart runs
+     integer :: jvec   = 3          ! holds output first  set eigenvalues & vectors used if zvec=.true.
+     integer :: jvec2   = 2        ! holds output second set                        zvec=.true.
+     integer :: kvec   = 8          ! holds output first  set transformed vectors used if ztran=.true.
+     integer :: kvec2    = 9        ! holds output second set   used if ztran=.true.
+     integer :: iscr = 10          ! scratch file used for restart runs
                                    ! holds hamiltonian file used if always
 
-     integer :: ires           ! = 0  normal run
+     integer :: ires = 0          ! = 0  normal run
                                    ! = 1  restart from first  call to dgrot
                                    ! = 2  restart from second call to dgrot
                                    ! = 3  restart from first  call to dgrot, one diagonalisation only
@@ -48,35 +49,38 @@ module outp
                                    ! = -3 perform first  transformation only
                                    ! (restart after zdiag=.false. run, ivec=irf1 and irf2 required)
 
-     integer :: irf1           ! irf1   restart file one  used if zdiag=.false.
-     integer :: irf2          ! irf2   restart file two  used if always
-     integer :: ivec          ! holds input  eigenvalues & eigenvectors used if always
-     integer :: ivec2              ! holds input  eigenvalues & eigenvectors used if nblk > 2
-     real(kind=dp) :: toler     ! convergence tolerance for the iterative diagonaliser
+     integer :: irf1 = 21          ! irf1   restart file one  used if zdiag=.false.
+     integer :: irf2   = 22       ! irf2   restart file two  used if always
+     integer :: ivec  = 26         ! holds input  eigenvalues & eigenvectors used if always
+     integer :: ivec2   = 4           ! holds input  eigenvalues & eigenvectors used if nblk > 2
+     DOUBLE PRECISION :: toler = 0.0D0    ! convergence tolerance for the iterative diagonaliser
                                         ! toler = 0.0 gives machine accuracy
 
-     real(kind=dp) :: thresh    ! threshold for printing a coefficient if zpvec=.true.
+     DOUBLE PRECISION :: thresh  = 0.1D0  ! threshold for printing a coefficient if zpvec=.true.
 
-     logical :: zpham     ! T request printing of the hamiltonian matrix
-     logical :: zpvec     ! T request printing of the eigenvectors
-     logical :: zvec      ! T store the eigenvectors from all the parts of the calculation
+     logical :: zpham = .FALSE.    ! T request printing of the hamiltonian matrix
+     logical :: zpvec  = .FALSE.    ! T request printing of the eigenvectors
+     logical :: zvec = .FALSE.     ! T store the eigenvectors from all the parts of the calculation
                                    ! eigenvalues and eigenvectors written to disk file.
                                    ! (1d,2d and 3d) on stream iout2.
                                    ! further information relating to this (arrays iv1 and iv2) is
                                    ! stored on stream iout1.
-     logical :: zdiag      ! F do not do final diagonalisation, instead the final Hamiltonian
+     logical :: zdiag = .TRUE.     ! F do not do final diagonalisation, instead the final Hamiltonian
                                    ! matrix is written on units IDIAG1 and IDIAG2. 
 
-     logical :: ztran     ! T perform the transformation of the solution coefficients
+     logical :: ztran = .FALSE.     ! T perform the transformation of the solution coefficients
                                    ! to the expression for the wavefunction amplitudes at the grid
                                    ! points. store the data on stream iwave.
                                    ! ztran = T automatically sets zvec = t for idia > -2.
-     logical :: zpfun     ! F store energy levels on stream ilev
+     logical :: zpfun   = .FALSE.   ! F store energy levels on stream ilev
      logical :: zembed     ! T z axis is along r2, = f z axis is along r1.
                                    ! only used if J > 0 ZBISC = in JHMAIN ie if zbisc=f and zperp=f.
 
-     logical :: zptra     ! print the transformed vectors.
-     logical :: zdcore    ! T for in core diagonalisation
+     logical :: zptra  = .FALSE.    ! print the transformed vectors.
+     logical :: zdcore = .false.   ! T for in core diagonalisation
+     namelist/prt/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
+                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
+                    zdiag,zdcore,iscr,ires,irf1,irf2
 
 end module outp  
 module timing
@@ -118,9 +122,8 @@ end module timing
       use outp
       use timing
       implicit none
-      namelist/prt/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+      INTEGER :: irate2,IMAX2,ITIME,ITIME2
+
 
 
      INTEGER :: count_0, count_rate, count_max, walltime , tstart, tend
@@ -209,27 +212,7 @@ end if
 
       use outp
  
-      TOLER = 0.0D0
-      THRESH = 0.1D0
-      ZPHAM = .FALSE.
-      ZPVEC = .FALSE.
-      ivec = 26
-      ZVEC = .FALSE.
-      JVEC = 3
-      JVEC2 = 2
-      ISCR = 10
-      IRES = 0
-      ivec2 = 4
-      ZTRAN = .FALSE.
-      KVEC = 8
-      KVEC2 = 9
-      ZPTRA = .FALSE.
-      ZPFUN = .FALSE.
-      ILEV = 14
-      ZDIAG = .TRUE.
-      zdcore = .false.
-      IRF1 = 21
-      IRF2 = 22
+      
       end
 
 
@@ -241,11 +224,10 @@ end if
 subroutine hosetaylor(ifile)
 use outp
 implicit none
-namelist/prt/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-              zdiag,zdcore,iscr,ires,irf1,irf2
 
-integer :: idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval
+
+integer :: idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,ITIME2,NVIB,IBASS,NEVAL2,NPNT,JK
+DOUBLE PRECISION :: TITLE
 integer, intent(in) :: ifile 
 double precision :: ezero
 
@@ -628,18 +610,17 @@ end subroutine read_8or9_radau
 !     loff : space required for all the off-diagonal blocks
 !     loff0: space required for the largest off-diagonal block
 
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+
       use size
       use outp
       implicit none
-      DOUBLE PRECISION :: X0
-      x0 = 0.0d0
+      DOUBLE PRECISION :: X0,G1,G2,RE1,DISS1,WE1
+      INTEGER :: IDIA,KMIN0,NLIM,I
+      LOGICAL :: ZMORS1,ZMORS2,ZNCOR,ZQUAD2
+
+
       character(len=8) title(9)
+      x0 = 0.0d0
  
 
       open(unit=ivec,form='unformatted',recordtype='segmented')
@@ -800,6 +781,9 @@ end subroutine read_8or9_radau
       use size
       use outp
       implicit none
+      INTEGER :: I,IPT,IOFF,K2,MAXLEG,IDVR,LINCR,IANG2,IBASS2,MAX,MEVAL2,MVIB,LMIN,NANG,NRAD,LBASIS,NKBAS,IVIB,IV,MIN,N,JPT,J,KZ,IPU,IPD,LENG,LWORK
+      LOGICAL :: ZMORS1,ZMORS2,ZNCOR,ZQUAD2
+      DOUBLE PRECISION :: G1,G2,REQ,DISS1,WE1,RE2,DISS2,WE2,DUMMY,ABS,RE1,EMIN,EVIBR
     
       
       DOUBLE PRECISION, DIMENSION(NVIB,NBLK) :: EVIB
@@ -1002,13 +986,15 @@ end subroutine read_8or9_radau
       use size
       use outp
       implicit none
-      DOUBLE PRECISION :: X0
-      x0 = 0.0d0
+      DOUBLE PRECISION :: X0,EZERO
+      INTEGER :: MVIB,LWORK,NKBAS,LMIN,LBASIS,IDVR
+
 
       DIMENSION MVIB(NBLK),nkbas(NBLK), lmin(NBLK),lbasis(NBLK)
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: DIAG,eval
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: vec
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: radmee,radmoo,radmeo,radmoe
+      x0 = 0.0d0
 
 
       if (abs(ires) .eq. 2) goto 100
@@ -1210,12 +1196,9 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION :: xp5
       DOUBLE PRECISION :: x1
       DOUBLE PRECISION :: x2
-      DOUBLE PRECISION :: toler
-      x0 = 0.0d0
-      xp5 = 0.5d0
-      x1 = 1.0d0
-      x2 = 2.0d0
-      toler = 1.0d-8
+      DOUBLE PRECISION :: toler,realk,DBLE,tswalf,cswalf,TERM,FACT,XKPH,SUM1,SUM2,angfac
+      INTEGER :: K1,NPNT2,I,X,MN,J,K,KKP1,I1,IV1,I2,IV2,JJ,JP,IP,nang1,NANG2
+     
 
 
       DIMENSION iv1(ndvr),iv2(ndvr)
@@ -1224,6 +1207,11 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, DIMENSION(npnt) :: xalf,walf
       DOUBLE PRECISION, DIMENSION(nang1,npnt) :: plega
       DOUBLE PRECISION, DIMENSION(nang2,npnt) :: plegb
+      x0 = 0.0d0
+      xp5 = 0.5d0
+      x1 = 1.0d0
+      x2 = 2.0d0
+      toler = 1.0d-8
 
 !     first: set up an npnt gauss-associated legendre quadrature scheme
       realk = dble(k1)
@@ -1313,11 +1301,10 @@ end subroutine read_8or9_radau
       implicit none
       DOUBLE PRECISION :: X0
 
-      DOUBLE PRECISION :: x1
+      DOUBLE PRECISION :: x1,TERM,FACT,SUM,angfac
+      INTEGER :: K1,I,J,K,I1,IV1,I2,IP,JP,NANG1,NANG2,IV2
  
-      x0 = 0.0d0
- 
-      x1 = 1.0d0
+
 
 
       DIMENSION iv1(ndvr),iv2(ndvr)
@@ -1326,6 +1313,9 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, DIMENSION(npnt) :: xalf,walf
       DOUBLE PRECISION, DIMENSION(nang1,npnt) :: plega
       DOUBLE PRECISION, DIMENSION(nang2,npnt) :: plegb 
+      x0 = 0.0d0
+ 
+      x1 = 1.0d0
 
 !     evaluate the polynomials at the quadrature points
       call asleg(plegb,fbrmat,nang2-1,xalf,npnt,k1+2)
@@ -1703,15 +1693,16 @@ end subroutine read_8or9_radau
       use outp
  
       implicit none
-      DOUBLE PRECISION :: X0
+      DOUBLE PRECISION :: X0,ANGFAC
+      INTEGER :: IST2,IPT,ITIME,LENG,MVIB,I1,I2,IST3,I,J,J0,IST1,IANG2,IBASS2,MN
 
-      x0 = 0.0d0
- 
+
 
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, dimension(*) :: diag
       DOUBLE PRECISION, dimension(ibass,ibass) :: hamil
-      data x0/0.0d0/
+      x0 = 0.0d0
+
       if (zdcore) then
          hamil=x0
          ist2=0
@@ -1861,7 +1852,8 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: COEF1,COEF2,angmat
       DOUBLE PRECISION :: x2
       DOUBLE PRECISION :: x16
-      DOUBLE PRECISION :: sqrt2
+      DOUBLE PRECISION :: sqrt2,ANGFAC
+      INTEGER :: JJP1,IP,K1,MAXLEG,NANG1,IANG1,IBASS1,IV1,I,MVIB,MEVAL2,IDPT,K2,NANG2,IV2,IOFF,IANG2,MN,IBASS2
       x2 = 2.0d0
       x16 = 16.0d0
       sqrt2 = 1.4142135623731d0
@@ -2203,6 +2195,7 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, DIMENSION(iang1,mvib2) :: pdg
       DOUBLE PRECISION :: x0
       DOUBLE PRECISION :: x1
+      INTEGER :: IR1,IR2,IR,I1,NMAX1,I2,IQ,I0,J0,IANG2,IBASS2,MN,IANG11,IANG1,MVIB2,MVIB1,IBASS1,IQ1,IQ2
       x0 = 0.0d0
       x1 = 1.0d0
 
@@ -2245,15 +2238,17 @@ end subroutine read_8or9_radau
  
       implicit none
       DOUBLE PRECISION :: x0
-      DOUBLE PRECISION :: autocm
-      x0 = 0.0d0
-      autocm = 2.19474624d+05
+      DOUBLE PRECISION :: autocm,EZERO,VBIG,ESMALL
+      INTEGER :: IFAIL,LWORK,MVIB,K1,IP,KZ,MEND,K,MBEG,J,I,IPT,VV,IBIG,MAX
+     
     
 
       DOUBLE PRECISION, DIMENSION(NEVAL) :: EVAL
       DOUBLE PRECISION, DIMENSION(*) :: DIAG
       DOUBLE PRECISION, DIMENSION(IBASS,*) :: VEC
       DIMENSION MVIB(NBLK),IBIG(IBASS)
+      x0 = 0.0d0
+      autocm = 2.19474624d+05
 
 !          autocm converts atomic units (hartree) to cm-1.
 
@@ -2364,6 +2359,7 @@ end subroutine read_8or9_radau
       implicit none
       double precision, external :: vecvec
       external matvec,f02fjz
+      INTEGER :: MVIB
 
       DOUBLE PRECISION, DIMENSION(KEVAL) :: EVAL
       DOUBLE PRECISION, DIMENSION(*) :: DIAG
@@ -2373,7 +2369,8 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION :: x0
       DOUBLE PRECISION :: x1
       DOUBLE PRECISION :: emax
-      DOUBLE PRECISION :: noffd
+      DOUBLE PRECISION :: noffd,EBIG,ESMALL,ESHIFT
+      INTEGER :: I,IND,MAX,IFAIL,MOITS,NDIAG,LWORK,J,NOITS
       x0 = 0.0d0
       x1 = 1.0d0
       emax = 1.0d50
@@ -2439,8 +2436,7 @@ end subroutine read_8or9_radau
       implicit none
       DOUBLE PRECISION :: x0
       DOUBLE PRECISION :: x1
-      x0 = 0.0d0
-      x1 = 1.0d0
+      
 
       DIMENSION MVIB(nblk),NKBAS(nblk),lmin(nblk),lbasis(nblk)
 !      DOUBLE PRECISION, DIMENSION(3) :: XMASS
@@ -2457,6 +2453,11 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, allocatable :: r (:)
       DIMENSION ivt(ndvr)
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: B
+      DOUBLE PRECISION :: G1,G2,RE1,DISS1,WE1,WE2,DISS2,RE2
+      INTEGER :: J,NOITS,MVIB,IDIA,IDVR,NPNT1,NPNT2,JROT0,KMIN0,MVAL,JORT1,KMIN1,IPAR1,NVAL,MIN,JROT1,ITRA,NEND,NKMAX,K,LMIN,LBASIS,iiout,I,IVT,NKBAS
+      LOGICAL :: ZMORS1,ZMORS2,ZNCOR,ZQUAD2
+      x0 = 0.0d0
+      x1 = 1.0d0
 
       allocate(XMASS(3))
       allocate(d(mbass0,neval))
@@ -2577,7 +2578,7 @@ end subroutine read_8or9_radau
  
       implicit none
       DOUBLE PRECISION :: autocm
-      autocm = 2.19474624d+05
+      
 
       DOUBLE PRECISION, DIMENSION(3) :: XMASS
       DOUBLE PRECISION, DIMENSION(mbass) :: d
@@ -2585,6 +2586,11 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, DIMENSION(nmax) :: r
       DOUBLE PRECISION, DIMENSION((ndvr+1)**2) :: pleg
       DIMENSION ivt(ndvr)
+      INTEGER :: IDIA,IDVR0,NPNT1,NPNT2,JROT0,KMIN0,MVAL,NKBAS,MAX,KMIN1,ITRA,IDVR,NANG,max2d,K1,MAXLEG,NANG1,IANG1,IBASS1,IVT,I,IP,MEVAL0,K,J
+      LOGICAL :: ZMORS1,ZMORS2,ZNCOR,ZQUAD2,RE1,DISS1,WE1,WE2,RE2,DISS2
+      DOUBLE PRECISION :: G1,G2,EZERO
+
+      autocm = 2.19474624d+05
  
  
 !     read dvr3d header
@@ -2704,6 +2710,8 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, DIMENSION(ndvr,idvr) :: pleg
       DIMENSION iv1(ndvr)
  
+      INTEGER :: KZ,MAXLEG,LINCR,ITRA,IANG1,IBASS1,IV1,I1,IVRES,NRAD,NANG,MVIB,NKBAS,L,IDVR,II
+ 
       read(ivec)
       read(ivec) kz,maxleg,idvr,lincr
 !     if k=0 and we are doing an f parity calculation, read k=1 from
@@ -2749,13 +2757,15 @@ end subroutine read_8or9_radau
  
       implicit none
       DOUBLE PRECISION :: x0
-      x0 = 0.0d0
+      INTEGER :: L,I,IOFF,NDIAG,I2,K,MVIB,J1,I1,JOFF2,IOFF2,J2,IFLAG,N,NOFFD,II,J,IANG1,KK,IV,MN,IPT,IDVR,NRAD,NANG,NKBAS,IBASS1
+
 
       DOUBLE PRECISION, DIMENSION(ndvr,idvr) :: pleg
       DOUBLE PRECISION, DIMENSION(iang,nrad) :: dvrvec
       DOUBLE PRECISION, DIMENSION(nkbas,mvib) :: coef
       DOUBLE PRECISION, DIMENSION(nrad) :: sumk
       DIMENSION iv(nang)
+      x0 = 0.0d0
   
 
 !     transform back to the original fbr-type basis in the
@@ -2829,6 +2839,7 @@ end subroutine read_8or9_radau
  
       implicit none
       DOUBLE PRECISION :: x1
+      INTEGER :: I,IOFF,NDIAG,I2,K,MVIB,J1,I1,JOFF2,N,IOFF2,IFLAG,NOFFD,J2
 
       DOUBLE PRECISION, DIMENSION(IBASS) :: W,Z
       DOUBLE PRECISION, DIMENSION(*) :: HAMIL

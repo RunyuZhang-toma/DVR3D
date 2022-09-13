@@ -31,23 +31,23 @@ module size
      integer :: npnt1    ! number of (gauss-laguerre) dvr points in r1
      integer :: npnt2    ! number of (gauss-laguerre) dvr points in r2
      integer :: npntt
-     
+
 end module size
 
 module outp
 !  definition of the control input parameters
   save
-     integer :: iwave          ! stores the wavefunction amplitudes at the grid points when
-     integer :: ilev           ! stream for final eigenvalues (formatted).
+     integer :: iwave  = 26         ! stores the wavefunction amplitudes at the grid points when
+     integer :: ilev = 14          ! stream for final eigenvalues (formatted).
                                    ! holds input/output of eigenvalues used if zpfun = .true.
-     integer :: jscr 
-     integer :: jvec            ! holds output first  set eigenvalues & vectors used if zvec=.true.
-     integer :: jvec2          ! holds output second set                        zvec=.true.
-     integer :: kvec            ! holds output first  set transformed vectors used if ztran=.true.
-     integer :: kvec2           ! holds output second set   used if ztran=.true.
-     integer :: iscr           ! scratch file used for restart runs
+     integer :: jscr  = 7
+     integer :: jvec = 3           ! holds output first  set eigenvalues & vectors used if zvec=.true.
+     integer :: jvec2  = 2         ! holds output second set                        zvec=.true.
+     integer :: kvec  = 8           ! holds output first  set transformed vectors used if ztran=.true.
+     integer :: kvec2  = 9          ! holds output second set   used if ztran=.true.
+     integer :: iscr = 10          ! scratch file used for restart runs
                                    ! holds hamiltonian file used if always
-     integer :: ires            ! = 0  normal run
+     integer :: ires = 0           ! = 0  normal run
                                    ! = 1  restart from first  call to dgrot
                                    ! = 2  restart from second call to dgrot
                                    ! = 3  restart from first  call to dgrot, one diagonalisation only
@@ -56,14 +56,14 @@ module outp
                                    ! = -3 perform first  transformation only
                                    ! (restart after zdiag=.false. run, ivec=irf1 and irf2 required)
 
-     integer :: irf1           ! irf1   restart file one  used if zdiag=.false.
-     integer :: irf2           ! irf2   restart file two  used if always
-     real(kind=dp) :: toler      ! convergence tolerance for the iterative diagonaliser
+     integer :: irf1  = 21         ! irf1   restart file one  used if zdiag=.false.
+     integer :: irf2 = 22          ! irf2   restart file two  used if always
+     double precision :: toler = 0.0D0     ! convergence tolerance for the iterative diagonaliser
                                         ! toler = 0.0 gives machine accuracy
-     real(kind=dp) :: thresh     ! threshold for printing a coefficient if zpvec=.true.
-     logical :: zpham     ! T request printing of the hamiltonian matrix
-     logical :: zpvec     ! T request printing of the eigenvectors 
-     logical :: zvec      ! T store the eigenvectors from all the parts of the calculation
+     double precision :: thresh = 0.1D0    ! threshold for printing a coefficient if zpvec=.true.
+     logical :: zpham = .FALSE.    ! T request printing of the hamiltonian matrix
+     logical :: zpvec = .FALSE.    ! T request printing of the eigenvectors 
+     logical :: zvec = .FALSE.    ! T store the eigenvectors from all the parts of the calculation
                                    ! eigenvalues and eigenvectors written to disk file.
                                    ! (1d,2d and 3d) on stream iout2.
                                    ! further information relating to this (arrays iv1 and iv2) is
@@ -74,22 +74,26 @@ module outp
                                    ! full dvr transformation on them.
                                    ! Note that zquad2 = f is not implemented for zmors2 = t
                                    ! or for ztheta = f.
-     logical :: zdiag      ! F do not do final diagonalisation, instead the final Hamiltonian
+     logical :: zdiag = .TRUE.     ! F do not do final diagonalisation, instead the final Hamiltonian
                                    ! matrix is written on units IDIAG1 and IDIAG2. 
      logical :: ztheta     ! T let theta be first in the order of solution;
                                    ! F let theta be last in the order of solution,
-     logical :: ztran     ! T perform the transformation of the solution coefficients
+     logical :: ztran = .FALSE.    ! T perform the transformation of the solution coefficients
                                    ! to the expression for the wavefunction amplitudes at the grid
                                    ! points. store the data on stream iwave.
                                    ! ztran = T automatically sets zvec = t for idia > -2.
-     logical :: zpseg 
-     logical :: zpfun     ! F store energy levels on stream ilev
+     logical :: zpseg  = .false.
+     logical :: zpfun = .FALSE.    ! F store energy levels on stream ilev
      logical :: zembed     ! T z axis is along r2, = f z axis is along r1.
                                    ! only used if J > 0 ZBISC = in JHMAIN ie if zbisc=f and zperp=f.
-     logical :: zptra     ! print the transformed vectors.
-     logical :: zdcore    ! T for in core diagonalisation
-     logical :: z1da 
-     
+     logical :: zptra = .FALSE.    ! print the transformed vectors.
+     logical :: zdcore = .false.   ! T for in core diagonalisation
+     logical :: z1da = .false.
+     NAMELIST/PRT/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
+                    iscr,ires,irf1,irf2,&
+                    zpham,zpvec,zdcore,zvec,zpfun,zdiag,ztran,zptra,&
+                    zpseg 
+
 end module outp
 ! END MODULE DEFINITIONS--------------------------------------------
 
@@ -127,17 +131,16 @@ end module outp
       use size
       use outp
       implicit none
-      NAMELIST/PRT/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                    iscr,ires,irf1,irf2,&
-                    zpham,zpvec,zdcore,zvec,zpfun,zdiag,ztran,zptra,&
-                    zpseg 
+      integer :: itime0,irate2,imax2,itime2,itime
+
    
       WRITE(6,1000)
  1000 FORMAT(5x,'PROGRAM ROTLEV3 (VERSION OF March 2002):',/)
 
 !     READ IN NAMELIST INPUT DATA (DEFAULTS IN BLOCK DATA)
       READ(5,PRT)
-      OPEN(UNIT=ISCR,FORM='UNFORMATTED')
+      OPEN(UNIT=iscr,FORM='UNFORMATTED')
+    
       call SYSTEM_CLOCK(itime0,irate2,imax2)
 
 !     READ IN CONTROL PARAMETERS OF PROBLEM.
@@ -193,29 +196,7 @@ end module outp
 
       use outp
       implicit none
-      TOLER = 0.0D0
-      THRESH = 0.1D0
-      ZPHAM = .FALSE.
-      ZPVEC = .FALSE.
-      iwave = 26
-      ZVEC = .FALSE.
-      JVEC = 3
-      JVEC2 = 2
-      ISCR = 10
-      IRES = 0
-      ZTRAN = .FALSE.
-      KVEC = 8
-      KVEC2 = 9
-      ZPTRA = .FALSE.
-      jscr = 7
-      ZPFUN = .FALSE.
-      ILEV = 14
-      ZDIAG = .TRUE.
-      zdcore = .false.
-      z1da = .false.
-      IRF1 = 21
-      IRF2 = 22
-      zpseg = .false.
+  
       END
 
 !####################################################################################
@@ -252,16 +233,13 @@ end module outp
 !     npnt2: number of r2 dvr points
 !     npntt: (maximum) number of theta dvr points
 
-      COMMON /SIZE/ NBASS,MBASS,IBASS,NEVAL,IPAR,IDIA,nlim,jrot,&
-                    KMIN,NEVAL2,MEVAL,KEVAL,NVIB,NBLK,LOFF,LOFF0,&
-                    kbass,npnt1,npnt2,npntt
-      COMMON /OUTP/ toler,thresh,ilev,iwave,jscr,jvec,jvec2,kvec,kvec2,&
-                    iscr,ires,irf1,irf2,zpham,zpvec,zdcore,z1da,&
-                    zembed,zvec,zquad2,zpfun,zdiag,ztran,zptra,zpseg
+      
       use size
       use outp
       implicit none
-      DOUBLE PRECISION :: X0
+      integer :: KMIN0
+      DOUBLE PRECISION :: X0,G1,G2
+      LOGICAL :: ZMORS1,ZMORS2
       CHARACTER(len=8) TITLE(9)
       DOUBLE PRECISION, DIMENSION(3) :: xmass
 
@@ -432,6 +410,8 @@ end module outp
       use size
       use outp
       implicit none
+      DOUBLE PRECISION :: RE1,DISS1,WE1,RE2,DISS2,WE2,DUMMY,EMIN,EVIBR
+      INTEGER :: i,IPT,K,K2,MAXLEG,IDVR,LINCR,IBASS2,IVIB,MIN,N,JPT,J,KZ,IPU,LENG,MAX,IPD
 
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: EVIB
       INTEGER, ALLOCATABLE, DIMENSION(:) :: IV,MVIB
@@ -608,14 +588,17 @@ end module outp
       use size
       use outp
       implicit none
-      DOUBLE PRECISION :: x0
-      x0 = 0.0d0
-
+      DOUBLE PRECISION :: x0,EZERO,K
+      INTEGER :: MVIB,MAXLEG,LWORK,NOFFD,IOFF2
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: DIAG,eval
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: vec
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: cvec,dvec
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: bvec
+
+      x0 = 0.0d0
+
+
 
 
     
@@ -759,6 +742,8 @@ end module outp
       DOUBLE PRECISION, DIMENSION(LOFF) :: OFFDG
       DIMENSION MVIB(NBLK)
 
+      INTEGER :: IOFF2,K,IOFF1,I,MVIB,MAXLEG
+
       WRITE(6,1010) DIAG
  1010 FORMAT(5X,'HAMILTONIAN MATRIX: DIAGONAL ELEMENTS',&
              /(10F13.8))
@@ -802,12 +787,15 @@ end module outp
       implicit none
 
       DOUBLE PRECISION, DIMENSION(nlim) :: rm2
+      INTEGER :: MVIB
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: pleg,dvrvec
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: TCOF,DIAG,OFFDG
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: COEF1,COEF2
-
-      data x0/0.0d0/,sqrt2/1.4142135623731d0/
+      DOUBLE PRECISION :: X0,SQRT2,ABS,COR,CJLP
+      INTEGER :: MAXLEG,JJP1,JDIA,n2max,NRAD,K,MOFF,IDPT,KZ,IDVR,LINCR,IBASS2,I,MOD,maxlg2,jst2,MN,KKP1,II,J,ijump,jst1,JJUMP,maxlg1,N1,M1,L1,LLP1,NBLK1,N2,IBASS1
+      X0 = 0.0D0
+      SQRT2 = 1.4142135623731d0
 
       ALLOCATE(TCOF(NVIB),COEF1(MBASS,NVIB),COEF2(MBASS,NVIB),&
                pleg((maxleg+1)*npntt),dvrvec(mbass),diag(nbass),offdg(loff0))
@@ -956,12 +944,16 @@ end module outp
       use outp
       implicit none
       DOUBLE PRECISION :: X0
-      X0 = 0.0D0
 
       DOUBLE PRECISION, DIMENSION(0:MAXLEG,idvr) :: PLEG
       DOUBLE PRECISION, DIMENSION(idvr,nrad) :: dvrvec
       DOUBLE PRECISION, DIMENSION(mbass,mvib) :: coef
       DOUBLE PRECISION, DIMENSION(nrad) :: sumk
+      INTEGER :: JSTART,KZ,JJ0,MOD,NANG,MAXLEG,LINCR,L,MVIB,JJ,IBASS2,J,K,MN,IDVR,JDIA,NRAD,IPT
+ 
+      X0 = 0.0D0
+
+
 
 
 
@@ -1022,12 +1014,16 @@ end module outp
       use size
       use outp
       implicit none
-      DOUBLE PRECISION :: X0
-      X0 = 0.0D0
+      DOUBLE PRECISION :: X0,ESMALL,EBIG,ESHIFT
+      INTEGER :: IPT,J,LENG,MVIB,ist2,IST1,I1,I2,I,ITIME,N,IND,K1
+      
+
 
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, dimension(*) :: diag
       DOUBLE PRECISION, dimension(ibass,ibass) :: hamil
+      X0 = 0.0D0
+
 
 
 
@@ -1092,10 +1088,9 @@ end module outp
       implicit none
       DOUBLE PRECISION :: X0
       DOUBLE PRECISION :: x1
-      DOUBLE PRECISION :: EMAX
-      X0 = 0.0D0
-      x1 = 1.0D0
-      EMAX = 1.0D50
+      DOUBLE PRECISION :: EMAX,ESMALL,EBIG,ESHIFT
+      INTEGER :: I,J,IND,K1,MAX,IFAIL,NOITS,NOFFD,MVIB,LWORK
+     
       double precision, external :: vecvec
       external matvec,f02fjz
       save eshift
@@ -1105,6 +1100,9 @@ end module outp
       DOUBLE PRECISION, DIMENSION(IBASS,keval) :: VEC
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, DIMENSION(lwork) :: WORK
+      X0 = 0.0D0
+      x1 = 1.0D0
+      EMAX = 1.0D50
       
 
 !     CREATE SOME STARTING VECTORS BY USING THE DIAGONAL ELEMENTS
@@ -1164,9 +1162,9 @@ end module outp
       use outp
       implicit none
       DOUBLE PRECISION :: X0
-      DOUBLE PRECISION :: AUTOCM
-      AUTOCM = 2.19474624D+05
-      X0 = 0.0d0
+      DOUBLE PRECISION :: AUTOCM,IBIG,EZERO,VBIG
+      INTEGER :: IP,IFAIL,nfound,I,J,LWORK,MVIB,K1,NOFFD,KZ,K,MEND,MBEG,IPT,VV,MAX
+ 
 
       DOUBLE PRECISION, DIMENSION(neval) :: eval
       DOUBLE PRECISION, DIMENSION(neval) :: evalcm
@@ -1175,6 +1173,8 @@ end module outp
       REAL*8, allocatable :: work(:),evec(:,:)
       integer, allocatable :: iwork(:),iwork2(:)
       DIMENSION MVIB(NBLK),IBIG(IBASS)
+      AUTOCM = 2.19474624D+05
+      X0 = 0.0d0
 
 !          AUTOCM CONVERTS ATOMIC UNITS (HARTREE) TO CM-1.
 
@@ -1322,9 +1322,10 @@ end module outp
       use size
       implicit none
       DOUBLE PRECISION :: X0
-      DOUBLE PRECISION :: x1
-      x1 = 1.0d0
-      X0 = 0.0d0
+      DOUBLE PRECISION :: x1,G1,G2,RE1,DISS1,WE1,RE2,DISS2,ABS,WE2
+      INTEGER :: IWAVE,JSCR,JVEC,KVEC,IDVR,JROT0,KMIN0,MVAL,JROT1,KMIN1,IPAR1,NVAL,MVIB,ITRA,K,LIMN,LBASIS,NKBAS,I,J,KK,lblk,NEND,LMIN
+      LOGICAL :: ZEMBED,ZMORS1,ZMORS2,Z1DA,ZQUAD2,ZPTRA,zpseg
+
 
 
       DIMENSION MVIB(lblk),NKBAS(lblk),lmin(lblk),lbasis(lblk)
@@ -1333,6 +1334,9 @@ end module outp
       DOUBLE PRECISION, DIMENSION(MBASS, neval) :: D
       DOUBLE PRECISION, DIMENSION(KEVAL) :: ENERGY
       DOUBLE PRECISION, DIMENSION(3) :: XMASS
+
+      x1 = 1.0d0
+      X0 = 0.0d0
 
 
 
@@ -1471,12 +1475,15 @@ end module outp
       use size
       use outp
       implicit none
-      DOUBLE PRECISION :: AUTOCM
-      AUTOCM = 2.19474624D+05
+      DOUBLE PRECISION :: AUTOCM,G1,G2,RE1,DISS1,WE1,RE2,DISS2,WE2,EZERO
+      INTEGER :: IDVR,KMIN0,MVAL,KMIN1,ITRA,LMIN,LBASIS,I,KZ,MAXLEG,nidvr,LINCR,NEND,KVEC1,NLEGS,IP,J,NKBAS
+      LOGICAL :: ZMORS1,ZMORS2
+    
 
       DOUBLE PRECISION, DIMENSION(max(mbass,neval,(npntt+1)**2)) :: B
       DOUBLE PRECISION, DIMENSION(neval) :: eval
       DOUBLE PRECISION, DIMENSION(3) :: XMASS
+      AUTOCM = 2.19474624D+05
 
 !     Read DVR3D header
       rewind iwave
@@ -1636,6 +1643,8 @@ end module outp
       use size
 
       implicit none
+      DOUBLE PRECISION :: X1
+      INTEGER :: I,IOFF,NOFFD,I2,K,K1,MVIB,I1,IFLAG,N
       DOUBLE PRECISION, DIMENSION(NBASS) :: W,Z
       DOUBLE PRECISION, DIMENSION(*) :: HAMIL
       DIMENSION MVIB(NBLK)

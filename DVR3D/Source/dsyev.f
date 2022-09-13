@@ -103,28 +103,28 @@
 *
       WANTZ = LSAME( JOBZ, 'V' )
       LOWER = LSAME( UPLO, 'L' )
-      LQUERY = ( LWORK==-1 )
+      LQUERY = ( LWORK.EQ.-1 )
 *
       INFO = 0
       IF( .NOT.( WANTZ .OR. LSAME( JOBZ, 'N' ) ) ) THEN
          INFO = -1
       ELSE IF( .NOT.( LOWER .OR. LSAME( UPLO, 'U' ) ) ) THEN
          INFO = -2
-      ELSE IF( N<0 ) THEN
+      ELSE IF( N.LT.0 ) THEN
          INFO = -3
-      ELSE IF( LDA<MAX( 1, N ) ) THEN
+      ELSE IF( LDA.LT.MAX( 1, N ) ) THEN
          INFO = -5
-      ELSE IF( LWORK<MAX( 1, 3*N-1 ) .AND. .NOT.LQUERY ) THEN
+      ELSE IF( LWORK.LT.MAX( 1, 3*N-1 ) .AND. .NOT.LQUERY ) THEN
          INFO = -8
       END IF
 *
-      IF( INFO==0 ) THEN
+      IF( INFO.EQ.0 ) THEN
          NB = ILAENV( 1, 'DSYTRD', UPLO, N, -1, -1, -1 )
          LWKOPT = MAX( 1, ( NB+2 )*N )
          WORK( 1 ) = LWKOPT
       END IF
 *
-      IF( INFO/=0 ) THEN
+      IF( INFO.NE.0 ) THEN
          CALL XERBLA( 'DSYEV ', -INFO )
          RETURN
       ELSE IF( LQUERY ) THEN
@@ -133,12 +133,12 @@
 *
 *     Quick return if possible
 *
-      IF( N==0 ) THEN
+      IF( N.EQ.0 ) THEN
          WORK( 1 ) = 1
          RETURN
       END IF
 *
-      IF( N==1 ) THEN
+      IF( N.EQ.1 ) THEN
          W( 1 ) = A( 1, 1 )
          WORK( 1 ) = 3
          IF( WANTZ )
@@ -159,14 +159,14 @@
 *
       ANRM = DLANSY( 'M', UPLO, N, A, LDA, WORK )
       ISCALE = 0
-      IF( ANRM>ZERO .AND. ANRM<RMIN ) THEN
+      IF( ANRM.GT.ZERO .AND. ANRM.LT.RMIN ) THEN
          ISCALE = 1
          SIGMA = RMIN / ANRM
-      ELSE IF( ANRM>RMAX ) THEN
+      ELSE IF( ANRM.GT.RMAX ) THEN
          ISCALE = 1
          SIGMA = RMAX / ANRM
       END IF
-      IF( ISCALE==1 )
+      IF( ISCALE.EQ.1 )
      $   CALL DLASCL( UPLO, 0, 0, ONE, SIGMA, N, N, A, LDA, INFO )
 *
 *     Call DSYTRD to reduce symmetric matrix to tridiagonal form.
@@ -193,8 +193,8 @@
 *
 *     If matrix was scaled, then rescale eigenvalues appropriately.
 *
-      IF( ISCALE==1 ) THEN
-         IF( INFO==0 ) THEN
+      IF( ISCALE.EQ.1 ) THEN
+         IF( INFO.EQ.0 ) THEN
             IMAX = N
          ELSE
             IMAX = INFO - 1
@@ -290,16 +290,16 @@
       ADF = ABS( DF )
       TB = B + B
       AB = ABS( TB )
-      IF( ABS( A )>ABS( C ) ) THEN
+      IF( ABS( A ).GT.ABS( C ) ) THEN
          ACMX = A
          ACMN = C
       ELSE
          ACMX = C
          ACMN = A
       END IF
-      IF( ADF>AB ) THEN
+      IF( ADF.GT.AB ) THEN
          RT = ADF*SQRT( ONE+( AB / ADF )**2 )
-      ELSE IF( ADF<AB ) THEN
+      ELSE IF( ADF.LT.AB ) THEN
          RT = AB*SQRT( ONE+( ADF / AB )**2 )
       ELSE
 *
@@ -307,7 +307,7 @@
 *
          RT = AB*SQRT( TWO )
       END IF
-      IF( SM<ZERO ) THEN
+      IF( SM.LT.ZERO ) THEN
          RT1 = HALF*( SM-RT )
 *
 *        Order of execution important.
@@ -315,7 +315,7 @@
 *        next line needs to be executed in higher precision.
 *
          RT2 = ( ACMX / RT1 )*ACMN - ( B / RT1 )*B
-      ELSE IF( SM>ZERO ) THEN
+      ELSE IF( SM.GT.ZERO ) THEN
          RT1 = HALF*( SM+RT )
 *
 *        Order of execution important.
@@ -427,16 +427,16 @@
       ADF = ABS( DF )
       TB = B + B
       AB = ABS( TB )
-      IF( ABS( A )>ABS( C ) ) THEN
+      IF( ABS( A ).GT.ABS( C ) ) THEN
          ACMX = A
          ACMN = C
       ELSE
          ACMX = C
          ACMN = A
       END IF
-      IF( ADF>AB ) THEN
+      IF( ADF.GT.AB ) THEN
          RT = ADF*SQRT( ONE+( AB / ADF )**2 )
-      ELSE IF( ADF<AB ) THEN
+      ELSE IF( ADF.LT.AB ) THEN
          RT = AB*SQRT( ONE+( ADF / AB )**2 )
       ELSE
 *
@@ -444,7 +444,7 @@
 *
          RT = AB*SQRT( TWO )
       END IF
-      IF( SM<ZERO ) THEN
+      IF( SM.LT.ZERO ) THEN
          RT1 = HALF*( SM-RT )
          SGN1 = -1
 *
@@ -453,7 +453,7 @@
 *        next line needs to be executed in higher precision.
 *
          RT2 = ( ACMX / RT1 )*ACMN - ( B / RT1 )*B
-      ELSE IF( SM>ZERO ) THEN
+      ELSE IF( SM.GT.ZERO ) THEN
          RT1 = HALF*( SM+RT )
          SGN1 = 1
 *
@@ -473,7 +473,7 @@
 *
 *     Compute the eigenvector
 *
-      IF( DF>=ZERO ) THEN
+      IF( DF.GE.ZERO ) THEN
          CS = DF + RT
          SGN2 = 1
       ELSE
@@ -481,12 +481,12 @@
          SGN2 = -1
       END IF
       ACS = ABS( CS )
-      IF( ACS>AB ) THEN
+      IF( ACS.GT.AB ) THEN
          CT = -TB / CS
          SN1 = ONE / SQRT( ONE+CT*CT )
          CS1 = CT*SN1
       ELSE
-         IF( AB==ZERO ) THEN
+         IF( AB.EQ.ZERO ) THEN
             CS1 = ONE
             SN1 = ZERO
          ELSE
@@ -495,7 +495,7 @@
             SN1 = TN*CS1
          END IF
       END IF
-      IF( SGN1==SGN2 ) THEN
+      IF( SGN1.EQ.SGN2 ) THEN
          TN = CS1
          CS1 = -SN1
          SN1 = TN
@@ -595,7 +595,7 @@
          EMAX = IMAX
          SFMIN = RMIN
          SMALL = ONE / RMAX
-         IF( SMALL>=SFMIN ) THEN
+         IF( SMALL.GE.SFMIN ) THEN
 *
 *           Use SMALL plus a bit, to avoid the possibility of rounding
 *           causing overflow when computing  1/sfmin.
@@ -723,9 +723,9 @@
          A = 1
          C = 1
 *
-*+       WHILE( C==ONE )LOOP
+*+       WHILE( C.EQ.ONE )LOOP
    10    CONTINUE
-         IF( C==ONE ) THEN
+         IF( C.EQ.ONE ) THEN
             A = 2*A
             C = DLAMC3( A, ONE )
             C = DLAMC3( C, -A )
@@ -736,14 +736,14 @@
 *        Now compute  b = 2.0**m  with the smallest positive integer m
 *        such that
 *
-*           fl( a + b ) > a.
+*           fl( a + b ) .gt. a.
 *
          B = 1
          C = DLAMC3( A, B )
 *
-*+       WHILE( C==A )LOOP
+*+       WHILE( C.EQ.A )LOOP
    20    CONTINUE
-         IF( C==A ) THEN
+         IF( C.EQ.A ) THEN
             B = 2*B
             C = DLAMC3( A, B )
             GO TO 20
@@ -766,14 +766,14 @@
          B = LBETA
          F = DLAMC3( B / 2, -B / 100 )
          C = DLAMC3( F, A )
-         IF( C==A ) THEN
+         IF( C.EQ.A ) THEN
             LRND = .TRUE.
          ELSE
             LRND = .FALSE.
          END IF
          F = DLAMC3( B / 2, B / 100 )
          C = DLAMC3( F, A )
-         IF( ( LRND ) .AND. ( C==A ) )
+         IF( ( LRND ) .AND. ( C.EQ.A ) )
      $      LRND = .FALSE.
 *
 *        Try and decide whether rounding is done in the  IEEE  'round to
@@ -784,7 +784,7 @@
 *
          T1 = DLAMC3( B / 2, A )
          T2 = DLAMC3( B / 2, SAVEC )
-         LIEEE1 = ( T1==A ) .AND. ( T2>SAVEC ) .AND. LRND
+         LIEEE1 = ( T1.EQ.A ) .AND. ( T2.GT.SAVEC ) .AND. LRND
 *
 *        Now find  the  mantissa, t.  It should  be the  integer part of
 *        log to the base beta of a,  however it is safer to determine  t
@@ -797,9 +797,9 @@
          A = 1
          C = 1
 *
-*+       WHILE( C==ONE )LOOP
+*+       WHILE( C.EQ.ONE )LOOP
    30    CONTINUE
-         IF( C==ONE ) THEN
+         IF( C.EQ.ONE ) THEN
             LT = LT + 1
             A = A*LBETA
             C = DLAMC3( A, ONE )
@@ -859,7 +859,7 @@
 *  EPS     (output) DOUBLE PRECISION
 *          The smallest positive number such that
 *
-*             fl( 1.0 - EPS ) < 1.0,
+*             fl( 1.0 - EPS ) .LT. 1.0,
 *
 *          where fl denotes the computed value.
 *
@@ -945,14 +945,14 @@
          B = DLAMC3( THIRD, -HALF )
          B = DLAMC3( B, SIXTH )
          B = ABS( B )
-         IF( B<LEPS )
+         IF( B.LT.LEPS )
      $      B = LEPS
 *
          LEPS = 1
 *
-*+       WHILE( ( LEPS>B ).AND.( B>ZERO ) )LOOP
+*+       WHILE( ( LEPS.GT.B ).AND.( B.GT.ZERO ) )LOOP
    10    CONTINUE
-         IF( ( LEPS>B ) .AND. ( B>ZERO ) ) THEN
+         IF( ( LEPS.GT.B ) .AND. ( B.GT.ZERO ) ) THEN
             LEPS = B
             C = DLAMC3( HALF*LEPS, ( TWO**5 )*( LEPS**2 ) )
             C = DLAMC3( HALF, -C )
@@ -963,7 +963,7 @@
          END IF
 *+       END WHILE
 *
-         IF( A<LEPS )
+         IF( A.LT.LEPS )
      $      LEPS = A
 *
 *        Computation of EPS complete.
@@ -984,12 +984,12 @@
          CALL DLAMC4( GNMIN, -A, LBETA )
          IEEE = .FALSE.
 *
-         IF( ( NGPMIN==NGNMIN ) .AND. ( GPMIN==GNMIN ) ) THEN
-            IF( NGPMIN==GPMIN ) THEN
+         IF( ( NGPMIN.EQ.NGNMIN ) .AND. ( GPMIN.EQ.GNMIN ) ) THEN
+            IF( NGPMIN.EQ.GPMIN ) THEN
                LEMIN = NGPMIN
 *            ( Non twos-complement machines, no gradual underflow;
 *              e.g.,  VAX )
-            ELSE IF( ( GPMIN-NGPMIN )==3 ) THEN
+            ELSE IF( ( GPMIN-NGPMIN ).EQ.3 ) THEN
                LEMIN = NGPMIN - 1 + LT
                IEEE = .TRUE.
 *            ( Non twos-complement machines, with gradual underflow;
@@ -1000,8 +1000,8 @@
                IWARN = .TRUE.
             END IF
 *
-         ELSE IF( ( NGPMIN==GPMIN ) .AND. ( NGNMIN==GNMIN ) ) THEN
-            IF( ABS( NGPMIN-NGNMIN )==1 ) THEN
+         ELSE IF( ( NGPMIN.EQ.GPMIN ) .AND. ( NGNMIN.EQ.GNMIN ) ) THEN
+            IF( ABS( NGPMIN-NGNMIN ).EQ.1 ) THEN
                LEMIN = MAX( NGPMIN, NGNMIN )
 *            ( Twos-complement machines, no gradual underflow;
 *              e.g., CYBER 205 )
@@ -1011,9 +1011,9 @@
                IWARN = .TRUE.
             END IF
 *
-         ELSE IF( ( ABS( NGPMIN-NGNMIN )==1 ) .AND.
-     $            ( GPMIN==GNMIN ) ) THEN
-            IF( ( GPMIN-MIN( NGPMIN, NGNMIN ) )==3 ) THEN
+         ELSE IF( ( ABS( NGPMIN-NGNMIN ).EQ.1 ) .AND.
+     $            ( GPMIN.EQ.GNMIN ) ) THEN
+            IF( ( GPMIN-MIN( NGPMIN, NGNMIN ) ).EQ.3 ) THEN
                LEMIN = MAX( NGPMIN, NGNMIN ) - 1 + LT
 *            ( Twos-complement machines with gradual underflow;
 *              no known machine )
@@ -1172,11 +1172,11 @@
       C2 = A
       D1 = A
       D2 = A
-*+    WHILE( ( C1==A ).AND.( C2==A ).AND.
-*    $       ( D1==A ).AND.( D2==A )      )LOOP
+*+    WHILE( ( C1.EQ.A ).AND.( C2.EQ.A ).AND.
+*    $       ( D1.EQ.A ).AND.( D2.EQ.A )      )LOOP
    10 CONTINUE
-      IF( ( C1==A ) .AND. ( C2==A ) .AND. ( D1==A ) .AND.
-     $    ( D2==A ) ) THEN
+      IF( ( C1.EQ.A ) .AND. ( C2.EQ.A ) .AND. ( D1.EQ.A ) .AND.
+     $    ( D2.EQ.A ) ) THEN
          EMIN = EMIN - 1
          A = B1
          B1 = DLAMC3( A / BASE, ZERO )
@@ -1277,12 +1277,12 @@
       EXBITS = 1
    10 CONTINUE
       TRY = LEXP*2
-      IF( TRY<=( -EMIN ) ) THEN
+      IF( TRY.LE.( -EMIN ) ) THEN
          LEXP = TRY
          EXBITS = EXBITS + 1
          GO TO 10
       END IF
-      IF( LEXP==-EMIN ) THEN
+      IF( LEXP.EQ.-EMIN ) THEN
          UEXP = LEXP
       ELSE
          UEXP = TRY
@@ -1293,7 +1293,7 @@
 *     than or equal to EMIN. EXBITS is the number of bits needed to
 *     store the exponent.
 *
-      IF( ( UEXP+EMIN )>( -LEXP-EMIN ) ) THEN
+      IF( ( UEXP+EMIN ).GT.( -LEXP-EMIN ) ) THEN
          EXPSUM = 2*LEXP
       ELSE
          EXPSUM = 2*UEXP
@@ -1308,7 +1308,7 @@
 *     NBITS is the total number of bits needed to store a
 *     floating-point number.
 *
-      IF( ( MOD( NBITS, 2 )==1 ) .AND. ( BETA==2 ) ) THEN
+      IF( ( MOD( NBITS, 2 ).EQ.1 ) .AND. ( BETA.EQ.2 ) ) THEN
 *
 *        Either there are an odd number of bits used to store a
 *        floating-point number, which is unlikely, or some bits are
@@ -1343,11 +1343,11 @@
       Y = ZERO
       DO 20 I = 1, P
          Z = Z*RECBAS
-         IF( Y<ONE )
+         IF( Y.LT.ONE )
      $      OLDY = Y
          Y = DLAMC3( Y, Z )
    20 CONTINUE
-      IF( Y>=ONE )
+      IF( Y.GE.ONE )
      $   Y = OLDY
 *
 *     Now multiply by BETA**EMAX to get RMAX.
@@ -1441,7 +1441,7 @@
 *     ..
 *     .. Executable Statements ..
 *
-      IF( N<=0 ) THEN
+      IF( N.LE.0 ) THEN
          ANORM = ZERO
       ELSE IF( LSAME( NORM, 'M' ) ) THEN
 *
@@ -1452,12 +1452,12 @@
             ANORM = MAX( ANORM, ABS( D( I ) ) )
             ANORM = MAX( ANORM, ABS( E( I ) ) )
    10    CONTINUE
-      ELSE IF( LSAME( NORM, 'O' ) .OR. NORM=='1' .OR.
+      ELSE IF( LSAME( NORM, 'O' ) .OR. NORM.EQ.'1' .OR.
      $         LSAME( NORM, 'I' ) ) THEN
 *
 *        Find norm1(A).
 *
-         IF( N==1 ) THEN
+         IF( N.EQ.1 ) THEN
             ANORM = ABS( D( 1 ) )
          ELSE
             ANORM = MAX( ABS( D( 1 ) )+ABS( E( 1 ) ),
@@ -1473,7 +1473,7 @@
 *
          SCALE = ZERO
          SUM = ONE
-         IF( N>1 ) THEN
+         IF( N.GT.1 ) THEN
             CALL DLASSQ( N-1, E, 1, SCALE, SUM )
             SUM = 2*SUM
          END IF
@@ -1582,7 +1582,7 @@
 *     ..
 *     .. Executable Statements ..
 *
-      IF( N==0 ) THEN
+      IF( N.EQ.0 ) THEN
          VALUE = ZERO
       ELSE IF( LSAME( NORM, 'M' ) ) THEN
 *
@@ -1603,7 +1603,7 @@
    40       CONTINUE
          END IF
       ELSE IF( ( LSAME( NORM, 'I' ) ) .OR. ( LSAME( NORM, 'O' ) ) .OR.
-     $         ( NORM=='1' ) ) THEN
+     $         ( NORM.EQ.'1' ) ) THEN
 *
 *        Find normI(A) ( = norm1(A), since A is symmetric).
 *
@@ -1705,7 +1705,7 @@
       YABS = ABS( Y )
       W = MAX( XABS, YABS )
       Z = MIN( XABS, YABS )
-      IF( Z==ZERO ) THEN
+      IF( Z.EQ.ZERO ) THEN
          DLAPY2 = W
       ELSE
          DLAPY2 = W*SQRT( ONE+( Z / W )**2 )
@@ -1799,7 +1799,7 @@
 *
 *        Form  H * C
 *
-         IF( TAU/=ZERO ) THEN
+         IF( TAU.NE.ZERO ) THEN
 *
 *           w := C' * v
 *
@@ -1814,7 +1814,7 @@
 *
 *        Form  C * H
 *
-         IF( TAU/=ZERO ) THEN
+         IF( TAU.NE.ZERO ) THEN
 *
 *           w := C * v
 *
@@ -1941,7 +1941,7 @@
 *
 *     Quick return if possible
 *
-      IF( M<=0 .OR. N<=0 )
+      IF( M.LE.0 .OR. N.LE.0 )
      $   RETURN
 *
       IF( LSAME( TRANS, 'N' ) ) THEN
@@ -1975,7 +1975,7 @@
 *
                CALL DTRMM( 'Right', 'Lower', 'No transpose', 'Unit', N,
      $                     K, ONE, V, LDV, WORK, LDWORK )
-               IF( M>K ) THEN
+               IF( M.GT.K ) THEN
 *
 *                 W := W + C2'*V2
 *
@@ -1991,7 +1991,7 @@
 *
 *              C := C - V * W'
 *
-               IF( M>K ) THEN
+               IF( M.GT.K ) THEN
 *
 *                 C2 := C2 - V2 * W'
 *
@@ -2029,7 +2029,7 @@
 *
                CALL DTRMM( 'Right', 'Lower', 'No transpose', 'Unit', M,
      $                     K, ONE, V, LDV, WORK, LDWORK )
-               IF( N>K ) THEN
+               IF( N.GT.K ) THEN
 *
 *                 W := W + C2 * V2
 *
@@ -2045,7 +2045,7 @@
 *
 *              C := C - W * V'
 *
-               IF( N>K ) THEN
+               IF( N.GT.K ) THEN
 *
 *                 C2 := C2 - W * V2'
 *
@@ -2091,7 +2091,7 @@
 *
                CALL DTRMM( 'Right', 'Upper', 'No transpose', 'Unit', N,
      $                     K, ONE, V( M-K+1, 1 ), LDV, WORK, LDWORK )
-               IF( M>K ) THEN
+               IF( M.GT.K ) THEN
 *
 *                 W := W + C1'*V1
 *
@@ -2106,7 +2106,7 @@
 *
 *              C := C - V * W'
 *
-               IF( M>K ) THEN
+               IF( M.GT.K ) THEN
 *
 *                 C1 := C1 - V1 * W'
 *
@@ -2143,7 +2143,7 @@
 *
                CALL DTRMM( 'Right', 'Upper', 'No transpose', 'Unit', M,
      $                     K, ONE, V( N-K+1, 1 ), LDV, WORK, LDWORK )
-               IF( N>K ) THEN
+               IF( N.GT.K ) THEN
 *
 *                 W := W + C1 * V1
 *
@@ -2158,7 +2158,7 @@
 *
 *              C := C - W * V'
 *
-               IF( N>K ) THEN
+               IF( N.GT.K ) THEN
 *
 *                 C1 := C1 - W * V1'
 *
@@ -2205,7 +2205,7 @@
 *
                CALL DTRMM( 'Right', 'Upper', 'Transpose', 'Unit', N, K,
      $                     ONE, V, LDV, WORK, LDWORK )
-               IF( M>K ) THEN
+               IF( M.GT.K ) THEN
 *
 *                 W := W + C2'*V2'
 *
@@ -2221,7 +2221,7 @@
 *
 *              C := C - V' * W'
 *
-               IF( M>K ) THEN
+               IF( M.GT.K ) THEN
 *
 *                 C2 := C2 - V2' * W'
 *
@@ -2259,7 +2259,7 @@
 *
                CALL DTRMM( 'Right', 'Upper', 'Transpose', 'Unit', M, K,
      $                     ONE, V, LDV, WORK, LDWORK )
-               IF( N>K ) THEN
+               IF( N.GT.K ) THEN
 *
 *                 W := W + C2 * V2'
 *
@@ -2275,7 +2275,7 @@
 *
 *              C := C - W * V
 *
-               IF( N>K ) THEN
+               IF( N.GT.K ) THEN
 *
 *                 C2 := C2 - W * V2
 *
@@ -2321,7 +2321,7 @@
 *
                CALL DTRMM( 'Right', 'Lower', 'Transpose', 'Unit', N, K,
      $                     ONE, V( 1, M-K+1 ), LDV, WORK, LDWORK )
-               IF( M>K ) THEN
+               IF( M.GT.K ) THEN
 *
 *                 W := W + C1'*V1'
 *
@@ -2336,7 +2336,7 @@
 *
 *              C := C - V' * W'
 *
-               IF( M>K ) THEN
+               IF( M.GT.K ) THEN
 *
 *                 C1 := C1 - V1' * W'
 *
@@ -2373,7 +2373,7 @@
 *
                CALL DTRMM( 'Right', 'Lower', 'Transpose', 'Unit', M, K,
      $                     ONE, V( 1, N-K+1 ), LDV, WORK, LDWORK )
-               IF( N>K ) THEN
+               IF( N.GT.K ) THEN
 *
 *                 W := W + C1 * V1'
 *
@@ -2388,7 +2388,7 @@
 *
 *              C := C - W * V
 *
-               IF( N>K ) THEN
+               IF( N.GT.K ) THEN
 *
 *                 C1 := C1 - W * V1
 *
@@ -2500,14 +2500,14 @@
 *     ..
 *     .. Executable Statements ..
 *
-      IF( N<=1 ) THEN
+      IF( N.LE.1 ) THEN
          TAU = ZERO
          RETURN
       END IF
 *
       XNORM = DNRM2( N-1, X, INCX )
 *
-      IF( XNORM==ZERO ) THEN
+      IF( XNORM.EQ.ZERO ) THEN
 *
 *        H  =  I
 *
@@ -2518,7 +2518,7 @@
 *
          BETA = -SIGN( DLAPY2( ALPHA, XNORM ), ALPHA )
          SAFMIN = DLAMCH( 'S' ) / DLAMCH( 'E' )
-         IF( ABS( BETA )<SAFMIN ) THEN
+         IF( ABS( BETA ).LT.SAFMIN ) THEN
 *
 *           XNORM, BETA may be inaccurate; scale X and recompute them
 *
@@ -2529,7 +2529,7 @@
             CALL DSCAL( N-1, RSAFMN, X, INCX )
             BETA = BETA*RSAFMN
             ALPHA = ALPHA*RSAFMN
-            IF( ABS( BETA )<SAFMIN )
+            IF( ABS( BETA ).LT.SAFMIN )
      $         GO TO 10
 *
 *           New BETA is at most 1, at least SAFMIN
@@ -2681,12 +2681,12 @@
 *
 *     Quick return if possible
 *
-      IF( N==0 )
+      IF( N.EQ.0 )
      $   RETURN
 *
       IF( LSAME( DIRECT, 'F' ) ) THEN
          DO 20 I = 1, K
-            IF( TAU( I )==ZERO ) THEN
+            IF( TAU( I ).EQ.ZERO ) THEN
 *
 *              H(i)  =  I
 *
@@ -2725,7 +2725,7 @@
    20    CONTINUE
       ELSE
          DO 40 I = K, 1, -1
-            IF( TAU( I )==ZERO ) THEN
+            IF( TAU( I ).EQ.ZERO ) THEN
 *
 *              H(i)  =  I
 *
@@ -2736,7 +2736,7 @@
 *
 *              general case
 *
-               IF( I<K ) THEN
+               IF( I.LT.K ) THEN
                   IF( LSAME( STOREV, 'C' ) ) THEN
                      VII = V( N-K+I, I )
                      V( N-K+I, I ) = ONE
@@ -2798,7 +2798,7 @@
 *  with the following other differences:
 *     F and G are unchanged on return.
 *     If G=0, then CS=1 and SN=0.
-*     If F=0 and (G /= 0), then CS=0 and SN=1 without doing any
+*     If F=0 and (G .ne. 0), then CS=0 and SN=1 without doing any
 *        floating point operations (saves work in DBDSQR when
 *        there are zeros on the diagonal).
 *
@@ -2860,11 +2860,11 @@
      $            LOG( DLAMCH( 'B' ) ) / TWO )
          SAFMX2 = ONE / SAFMN2
       END IF
-      IF( G==ZERO ) THEN
+      IF( G.EQ.ZERO ) THEN
          CS = ONE
          SN = ZERO
          R = F
-      ELSE IF( F==ZERO ) THEN
+      ELSE IF( F.EQ.ZERO ) THEN
          CS = ZERO
          SN = ONE
          R = G
@@ -2872,14 +2872,14 @@
          F1 = F
          G1 = G
          SCALE = MAX( ABS( F1 ), ABS( G1 ) )
-         IF( SCALE>=SAFMX2 ) THEN
+         IF( SCALE.GE.SAFMX2 ) THEN
             COUNT = 0
    10       CONTINUE
             COUNT = COUNT + 1
             F1 = F1*SAFMN2
             G1 = G1*SAFMN2
             SCALE = MAX( ABS( F1 ), ABS( G1 ) )
-            IF( SCALE>=SAFMX2 )
+            IF( SCALE.GE.SAFMX2 )
      $         GO TO 10
             R = SQRT( F1**2+G1**2 )
             CS = F1 / R
@@ -2887,14 +2887,14 @@
             DO 20 I = 1, COUNT
                R = R*SAFMX2
    20       CONTINUE
-         ELSE IF( SCALE<=SAFMN2 ) THEN
+         ELSE IF( SCALE.LE.SAFMN2 ) THEN
             COUNT = 0
    30       CONTINUE
             COUNT = COUNT + 1
             F1 = F1*SAFMX2
             G1 = G1*SAFMX2
             SCALE = MAX( ABS( F1 ), ABS( G1 ) )
-            IF( SCALE<=SAFMN2 )
+            IF( SCALE.LE.SAFMN2 )
      $         GO TO 30
             R = SQRT( F1**2+G1**2 )
             CS = F1 / R
@@ -2907,7 +2907,7 @@
             CS = F1 / R
             SN = G1 / R
          END IF
-         IF( ABS( F )>ABS( G ) .AND. CS<ZERO ) THEN
+         IF( ABS( F ).GT.ABS( G ) .AND. CS.LT.ZERO ) THEN
             CS = -CS
             SN = -SN
             R = -R
@@ -3039,39 +3039,39 @@
          ITYPE = -1
       END IF
 *
-      IF( ITYPE==-1 ) THEN
+      IF( ITYPE.EQ.-1 ) THEN
          INFO = -1
-      ELSE IF( CFROM==ZERO ) THEN
+      ELSE IF( CFROM.EQ.ZERO ) THEN
          INFO = -4
-      ELSE IF( M<0 ) THEN
+      ELSE IF( M.LT.0 ) THEN
          INFO = -6
-      ELSE IF( N<0 .OR. ( ITYPE==4 .AND. N/=M ) .OR.
-     $         ( ITYPE==5 .AND. N/=M ) ) THEN
+      ELSE IF( N.LT.0 .OR. ( ITYPE.EQ.4 .AND. N.NE.M ) .OR.
+     $         ( ITYPE.EQ.5 .AND. N.NE.M ) ) THEN
          INFO = -7
-      ELSE IF( ITYPE<=3 .AND. LDA<MAX( 1, M ) ) THEN
+      ELSE IF( ITYPE.LE.3 .AND. LDA.LT.MAX( 1, M ) ) THEN
          INFO = -9
-      ELSE IF( ITYPE>=4 ) THEN
-         IF( KL<0 .OR. KL>MAX( M-1, 0 ) ) THEN
+      ELSE IF( ITYPE.GE.4 ) THEN
+         IF( KL.LT.0 .OR. KL.GT.MAX( M-1, 0 ) ) THEN
             INFO = -2
-         ELSE IF( KU<0 .OR. KU>MAX( N-1, 0 ) .OR.
-     $            ( ( ITYPE==4 .OR. ITYPE==5 ) .AND. KL/=KU ) )
+         ELSE IF( KU.LT.0 .OR. KU.GT.MAX( N-1, 0 ) .OR.
+     $            ( ( ITYPE.EQ.4 .OR. ITYPE.EQ.5 ) .AND. KL.NE.KU ) )
      $             THEN
             INFO = -3
-         ELSE IF( ( ITYPE==4 .AND. LDA<KL+1 ) .OR.
-     $            ( ITYPE==5 .AND. LDA<KU+1 ) .OR.
-     $            ( ITYPE==6 .AND. LDA<2*KL+KU+1 ) ) THEN
+         ELSE IF( ( ITYPE.EQ.4 .AND. LDA.LT.KL+1 ) .OR.
+     $            ( ITYPE.EQ.5 .AND. LDA.LT.KU+1 ) .OR.
+     $            ( ITYPE.EQ.6 .AND. LDA.LT.2*KL+KU+1 ) ) THEN
             INFO = -9
          END IF
       END IF
 *
-      IF( INFO/=0 ) THEN
+      IF( INFO.NE.0 ) THEN
          CALL XERBLA( 'DLASCL', -INFO )
          RETURN
       END IF
 *
 *     Quick return if possible
 *
-      IF( N==0 .OR. M==0 )
+      IF( N.EQ.0 .OR. M.EQ.0 )
      $   RETURN
 *
 *     Get machine parameters
@@ -3085,11 +3085,11 @@
    10 CONTINUE
       CFROM1 = CFROMC*SMLNUM
       CTO1 = CTOC / BIGNUM
-      IF( ABS( CFROM1 )>ABS( CTOC ) .AND. CTOC/=ZERO ) THEN
+      IF( ABS( CFROM1 ).GT.ABS( CTOC ) .AND. CTOC.NE.ZERO ) THEN
          MUL = SMLNUM
          DONE = .FALSE.
          CFROMC = CFROM1
-      ELSE IF( ABS( CTO1 )>ABS( CFROMC ) ) THEN
+      ELSE IF( ABS( CTO1 ).GT.ABS( CFROMC ) ) THEN
          MUL = BIGNUM
          DONE = .FALSE.
          CTOC = CTO1
@@ -3098,7 +3098,7 @@
          DONE = .TRUE.
       END IF
 *
-      IF( ITYPE==0 ) THEN
+      IF( ITYPE.EQ.0 ) THEN
 *
 *        Full matrix
 *
@@ -3108,7 +3108,7 @@
    20       CONTINUE
    30    CONTINUE
 *
-      ELSE IF( ITYPE==1 ) THEN
+      ELSE IF( ITYPE.EQ.1 ) THEN
 *
 *        Lower triangular matrix
 *
@@ -3118,7 +3118,7 @@
    40       CONTINUE
    50    CONTINUE
 *
-      ELSE IF( ITYPE==2 ) THEN
+      ELSE IF( ITYPE.EQ.2 ) THEN
 *
 *        Upper triangular matrix
 *
@@ -3128,7 +3128,7 @@
    60       CONTINUE
    70    CONTINUE
 *
-      ELSE IF( ITYPE==3 ) THEN
+      ELSE IF( ITYPE.EQ.3 ) THEN
 *
 *        Upper Hessenberg matrix
 *
@@ -3138,7 +3138,7 @@
    80       CONTINUE
    90    CONTINUE
 *
-      ELSE IF( ITYPE==4 ) THEN
+      ELSE IF( ITYPE.EQ.4 ) THEN
 *
 *        Lower half of a symmetric band matrix
 *
@@ -3150,7 +3150,7 @@
   100       CONTINUE
   110    CONTINUE
 *
-      ELSE IF( ITYPE==5 ) THEN
+      ELSE IF( ITYPE.EQ.5 ) THEN
 *
 *        Upper half of a symmetric band matrix
 *
@@ -3162,7 +3162,7 @@
   120       CONTINUE
   130    CONTINUE
 *
-      ELSE IF( ITYPE==6 ) THEN
+      ELSE IF( ITYPE.EQ.6 ) THEN
 *
 *        Band matrix
 *
@@ -3236,7 +3236,7 @@
 *
 *          if UPLO = 'U', A(i,j) = ALPHA, 1<=i<=j-1, 1<=j<=n,
 *          if UPLO = 'L', A(i,j) = ALPHA, j+1<=i<=m, 1<=j<=n,
-*          otherwise,     A(i,j) = ALPHA, 1<=i<=m, 1<=j<=n, i/=j,
+*          otherwise,     A(i,j) = ALPHA, 1<=i<=m, 1<=j<=n, i.ne.j,
 *
 *          and, for all UPLO, A(i,i) = BETA, 1<=i<=min(m,n).
 *
@@ -3437,21 +3437,21 @@
       ELSE IF( .NOT.( LSAME( DIRECT, 'F' ) .OR. LSAME( DIRECT, 'B' ) ) )
      $          THEN
          INFO = 3
-      ELSE IF( M<0 ) THEN
+      ELSE IF( M.LT.0 ) THEN
          INFO = 4
-      ELSE IF( N<0 ) THEN
+      ELSE IF( N.LT.0 ) THEN
          INFO = 5
-      ELSE IF( LDA<MAX( 1, M ) ) THEN
+      ELSE IF( LDA.LT.MAX( 1, M ) ) THEN
          INFO = 9
       END IF
-      IF( INFO/=0 ) THEN
+      IF( INFO.NE.0 ) THEN
          CALL XERBLA( 'DLASR ', INFO )
          RETURN
       END IF
 *
 *     Quick return if possible
 *
-      IF( ( M==0 ) .OR. ( N==0 ) )
+      IF( ( M.EQ.0 ) .OR. ( N.EQ.0 ) )
      $   RETURN
       IF( LSAME( SIDE, 'L' ) ) THEN
 *
@@ -3462,7 +3462,7 @@
                DO 20 J = 1, M - 1
                   CTEMP = C( J )
                   STEMP = S( J )
-                  IF( ( CTEMP/=ONE ) .OR. ( STEMP/=ZERO ) ) THEN
+                  IF( ( CTEMP.NE.ONE ) .OR. ( STEMP.NE.ZERO ) ) THEN
                      DO 10 I = 1, N
                         TEMP = A( J+1, I )
                         A( J+1, I ) = CTEMP*TEMP - STEMP*A( J, I )
@@ -3474,7 +3474,7 @@
                DO 40 J = M - 1, 1, -1
                   CTEMP = C( J )
                   STEMP = S( J )
-                  IF( ( CTEMP/=ONE ) .OR. ( STEMP/=ZERO ) ) THEN
+                  IF( ( CTEMP.NE.ONE ) .OR. ( STEMP.NE.ZERO ) ) THEN
                      DO 30 I = 1, N
                         TEMP = A( J+1, I )
                         A( J+1, I ) = CTEMP*TEMP - STEMP*A( J, I )
@@ -3488,7 +3488,7 @@
                DO 60 J = 2, M
                   CTEMP = C( J-1 )
                   STEMP = S( J-1 )
-                  IF( ( CTEMP/=ONE ) .OR. ( STEMP/=ZERO ) ) THEN
+                  IF( ( CTEMP.NE.ONE ) .OR. ( STEMP.NE.ZERO ) ) THEN
                      DO 50 I = 1, N
                         TEMP = A( J, I )
                         A( J, I ) = CTEMP*TEMP - STEMP*A( 1, I )
@@ -3500,7 +3500,7 @@
                DO 80 J = M, 2, -1
                   CTEMP = C( J-1 )
                   STEMP = S( J-1 )
-                  IF( ( CTEMP/=ONE ) .OR. ( STEMP/=ZERO ) ) THEN
+                  IF( ( CTEMP.NE.ONE ) .OR. ( STEMP.NE.ZERO ) ) THEN
                      DO 70 I = 1, N
                         TEMP = A( J, I )
                         A( J, I ) = CTEMP*TEMP - STEMP*A( 1, I )
@@ -3514,7 +3514,7 @@
                DO 100 J = 1, M - 1
                   CTEMP = C( J )
                   STEMP = S( J )
-                  IF( ( CTEMP/=ONE ) .OR. ( STEMP/=ZERO ) ) THEN
+                  IF( ( CTEMP.NE.ONE ) .OR. ( STEMP.NE.ZERO ) ) THEN
                      DO 90 I = 1, N
                         TEMP = A( J, I )
                         A( J, I ) = STEMP*A( M, I ) + CTEMP*TEMP
@@ -3526,7 +3526,7 @@
                DO 120 J = M - 1, 1, -1
                   CTEMP = C( J )
                   STEMP = S( J )
-                  IF( ( CTEMP/=ONE ) .OR. ( STEMP/=ZERO ) ) THEN
+                  IF( ( CTEMP.NE.ONE ) .OR. ( STEMP.NE.ZERO ) ) THEN
                      DO 110 I = 1, N
                         TEMP = A( J, I )
                         A( J, I ) = STEMP*A( M, I ) + CTEMP*TEMP
@@ -3545,7 +3545,7 @@
                DO 140 J = 1, N - 1
                   CTEMP = C( J )
                   STEMP = S( J )
-                  IF( ( CTEMP/=ONE ) .OR. ( STEMP/=ZERO ) ) THEN
+                  IF( ( CTEMP.NE.ONE ) .OR. ( STEMP.NE.ZERO ) ) THEN
                      DO 130 I = 1, M
                         TEMP = A( I, J+1 )
                         A( I, J+1 ) = CTEMP*TEMP - STEMP*A( I, J )
@@ -3557,7 +3557,7 @@
                DO 160 J = N - 1, 1, -1
                   CTEMP = C( J )
                   STEMP = S( J )
-                  IF( ( CTEMP/=ONE ) .OR. ( STEMP/=ZERO ) ) THEN
+                  IF( ( CTEMP.NE.ONE ) .OR. ( STEMP.NE.ZERO ) ) THEN
                      DO 150 I = 1, M
                         TEMP = A( I, J+1 )
                         A( I, J+1 ) = CTEMP*TEMP - STEMP*A( I, J )
@@ -3571,7 +3571,7 @@
                DO 180 J = 2, N
                   CTEMP = C( J-1 )
                   STEMP = S( J-1 )
-                  IF( ( CTEMP/=ONE ) .OR. ( STEMP/=ZERO ) ) THEN
+                  IF( ( CTEMP.NE.ONE ) .OR. ( STEMP.NE.ZERO ) ) THEN
                      DO 170 I = 1, M
                         TEMP = A( I, J )
                         A( I, J ) = CTEMP*TEMP - STEMP*A( I, 1 )
@@ -3583,7 +3583,7 @@
                DO 200 J = N, 2, -1
                   CTEMP = C( J-1 )
                   STEMP = S( J-1 )
-                  IF( ( CTEMP/=ONE ) .OR. ( STEMP/=ZERO ) ) THEN
+                  IF( ( CTEMP.NE.ONE ) .OR. ( STEMP.NE.ZERO ) ) THEN
                      DO 190 I = 1, M
                         TEMP = A( I, J )
                         A( I, J ) = CTEMP*TEMP - STEMP*A( I, 1 )
@@ -3597,7 +3597,7 @@
                DO 220 J = 1, N - 1
                   CTEMP = C( J )
                   STEMP = S( J )
-                  IF( ( CTEMP/=ONE ) .OR. ( STEMP/=ZERO ) ) THEN
+                  IF( ( CTEMP.NE.ONE ) .OR. ( STEMP.NE.ZERO ) ) THEN
                      DO 210 I = 1, M
                         TEMP = A( I, J )
                         A( I, J ) = STEMP*A( I, N ) + CTEMP*TEMP
@@ -3609,7 +3609,7 @@
                DO 240 J = N - 1, 1, -1
                   CTEMP = C( J )
                   STEMP = S( J )
-                  IF( ( CTEMP/=ONE ) .OR. ( STEMP/=ZERO ) ) THEN
+                  IF( ( CTEMP.NE.ONE ) .OR. ( STEMP.NE.ZERO ) ) THEN
                      DO 230 I = 1, M
                         TEMP = A( I, J )
                         A( I, J ) = STEMP*A( I, N ) + CTEMP*TEMP
@@ -3701,19 +3701,19 @@
       ELSE IF( LSAME( ID, 'I' ) ) THEN
          DIR = 1
       END IF
-      IF( DIR==-1 ) THEN
+      IF( DIR.EQ.-1 ) THEN
          INFO = -1
-      ELSE IF( N<0 ) THEN
+      ELSE IF( N.LT.0 ) THEN
          INFO = -2
       END IF
-      IF( INFO/=0 ) THEN
+      IF( INFO.NE.0 ) THEN
          CALL XERBLA( 'DLASRT', -INFO )
          RETURN
       END IF
 *
 *     Quick return if possible
 *
-      IF( N<=1 )
+      IF( N.LE.1 )
      $   RETURN
 *
       STKPNT = 1
@@ -3723,17 +3723,17 @@
       START = STACK( 1, STKPNT )
       ENDD = STACK( 2, STKPNT )
       STKPNT = STKPNT - 1
-      IF( ENDD-START<=SELECT .AND. ENDD-START>0 ) THEN
+      IF( ENDD-START.LE.SELECT .AND. ENDD-START.GT.0 ) THEN
 *
 *        Do Insertion sort on D( START:ENDD )
 *
-         IF( DIR==0 ) THEN
+         IF( DIR.EQ.0 ) THEN
 *
 *           Sort into decreasing order
 *
             DO 30 I = START + 1, ENDD
                DO 20 J = I, START + 1, -1
-                  IF( D( J )>D( J-1 ) ) THEN
+                  IF( D( J ).GT.D( J-1 ) ) THEN
                      DMNMX = D( J )
                      D( J ) = D( J-1 )
                      D( J-1 ) = DMNMX
@@ -3749,7 +3749,7 @@
 *
             DO 50 I = START + 1, ENDD
                DO 40 J = I, START + 1, -1
-                  IF( D( J )<D( J-1 ) ) THEN
+                  IF( D( J ).LT.D( J-1 ) ) THEN
                      DMNMX = D( J )
                      D( J ) = D( J-1 )
                      D( J-1 ) = DMNMX
@@ -3761,7 +3761,7 @@
 *
          END IF
 *
-      ELSE IF( ENDD-START>SELECT ) THEN
+      ELSE IF( ENDD-START.GT.SELECT ) THEN
 *
 *        Partition D( START:ENDD ) and stack parts, largest one first
 *
@@ -3771,25 +3771,25 @@
          D2 = D( ENDD )
          I = ( START+ENDD ) / 2
          D3 = D( I )
-         IF( D1<D2 ) THEN
-            IF( D3<D1 ) THEN
+         IF( D1.LT.D2 ) THEN
+            IF( D3.LT.D1 ) THEN
                DMNMX = D1
-            ELSE IF( D3<D2 ) THEN
+            ELSE IF( D3.LT.D2 ) THEN
                DMNMX = D3
             ELSE
                DMNMX = D2
             END IF
          ELSE
-            IF( D3<D2 ) THEN
+            IF( D3.LT.D2 ) THEN
                DMNMX = D2
-            ELSE IF( D3<D1 ) THEN
+            ELSE IF( D3.LT.D1 ) THEN
                DMNMX = D3
             ELSE
                DMNMX = D1
             END IF
          END IF
 *
-         IF( DIR==0 ) THEN
+         IF( DIR.EQ.0 ) THEN
 *
 *           Sort into decreasing order
 *
@@ -3798,19 +3798,19 @@
    60       CONTINUE
    70       CONTINUE
             J = J - 1
-            IF( D( J )<DMNMX )
+            IF( D( J ).LT.DMNMX )
      $         GO TO 70
    80       CONTINUE
             I = I + 1
-            IF( D( I )>DMNMX )
+            IF( D( I ).GT.DMNMX )
      $         GO TO 80
-            IF( I<J ) THEN
+            IF( I.LT.J ) THEN
                TMP = D( I )
                D( I ) = D( J )
                D( J ) = TMP
                GO TO 60
             END IF
-            IF( J-START>ENDD-J-1 ) THEN
+            IF( J-START.GT.ENDD-J-1 ) THEN
                STKPNT = STKPNT + 1
                STACK( 1, STKPNT ) = START
                STACK( 2, STKPNT ) = J
@@ -3834,19 +3834,19 @@
    90       CONTINUE
   100       CONTINUE
             J = J - 1
-            IF( D( J )>DMNMX )
+            IF( D( J ).GT.DMNMX )
      $         GO TO 100
   110       CONTINUE
             I = I + 1
-            IF( D( I )<DMNMX )
+            IF( D( I ).LT.DMNMX )
      $         GO TO 110
-            IF( I<J ) THEN
+            IF( I.LT.J ) THEN
                TMP = D( I )
                D( I ) = D( J )
                D( J ) = TMP
                GO TO 90
             END IF
-            IF( J-START>ENDD-J-1 ) THEN
+            IF( J-START.GT.ENDD-J-1 ) THEN
                STKPNT = STKPNT + 1
                STACK( 1, STKPNT ) = START
                STACK( 2, STKPNT ) = J
@@ -3863,7 +3863,7 @@
             END IF
          END IF
       END IF
-      IF( STKPNT>0 )
+      IF( STKPNT.GT.0 )
      $   GO TO 10
       RETURN
 *
@@ -3941,11 +3941,11 @@
 *     ..
 *     .. Executable Statements ..
 *
-      IF( N>0 ) THEN
+      IF( N.GT.0 ) THEN
          DO 10 IX = 1, 1 + ( N-1 )*INCX, INCX
-            IF( X( IX )/=ZERO ) THEN
+            IF( X( IX ).NE.ZERO ) THEN
                ABSXI = ABS( X( IX ) )
-               IF( SCALE<ABSXI ) THEN
+               IF( SCALE.LT.ABSXI ) THEN
                   SUMSQ = 1 + SUMSQ*( SCALE / ABSXI )**2
                   SCALE = ABSXI
                ELSE
@@ -4120,7 +4120,7 @@
 *
 *     Quick return if possible
 *
-      IF( N<=0 )
+      IF( N.LE.0 )
      $   RETURN
 *
       IF( LSAME( UPLO, 'U' ) ) THEN
@@ -4129,7 +4129,7 @@
 *
          DO 10 I = N, N - NB + 1, -1
             IW = I - N + NB
-            IF( I<N ) THEN
+            IF( I.LT.N ) THEN
 *
 *              Update A(1:i,i)
 *
@@ -4138,7 +4138,7 @@
                CALL DGEMV( 'No transpose', I, N-I, -ONE, W( 1, IW+1 ),
      $                     LDW, A( I, I+1 ), LDA, ONE, A( 1, I ), 1 )
             END IF
-            IF( I>1 ) THEN
+            IF( I.GT.1 ) THEN
 *
 *              Generate elementary reflector H(i) to annihilate
 *              A(1:i-2,i)
@@ -4151,7 +4151,7 @@
 *
                CALL DSYMV( 'Upper', I-1, ONE, A, LDA, A( 1, I ), 1,
      $                     ZERO, W( 1, IW ), 1 )
-               IF( I<N ) THEN
+               IF( I.LT.N ) THEN
                   CALL DGEMV( 'Transpose', I-1, N-I, ONE, W( 1, IW+1 ),
      $                        LDW, A( 1, I ), 1, ZERO, W( I+1, IW ), 1 )
                   CALL DGEMV( 'No transpose', I-1, N-I, -ONE,
@@ -4182,7 +4182,7 @@
      $                  LDA, W( I, 1 ), LDW, ONE, A( I, I ), 1 )
             CALL DGEMV( 'No transpose', N-I+1, I-1, -ONE, W( I, 1 ),
      $                  LDW, A( I, 1 ), LDA, ONE, A( I, I ), 1 )
-            IF( I<N ) THEN
+            IF( I.LT.N ) THEN
 *
 *              Generate elementary reflector H(i) to annihilate
 *              A(i+2:n,i)
@@ -4296,23 +4296,23 @@
 *     Test the input arguments
 *
       INFO = 0
-      IF( M<0 ) THEN
+      IF( M.LT.0 ) THEN
          INFO = -1
-      ELSE IF( N<0 .OR. N>M ) THEN
+      ELSE IF( N.LT.0 .OR. N.GT.M ) THEN
          INFO = -2
-      ELSE IF( K<0 .OR. K>N ) THEN
+      ELSE IF( K.LT.0 .OR. K.GT.N ) THEN
          INFO = -3
-      ELSE IF( LDA<MAX( 1, M ) ) THEN
+      ELSE IF( LDA.LT.MAX( 1, M ) ) THEN
          INFO = -5
       END IF
-      IF( INFO/=0 ) THEN
+      IF( INFO.NE.0 ) THEN
          CALL XERBLA( 'DORG2L', -INFO )
          RETURN
       END IF
 *
 *     Quick return if possible
 *
-      IF( N<=0 )
+      IF( N.LE.0 )
      $   RETURN
 *
 *     Initialise columns 1:n-k to columns of the unit matrix
@@ -4424,23 +4424,23 @@
 *     Test the input arguments
 *
       INFO = 0
-      IF( M<0 ) THEN
+      IF( M.LT.0 ) THEN
          INFO = -1
-      ELSE IF( N<0 .OR. N>M ) THEN
+      ELSE IF( N.LT.0 .OR. N.GT.M ) THEN
          INFO = -2
-      ELSE IF( K<0 .OR. K>N ) THEN
+      ELSE IF( K.LT.0 .OR. K.GT.N ) THEN
          INFO = -3
-      ELSE IF( LDA<MAX( 1, M ) ) THEN
+      ELSE IF( LDA.LT.MAX( 1, M ) ) THEN
          INFO = -5
       END IF
-      IF( INFO/=0 ) THEN
+      IF( INFO.NE.0 ) THEN
          CALL XERBLA( 'DORG2R', -INFO )
          RETURN
       END IF
 *
 *     Quick return if possible
 *
-      IF( N<=0 )
+      IF( N.LE.0 )
      $   RETURN
 *
 *     Initialise columns k+1:n to columns of the unit matrix
@@ -4456,12 +4456,12 @@
 *
 *        Apply H(i) to A(i:m,i:n) from the left
 *
-         IF( I<N ) THEN
+         IF( I.LT.N ) THEN
             A( I, I ) = ONE
             CALL DLARF( 'Left', M-I+1, N-I, A( I, I ), 1, TAU( I ),
      $                  A( I, I+1 ), LDA, WORK )
          END IF
-         IF( I<M )
+         IF( I.LT.M )
      $      CALL DSCAL( M-I, -TAU( I ), A( I+1, I ), 1 )
          A( I, I ) = ONE - TAU( I )
 *
@@ -4574,19 +4574,19 @@
       NB = ILAENV( 1, 'DORGQL', ' ', M, N, K, -1 )
       LWKOPT = MAX( 1, N )*NB
       WORK( 1 ) = LWKOPT
-      LQUERY = ( LWORK==-1 )
-      IF( M<0 ) THEN
+      LQUERY = ( LWORK.EQ.-1 )
+      IF( M.LT.0 ) THEN
          INFO = -1
-      ELSE IF( N<0 .OR. N>M ) THEN
+      ELSE IF( N.LT.0 .OR. N.GT.M ) THEN
          INFO = -2
-      ELSE IF( K<0 .OR. K>N ) THEN
+      ELSE IF( K.LT.0 .OR. K.GT.N ) THEN
          INFO = -3
-      ELSE IF( LDA<MAX( 1, M ) ) THEN
+      ELSE IF( LDA.LT.MAX( 1, M ) ) THEN
          INFO = -5
-      ELSE IF( LWORK<MAX( 1, N ) .AND. .NOT.LQUERY ) THEN
+      ELSE IF( LWORK.LT.MAX( 1, N ) .AND. .NOT.LQUERY ) THEN
          INFO = -8
       END IF
-      IF( INFO/=0 ) THEN
+      IF( INFO.NE.0 ) THEN
          CALL XERBLA( 'DORGQL', -INFO )
          RETURN
       ELSE IF( LQUERY ) THEN
@@ -4595,7 +4595,7 @@
 *
 *     Quick return if possible
 *
-      IF( N<=0 ) THEN
+      IF( N.LE.0 ) THEN
          WORK( 1 ) = 1
          RETURN
       END IF
@@ -4603,18 +4603,18 @@
       NBMIN = 2
       NX = 0
       IWS = N
-      IF( NB>1 .AND. NB<K ) THEN
+      IF( NB.GT.1 .AND. NB.LT.K ) THEN
 *
 *        Determine when to cross over from blocked to unblocked code.
 *
          NX = MAX( 0, ILAENV( 3, 'DORGQL', ' ', M, N, K, -1 ) )
-         IF( NX<K ) THEN
+         IF( NX.LT.K ) THEN
 *
 *           Determine if workspace is large enough for blocked code.
 *
             LDWORK = N
             IWS = LDWORK*NB
-            IF( LWORK<IWS ) THEN
+            IF( LWORK.LT.IWS ) THEN
 *
 *              Not enough workspace to use optimal NB:  reduce NB and
 *              determine the minimum value of NB.
@@ -4625,7 +4625,7 @@
          END IF
       END IF
 *
-      IF( NB>=NBMIN .AND. NB<K .AND. NX<K ) THEN
+      IF( NB.GE.NBMIN .AND. NB.LT.K .AND. NX.LT.K ) THEN
 *
 *        Use blocked code after the first block.
 *        The last kk columns are handled by the block method.
@@ -4647,13 +4647,13 @@
 *
       CALL DORG2L( M-KK, N-KK, K-KK, A, LDA, TAU, WORK, IINFO )
 *
-      IF( KK>0 ) THEN
+      IF( KK.GT.0 ) THEN
 *
 *        Use blocked code
 *
          DO 50 I = K - KK + 1, K, NB
             IB = MIN( NB, K-I+1 )
-            IF( N-K+I>1 ) THEN
+            IF( N-K+I.GT.1 ) THEN
 *
 *              Form the triangular factor of the block reflector
 *              H = H(i+ib-1) . . . H(i+1) H(i)
@@ -4788,19 +4788,19 @@
       NB = ILAENV( 1, 'DORGQR', ' ', M, N, K, -1 )
       LWKOPT = MAX( 1, N )*NB
       WORK( 1 ) = LWKOPT
-      LQUERY = ( LWORK==-1 )
-      IF( M<0 ) THEN
+      LQUERY = ( LWORK.EQ.-1 )
+      IF( M.LT.0 ) THEN
          INFO = -1
-      ELSE IF( N<0 .OR. N>M ) THEN
+      ELSE IF( N.LT.0 .OR. N.GT.M ) THEN
          INFO = -2
-      ELSE IF( K<0 .OR. K>N ) THEN
+      ELSE IF( K.LT.0 .OR. K.GT.N ) THEN
          INFO = -3
-      ELSE IF( LDA<MAX( 1, M ) ) THEN
+      ELSE IF( LDA.LT.MAX( 1, M ) ) THEN
          INFO = -5
-      ELSE IF( LWORK<MAX( 1, N ) .AND. .NOT.LQUERY ) THEN
+      ELSE IF( LWORK.LT.MAX( 1, N ) .AND. .NOT.LQUERY ) THEN
          INFO = -8
       END IF
-      IF( INFO/=0 ) THEN
+      IF( INFO.NE.0 ) THEN
          CALL XERBLA( 'DORGQR', -INFO )
          RETURN
       ELSE IF( LQUERY ) THEN
@@ -4809,7 +4809,7 @@
 *
 *     Quick return if possible
 *
-      IF( N<=0 ) THEN
+      IF( N.LE.0 ) THEN
          WORK( 1 ) = 1
          RETURN
       END IF
@@ -4817,18 +4817,18 @@
       NBMIN = 2
       NX = 0
       IWS = N
-      IF( NB>1 .AND. NB<K ) THEN
+      IF( NB.GT.1 .AND. NB.LT.K ) THEN
 *
 *        Determine when to cross over from blocked to unblocked code.
 *
          NX = MAX( 0, ILAENV( 3, 'DORGQR', ' ', M, N, K, -1 ) )
-         IF( NX<K ) THEN
+         IF( NX.LT.K ) THEN
 *
 *           Determine if workspace is large enough for blocked code.
 *
             LDWORK = N
             IWS = LDWORK*NB
-            IF( LWORK<IWS ) THEN
+            IF( LWORK.LT.IWS ) THEN
 *
 *              Not enough workspace to use optimal NB:  reduce NB and
 *              determine the minimum value of NB.
@@ -4839,7 +4839,7 @@
          END IF
       END IF
 *
-      IF( NB>=NBMIN .AND. NB<K .AND. NX<K ) THEN
+      IF( NB.GE.NBMIN .AND. NB.LT.K .AND. NX.LT.K ) THEN
 *
 *        Use blocked code after the last block.
 *        The first kk columns are handled by the block method.
@@ -4860,17 +4860,17 @@
 *
 *     Use unblocked code for the last or only block.
 *
-      IF( KK<N )
+      IF( KK.LT.N )
      $   CALL DORG2R( M-KK, N-KK, K-KK, A( KK+1, KK+1 ), LDA,
      $                TAU( KK+1 ), WORK, IINFO )
 *
-      IF( KK>0 ) THEN
+      IF( KK.GT.0 ) THEN
 *
 *        Use blocked code
 *
          DO 50 I = KI + 1, 1, -NB
             IB = MIN( NB, K-I+1 )
-            IF( I+IB<=N ) THEN
+            IF( I+IB.LE.N ) THEN
 *
 *              Form the triangular factor of the block reflector
 *              H = H(i) H(i+1) . . . H(i+ib-1)
@@ -5000,19 +5000,19 @@
 *     Test the input arguments
 *
       INFO = 0
-      LQUERY = ( LWORK==-1 )
+      LQUERY = ( LWORK.EQ.-1 )
       UPPER = LSAME( UPLO, 'U' )
       IF( .NOT.UPPER .AND. .NOT.LSAME( UPLO, 'L' ) ) THEN
          INFO = -1
-      ELSE IF( N<0 ) THEN
+      ELSE IF( N.LT.0 ) THEN
          INFO = -2
-      ELSE IF( LDA<MAX( 1, N ) ) THEN
+      ELSE IF( LDA.LT.MAX( 1, N ) ) THEN
          INFO = -4
-      ELSE IF( LWORK<MAX( 1, N-1 ) .AND. .NOT.LQUERY ) THEN
+      ELSE IF( LWORK.LT.MAX( 1, N-1 ) .AND. .NOT.LQUERY ) THEN
          INFO = -7
       END IF
 *
-      IF( INFO==0 ) THEN
+      IF( INFO.EQ.0 ) THEN
          IF( UPPER ) THEN
             NB = ILAENV( 1, 'DORGQL', ' ', N-1, N-1, N-1, -1 )
          ELSE
@@ -5022,7 +5022,7 @@
          WORK( 1 ) = LWKOPT
       END IF
 *
-      IF( INFO/=0 ) THEN
+      IF( INFO.NE.0 ) THEN
          CALL XERBLA( 'DORGTR', -INFO )
          RETURN
       ELSE IF( LQUERY ) THEN
@@ -5031,7 +5031,7 @@
 *
 *     Quick return if possible
 *
-      IF( N==0 ) THEN
+      IF( N.EQ.0 ) THEN
          WORK( 1 ) = 1
          RETURN
       END IF
@@ -5077,7 +5077,7 @@
          DO 60 I = 2, N
             A( I, 1 ) = ZERO
    60    CONTINUE
-         IF( N>1 ) THEN
+         IF( N.GT.1 ) THEN
 *
 *           Generate Q(2:n,2:n)
 *
@@ -5209,26 +5209,26 @@
       ELSE
          ICOMPZ = -1
       END IF
-      IF( ICOMPZ<0 ) THEN
+      IF( ICOMPZ.LT.0 ) THEN
          INFO = -1
-      ELSE IF( N<0 ) THEN
+      ELSE IF( N.LT.0 ) THEN
          INFO = -2
-      ELSE IF( ( LDZ<1 ) .OR. ( ICOMPZ>0 .AND. LDZ<MAX( 1,
+      ELSE IF( ( LDZ.LT.1 ) .OR. ( ICOMPZ.GT.0 .AND. LDZ.LT.MAX( 1,
      $         N ) ) ) THEN
          INFO = -6
       END IF
-      IF( INFO/=0 ) THEN
+      IF( INFO.NE.0 ) THEN
          CALL XERBLA( 'DSTEQR', -INFO )
          RETURN
       END IF
 *
 *     Quick return if possible
 *
-      IF( N==0 )
+      IF( N.EQ.0 )
      $   RETURN
 *
-      IF( N==1 ) THEN
-         IF( ICOMPZ==2 )
+      IF( N.EQ.1 ) THEN
+         IF( ICOMPZ.EQ.2 )
      $      Z( 1, 1 ) = ONE
          RETURN
       END IF
@@ -5245,7 +5245,7 @@
 *     Compute the eigenvalues and eigenvectors of the tridiagonal
 *     matrix.
 *
-      IF( ICOMPZ==2 )
+      IF( ICOMPZ.EQ.2 )
      $   CALL DLASET( 'Full', N, N, ZERO, ONE, Z, LDZ )
 *
       NMAXIT = N*MAXIT
@@ -5259,16 +5259,16 @@
       NM1 = N - 1
 *
    10 CONTINUE
-      IF( L1>N )
+      IF( L1.GT.N )
      $   GO TO 160
-      IF( L1>1 )
+      IF( L1.GT.1 )
      $   E( L1-1 ) = ZERO
-      IF( L1<=NM1 ) THEN
+      IF( L1.LE.NM1 ) THEN
          DO 20 M = L1, NM1
             TST = ABS( E( M ) )
-            IF( TST==ZERO )
+            IF( TST.EQ.ZERO )
      $         GO TO 30
-            IF( TST<=( SQRT( ABS( D( M ) ) )*SQRT( ABS( D( M+
+            IF( TST.LE.( SQRT( ABS( D( M ) ) )*SQRT( ABS( D( M+
      $          1 ) ) ) )*EPS ) THEN
                E( M ) = ZERO
                GO TO 30
@@ -5283,22 +5283,22 @@
       LEND = M
       LENDSV = LEND
       L1 = M + 1
-      IF( LEND==L )
+      IF( LEND.EQ.L )
      $   GO TO 10
 *
 *     Scale submatrix in rows and columns L to LEND
 *
       ANORM = DLANST( 'I', LEND-L+1, D( L ), E( L ) )
       ISCALE = 0
-      IF( ANORM==ZERO )
+      IF( ANORM.EQ.ZERO )
      $   GO TO 10
-      IF( ANORM>SSFMAX ) THEN
+      IF( ANORM.GT.SSFMAX ) THEN
          ISCALE = 1
          CALL DLASCL( 'G', 0, 0, ANORM, SSFMAX, LEND-L+1, 1, D( L ), N,
      $                INFO )
          CALL DLASCL( 'G', 0, 0, ANORM, SSFMAX, LEND-L, 1, E( L ), N,
      $                INFO )
-      ELSE IF( ANORM<SSFMIN ) THEN
+      ELSE IF( ANORM.LT.SSFMIN ) THEN
          ISCALE = 2
          CALL DLASCL( 'G', 0, 0, ANORM, SSFMIN, LEND-L+1, 1, D( L ), N,
      $                INFO )
@@ -5308,23 +5308,23 @@
 *
 *     Choose between QL and QR iteration
 *
-      IF( ABS( D( LEND ) )<ABS( D( L ) ) ) THEN
+      IF( ABS( D( LEND ) ).LT.ABS( D( L ) ) ) THEN
          LEND = LSV
          L = LENDSV
       END IF
 *
-      IF( LEND>L ) THEN
+      IF( LEND.GT.L ) THEN
 *
 *        QL Iteration
 *
 *        Look for small subdiagonal element.
 *
    40    CONTINUE
-         IF( L/=LEND ) THEN
+         IF( L.NE.LEND ) THEN
             LENDM1 = LEND - 1
             DO 50 M = L, LENDM1
                TST = ABS( E( M ) )**2
-               IF( TST<=( EPS2*ABS( D( M ) ) )*ABS( D( M+1 ) )+
+               IF( TST.LE.( EPS2*ABS( D( M ) ) )*ABS( D( M+1 ) )+
      $             SAFMIN )GO TO 60
    50       CONTINUE
          END IF
@@ -5332,17 +5332,17 @@
          M = LEND
 *
    60    CONTINUE
-         IF( M<LEND )
+         IF( M.LT.LEND )
      $      E( M ) = ZERO
          P = D( L )
-         IF( M==L )
+         IF( M.EQ.L )
      $      GO TO 80
 *
 *        If remaining matrix is 2-by-2, use DLAE2 or SLAEV2
 *        to compute its eigensystem.
 *
-         IF( M==L+1 ) THEN
-            IF( ICOMPZ>0 ) THEN
+         IF( M.EQ.L+1 ) THEN
+            IF( ICOMPZ.GT.0 ) THEN
                CALL DLAEV2( D( L ), E( L ), D( L+1 ), RT1, RT2, C, S )
                WORK( L ) = C
                WORK( N-1+L ) = S
@@ -5355,12 +5355,12 @@
             D( L+1 ) = RT2
             E( L ) = ZERO
             L = L + 2
-            IF( L<=LEND )
+            IF( L.LE.LEND )
      $         GO TO 40
             GO TO 140
          END IF
 *
-         IF( JTOT==NMAXIT )
+         IF( JTOT.EQ.NMAXIT )
      $      GO TO 140
          JTOT = JTOT + 1
 *
@@ -5381,7 +5381,7 @@
             F = S*E( I )
             B = C*E( I )
             CALL DLARTG( G, F, C, S, R )
-            IF( I/=M-1 )
+            IF( I.NE.M-1 )
      $         E( I+1 ) = R
             G = D( I+1 ) - P
             R = ( D( I )-G )*S + TWO*C*B
@@ -5391,7 +5391,7 @@
 *
 *           If eigenvectors are desired, then save rotations.
 *
-            IF( ICOMPZ>0 ) THEN
+            IF( ICOMPZ.GT.0 ) THEN
                WORK( I ) = C
                WORK( N-1+I ) = -S
             END IF
@@ -5400,7 +5400,7 @@
 *
 *        If eigenvectors are desired, then apply saved rotations.
 *
-         IF( ICOMPZ>0 ) THEN
+         IF( ICOMPZ.GT.0 ) THEN
             MM = M - L + 1
             CALL DLASR( 'R', 'V', 'B', N, MM, WORK( L ), WORK( N-1+L ),
      $                  Z( 1, L ), LDZ )
@@ -5416,7 +5416,7 @@
          D( L ) = P
 *
          L = L + 1
-         IF( L<=LEND )
+         IF( L.LE.LEND )
      $      GO TO 40
          GO TO 140
 *
@@ -5427,11 +5427,11 @@
 *        Look for small superdiagonal element.
 *
    90    CONTINUE
-         IF( L/=LEND ) THEN
+         IF( L.NE.LEND ) THEN
             LENDP1 = LEND + 1
             DO 100 M = L, LENDP1, -1
                TST = ABS( E( M-1 ) )**2
-               IF( TST<=( EPS2*ABS( D( M ) ) )*ABS( D( M-1 ) )+
+               IF( TST.LE.( EPS2*ABS( D( M ) ) )*ABS( D( M-1 ) )+
      $             SAFMIN )GO TO 110
   100       CONTINUE
          END IF
@@ -5439,17 +5439,17 @@
          M = LEND
 *
   110    CONTINUE
-         IF( M>LEND )
+         IF( M.GT.LEND )
      $      E( M-1 ) = ZERO
          P = D( L )
-         IF( M==L )
+         IF( M.EQ.L )
      $      GO TO 130
 *
 *        If remaining matrix is 2-by-2, use DLAE2 or SLAEV2
 *        to compute its eigensystem.
 *
-         IF( M==L-1 ) THEN
-            IF( ICOMPZ>0 ) THEN
+         IF( M.EQ.L-1 ) THEN
+            IF( ICOMPZ.GT.0 ) THEN
                CALL DLAEV2( D( L-1 ), E( L-1 ), D( L ), RT1, RT2, C, S )
                WORK( M ) = C
                WORK( N-1+M ) = S
@@ -5462,12 +5462,12 @@
             D( L ) = RT2
             E( L-1 ) = ZERO
             L = L - 2
-            IF( L>=LEND )
+            IF( L.GE.LEND )
      $         GO TO 90
             GO TO 140
          END IF
 *
-         IF( JTOT==NMAXIT )
+         IF( JTOT.EQ.NMAXIT )
      $      GO TO 140
          JTOT = JTOT + 1
 *
@@ -5488,7 +5488,7 @@
             F = S*E( I )
             B = C*E( I )
             CALL DLARTG( G, F, C, S, R )
-            IF( I/=M )
+            IF( I.NE.M )
      $         E( I-1 ) = R
             G = D( I ) - P
             R = ( D( I+1 )-G )*S + TWO*C*B
@@ -5498,7 +5498,7 @@
 *
 *           If eigenvectors are desired, then save rotations.
 *
-            IF( ICOMPZ>0 ) THEN
+            IF( ICOMPZ.GT.0 ) THEN
                WORK( I ) = C
                WORK( N-1+I ) = S
             END IF
@@ -5507,7 +5507,7 @@
 *
 *        If eigenvectors are desired, then apply saved rotations.
 *
-         IF( ICOMPZ>0 ) THEN
+         IF( ICOMPZ.GT.0 ) THEN
             MM = L - M + 1
             CALL DLASR( 'R', 'V', 'F', N, MM, WORK( M ), WORK( N-1+M ),
      $                  Z( 1, M ), LDZ )
@@ -5523,7 +5523,7 @@
          D( L ) = P
 *
          L = L - 1
-         IF( L>=LEND )
+         IF( L.GE.LEND )
      $      GO TO 90
          GO TO 140
 *
@@ -5532,12 +5532,12 @@
 *     Undo scaling if necessary
 *
   140 CONTINUE
-      IF( ISCALE==1 ) THEN
+      IF( ISCALE.EQ.1 ) THEN
          CALL DLASCL( 'G', 0, 0, SSFMAX, ANORM, LENDSV-LSV+1, 1,
      $                D( LSV ), N, INFO )
          CALL DLASCL( 'G', 0, 0, SSFMAX, ANORM, LENDSV-LSV, 1, E( LSV ),
      $                N, INFO )
-      ELSE IF( ISCALE==2 ) THEN
+      ELSE IF( ISCALE.EQ.2 ) THEN
          CALL DLASCL( 'G', 0, 0, SSFMIN, ANORM, LENDSV-LSV+1, 1,
      $                D( LSV ), N, INFO )
          CALL DLASCL( 'G', 0, 0, SSFMIN, ANORM, LENDSV-LSV, 1, E( LSV ),
@@ -5547,10 +5547,10 @@
 *     Check for no convergence to an eigenvalue after a total
 *     of N*MAXIT iterations.
 *
-      IF( JTOT<NMAXIT )
+      IF( JTOT.LT.NMAXIT )
      $   GO TO 10
       DO 150 I = 1, N - 1
-         IF( E( I )/=ZERO )
+         IF( E( I ).NE.ZERO )
      $      INFO = INFO + 1
   150 CONTINUE
       GO TO 190
@@ -5558,7 +5558,7 @@
 *     Order eigenvalues and eigenvectors.
 *
   160 CONTINUE
-      IF( ICOMPZ==0 ) THEN
+      IF( ICOMPZ.EQ.0 ) THEN
 *
 *        Use Quick Sort
 *
@@ -5573,12 +5573,12 @@
             K = I
             P = D( I )
             DO 170 J = II, N
-               IF( D( J )<P ) THEN
+               IF( D( J ).LT.P ) THEN
                   K = J
                   P = D( J )
                END IF
   170       CONTINUE
-            IF( K/=I ) THEN
+            IF( K.NE.I ) THEN
                D( K ) = D( I )
                D( I ) = P
                CALL DSWAP( N, Z( 1, I ), 1, Z( 1, K ), 1 )
@@ -5668,12 +5668,12 @@
 *
 *     Quick return if possible
 *
-      IF( N<0 ) THEN
+      IF( N.LT.0 ) THEN
          INFO = -1
          CALL XERBLA( 'DSTERF', -INFO )
          RETURN
       END IF
-      IF( N<=1 )
+      IF( N.LE.1 )
      $   RETURN
 *
 *     Determine the unit roundoff for this environment.
@@ -5698,12 +5698,12 @@
       L1 = 1
 *
    10 CONTINUE
-      IF( L1>N )
+      IF( L1.GT.N )
      $   GO TO 170
-      IF( L1>1 )
+      IF( L1.GT.1 )
      $   E( L1-1 ) = ZERO
       DO 20 M = L1, N - 1
-         IF( ABS( E( M ) )<=( SQRT( ABS( D( M ) ) )*SQRT( ABS( D( M+
+         IF( ABS( E( M ) ).LE.( SQRT( ABS( D( M ) ) )*SQRT( ABS( D( M+
      $       1 ) ) ) )*EPS ) THEN
             E( M ) = ZERO
             GO TO 30
@@ -5717,20 +5717,20 @@
       LEND = M
       LENDSV = LEND
       L1 = M + 1
-      IF( LEND==L )
+      IF( LEND.EQ.L )
      $   GO TO 10
 *
 *     Scale submatrix in rows and columns L to LEND
 *
       ANORM = DLANST( 'I', LEND-L+1, D( L ), E( L ) )
       ISCALE = 0
-      IF( ANORM>SSFMAX ) THEN
+      IF( ANORM.GT.SSFMAX ) THEN
          ISCALE = 1
          CALL DLASCL( 'G', 0, 0, ANORM, SSFMAX, LEND-L+1, 1, D( L ), N,
      $                INFO )
          CALL DLASCL( 'G', 0, 0, ANORM, SSFMAX, LEND-L, 1, E( L ), N,
      $                INFO )
-      ELSE IF( ANORM<SSFMIN ) THEN
+      ELSE IF( ANORM.LT.SSFMIN ) THEN
          ISCALE = 2
          CALL DLASCL( 'G', 0, 0, ANORM, SSFMIN, LEND-L+1, 1, D( L ), N,
      $                INFO )
@@ -5744,49 +5744,49 @@
 *
 *     Choose between QL and QR iteration
 *
-      IF( ABS( D( LEND ) )<ABS( D( L ) ) ) THEN
+      IF( ABS( D( LEND ) ).LT.ABS( D( L ) ) ) THEN
          LEND = LSV
          L = LENDSV
       END IF
 *
-      IF( LEND>=L ) THEN
+      IF( LEND.GE.L ) THEN
 *
 *        QL Iteration
 *
 *        Look for small subdiagonal element.
 *
    50    CONTINUE
-         IF( L/=LEND ) THEN
+         IF( L.NE.LEND ) THEN
             DO 60 M = L, LEND - 1
-               IF( ABS( E( M ) )<=EPS2*ABS( D( M )*D( M+1 ) ) )
+               IF( ABS( E( M ) ).LE.EPS2*ABS( D( M )*D( M+1 ) ) )
      $            GO TO 70
    60       CONTINUE
          END IF
          M = LEND
 *
    70    CONTINUE
-         IF( M<LEND )
+         IF( M.LT.LEND )
      $      E( M ) = ZERO
          P = D( L )
-         IF( M==L )
+         IF( M.EQ.L )
      $      GO TO 90
 *
 *        If remaining matrix is 2 by 2, use DLAE2 to compute its
 *        eigenvalues.
 *
-         IF( M==L+1 ) THEN
+         IF( M.EQ.L+1 ) THEN
             RTE = SQRT( E( L ) )
             CALL DLAE2( D( L ), RTE, D( L+1 ), RT1, RT2 )
             D( L ) = RT1
             D( L+1 ) = RT2
             E( L ) = ZERO
             L = L + 2
-            IF( L<=LEND )
+            IF( L.LE.LEND )
      $         GO TO 50
             GO TO 150
          END IF
 *
-         IF( JTOT==NMAXIT )
+         IF( JTOT.EQ.NMAXIT )
      $      GO TO 150
          JTOT = JTOT + 1
 *
@@ -5807,7 +5807,7 @@
          DO 80 I = M - 1, L, -1
             BB = E( I )
             R = P + BB
-            IF( I/=M-1 )
+            IF( I.NE.M-1 )
      $         E( I+1 ) = S*R
             OLDC = C
             C = P / R
@@ -5816,7 +5816,7 @@
             ALPHA = D( I )
             GAMMA = C*( ALPHA-SIGMA ) - S*OLDGAM
             D( I+1 ) = OLDGAM + ( ALPHA-GAMMA )
-            IF( C/=ZERO ) THEN
+            IF( C.NE.ZERO ) THEN
                P = ( GAMMA*GAMMA ) / C
             ELSE
                P = OLDC*BB
@@ -5833,7 +5833,7 @@
          D( L ) = P
 *
          L = L + 1
-         IF( L<=LEND )
+         IF( L.LE.LEND )
      $      GO TO 50
          GO TO 150
 *
@@ -5845,34 +5845,34 @@
 *
   100    CONTINUE
          DO 110 M = L, LEND + 1, -1
-            IF( ABS( E( M-1 ) )<=EPS2*ABS( D( M )*D( M-1 ) ) )
+            IF( ABS( E( M-1 ) ).LE.EPS2*ABS( D( M )*D( M-1 ) ) )
      $         GO TO 120
   110    CONTINUE
          M = LEND
 *
   120    CONTINUE
-         IF( M>LEND )
+         IF( M.GT.LEND )
      $      E( M-1 ) = ZERO
          P = D( L )
-         IF( M==L )
+         IF( M.EQ.L )
      $      GO TO 140
 *
 *        If remaining matrix is 2 by 2, use DLAE2 to compute its
 *        eigenvalues.
 *
-         IF( M==L-1 ) THEN
+         IF( M.EQ.L-1 ) THEN
             RTE = SQRT( E( L-1 ) )
             CALL DLAE2( D( L ), RTE, D( L-1 ), RT1, RT2 )
             D( L ) = RT1
             D( L-1 ) = RT2
             E( L-1 ) = ZERO
             L = L - 2
-            IF( L>=LEND )
+            IF( L.GE.LEND )
      $         GO TO 100
             GO TO 150
          END IF
 *
-         IF( JTOT==NMAXIT )
+         IF( JTOT.EQ.NMAXIT )
      $      GO TO 150
          JTOT = JTOT + 1
 *
@@ -5893,7 +5893,7 @@
          DO 130 I = M, L - 1
             BB = E( I )
             R = P + BB
-            IF( I/=M )
+            IF( I.NE.M )
      $         E( I-1 ) = S*R
             OLDC = C
             C = P / R
@@ -5902,7 +5902,7 @@
             ALPHA = D( I+1 )
             GAMMA = C*( ALPHA-SIGMA ) - S*OLDGAM
             D( I ) = OLDGAM + ( ALPHA-GAMMA )
-            IF( C/=ZERO ) THEN
+            IF( C.NE.ZERO ) THEN
                P = ( GAMMA*GAMMA ) / C
             ELSE
                P = OLDC*BB
@@ -5919,7 +5919,7 @@
          D( L ) = P
 *
          L = L - 1
-         IF( L>=LEND )
+         IF( L.GE.LEND )
      $      GO TO 100
          GO TO 150
 *
@@ -5928,20 +5928,20 @@
 *     Undo scaling if necessary
 *
   150 CONTINUE
-      IF( ISCALE==1 )
+      IF( ISCALE.EQ.1 )
      $   CALL DLASCL( 'G', 0, 0, SSFMAX, ANORM, LENDSV-LSV+1, 1,
      $                D( LSV ), N, INFO )
-      IF( ISCALE==2 )
+      IF( ISCALE.EQ.2 )
      $   CALL DLASCL( 'G', 0, 0, SSFMIN, ANORM, LENDSV-LSV+1, 1,
      $                D( LSV ), N, INFO )
 *
 *     Check for no convergence to an eigenvalue after a total
 *     of N*MAXIT iterations.
 *
-      IF( JTOT<NMAXIT )
+      IF( JTOT.LT.NMAXIT )
      $   GO TO 10
       DO 160 I = 1, N - 1
-         IF( E( I )/=ZERO )
+         IF( E( I ).NE.ZERO )
      $      INFO = INFO + 1
   160 CONTINUE
       GO TO 180
@@ -6102,19 +6102,19 @@
       UPPER = LSAME( UPLO, 'U' )
       IF( .NOT.UPPER .AND. .NOT.LSAME( UPLO, 'L' ) ) THEN
          INFO = -1
-      ELSE IF( N<0 ) THEN
+      ELSE IF( N.LT.0 ) THEN
          INFO = -2
-      ELSE IF( LDA<MAX( 1, N ) ) THEN
+      ELSE IF( LDA.LT.MAX( 1, N ) ) THEN
          INFO = -4
       END IF
-      IF( INFO/=0 ) THEN
+      IF( INFO.NE.0 ) THEN
          CALL XERBLA( 'DSYTD2', -INFO )
          RETURN
       END IF
 *
 *     Quick return if possible
 *
-      IF( N<=0 )
+      IF( N.LE.0 )
      $   RETURN
 *
       IF( UPPER ) THEN
@@ -6129,7 +6129,7 @@
             CALL DLARFG( I, A( I, I+1 ), A( 1, I+1 ), 1, TAUI )
             E( I ) = A( I, I+1 )
 *
-            IF( TAUI/=ZERO ) THEN
+            IF( TAUI.NE.ZERO ) THEN
 *
 *              Apply H(i) from both sides to A(1:i,1:i)
 *
@@ -6170,7 +6170,7 @@
      $                   TAUI )
             E( I ) = A( I+1, I )
 *
-            IF( TAUI/=ZERO ) THEN
+            IF( TAUI.NE.ZERO ) THEN
 *
 *              Apply H(i) from both sides to A(i+1:n,i+1:n)
 *
@@ -6361,18 +6361,18 @@
 *
       INFO = 0
       UPPER = LSAME( UPLO, 'U' )
-      LQUERY = ( LWORK==-1 )
+      LQUERY = ( LWORK.EQ.-1 )
       IF( .NOT.UPPER .AND. .NOT.LSAME( UPLO, 'L' ) ) THEN
          INFO = -1
-      ELSE IF( N<0 ) THEN
+      ELSE IF( N.LT.0 ) THEN
          INFO = -2
-      ELSE IF( LDA<MAX( 1, N ) ) THEN
+      ELSE IF( LDA.LT.MAX( 1, N ) ) THEN
          INFO = -4
-      ELSE IF( LWORK<1 .AND. .NOT.LQUERY ) THEN
+      ELSE IF( LWORK.LT.1 .AND. .NOT.LQUERY ) THEN
          INFO = -9
       END IF
 *
-      IF( INFO==0 ) THEN
+      IF( INFO.EQ.0 ) THEN
 *
 *        Determine the block size.
 *
@@ -6381,7 +6381,7 @@
          WORK( 1 ) = LWKOPT
       END IF
 *
-      IF( INFO/=0 ) THEN
+      IF( INFO.NE.0 ) THEN
          CALL XERBLA( 'DSYTRD', -INFO )
          RETURN
       ELSE IF( LQUERY ) THEN
@@ -6390,26 +6390,26 @@
 *
 *     Quick return if possible
 *
-      IF( N==0 ) THEN
+      IF( N.EQ.0 ) THEN
          WORK( 1 ) = 1
          RETURN
       END IF
 *
       NX = N
       IWS = 1
-      IF( NB>1 .AND. NB<N ) THEN
+      IF( NB.GT.1 .AND. NB.LT.N ) THEN
 *
 *        Determine when to cross over from blocked to unblocked code
 *        (last block is always handled by unblocked code).
 *
          NX = MAX( NB, ILAENV( 3, 'DSYTRD', UPLO, N, -1, -1, -1 ) )
-         IF( NX<N ) THEN
+         IF( NX.LT.N ) THEN
 *
 *           Determine if workspace is large enough for blocked code.
 *
             LDWORK = N
             IWS = LDWORK*NB
-            IF( LWORK<IWS ) THEN
+            IF( LWORK.LT.IWS ) THEN
 *
 *              Not enough workspace to use optimal NB:  determine the
 *              minimum value of NB, and reduce NB or force use of
@@ -6417,7 +6417,7 @@
 *
                NB = MAX( LWORK / LDWORK, 1 )
                NBMIN = ILAENV( 2, 'DSYTRD', UPLO, N, -1, -1, -1 )
-               IF( NB<NBMIN )
+               IF( NB.LT.NBMIN )
      $            NX = N
             END IF
          ELSE
@@ -6550,49 +6550,49 @@
       IEEECK = 1
 *
       POSINF = ONE / ZERO
-      IF( POSINF<=ONE ) THEN
+      IF( POSINF.LE.ONE ) THEN
          IEEECK = 0
          RETURN
       END IF
 *
       NEGINF = -ONE / ZERO
-      IF( NEGINF>=ZERO ) THEN
+      IF( NEGINF.GE.ZERO ) THEN
          IEEECK = 0
          RETURN
       END IF
 *
       NEGZRO = ONE / ( NEGINF+ONE )
-      IF( NEGZRO/=ZERO ) THEN
+      IF( NEGZRO.NE.ZERO ) THEN
          IEEECK = 0
          RETURN
       END IF
 *
       NEGINF = ONE / NEGZRO
-      IF( NEGINF>=ZERO ) THEN
+      IF( NEGINF.GE.ZERO ) THEN
          IEEECK = 0
          RETURN
       END IF
 *
       NEWZRO = NEGZRO + ZERO
-      IF( NEWZRO/=ZERO ) THEN
+      IF( NEWZRO.NE.ZERO ) THEN
          IEEECK = 0
          RETURN
       END IF
 *
       POSINF = ONE / NEWZRO
-      IF( POSINF<=ONE ) THEN
+      IF( POSINF.LE.ONE ) THEN
          IEEECK = 0
          RETURN
       END IF
 *
       NEGINF = NEGINF*POSINF
-      IF( NEGINF>=ZERO ) THEN
+      IF( NEGINF.GE.ZERO ) THEN
          IEEECK = 0
          RETURN
       END IF
 *
       POSINF = POSINF*POSINF
-      IF( POSINF<=ONE ) THEN
+      IF( POSINF.LE.ONE ) THEN
          IEEECK = 0
          RETURN
       END IF
@@ -6602,7 +6602,7 @@
 *
 *     Return if we were only asked to check infinity arithmetic
 *
-      IF( ISPEC==0 )
+      IF( ISPEC.EQ.0 )
      $   RETURN
 *
       NAN1 = POSINF + NEGINF
@@ -6617,32 +6617,32 @@
 *
       NAN6 = NAN5*0.0
 *
-      IF( NAN1==NAN1 ) THEN
+      IF( NAN1.EQ.NAN1 ) THEN
          IEEECK = 0
          RETURN
       END IF
 *
-      IF( NAN2==NAN2 ) THEN
+      IF( NAN2.EQ.NAN2 ) THEN
          IEEECK = 0
          RETURN
       END IF
 *
-      IF( NAN3==NAN3 ) THEN
+      IF( NAN3.EQ.NAN3 ) THEN
          IEEECK = 0
          RETURN
       END IF
 *
-      IF( NAN4==NAN4 ) THEN
+      IF( NAN4.EQ.NAN4 ) THEN
          IEEECK = 0
          RETURN
       END IF
 *
-      IF( NAN5==NAN5 ) THEN
+      IF( NAN5.EQ.NAN5 ) THEN
          IEEECK = 0
          RETURN
       END IF
 *
-      IF( NAN6==NAN6 ) THEN
+      IF( NAN6.EQ.NAN6 ) THEN
          IEEECK = 0
          RETURN
       END IF
@@ -6748,7 +6748,7 @@
 *      the optimal blocksize for STRTRI as follows:
 *
 *      NB = ILAENV( 1, 'STRTRI', UPLO // DIAG, N, -1, -1, -1 )
-*      IF( NB<=1 ) NB = MAX( 1, N )
+*      IF( NB.LE.1 ) NB = MAX( 1, N )
 *
 *  =====================================================================
 *
@@ -6785,53 +6785,53 @@
       SUBNAM = NAME
       IC = ICHAR( SUBNAM( 1:1 ) )
       IZ = ICHAR( 'Z' )
-      IF( IZ==90 .OR. IZ==122 ) THEN
+      IF( IZ.EQ.90 .OR. IZ.EQ.122 ) THEN
 *
 *        ASCII character set
 *
-         IF( IC>=97 .AND. IC<=122 ) THEN
+         IF( IC.GE.97 .AND. IC.LE.122 ) THEN
             SUBNAM( 1:1 ) = CHAR( IC-32 )
             DO 10 I = 2, 6
                IC = ICHAR( SUBNAM( I:I ) )
-               IF( IC>=97 .AND. IC<=122 )
+               IF( IC.GE.97 .AND. IC.LE.122 )
      $            SUBNAM( I:I ) = CHAR( IC-32 )
    10       CONTINUE
          END IF
 *
-      ELSE IF( IZ==233 .OR. IZ==169 ) THEN
+      ELSE IF( IZ.EQ.233 .OR. IZ.EQ.169 ) THEN
 *
 *        EBCDIC character set
 *
-         IF( ( IC>=129 .AND. IC<=137 ) .OR.
-     $       ( IC>=145 .AND. IC<=153 ) .OR.
-     $       ( IC>=162 .AND. IC<=169 ) ) THEN
+         IF( ( IC.GE.129 .AND. IC.LE.137 ) .OR.
+     $       ( IC.GE.145 .AND. IC.LE.153 ) .OR.
+     $       ( IC.GE.162 .AND. IC.LE.169 ) ) THEN
             SUBNAM( 1:1 ) = CHAR( IC+64 )
             DO 20 I = 2, 6
                IC = ICHAR( SUBNAM( I:I ) )
-               IF( ( IC>=129 .AND. IC<=137 ) .OR.
-     $             ( IC>=145 .AND. IC<=153 ) .OR.
-     $             ( IC>=162 .AND. IC<=169 ) )
+               IF( ( IC.GE.129 .AND. IC.LE.137 ) .OR.
+     $             ( IC.GE.145 .AND. IC.LE.153 ) .OR.
+     $             ( IC.GE.162 .AND. IC.LE.169 ) )
      $            SUBNAM( I:I ) = CHAR( IC+64 )
    20       CONTINUE
          END IF
 *
-      ELSE IF( IZ==218 .OR. IZ==250 ) THEN
+      ELSE IF( IZ.EQ.218 .OR. IZ.EQ.250 ) THEN
 *
 *        Prime machines:  ASCII+128
 *
-         IF( IC>=225 .AND. IC<=250 ) THEN
+         IF( IC.GE.225 .AND. IC.LE.250 ) THEN
             SUBNAM( 1:1 ) = CHAR( IC-32 )
             DO 30 I = 2, 6
                IC = ICHAR( SUBNAM( I:I ) )
-               IF( IC>=225 .AND. IC<=250 )
+               IF( IC.GE.225 .AND. IC.LE.250 )
      $            SUBNAM( I:I ) = CHAR( IC-32 )
    30       CONTINUE
          END IF
       END IF
 *
       C1 = SUBNAM( 1:1 )
-      SNAME = C1=='S' .OR. C1=='D'
-      CNAME = C1=='C' .OR. C1=='Z'
+      SNAME = C1.EQ.'S' .OR. C1.EQ.'D'
+      CNAME = C1.EQ.'C' .OR. C1.EQ.'Z'
       IF( .NOT.( CNAME .OR. SNAME ) )
      $   RETURN
       C2 = SUBNAM( 2:3 )
@@ -6850,145 +6850,145 @@
 *
       NB = 1
 *
-      IF( C2=='GE' ) THEN
-         IF( C3=='TRF' ) THEN
+      IF( C2.EQ.'GE' ) THEN
+         IF( C3.EQ.'TRF' ) THEN
             IF( SNAME ) THEN
                NB = 64
             ELSE
                NB = 64
             END IF
-         ELSE IF( C3=='QRF' .OR. C3=='RQF' .OR. C3=='LQF' .OR.
-     $            C3=='QLF' ) THEN
+         ELSE IF( C3.EQ.'QRF' .OR. C3.EQ.'RQF' .OR. C3.EQ.'LQF' .OR.
+     $            C3.EQ.'QLF' ) THEN
             IF( SNAME ) THEN
                NB = 32
             ELSE
                NB = 32
             END IF
-         ELSE IF( C3=='HRD' ) THEN
+         ELSE IF( C3.EQ.'HRD' ) THEN
             IF( SNAME ) THEN
                NB = 32
             ELSE
                NB = 32
             END IF
-         ELSE IF( C3=='BRD' ) THEN
+         ELSE IF( C3.EQ.'BRD' ) THEN
             IF( SNAME ) THEN
                NB = 32
             ELSE
                NB = 32
             END IF
-         ELSE IF( C3=='TRI' ) THEN
+         ELSE IF( C3.EQ.'TRI' ) THEN
             IF( SNAME ) THEN
                NB = 64
             ELSE
                NB = 64
             END IF
          END IF
-      ELSE IF( C2=='PO' ) THEN
-         IF( C3=='TRF' ) THEN
+      ELSE IF( C2.EQ.'PO' ) THEN
+         IF( C3.EQ.'TRF' ) THEN
             IF( SNAME ) THEN
                NB = 64
             ELSE
                NB = 64
             END IF
          END IF
-      ELSE IF( C2=='SY' ) THEN
-         IF( C3=='TRF' ) THEN
+      ELSE IF( C2.EQ.'SY' ) THEN
+         IF( C3.EQ.'TRF' ) THEN
             IF( SNAME ) THEN
                NB = 64
             ELSE
                NB = 64
             END IF
-         ELSE IF( SNAME .AND. C3=='TRD' ) THEN
+         ELSE IF( SNAME .AND. C3.EQ.'TRD' ) THEN
             NB = 32
-         ELSE IF( SNAME .AND. C3=='GST' ) THEN
+         ELSE IF( SNAME .AND. C3.EQ.'GST' ) THEN
             NB = 64
          END IF
-      ELSE IF( CNAME .AND. C2=='HE' ) THEN
-         IF( C3=='TRF' ) THEN
+      ELSE IF( CNAME .AND. C2.EQ.'HE' ) THEN
+         IF( C3.EQ.'TRF' ) THEN
             NB = 64
-         ELSE IF( C3=='TRD' ) THEN
+         ELSE IF( C3.EQ.'TRD' ) THEN
             NB = 32
-         ELSE IF( C3=='GST' ) THEN
+         ELSE IF( C3.EQ.'GST' ) THEN
             NB = 64
          END IF
-      ELSE IF( SNAME .AND. C2=='OR' ) THEN
-         IF( C3( 1:1 )=='G' ) THEN
-            IF( C4=='QR' .OR. C4=='RQ' .OR. C4=='LQ' .OR.
-     $          C4=='QL' .OR. C4=='HR' .OR. C4=='TR' .OR.
-     $          C4=='BR' ) THEN
+      ELSE IF( SNAME .AND. C2.EQ.'OR' ) THEN
+         IF( C3( 1:1 ).EQ.'G' ) THEN
+            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
+     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
+     $          C4.EQ.'BR' ) THEN
                NB = 32
             END IF
-         ELSE IF( C3( 1:1 )=='M' ) THEN
-            IF( C4=='QR' .OR. C4=='RQ' .OR. C4=='LQ' .OR.
-     $          C4=='QL' .OR. C4=='HR' .OR. C4=='TR' .OR.
-     $          C4=='BR' ) THEN
-               NB = 32
-            END IF
-         END IF
-      ELSE IF( CNAME .AND. C2=='UN' ) THEN
-         IF( C3( 1:1 )=='G' ) THEN
-            IF( C4=='QR' .OR. C4=='RQ' .OR. C4=='LQ' .OR.
-     $          C4=='QL' .OR. C4=='HR' .OR. C4=='TR' .OR.
-     $          C4=='BR' ) THEN
-               NB = 32
-            END IF
-         ELSE IF( C3( 1:1 )=='M' ) THEN
-            IF( C4=='QR' .OR. C4=='RQ' .OR. C4=='LQ' .OR.
-     $          C4=='QL' .OR. C4=='HR' .OR. C4=='TR' .OR.
-     $          C4=='BR' ) THEN
+         ELSE IF( C3( 1:1 ).EQ.'M' ) THEN
+            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
+     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
+     $          C4.EQ.'BR' ) THEN
                NB = 32
             END IF
          END IF
-      ELSE IF( C2=='GB' ) THEN
-         IF( C3=='TRF' ) THEN
+      ELSE IF( CNAME .AND. C2.EQ.'UN' ) THEN
+         IF( C3( 1:1 ).EQ.'G' ) THEN
+            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
+     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
+     $          C4.EQ.'BR' ) THEN
+               NB = 32
+            END IF
+         ELSE IF( C3( 1:1 ).EQ.'M' ) THEN
+            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
+     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
+     $          C4.EQ.'BR' ) THEN
+               NB = 32
+            END IF
+         END IF
+      ELSE IF( C2.EQ.'GB' ) THEN
+         IF( C3.EQ.'TRF' ) THEN
             IF( SNAME ) THEN
-               IF( N4<=64 ) THEN
+               IF( N4.LE.64 ) THEN
                   NB = 1
                ELSE
                   NB = 32
                END IF
             ELSE
-               IF( N4<=64 ) THEN
-                  NB = 1
-               ELSE
-                  NB = 32
-               END IF
-            END IF
-         END IF
-      ELSE IF( C2=='PB' ) THEN
-         IF( C3=='TRF' ) THEN
-            IF( SNAME ) THEN
-               IF( N2<=64 ) THEN
-                  NB = 1
-               ELSE
-                  NB = 32
-               END IF
-            ELSE
-               IF( N2<=64 ) THEN
+               IF( N4.LE.64 ) THEN
                   NB = 1
                ELSE
                   NB = 32
                END IF
             END IF
          END IF
-      ELSE IF( C2=='TR' ) THEN
-         IF( C3=='TRI' ) THEN
+      ELSE IF( C2.EQ.'PB' ) THEN
+         IF( C3.EQ.'TRF' ) THEN
+            IF( SNAME ) THEN
+               IF( N2.LE.64 ) THEN
+                  NB = 1
+               ELSE
+                  NB = 32
+               END IF
+            ELSE
+               IF( N2.LE.64 ) THEN
+                  NB = 1
+               ELSE
+                  NB = 32
+               END IF
+            END IF
+         END IF
+      ELSE IF( C2.EQ.'TR' ) THEN
+         IF( C3.EQ.'TRI' ) THEN
             IF( SNAME ) THEN
                NB = 64
             ELSE
                NB = 64
             END IF
          END IF
-      ELSE IF( C2=='LA' ) THEN
-         IF( C3=='UUM' ) THEN
+      ELSE IF( C2.EQ.'LA' ) THEN
+         IF( C3.EQ.'UUM' ) THEN
             IF( SNAME ) THEN
                NB = 64
             ELSE
                NB = 64
             END IF
          END IF
-      ELSE IF( SNAME .AND. C2=='ST' ) THEN
-         IF( C3=='EBZ' ) THEN
+      ELSE IF( SNAME .AND. C2.EQ.'ST' ) THEN
+         IF( C3.EQ.'EBZ' ) THEN
             NB = 1
          END IF
       END IF
@@ -7000,72 +7000,72 @@
 *     ISPEC = 2:  minimum block size
 *
       NBMIN = 2
-      IF( C2=='GE' ) THEN
-         IF( C3=='QRF' .OR. C3=='RQF' .OR. C3=='LQF' .OR.
-     $       C3=='QLF' ) THEN
+      IF( C2.EQ.'GE' ) THEN
+         IF( C3.EQ.'QRF' .OR. C3.EQ.'RQF' .OR. C3.EQ.'LQF' .OR.
+     $       C3.EQ.'QLF' ) THEN
             IF( SNAME ) THEN
                NBMIN = 2
             ELSE
                NBMIN = 2
             END IF
-         ELSE IF( C3=='HRD' ) THEN
+         ELSE IF( C3.EQ.'HRD' ) THEN
             IF( SNAME ) THEN
                NBMIN = 2
             ELSE
                NBMIN = 2
             END IF
-         ELSE IF( C3=='BRD' ) THEN
+         ELSE IF( C3.EQ.'BRD' ) THEN
             IF( SNAME ) THEN
                NBMIN = 2
             ELSE
                NBMIN = 2
             END IF
-         ELSE IF( C3=='TRI' ) THEN
+         ELSE IF( C3.EQ.'TRI' ) THEN
             IF( SNAME ) THEN
                NBMIN = 2
             ELSE
                NBMIN = 2
             END IF
          END IF
-      ELSE IF( C2=='SY' ) THEN
-         IF( C3=='TRF' ) THEN
+      ELSE IF( C2.EQ.'SY' ) THEN
+         IF( C3.EQ.'TRF' ) THEN
             IF( SNAME ) THEN
                NBMIN = 8
             ELSE
                NBMIN = 8
             END IF
-         ELSE IF( SNAME .AND. C3=='TRD' ) THEN
+         ELSE IF( SNAME .AND. C3.EQ.'TRD' ) THEN
             NBMIN = 2
          END IF
-      ELSE IF( CNAME .AND. C2=='HE' ) THEN
-         IF( C3=='TRD' ) THEN
+      ELSE IF( CNAME .AND. C2.EQ.'HE' ) THEN
+         IF( C3.EQ.'TRD' ) THEN
             NBMIN = 2
          END IF
-      ELSE IF( SNAME .AND. C2=='OR' ) THEN
-         IF( C3( 1:1 )=='G' ) THEN
-            IF( C4=='QR' .OR. C4=='RQ' .OR. C4=='LQ' .OR.
-     $          C4=='QL' .OR. C4=='HR' .OR. C4=='TR' .OR.
-     $          C4=='BR' ) THEN
+      ELSE IF( SNAME .AND. C2.EQ.'OR' ) THEN
+         IF( C3( 1:1 ).EQ.'G' ) THEN
+            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
+     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
+     $          C4.EQ.'BR' ) THEN
                NBMIN = 2
             END IF
-         ELSE IF( C3( 1:1 )=='M' ) THEN
-            IF( C4=='QR' .OR. C4=='RQ' .OR. C4=='LQ' .OR.
-     $          C4=='QL' .OR. C4=='HR' .OR. C4=='TR' .OR.
-     $          C4=='BR' ) THEN
+         ELSE IF( C3( 1:1 ).EQ.'M' ) THEN
+            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
+     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
+     $          C4.EQ.'BR' ) THEN
                NBMIN = 2
             END IF
          END IF
-      ELSE IF( CNAME .AND. C2=='UN' ) THEN
-         IF( C3( 1:1 )=='G' ) THEN
-            IF( C4=='QR' .OR. C4=='RQ' .OR. C4=='LQ' .OR.
-     $          C4=='QL' .OR. C4=='HR' .OR. C4=='TR' .OR.
-     $          C4=='BR' ) THEN
+      ELSE IF( CNAME .AND. C2.EQ.'UN' ) THEN
+         IF( C3( 1:1 ).EQ.'G' ) THEN
+            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
+     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
+     $          C4.EQ.'BR' ) THEN
                NBMIN = 2
             END IF
-         ELSE IF( C3( 1:1 )=='M' ) THEN
-            IF( C4=='QR' .OR. C4=='RQ' .OR. C4=='LQ' .OR.
-     $          C4=='QL' .OR. C4=='HR' .OR. C4=='TR' .OR.
-     $          C4=='BR' ) THEN
+         ELSE IF( C3( 1:1 ).EQ.'M' ) THEN
+            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
+     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
+     $          C4.EQ.'BR' ) THEN
                NBMIN = 2
             END IF
          END IF
@@ -7078,48 +7078,48 @@
 *     ISPEC = 3:  crossover point
 *
       NX = 0
-      IF( C2=='GE' ) THEN
-         IF( C3=='QRF' .OR. C3=='RQF' .OR. C3=='LQF' .OR.
-     $       C3=='QLF' ) THEN
+      IF( C2.EQ.'GE' ) THEN
+         IF( C3.EQ.'QRF' .OR. C3.EQ.'RQF' .OR. C3.EQ.'LQF' .OR.
+     $       C3.EQ.'QLF' ) THEN
             IF( SNAME ) THEN
                NX = 128
             ELSE
                NX = 128
             END IF
-         ELSE IF( C3=='HRD' ) THEN
+         ELSE IF( C3.EQ.'HRD' ) THEN
             IF( SNAME ) THEN
                NX = 128
             ELSE
                NX = 128
             END IF
-         ELSE IF( C3=='BRD' ) THEN
+         ELSE IF( C3.EQ.'BRD' ) THEN
             IF( SNAME ) THEN
                NX = 128
             ELSE
                NX = 128
             END IF
          END IF
-      ELSE IF( C2=='SY' ) THEN
-         IF( SNAME .AND. C3=='TRD' ) THEN
+      ELSE IF( C2.EQ.'SY' ) THEN
+         IF( SNAME .AND. C3.EQ.'TRD' ) THEN
             NX = 32
          END IF
-      ELSE IF( CNAME .AND. C2=='HE' ) THEN
-         IF( C3=='TRD' ) THEN
+      ELSE IF( CNAME .AND. C2.EQ.'HE' ) THEN
+         IF( C3.EQ.'TRD' ) THEN
             NX = 32
          END IF
-      ELSE IF( SNAME .AND. C2=='OR' ) THEN
-         IF( C3( 1:1 )=='G' ) THEN
-            IF( C4=='QR' .OR. C4=='RQ' .OR. C4=='LQ' .OR.
-     $          C4=='QL' .OR. C4=='HR' .OR. C4=='TR' .OR.
-     $          C4=='BR' ) THEN
+      ELSE IF( SNAME .AND. C2.EQ.'OR' ) THEN
+         IF( C3( 1:1 ).EQ.'G' ) THEN
+            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
+     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
+     $          C4.EQ.'BR' ) THEN
                NX = 128
             END IF
          END IF
-      ELSE IF( CNAME .AND. C2=='UN' ) THEN
-         IF( C3( 1:1 )=='G' ) THEN
-            IF( C4=='QR' .OR. C4=='RQ' .OR. C4=='LQ' .OR.
-     $          C4=='QL' .OR. C4=='HR' .OR. C4=='TR' .OR.
-     $          C4=='BR' ) THEN
+      ELSE IF( CNAME .AND. C2.EQ.'UN' ) THEN
+         IF( C3( 1:1 ).EQ.'G' ) THEN
+            IF( C4.EQ.'QR' .OR. C4.EQ.'RQ' .OR. C4.EQ.'LQ' .OR.
+     $          C4.EQ.'QL' .OR. C4.EQ.'HR' .OR. C4.EQ.'TR' .OR.
+     $          C4.EQ.'BR' ) THEN
                NX = 128
             END IF
          END IF
@@ -7177,7 +7177,7 @@
 *
 C     ILAENV = 0
       ILAENV = 1
-      IF( ILAENV==1 ) THEN
+      IF( ILAENV.EQ.1 ) THEN
          ILAENV = IEEECK( 0, 0.0, 1.0 ) 
       END IF
       RETURN
@@ -7188,7 +7188,7 @@ C     ILAENV = 0
 *
 C     ILAENV = 0
       ILAENV = 1
-      IF( ILAENV==1 ) THEN
+      IF( ILAENV.EQ.1 ) THEN
          ILAENV = IEEECK( 1, 0.0, 1.0 ) 
       END IF
       RETURN
@@ -7232,7 +7232,7 @@ C     ILAENV = 0
 *
 *     Test if the characters are equal
 *
-      LSAME = CA==CB
+      LSAME = CA.EQ.CB
       IF( LSAME )
      $   RETURN
 *
@@ -7248,35 +7248,35 @@ C     ILAENV = 0
       INTA = ICHAR( CA )
       INTB = ICHAR( CB )
 *
-      IF( ZCODE==90 .OR. ZCODE==122 ) THEN
+      IF( ZCODE.EQ.90 .OR. ZCODE.EQ.122 ) THEN
 *
 *        ASCII is assumed - ZCODE is the ASCII code of either lower or
 *        upper case 'Z'.
 *
-         IF( INTA>=97 .AND. INTA<=122 ) INTA = INTA - 32
-         IF( INTB>=97 .AND. INTB<=122 ) INTB = INTB - 32
+         IF( INTA.GE.97 .AND. INTA.LE.122 ) INTA = INTA - 32
+         IF( INTB.GE.97 .AND. INTB.LE.122 ) INTB = INTB - 32
 *
-      ELSE IF( ZCODE==233 .OR. ZCODE==169 ) THEN
+      ELSE IF( ZCODE.EQ.233 .OR. ZCODE.EQ.169 ) THEN
 *
 *        EBCDIC is assumed - ZCODE is the EBCDIC code of either lower or
 *        upper case 'Z'.
 *
-         IF( INTA>=129 .AND. INTA<=137 .OR.
-     $       INTA>=145 .AND. INTA<=153 .OR.
-     $       INTA>=162 .AND. INTA<=169 ) INTA = INTA + 64
-         IF( INTB>=129 .AND. INTB<=137 .OR.
-     $       INTB>=145 .AND. INTB<=153 .OR.
-     $       INTB>=162 .AND. INTB<=169 ) INTB = INTB + 64
+         IF( INTA.GE.129 .AND. INTA.LE.137 .OR.
+     $       INTA.GE.145 .AND. INTA.LE.153 .OR.
+     $       INTA.GE.162 .AND. INTA.LE.169 ) INTA = INTA + 64
+         IF( INTB.GE.129 .AND. INTB.LE.137 .OR.
+     $       INTB.GE.145 .AND. INTB.LE.153 .OR.
+     $       INTB.GE.162 .AND. INTB.LE.169 ) INTB = INTB + 64
 *
-      ELSE IF( ZCODE==218 .OR. ZCODE==250 ) THEN
+      ELSE IF( ZCODE.EQ.218 .OR. ZCODE.EQ.250 ) THEN
 *
 *        ASCII is assumed, on Prime machines - ZCODE is the ASCII code
 *        plus 128 of either lower or upper case 'Z'.
 *
-         IF( INTA>=225 .AND. INTA<=250 ) INTA = INTA - 32
-         IF( INTB>=225 .AND. INTB<=250 ) INTB = INTB - 32
+         IF( INTA.GE.225 .AND. INTA.LE.250 ) INTA = INTA - 32
+         IF( INTB.GE.225 .AND. INTB.LE.250 ) INTB = INTB - 32
       END IF
-      LSAME = INTA==INTB
+      LSAME = INTA.EQ.INTB
 *
 *     RETURN
 *

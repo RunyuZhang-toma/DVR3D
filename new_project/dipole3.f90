@@ -126,17 +126,14 @@ module mass
 end module mass
 ! END MODULE DEFINITIONS--------------------------------------------
 
+program shallot
+call dipole3b
+stop
+end
 
-
-
-
-      program shallot
-      call dipole3b
-      stop
-      end
 !ccccccccccccccccccccccccccccccccccccccccccc
 !                                                **001
-      subroutine dipole3b
+subroutine dipole3b
 !
 !    dipoleb3, and the various subroutines it calls, calculate the
 !    transitions between vib-rot eigenfunctions due to the

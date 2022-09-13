@@ -1,9 +1,24 @@
+
+module wfnread_size
+  integer :: idia
+  integer :: ipar
+  integer :: lmax
+  integer :: npnt1
+  integer :: npnt2
+  integer :: jrot
+  integer :: kmin
+  integer :: neval
+  integer :: jk
+  integer :: ifile
+
+end module wfnread_size
+
 program reader
 ! This is a small utility to read the wavefunction files.
 ! At present it just echos the reads to standard output but 
 ! it can adapted for other functions such as plotting wavefunctions
 
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  use wfnread_size
 
 ! file is assumed to be attached to unit 26
   ifile=26
@@ -12,18 +27,18 @@ program reader
 ! reader header record to determine file structure  
   read(ifile) idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval
   write(*,*) idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval
-  If (jrot==0) kmin=1
+  If (jrot.eq.0) kmin=1
   jk=jrot+kmin
 
 
 
-  If (idia == -2 .and. jk > 1) then
+  If (idia .eq. -2 .and. jk .gt. 1) then
      print *, "Radau, 8 or 9"
       call read_8or9_radau
-  elseif (idia == -2) then
+  elseif (idia .eq. -2) then
      print *, "Radau, 26"
       call read_26_radau
-  elseif (jk > 1) then
+  elseif (jk .gt. 1) then
      print *, "Jacobi, 8 or 9"
       call read_8or9_jacobi
   else
@@ -36,10 +51,9 @@ end program reader
 
 !###################################################################
 subroutine read_8or9_jacobi
+    use wfnread_size
   implicit double precision (a-h,o-y), logical (z)
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
 
-  integer :: ifile, jk
   integer, allocatable ::  nbass(:), lmin(:), lbass(:)
   double precision, allocatable:: r1(:), r2(:), e(:), temp(:,:)
   dimension xm(3)
@@ -99,10 +113,10 @@ end subroutine read_8or9_jacobi
 !##################################################################
 
 subroutine read_26_jacobi
+    use wfnread_size
   implicit double precision (a-h,o-y), logical (z)
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
 
-  integer :: ifile, jk,mbass0,lmin,lbass,nbass
+  integer :: mbass0,lmin,lbass,nbass
 !  double precision, allocatable:: r1(:), r2(:), e(:), d(:), plegd(:,:)
   double precision, allocatable:: e(:), d(:)
   dimension xm(3)
@@ -167,10 +181,9 @@ end subroutine read_26_jacobi
 !###################################################################
 
 subroutine read_26_radau
+    use wfnread_size
   implicit double precision (a-h,o-y), logical (z)
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
 
-  integer :: ifile, jk
   integer, allocatable ::  nbass(:), lmin(:), lbass(:), iv(:)
   double precision, allocatable:: e(:), d(:)
   dimension xm(3)
@@ -217,10 +230,9 @@ end subroutine read_26_radau
 !###################################################################
 
 subroutine read_8or9_radau
+    use wfnread_size
   implicit double precision (a-h,o-y), logical (z)
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
 
-  integer :: ifile, jk
   integer, allocatable ::  nbass(:), lmin(:), lbass(:)
   double precision, allocatable:: e(:), d(:)
   dimension xm(3)

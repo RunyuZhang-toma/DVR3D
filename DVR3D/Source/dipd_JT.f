@@ -12,21 +12,21 @@ C     (R = r . S = r'. T = theta)
 C
       DATA X1/1.0D0/,X0/0.0D0/,TINY/9.0D-15/,X2/2.0D0/,PI/3.1415927D0/
 C
-      IF (G1 == X0) THEN
+      IF (G1 .EQ. X0) THEN
 C        BONDLENGTH BONDANGLE COORDINATES: ATOM 1 = ATOM 2
          Q1 = R1
          Q2 = R2
          THETA = ACOS(XCOS)
-      ELSE IF (G2 == X0) THEN
+      ELSE IF (G2 .EQ. X0) THEN
 C        SCATTERING COORDINATES: ATOM 2 = ATOM 3
          XX = R1 * G1
          YY = R1 * (X1 - G1)
          ALPHA= ACOS(XCOS)
-         IF (R2 == X0 .OR. XCOS >= (X1 - TINY)) THEN
+         IF (R2 .EQ. X0 .OR. XCOS .GE. (X1 - TINY)) THEN
             Q1 = ABS(XX - R2)
             Q2 = (YY + R2)
             COST = -X1
-         ELSE IF (XCOS <= (TINY - X1)) THEN
+         ELSE IF (XCOS .LE. (TINY - X1)) THEN
             Q1 = (XX + R2)
             Q2 = ABS(YY + R2)
             COST = X1
@@ -59,18 +59,18 @@ c      CALL DIPS(DIPX,DIPY,Q1,Q2,THETA)
 C
 C     BONDLENGTH-BONDANGLE CO-ORDINATES
 C
-      IF (G1==X0) THEN
+      IF (G1.EQ.X0) THEN
          GAMMA= THETA/X2
          ycos= COS(GAMMA)
          ysin= SIN(GAMMA)
          IF (ZEMBED) THEN
-            IF (NU==0) THEN
+            IF (NU.EQ.0) THEN
                DIPC= +DIPY*ycos - DIPX*ysin
             ELSE
                DIPC= +DIPX*ycos + DIPY*ysin
             ENDIF
          ELSE
-            if (NU==0) THEN
+            if (NU.EQ.0) THEN
                DIPC= +DIPY*ycos + DIPX*ysin
             ELSE
                DIPC= -DIPX*ycos + DIPY*ysin
@@ -79,12 +79,12 @@ C
 C
 C     SCATTERING CO-ORDINATES
 C
-      ELSE if (G2==X0) THEN
+      ELSE if (G2.EQ.X0) THEN
          GAMMA= BETA - THETA/x2
          if (ZEMBED) THEN
             ycos= COS(GAMMA)
             ysin= SIN(GAMMA)
-            if (NU==0) THEN
+            if (NU.EQ.0) THEN
                DIPC= -DIPX*ysin - DIPY*ycos
             ELSE
                DIPC= +DIPX*ycos - DIPY*ysin
@@ -93,7 +93,7 @@ C
             DELTA= ALPHA - GAMMA
             ycos= COS(DELTA)
             ysin= SIN(DELTA)
-            if (NU==0) THEN
+            if (NU.EQ.0) THEN
                DIPC= +DIPX*ysin + DIPY*ycos
             ELSE
                DIPC= +DIPX*ycos - DIPY*ysin
@@ -109,7 +109,7 @@ C
             alpha = (acos(xcos)-theta)/x2 - acos(cosa)
             ycos= - COS(ALPHA)
             ysin= + SIN(ALPHA)
-            if (NU==1) THEN
+            if (NU.EQ.1) THEN
                DIPC= +DIPX*ysin - DIPY*ycos
             ELSE
                DIPC= -DIPX*ycos - DIPY*ysin
@@ -120,7 +120,7 @@ C
             ALPHA= ACOS(COSA)
             ycos= - COS(ALPHA + THETA/X2)
             ysin= + SIN(ALPHA + THETA/X2)
-            if (NU==0) THEN
+            if (NU.EQ.0) THEN
                DIPC= -DIPX*ysin + DIPY*ycos
             ELSE
                DIPC= -DIPX*ycos - DIPY*ysin
@@ -131,7 +131,7 @@ C
             alpha = ACOS(COSA)
             ycos= - COS(alpha + THETA/X2)
             ysin= + SIN(alpha + THETA/X2)
-            if (NU==0) THEN
+            if (NU.EQ.0) THEN
                DIPC= +DIPX*ysin + DIPY*ycos
             ELSE
                DIPC= -DIPX*ycos + DIPY*ysin

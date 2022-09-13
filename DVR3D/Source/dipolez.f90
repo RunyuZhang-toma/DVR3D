@@ -212,24 +212,24 @@ use input
 use workdata
 implicit none
 
-  if(nval1<nv1+ibase1.or.nval2<nv2+ibase2)then
-     write(6,*)'nval1<nv2+ibase2.or.nval2<nv1+ibase1 --- the program will stop'
+  if(nval1.lt.nv1+ibase1.or.nval2.lt.nv2+ibase2)then
+     write(6,*)'nval1.lt.nv2+ibase2.or.nval2.lt.nv1+ibase1 --- the program will stop'
      stop
   end if
-  if(kpar1==kpar2) then
-     write(6,*)'kpar1==kpar2 -> there are not allowed transitions (d_z=0)!'
+  if(kpar1.eq.kpar2) then
+     write(6,*)'kpar1.eq.kpar2 -> there are not allowed transitions (d_z=0)!'
      write(6,*)'Program stops here'
      stop
   end if
-  if(ifpar1/=ifpar2) then
-     write(6,*)'ifpar1/=ifpar2 -> there are not allowed transitions!'
+  if(ifpar1.ne.ifpar2) then
+     write(6,*)'ifpar1.ne.ifpar2 -> there are not allowed transitions!'
 !     write(6,*)'Program stops here'
 !     stop
   end if
-  if(nv1<=0)then
+  if(nv1.le.0)then
      nv1=nval1-ibase1
   end if
-  if(nv2<=0)then
+  if(nv2.le.0)then
      nv2=nval2-ibase2
   end if
 
@@ -273,9 +273,9 @@ subroutine read_head(channel)
   
 !  write(6,*)"determining the number of k blocks"
 
-  if((headlist%kpar==1.and.mod(headlist%jrot,2)==0).or.(headlist%kpar==0.and.mod(headlist%jrot,2)==1)) then
+  if((headlist%kpar.eq.1.and.mod(headlist%jrot,2).eq.0).or.(headlist%kpar.eq.0.and.mod(headlist%jrot,2).eq.1)) then
      headlist%nk=headlist%jrot
-  elseif((headlist%kpar==1.and.mod(headlist%jrot,2)==1).or.(headlist%kpar==0.and.mod(headlist%jrot,2)==0)) then
+  elseif((headlist%kpar.eq.1.and.mod(headlist%jrot,2).eq.1).or.(headlist%kpar.eq.0.and.mod(headlist%jrot,2).eq.0)) then
      headlist%nk=headlist%jrot+1
   endif
 
@@ -351,7 +351,7 @@ subroutine read_kblocks(channel)
             write(6,*)'n3d2 is',n3d2
             end if
 
-               if(nth1/=nth2)then
+               if(nth1.ne.nth2)then
                   write(6,*)nth1,nth2
                   write(6,*)'---the number of angular grid points is not the same in both files'
                   write(6,*)'---the program will stop'
@@ -375,8 +375,8 @@ subroutine read_kblocks(channel)
 
                !if(.true.) then ! FOR NORM CHECK
                
-               if(sa/=0.0d0.or.sb/=0.d0) then
-!               if(sa/=100000.0d0.or.sb/=10000.0d0) then
+               if(sa.ne.0.0d0.or.sb.ne.0.d0) then
+!               if(sa.ne.100000.0d0.or.sb.ne.10000.0d0) then
 
                   if(.not.allocated(waves2)) then
 
@@ -634,13 +634,13 @@ cq2 = ci**(-iqpar2)
 cq=conjg(cq1)*cq2
 
 
-  if(ispar1==1.or.ispar2==1) then
+  if(ispar1.eq.1.or.ispar2.eq.1) then
        isparloop=1
   else
        isparloop=0
   endif
 
-  if((ispar1+ispar2)==1) then
+  if((ispar1+ispar2).eq.1) then
        ispar=1
   else
        ispar=0
@@ -690,12 +690,12 @@ do n=1,nr
 do l=1,n-isparloop
    call dipc(n,l)       ! calculates the dipole surface at grid
 
-   if(n==l) then
+   if(n.eq.l) then
       fac = 1.0d0
       diag = 0.0d0
    else
       fac=0.5d0
-      if(ispar==1) then
+      if(ispar.eq.1) then
          diag = - 1.0d0
       else
          diag = 1.0d0
@@ -756,8 +756,8 @@ deallocate(dipcxa,dipcya,dipcxb,dipcyb)
 pc1=pc1+1
 pc2=pc2+1
 enddo !cycle over columns r_grid
-    if(ispar1==0.and.isparloop/=0) pc1=pc1+1
-    if(ispar2==0.and.isparloop/=0) pc2=pc2+1
+    if(ispar1.eq.0.and.isparloop.ne.0) pc1=pc1+1
+    if(ispar2.eq.0.and.isparloop.ne.0) pc2=pc2+1
 enddo!cycle over lines   r_grid
 
 152 format(2f20.10)   
@@ -1005,31 +1005,31 @@ end subroutine r_to_q
       data zero,one/0.0d0,1.0d0/
 
       threej = zero
-      if (m1+m2+m3 /= 0) return
+      if (m1+m2+m3 .ne. 0) return
       i1 = -j1+j2+j3+1
-      if (i1 <= 0) return
+      if (i1 .le. 0) return
       i2 = j1-j2+j3+1
-      if (i2 <= 0) return
+      if (i2 .le. 0) return
       i3 =  j1+j2-j3+1
-      if (i3 <= 0) return
+      if (i3 .le. 0) return
       k1 =  j1+m1+1
-      if (k1 <= 0) return
+      if (k1 .le. 0) return
       k2 = j2+m2+1
-      if (k2 <= 0) return
+      if (k2 .le. 0) return
       k3 =  j3+m3+1
-      if (k3 <= 0) return
+      if (k3 .le. 0) return
       l1 = j1-m1+1
-      if (l1 <= 0) return
+      if (l1 .le. 0) return
       l2 = j2-m2+1
-      if (l2 <= 0) return
+      if (l2 .le. 0) return
       l3 = j3-m3+1
-      if (l3 <= 0) return
+      if (l3 .le. 0) return
       n1 = -j1-m2+j3
       n2 = m1-j2+j3
       n3 = j1-j2+m3
       imin = max(-n1,-n2,0)+1
       imax = min(l1,k2,i3)
-      if (imin > imax) return
+      if (imin .gt. imax) return
       sign = one
 
       do 20 i=imin,imax
@@ -1039,7 +1039,7 @@ end subroutine r_to_q
       threej = threej * sqrt(binom(j2+j2+1,i3)*binom(j1+j1+1,i2)&
              / (binom(j1+j2+j3+2,i3)*dble(j3+j3+1)&
              * binom(j1+j1+1,l1)*binom(j2+j2+1,l2)*binom(j3+j3+1,l3)))
-      if (mod(n3+imin,2) /= 0) threej = - threej
+      if (mod(n3+imin,2) .ne. 0) threej = - threej
       return
       end
 
@@ -1072,7 +1072,7 @@ real(8) function delta(a,b)
 implicit none
 integer :: a,b
 
-if(a==b)then
+if(a.eq.b)then
 delta=1.d0
 else
 delta=0.d0
@@ -1201,7 +1201,7 @@ subroutine list_transfer
 
 !!!
 
-  if(nval1/=nval2)then
+  if(nval1.ne.nval2)then
      nval=min(nval1,nval2)
      write(6,*)'---the number of wavefunctions on each file is different.'
      write(6,*)'---calculations will use the lowest number:',nval
@@ -1211,7 +1211,7 @@ subroutine list_transfer
   end if
 
 
-  if(any((rgrid1/=rgrid2).or.(nr1/=nr2)))then
+  if(any((rgrid1.ne.rgrid2).or.(nr1.ne.nr2)))then
      write(6,*)'---the rgrid points are different.'
      write(6,*)'---the program will stop'
      stop
@@ -1323,7 +1323,7 @@ end subroutine readeigs
       DO i=0,nb
          DO n=1,nn
             basis(i,n)=bass(i,n)*norm(i)
-!            if (i==0) write(33,*)n,basis(i,n),norm(i)
+!            if (i.eq.0) write(33,*)n,basis(i,n),norm(i)
          END DO
       END DO
 
@@ -1352,7 +1352,7 @@ end subroutine readeigs
       bass=x0
       DO 60 I=1,nn
       bass(0,I)=x1
-      IF(nb<1) GO TO 70
+      IF(nb.LT.1) GO TO 70
       bass(1,I)=(alf-bet+(lmd+x1)*x(I))/x2
       DO 80 n=2,nb
          bass(n,I)=((A2n(n-1)+A3n(n-1)*x(I))*bass(n-1,I)&
@@ -1429,7 +1429,7 @@ end subroutine readeigs
            &    (DBLE(n)+bet)*p2)/(temp*(x1-z*z))
             z1=z
             z=z1-p1/pp
-            IF(ABS(z-z1)<=EPS) GOTO 1
+            IF(ABS(z-z1).LE.EPS) GOTO 1
  12         CONTINUE            
      1   x(i)=z 
          w(i)=DEXP(gammln(alf+DBLE(n))+gammln(bet+DBLE(n))    &
@@ -1679,16 +1679,16 @@ end if
         sxd= (dpba(ie1,ie2)*cc)**2
         sint(ie1,ie2)= sxd
 
-        if (dd > x0) a= sxd*dd3*detosec/dble(2*jrot2 + 1)
-        if (dd < x0) a= sxd*dd3*detosec/dble(2*jrot1 + 1)
+        if (dd .gt. x0) a= sxd*dd3*detosec/dble(2*jrot2 + 1)
+        if (dd .lt. x0) a= sxd*dd3*detosec/dble(2*jrot1 + 1)
 
         write(6,206) ie1+ibase1,ie2+ibase2,xe1,xe2,dd,sxd,a 
         write(96,209) ie1+ibase1,ie2+ibase2,xe1,xe2,dd,a 
 209     format(2(i4),3(3x,f12.5),f16.8)
 206     format(2(i4),3(3x,f10.3),(2x,e13.6),(2x,f13.6))
 2       continue
-!        if (.not.zpmin .or. ie1<=10) write(6,207)
-!        if (ie1<=nval1) write(6,207)
+!        if (.not.zpmin .or. ie1.le.10) write(6,207)
+!        if (ie1.le.nval1) write(6,207)
         write(6,207)
 207     format(//)
 1       continue

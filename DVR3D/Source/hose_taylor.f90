@@ -1,3 +1,17 @@
+module hose_taylor_size
+  integer :: idia
+  integer :: ipar
+  integer :: lmax
+  integer :: npnt1
+  integer :: npnt2
+  integer :: jrot
+  integer :: kmin
+  integer :: neval
+  integer :: jk
+  integer :: ifile
+
+end module  hose_taylor_size
+
 program hosetaylor
 ! THIS PROGRAM CALCULATES |<PSI|PSI>|^2 FOR EACH VALUE OF K. 
 ! IT THEN PRINTS OUT THE LARGEST COMPONENT AND THE PREDICTED VALUE OF Kc AND Kc
@@ -7,7 +21,7 @@ program hosetaylor
 !
 ! OUTPUT FORMAT IS: J, ENERGY, KA, KC, MAX(|<PSI|PSI>|^2),  IPAR, KMIN, MOD(QUANTA OF NU3,2)
 !
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
+  use hose_taylor_size
 
 ! file is assumed to be attached to unit 26
   ifile=26
@@ -16,14 +30,14 @@ program hosetaylor
 ! reader header record to determine file structure  
   read(ifile) idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval
   write(*,*) idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval
-  If (jrot==0) kmin=1
+  If (jrot.eq.0) kmin=1
   jk=jrot+kmin
 
 
-  If (idia == -2 .and. jk > 1) then
+  If (idia .eq. -2 .and. jk .gt. 1) then
      print *, "Radau, 8 or 9"
       call read_8or9_radau
-  elseif (idia == -2) then
+  elseif (idia .eq. -2) then
      print *, "Radau, 26"
       call read_26_radau
   else
@@ -37,10 +51,9 @@ end program hosetaylor
 !###################################################################
 
 subroutine read_26_radau
+  use hose_taylor_size
   implicit double precision (a-h,o-y), logical (z)
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
 
-  integer :: ifile, jk
   integer, allocatable ::  nbass(:), lmin(:), lbass(:), iv(:)
   double precision, allocatable:: e(:), d(:)
   dimension xm(3)
@@ -57,7 +70,7 @@ integer :: parity
 ! PLEASE SPECIFY EZERO TO OBTAIN ENERGIES WRT ZERO POINT EQUILIBRIUM
   ezero = 0.0d0
 
-  if(ezero == 0.0d0) print *, "ZPE IS ZERO"
+  if(ezero .eq. 0.0d0) print *, "ZPE IS ZERO"
 
 
   do i=1,5
@@ -85,21 +98,21 @@ integer :: parity
 
 !get the eigenvectors
 
-if ( (MODULO(jrot,2) == 0 ) ) THEN
+if ( (MODULO(jrot,2) .eq. 0 ) ) THEN
 
-    if( (ipar == 0) .and. (kmin == 1) ) then
+    if( (ipar .eq. 0) .and. (kmin .eq. 1) ) then
     state = 'para'
     label = 0
     parity = 1
-    else if( (ipar == 0) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 0) .and. (kmin .eq. 0) ) then
     state = 'para'
     label = 0
     parity = -1
-    else if( (ipar == 1) .and. (kmin == 1) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 1) ) then
     state = 'orth'
     label = 1
     parity = 1
-    else if( (ipar == 1) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 0) ) then
     state = 'orth'
     label = 1
     parity = -1
@@ -107,21 +120,21 @@ if ( (MODULO(jrot,2) == 0 ) ) THEN
     continue 
     end if
 
-else if ( (MODULO(jrot,2) == 1 ) ) THEN
+else if ( (MODULO(jrot,2) .eq. 1 ) ) THEN
 
-    if( (ipar == 0) .and. (kmin == 1) ) then
+    if( (ipar .eq. 0) .and. (kmin .eq. 1) ) then
     state = 'orth'
     label = 1
     parity = -1
-    else if( (ipar == 0) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 0) .and. (kmin .eq. 0) ) then
     state = 'orth'
     label = 1
     parity = 1
-    else if( (ipar == 1) .and. (kmin == 1) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 1) ) then
     state = 'para'
     label = 0
     parity = -1
-    else if( (ipar == 1) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 0) ) then
     state = 'para'
     label = 0
     parity = 1
@@ -132,19 +145,19 @@ else
 continue
 end if
 
-if (kmin == 0) ka =  1 
-if (kmin == 1) ka = 1 - 1
+if (kmin .eq. 0) ka =  1 
+if (kmin .eq. 1) ka = 1 - 1
 
-if(ka == 0) then 
+if(ka .eq. 0) then 
 kc=jrot
 !KA+KC EVEN
-if((mod((ka + kc),2) == 0) .and. (state == 'orth')) nu3=1
-if((mod((ka + kc),2) == 0) .and. (state == 'para')) nu3=0
+if((mod((ka + kc),2) .eq. 0) .and. (state .eq. 'orth')) nu3=1
+if((mod((ka + kc),2) .eq. 0) .and. (state .eq. 'para')) nu3=0
 
-if((mod((ka + kc),2) == 1) .and. (state == 'orth')) nu3=0
-if((mod((ka + kc),2) == 1) .and. (state == 'para')) nu3=1
+if((mod((ka + kc),2) .eq. 1) .and. (state .eq. 'orth')) nu3=0
+if((mod((ka + kc),2) .eq. 1) .and. (state .eq. 'para')) nu3=1
 
-else if(ka > 0 ) then
+else if(ka .gt. 0 ) then
 kc1 = jrot - ka
 p1=(-1.0d0)**kc1
 !----------
@@ -153,13 +166,13 @@ p2=(-1.0d0)**kc2
 
 
 
-if(parity == p1) kc=kc1
-if(parity == p2) kc=kc2
-if((mod((ka + kc),2) == 0) .and. (state == 'orth')) nu3=1
-if((mod((ka + kc),2) == 0) .and. (state == 'para')) nu3=0
+if(parity .eq. p1) kc=kc1
+if(parity .eq. p2) kc=kc2
+if((mod((ka + kc),2) .eq. 0) .and. (state .eq. 'orth')) nu3=1
+if((mod((ka + kc),2) .eq. 0) .and. (state .eq. 'para')) nu3=0
 
-if((mod((ka + kc),2) == 1) .and. (state == 'orth')) nu3=0
-if((mod((ka + kc),2) == 1) .and. (state == 'para')) nu3=1
+if((mod((ka + kc),2) .eq. 1) .and. (state .eq. 'orth')) nu3=0
+if((mod((ka + kc),2) .eq. 1) .and. (state .eq. 'para')) nu3=1
 else
 continue 
 end if
@@ -187,10 +200,9 @@ end subroutine read_26_radau
 !###################################################################
 
 subroutine read_8or9_radau
+  use hose_taylor_size
   implicit double precision (a-h,o-y), logical (z)
-  common/size/ idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,jk,ifile
 
-  integer :: ifile, jk
   integer, allocatable ::  nbass(:), lmin(:), lbass(:)
   double precision, allocatable:: e(:), d(:)
   dimension xm(3)
@@ -206,7 +218,7 @@ double precision :: ezero
 ! PLEASE SPECIFY EZERO TO OBTAIN ENERGIES WRT ZERO POINT EQUILIBRIUM
   ezero = 0.0d0
 
-  if(ezero == 0.0d0) print *, "ZPE IS ZERO"
+  if(ezero .eq. 0.0d0) print *, "ZPE IS ZERO"
 
   read(ifile) zembed,zmorse1,zmorse2,xm,g1,g2,zncor
   write(*,*) zembed,zmorse1,zmorse2,xm,g1,g2,zncor
@@ -250,21 +262,21 @@ sum(j)=0.0d0
 biggest(j)=0.0d0
 end do
 
-if ( (MODULO(jrot,2) == 0 ) ) THEN
+if ( (MODULO(jrot,2) .eq. 0 ) ) THEN
 
-    if( (ipar == 0) .and. (kmin == 1) ) then
+    if( (ipar .eq. 0) .and. (kmin .eq. 1) ) then
     state = 'para'
     label = 0
     parity = 1
-    else if( (ipar == 0) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 0) .and. (kmin .eq. 0) ) then
     state = 'para'
     label = 0
     parity = -1
-    else if( (ipar == 1) .and. (kmin == 1) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 1) ) then
     state = 'orth'
     label = 1
     parity = 1
-    else if( (ipar == 1) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 0) ) then
     state = 'orth'
     label = 1
     parity = -1
@@ -272,21 +284,21 @@ if ( (MODULO(jrot,2) == 0 ) ) THEN
     continue 
     end if
 
-else if ( (MODULO(jrot,2) == 1 ) ) THEN
+else if ( (MODULO(jrot,2) .eq. 1 ) ) THEN
 
-    if( (ipar == 0) .and. (kmin == 1) ) then
+    if( (ipar .eq. 0) .and. (kmin .eq. 1) ) then
     state = 'orth'
     label = 1
     parity = -1
-    else if( (ipar == 0) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 0) .and. (kmin .eq. 0) ) then
     state = 'orth'
     label = 1
     parity = 1
-    else if( (ipar == 1) .and. (kmin == 1) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 1) ) then
     state = 'para'
     label = 0
     parity = -1
-    else if( (ipar == 1) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 0) ) then
     state = 'para'
     label = 0
     parity = 1
@@ -311,28 +323,28 @@ d=d**2
         sum(j) = sum(j) + d(i)
         component(j,k) = component(j,k) + d(i) 
         end do
-            if(k == 1) then 
+            if(k .eq. 1) then 
             biggest(j)=component(j,k)
-            if (kmin == 0) ka(j) =  k 
-            if (kmin == 1) ka(j) = k - 1
-            else if ( (k > 1) .and. ( component(j,k) > biggest(j) )) then
+            if (kmin .eq. 0) ka(j) =  k 
+            if (kmin .eq. 1) ka(j) = k - 1
+            else if ( (k .gt. 1) .and. ( component(j,k) .gt. biggest(j) )) then
             biggest(j)=component(j,k)
-            if (kmin == 0) ka(j) = k 
-            if (kmin == 1) ka(j) = k - 1
+            if (kmin .eq. 0) ka(j) = k 
+            if (kmin .eq. 1) ka(j) = k - 1
             else
             continue
             end if
 
-if(ka(j) == 0) then 
+if(ka(j) .eq. 0) then 
 kc(j)=jrot
 !KA+KC EVEN
-if((mod((ka(j) + kc(j)),2) == 0) .and. (state == 'orth')) nu3(j)=1
-if((mod((ka(j) + kc(j)),2) == 0) .and. (state == 'para')) nu3(j)=0
+if((mod((ka(j) + kc(j)),2) .eq. 0) .and. (state .eq. 'orth')) nu3(j)=1
+if((mod((ka(j) + kc(j)),2) .eq. 0) .and. (state .eq. 'para')) nu3(j)=0
 
-if((mod((ka(j) + kc(j)),2) == 1) .and. (state == 'orth')) nu3(j)=0
-if((mod((ka(j) + kc(j)),2) == 1) .and. (state == 'para')) nu3(j)=1
+if((mod((ka(j) + kc(j)),2) .eq. 1) .and. (state .eq. 'orth')) nu3(j)=0
+if((mod((ka(j) + kc(j)),2) .eq. 1) .and. (state .eq. 'para')) nu3(j)=1
 
-else if(ka(j) > 0 ) then
+else if(ka(j) .gt. 0 ) then
 kc1(j) = jrot - ka(j)
 p1(j)=(-1.0d0)**kc1(j)
 !----------
@@ -341,13 +353,13 @@ p2(j)=(-1.0d0)**kc2(j)
 
 
 
-if(parity == p1(j)) kc(j)=kc1(j)
-if(parity == p2(j)) kc(j)=kc2(j)
-if((mod((ka(j) + kc(j)),2) == 0) .and. (state == 'orth')) nu3(j)=1
-if((mod((ka(j) + kc(j)),2) == 0) .and. (state == 'para')) nu3(j)=0
+if(parity .eq. p1(j)) kc(j)=kc1(j)
+if(parity .eq. p2(j)) kc(j)=kc2(j)
+if((mod((ka(j) + kc(j)),2) .eq. 0) .and. (state .eq. 'orth')) nu3(j)=1
+if((mod((ka(j) + kc(j)),2) .eq. 0) .and. (state .eq. 'para')) nu3(j)=0
 
-if((mod((ka(j) + kc(j)),2) == 1) .and. (state == 'orth')) nu3(j)=0
-if((mod((ka(j) + kc(j)),2) == 1) .and. (state == 'para')) nu3(j)=1
+if((mod((ka(j) + kc(j)),2) .eq. 1) .and. (state .eq. 'orth')) nu3(j)=0
+if((mod((ka(j) + kc(j)),2) .eq. 1) .and. (state .eq. 'para')) nu3(j)=1
 else
 continue 
 end if

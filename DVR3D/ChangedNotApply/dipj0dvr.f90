@@ -1,10 +1,7 @@
-!MODULE DEFINITIONS
+module dipj0dvr_sizes
+    save
 
-module sizes
-
-  save
-
-  integer :: lbra0
+    integer :: lbra0
     integer :: nbra0
     integer :: lket0
     integer :: nket0
@@ -18,58 +15,102 @@ module sizes
     integer :: neval0
     integer :: neval1
 
-end module sizes
+end module dipj0dvr_sizes
 
-module diffs
+module dipj0dvr_diffs
+    save
+    integer :: nqe
+    integer :: nqo
+    integer :: nr21
 
-  save
-  integer :: nqe
-  integer :: nqo
-  integer :: nr21
+    double precision alphae
+    double precision :: betae
+    double precision :: alphao
+    double precision :: betao
 
-  double precision alphae
-  double precision :: betae
-  double precision :: alphao
-  double precision :: betao
+    logical zsame
 
-  logical zsame
+end module dipj0dvr_diffs
 
-end module diffs
+module dipj0dvr_old
+    save
 
-module old
+    integer :: npta
+    integer :: nptb
+    integer :: nptc
+    integer :: max2d    ! upper bound on size of intermediate 2d hamiltonian
+    integer :: max3d    ! upper bound on size of full 3d hamiltonian
+    integer :: npta1
+    integer :: nptb1
+    integer :: nptc1
+    integer :: max2d1
+    integer :: max3d1
 
-  save
-
-  integer :: npta
-  integer :: nptb
-  integer :: nptc
-  integer :: max2d    ! upper bound on size of intermediate 2d hamiltonian
-  integer :: max3d    ! upper bound on size of full 3d hamiltonian
-  integer :: npta1
-  integer :: nptb1
-  integer :: nptc1
-  integer :: max2d1
-  integer :: max3d1
-
-  logical :: ztheta ! T let theta be first in the order of solution;
+    logical :: ztheta ! T let theta be first in the order of solution;
                                 ! F let theta be last in the order of solution.
-  logical :: zr2r1  ! T let r_2 come before r_1 in the order of solution;
+    logical :: zr2r1  ! T let r_2 come before r_1 in the order of solution;
                                 ! F let r_1 come before r_2 in the order of solution. (only idia > -2).
-  logical :: zthet1
-  logical :: zr2r11
+    logical :: zthet1
+    logical :: zr2r11
 
-end module old
+end module dipj0dvr_old
 
-module logic
-  save
-  integer :: iptot
-  integer :: idia
+module dipj0dvr_logic
+    save
 
-  logical :: zembed ! T z axis is along r2, = f z axis is along r1.
+    integer :: iptot
+    integer :: idia
+
+    logical :: zembed ! T z axis is along r2, = f z axis is along r1.
                     ! only used if J > 0 ZBISC = in JHMAIN ie if zbisc=f and zperp=f.
-  logical :: zdone
+    logical :: zdone
 
-end module logic
+end module dipj0dvr_logic
+
+module dipj0dvr_stream
+    save
+
+    integer :: ibra0
+    integer :: ibra1
+    integer :: iket0
+    integer :: iket1
+    integer :: iwave0
+    integer :: iwave1
+    integer :: ivc0
+    integer :: ivc1
+    integer :: ione
+    integer :: itwo
+
+
+
+end module dipj0dvr_stream
+
+module dipj0dvr_mass
+    save
+
+    double precision :: xmass(3)
+    double precision :: g1
+    double precision :: g2
+
+end module dipj0dvr_mass
+
+module dipj0dvr_eqm
+    save
+
+    double precision :: ex(3)
+    double precision :: ez(3)
+    double precision :: tmass
+
+end module dipj0dvr_eqm
+
+module dipj0dvr_time
+    save
+
+    double precision :: ouser
+    double precision :: osys
+    double precision :: ototal
+
+end module dipj0dvr_time
 
 program dipj0dvr
 !
@@ -78,11 +119,9 @@ program dipj0dvr
 ! Sutcliffe BT, Mol Phys (1992) 76,1147.  The vibrational wavefunctions
 ! have been obtained using DVR theory in the program DVR3D.
 !
-
-use sizes
-use diffs
-implicit none
-
+use dipj0dvr_sizes
+use dipj0dvr_diffs
+implicit double precision(a,b,d-h,o-y),logical(z),character(c)
 parameter (navail=500000)
 parameter (maxq=500)
 character*80 title
@@ -129,17 +168,15 @@ do i=1,200
 enddo
 
 end program dipj0dvr
-
 !========================================================== rddata =====
 ! This subroutine reads in the data needed from the various places: a
 ! data file on stream 5, iwave0, ivc0, and if iptot=2, iwave1 and iv1.
-subroutine rddata(title,r1,r2,theta,r11,r21,theta1,maxq)
-  
-  implicit double precision(a-h,o-y),logical(z)
-  parameter (tol=1d-8)
-  parameter (amtoau=1.6605402d-27/0.91093897d-30)
-  character*80 title
-  
+      subroutine rddata(title,r1,r2,theta,r11,r21,theta1,maxq)
+      
+      implicit double precision(a-h,o-y),logical(z)
+      parameter (tol=1d-8)
+      parameter (amtoau=1.6605402d-27/0.91093897d-30)
+      character*80 title
       dimension r1(maxq),r2(maxq),theta(maxq),r11(maxq),r21(maxq), &
      &          theta1(maxq),xmass1(3)
       common/logic/zembed,iptot,idia,zdone
@@ -149,7 +186,8 @@ subroutine rddata(title,r1,r2,theta,r11,r21,theta1,maxq)
       common/eqm/ex(3),ez(3),tmass
       common/sizes/lbra0,nbra0,lket0,nket0,lbra1,nbra1,lket1,nket1, &
      &             ntheta,nr1,nr2,neval0,neval1
-
+      common/old/ztheta,zr2r1, npta, nptb, nptc, max2d, max3d, &
+     &           zthet1,zr2r11,npta1,nptb1,nptc1,max2d1,max3d1
       common/diffs/alphae,betae,alphao,betao,nqe,nqo,nr21,zsame
       namelist/prt/ibra0,iket0,iwave0,ivc0,ibra1,iket1,iwave1,ivc1, &
      &             zsame,iptot,zdone,ione,itwo

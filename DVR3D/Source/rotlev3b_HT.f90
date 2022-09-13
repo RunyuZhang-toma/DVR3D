@@ -1,3 +1,93 @@
+!MODULE DEFINITIONS--------------------------------------------
+module size
+   save
+     integer :: nmax     ! number of dvr points in each radial coordinate
+     integer :: maxblk   ! size of vibrational radial problem (even basis)
+     integer :: npnt     ! max(npnt1,npnt2) number of gauss-associated legendre grid points requested
+     integer :: jrot     ! total angular momentum of the molecule
+     integer :: kmin     ! zrot=t, kmin=1 sym. rot. basis, =0 anti-sym.
+                         ! kmin=2 loop over both sym & anti-sym (zbisc=t only)
+                         ! zrot=f, kmin=fixed value of k
+     integer :: NBASS    ! maximum dimension of rotational secular problem
+     integer :: MBASS    ! maximum size of vibrational problem (excluding linear geom)
+     integer :: IBASS    ! actual dimension of rotational secular problem
+     integer :: NEVAL    ! number of eigenvalues which have to actually be supplied as output
+     integer :: IPAR     ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
+     integer :: NEVAL2   ! neval for f block when kmin>1.
+     integer :: MEVAL    ! number of eigenvalues computed in the vibrational problem
+     integer :: KEVAL    ! number of eigenvectors used for iterations (=neval+4)
+     integer :: NVIB     ! number of vibrational eigenvalues used in rotational prob.
+     integer :: NBLK     ! number of k values
+     integer :: LOFF     ! space required for all the off-diagonal blocks
+     integer :: LOFF0    ! space required for the largest off-diagonal block
+     integer :: kmax
+     integer :: ndvr     ! maximum dimension of theta dvr grid used in vibrational problem
+     integer :: iang     ! maximum number of discrete angles retained in vib. problem
+     integer :: mxblk2   ! size of vibrational radial problem (odd  basis)
+     integer :: mbass0   ! maximum size of vibrational problem (excluding linear geom)
+end module size
+
+
+module outp
+   save
+     
+     integer :: ilev  = 14         ! stream for final eigenvalues (formatted).
+                                   ! holds input/output of eigenvalues used if zpfun = .true.
+     integer :: jvec   = 3          ! holds output first  set eigenvalues & vectors used if zvec=.true.
+     integer :: jvec2   = 2        ! holds output second set                        zvec=.true.
+     integer :: kvec   = 8          ! holds output first  set transformed vectors used if ztran=.true.
+     integer :: kvec2    = 9        ! holds output second set   used if ztran=.true.
+     integer :: iscr = 10          ! scratch file used for restart runs
+                                   ! holds hamiltonian file used if always
+
+     integer :: ires = 0          ! = 0  normal run
+                                   ! = 1  restart from first  call to dgrot
+                                   ! = 2  restart from second call to dgrot
+                                   ! = 3  restart from first  call to dgrot, one diagonalisation only
+                                   ! = -1 perform both transformations
+                                   ! = -2 perform second transformation only
+                                   ! = -3 perform first  transformation only
+                                   ! (restart after zdiag=.false. run, ivec=irf1 and irf2 required)
+
+     integer :: irf1 = 21          ! irf1   restart file one  used if zdiag=.false.
+     integer :: irf2   = 22       ! irf2   restart file two  used if always
+     integer :: ivec  = 26         ! holds input  eigenvalues & eigenvectors used if always
+     integer :: ivec2   = 4           ! holds input  eigenvalues & eigenvectors used if nblk > 2
+     DOUBLE PRECISION :: toler = 0.0D0    ! convergence tolerance for the iterative diagonaliser
+                                        ! toler = 0.0 gives machine accuracy
+
+     DOUBLE PRECISION :: thresh  = 0.1D0  ! threshold for printing a coefficient if zpvec=.true.
+
+     logical :: zpham = .FALSE.    ! T request printing of the hamiltonian matrix
+     logical :: zpvec  = .FALSE.    ! T request printing of the eigenvectors
+     logical :: zvec = .FALSE.     ! T store the eigenvectors from all the parts of the calculation
+                                   ! eigenvalues and eigenvectors written to disk file.
+                                   ! (1d,2d and 3d) on stream iout2.
+                                   ! further information relating to this (arrays iv1 and iv2) is
+                                   ! stored on stream iout1.
+     logical :: zdiag = .TRUE.     ! F do not do final diagonalisation, instead the final Hamiltonian
+                                   ! matrix is written on units IDIAG1 and IDIAG2. 
+
+     logical :: ztran = .FALSE.     ! T perform the transformation of the solution coefficients
+                                   ! to the expression for the wavefunction amplitudes at the grid
+                                   ! points. store the data on stream iwave.
+                                   ! ztran = T automatically sets zvec = t for idia > -2.
+     logical :: zpfun   = .FALSE.   ! F store energy levels on stream ilev
+     logical :: zembed     ! T z axis is along r2, = f z axis is along r1.
+                                   ! only used if J > 0 ZBISC = in JHMAIN ie if zbisc=f and zperp=f.
+
+     logical :: zptra  = .FALSE.    ! print the transformed vectors.
+     logical :: zdcore = .false.   ! T for in core diagonalisation
+     namelist/prt/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
+                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
+                    zdiag,zdcore,iscr,ires,irf1,irf2
+
+end module outp  
+module timing
+   save
+     integer :: itime0
+end module timing
+! END MODULE DEFINITIONS--------------------------------------------
 !     dummy main program                                           #001
       call rotlev3b
       stop
@@ -27,18 +117,14 @@
 !     the program works in **** atomic units ***** :
 !     Fortan90 version with dynamic arrays by Max Kostin & Jonathan Tennyson
 
-      implicit double precision (a-h,o-y), logical (z)
 
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
-      namelist/prt/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
-      common/timing/itime0
+      use size
+      use outp
+      use timing
+      implicit none
+      INTEGER :: irate2,IMAX2,ITIME,ITIME2
+
+
 
      INTEGER :: count_0, count_rate, count_max, walltime , tstart, tend
       
@@ -72,12 +158,12 @@ print *, "RULE IS VALID FOR PSI(K)^2>0.5"
 print *, "******************************************"
 
 
-if(kmin == 2) then!THERE ARE SYMMETRIC AND ASYMMETRIC BASIS TO CONSIDER
+if(kmin .eq. 2) then!THERE ARE SYMMETRIC AND ASYMMETRIC BASIS TO CONSIDER
 call hosetaylor(8)
 call hosetaylor(9)
-else if(kmin == 1) then ! SYMMETRIC
+else if(kmin .eq. 1) then ! SYMMETRIC
 call hosetaylor(8)
-else if(kmin == 0) then! ASYMMETRIC
+else if(kmin .eq. 0) then! ASYMMETRIC
 call hosetaylor(8)
 else
 continue
@@ -88,7 +174,7 @@ end if
 !#######################################################################
       block data
 !     stores defaults for namelist parameters                       #003
-      implicit double precision (a-h,o-y), logical (z)
+
 
 !     outp holds information which controls the amount of printed output
 !     toler: convergence tolerance for the iterative diagonaliser
@@ -105,7 +191,7 @@ end if
 !     stream         holds                              used if
 !      ilev    input/output of eigenvalues              zpfun=.true.
 !      ivec    input  eigenvalues & eigenvectors        always
-!      ivec2   input  eigenvalues & eigenvectors        nblk > 2
+!      ivec2   input  eigenvalues & eigenvectors        nblk .gt. 2
 !      jvec    output first  set eigenvalues & vectors  zvec=.true.
 !      jvec2   output second set                        zvec=.true.
 !      kvec    output first  set transformed vectors    ztran=.true.
@@ -123,14 +209,10 @@ end if
 !          = -3 perform first  transformation only
 ! (restart after zdiag=.false. run, ivec=irf1 and irf2 required)
 
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
-      data toler/0.0d0/,thresh/0.1d0/,zpham/.false./,zpvec/.false./,&
-           ivec/26/,zvec/.false./,jvec/3/,jvec2/2/,iscr/1/,ires/0/,&
-           ivec2/4/,zpfun/.false./,ilev/14/,kvec/8/,kvec2/9/,&
-           zdiag/.true./,ztran/.false./,zptra/.false./,zdcore/.false./,&
-           irf1/21/,irf2/22/
+
+      use outp
+ 
+      
       end
 
 
@@ -140,12 +222,12 @@ end if
 !################################################
 
 subroutine hosetaylor(ifile)
-      implicit double precision (a-h,o-y), logical (z)
-namelist/prt/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-              zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-              zdiag,zdcore,iscr,ires,irf1,irf2
+use outp
+implicit none
 
-integer :: idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval
+
+integer :: idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval,ITIME2,NVIB,IBASS,NEVAL2,NPNT,JK
+DOUBLE PRECISION :: TITLE
 integer, intent(in) :: ifile 
 double precision :: ezero
 
@@ -162,13 +244,13 @@ open(unit=ifile,form='unformatted',recordtype='segmented')
 ! reader header record to determine file structure  
 read(ifile) idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval
 rewind(ifile)
-If (jrot==0) kmin=1
+If (jrot.eq.0) kmin=1
 jk=jrot+kmin
 
-If (idia == -2 .and. jk > 1) then
+If (idia .eq. -2 .and. jk .gt. 1) then
  !  print *, "Radau, 8 or 9"
     call read_8or9_radau(ifile,jk,ezero)
-elseif (idia == -2) then
+elseif (idia .eq. -2) then
  !  print *, "Radau, 26"
     call read_26_radau(ifile,jk,ezero)
 else
@@ -203,7 +285,7 @@ double precision, intent(in) :: ezero
 ! PLEASE SPECIFY EZERO TO OBTAIN ENERGIES WRT ZERO POINT EQUILIBRIUM
 !ezero = 0.0d0
 
- ! if(ezero == 0.0d0) print *, "WARNING: ZPE IS ZERO: LINE 190"
+ ! if(ezero .eq. 0.0d0) print *, "WARNING: ZPE IS ZERO: LINE 190"
 
 
   do i=1,5
@@ -231,21 +313,21 @@ double precision, intent(in) :: ezero
 
 !get the eigenvectors
 
-if ( (MODULO(jrot,2) == 0 ) ) THEN
+if ( (MODULO(jrot,2) .eq. 0 ) ) THEN
 
-    if( (ipar == 0) .and. (kmin == 1) ) then
+    if( (ipar .eq. 0) .and. (kmin .eq. 1) ) then
     state = 'para'
     label = 0
     parity = 1
-    else if( (ipar == 0) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 0) .and. (kmin .eq. 0) ) then
     state = 'para'
     label = 0
     parity = -1
-    else if( (ipar == 1) .and. (kmin == 1) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 1) ) then
     state = 'orth'
     label = 1
     parity = 1
-    else if( (ipar == 1) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 0) ) then
     state = 'orth'
     label = 1
     parity = -1
@@ -253,21 +335,21 @@ if ( (MODULO(jrot,2) == 0 ) ) THEN
     continue 
     end if
 
-else if ( (MODULO(jrot,2) == 1 ) ) THEN
+else if ( (MODULO(jrot,2) .eq. 1 ) ) THEN
 
-    if( (ipar == 0) .and. (kmin == 1) ) then
+    if( (ipar .eq. 0) .and. (kmin .eq. 1) ) then
     state = 'orth'
     label = 1
     parity = -1
-    else if( (ipar == 0) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 0) .and. (kmin .eq. 0) ) then
     state = 'orth'
     label = 1
     parity = 1
-    else if( (ipar == 1) .and. (kmin == 1) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 1) ) then
     state = 'para'
     label = 0
     parity = -1
-    else if( (ipar == 1) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 0) ) then
     state = 'para'
     label = 0
     parity = 1
@@ -278,19 +360,19 @@ else
 continue
 end if
 
-if (kmin == 0) ka =  1 
-if (kmin == 1) ka = 1 - 1
+if (kmin .eq. 0) ka =  1 
+if (kmin .eq. 1) ka = 1 - 1
 
-if(ka == 0) then 
+if(ka .eq. 0) then 
 kc=jrot
 !KA+KC EVEN
-if((mod((ka + kc),2) == 0) .and. (state == 'orth')) nu3=1
-if((mod((ka + kc),2) == 0) .and. (state == 'para')) nu3=0
+if((mod((ka + kc),2) .eq. 0) .and. (state .eq. 'orth')) nu3=1
+if((mod((ka + kc),2) .eq. 0) .and. (state .eq. 'para')) nu3=0
 
-if((mod((ka + kc),2) == 1) .and. (state == 'orth')) nu3=0
-if((mod((ka + kc),2) == 1) .and. (state == 'para')) nu3=1
+if((mod((ka + kc),2) .eq. 1) .and. (state .eq. 'orth')) nu3=0
+if((mod((ka + kc),2) .eq. 1) .and. (state .eq. 'para')) nu3=1
 
-else if(ka > 0 ) then
+else if(ka .gt. 0 ) then
 kc1 = jrot - ka
 p1=(-1.0d0)**kc1
 !----------
@@ -299,13 +381,13 @@ p2=(-1.0d0)**kc2
 
 
 
-if(parity == p1) kc=kc1
-if(parity == p2) kc=kc2
-if((mod((ka + kc),2) == 0) .and. (state == 'orth')) nu3=1
-if((mod((ka + kc),2) == 0) .and. (state == 'para')) nu3=0
+if(parity .eq. p1) kc=kc1
+if(parity .eq. p2) kc=kc2
+if((mod((ka + kc),2) .eq. 0) .and. (state .eq. 'orth')) nu3=1
+if((mod((ka + kc),2) .eq. 0) .and. (state .eq. 'para')) nu3=0
 
-if((mod((ka + kc),2) == 1) .and. (state == 'orth')) nu3=0
-if((mod((ka + kc),2) == 1) .and. (state == 'para')) nu3=1
+if((mod((ka + kc),2) .eq. 1) .and. (state .eq. 'orth')) nu3=0
+if((mod((ka + kc),2) .eq. 1) .and. (state .eq. 'para')) nu3=1
 else
 continue 
 end if
@@ -350,7 +432,7 @@ integer, allocatable :: ka(:),kc(:),kc1(:),kc2(:),p1(:),p2(:),nu3(:)
 ! PLEASE SPECIFY EZERO TO OBTAIN ENERGIES WRT ZERO POINT EQUILIBRIUM
 !ezero = 0.0d0
 
- ! if(ezero == 0.0d0) print *, "WARNING: ZPE IS ZERO: LINE 336"
+ ! if(ezero .eq. 0.0d0) print *, "WARNING: ZPE IS ZERO: LINE 336"
 
   read(ifile) idia,ipar,lmax,npnt1,npnt2,jrot,kmin,neval
   read(ifile) zembed,zmorse1,zmorse2,xm,g1,g2,zncor
@@ -383,21 +465,21 @@ sum(j)=0.0d0
 biggest(j)=0.0d0
 end do
 
-if ( (MODULO(jrot,2) == 0 ) ) THEN
+if ( (MODULO(jrot,2) .eq. 0 ) ) THEN
 
-    if( (ipar == 0) .and. (kmin == 1) ) then
+    if( (ipar .eq. 0) .and. (kmin .eq. 1) ) then
     state = 'para'
     label = 0
     parity = 1
-    else if( (ipar == 0) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 0) .and. (kmin .eq. 0) ) then
     state = 'para'
     label = 0
     parity = -1
-    else if( (ipar == 1) .and. (kmin == 1) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 1) ) then
     state = 'orth'
     label = 1
     parity = 1
-    else if( (ipar == 1) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 0) ) then
     state = 'orth'
     label = 1
     parity = -1
@@ -405,21 +487,21 @@ if ( (MODULO(jrot,2) == 0 ) ) THEN
     continue 
     end if
 
-else if ( (MODULO(jrot,2) == 1 ) ) THEN
+else if ( (MODULO(jrot,2) .eq. 1 ) ) THEN
 
-    if( (ipar == 0) .and. (kmin == 1) ) then
+    if( (ipar .eq. 0) .and. (kmin .eq. 1) ) then
     state = 'orth'
     label = 1
     parity = -1
-    else if( (ipar == 0) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 0) .and. (kmin .eq. 0) ) then
     state = 'orth'
     label = 1
     parity = 1
-    else if( (ipar == 1) .and. (kmin == 1) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 1) ) then
     state = 'para'
     label = 0
     parity = -1
-    else if( (ipar == 1) .and. (kmin == 0) ) then
+    else if( (ipar .eq. 1) .and. (kmin .eq. 0) ) then
     state = 'para'
     label = 0
     parity = 1
@@ -444,28 +526,28 @@ d=d**2
         sum(j) = sum(j) + d(i)
         component(j,k) = component(j,k) + d(i) 
         end do
-            if(k == 1) then 
+            if(k .eq. 1) then 
             biggest(j)=component(j,k)
-            if (kmin == 0) ka(j) =  k 
-            if (kmin == 1) ka(j) = k - 1
-            else if ( (k > 1) .and. ( component(j,k) > biggest(j) )) then
+            if (kmin .eq. 0) ka(j) =  k 
+            if (kmin .eq. 1) ka(j) = k - 1
+            else if ( (k .gt. 1) .and. ( component(j,k) .gt. biggest(j) )) then
             biggest(j)=component(j,k)
-            if (kmin == 0) ka(j) = k 
-            if (kmin == 1) ka(j) = k - 1
+            if (kmin .eq. 0) ka(j) = k 
+            if (kmin .eq. 1) ka(j) = k - 1
             else
             continue
             end if
 
-if(ka(j) == 0) then 
+if(ka(j) .eq. 0) then 
 kc(j)=jrot
 !KA+KC EVEN
-if((mod((ka(j) + kc(j)),2) == 0) .and. (state == 'orth')) nu3(j)=1
-if((mod((ka(j) + kc(j)),2) == 0) .and. (state == 'para')) nu3(j)=0
+if((mod((ka(j) + kc(j)),2) .eq. 0) .and. (state .eq. 'orth')) nu3(j)=1
+if((mod((ka(j) + kc(j)),2) .eq. 0) .and. (state .eq. 'para')) nu3(j)=0
 
-if((mod((ka(j) + kc(j)),2) == 1) .and. (state == 'orth')) nu3(j)=0
-if((mod((ka(j) + kc(j)),2) == 1) .and. (state == 'para')) nu3(j)=1
+if((mod((ka(j) + kc(j)),2) .eq. 1) .and. (state .eq. 'orth')) nu3(j)=0
+if((mod((ka(j) + kc(j)),2) .eq. 1) .and. (state .eq. 'para')) nu3(j)=1
 
-else if(ka(j) > 0 ) then
+else if(ka(j) .gt. 0 ) then
 kc1(j) = jrot - ka(j)
 p1(j)=(-1.0d0)**kc1(j)
 !----------
@@ -474,13 +556,13 @@ p2(j)=(-1.0d0)**kc2(j)
 
 
 
-if(parity == p1(j)) kc(j)=kc1(j)
-if(parity == p2(j)) kc(j)=kc2(j)
-if((mod((ka(j) + kc(j)),2) == 0) .and. (state == 'orth')) nu3(j)=1
-if((mod((ka(j) + kc(j)),2) == 0) .and. (state == 'para')) nu3(j)=0
+if(parity .eq. p1(j)) kc(j)=kc1(j)
+if(parity .eq. p2(j)) kc(j)=kc2(j)
+if((mod((ka(j) + kc(j)),2) .eq. 0) .and. (state .eq. 'orth')) nu3(j)=1
+if((mod((ka(j) + kc(j)),2) .eq. 0) .and. (state .eq. 'para')) nu3(j)=0
 
-if((mod((ka(j) + kc(j)),2) == 1) .and. (state == 'orth')) nu3(j)=0
-if((mod((ka(j) + kc(j)),2) == 1) .and. (state == 'para')) nu3(j)=1
+if((mod((ka(j) + kc(j)),2) .eq. 1) .and. (state .eq. 'orth')) nu3(j)=0
+if((mod((ka(j) + kc(j)),2) .eq. 1) .and. (state .eq. 'para')) nu3(j)=1
 else
 continue 
 end if
@@ -502,7 +584,6 @@ end subroutine read_8or9_radau
 
 !     set up common /size/ & write control parameters of problem    #004
 
-      implicit double precision (a-h,o-y), logical (z)
 
 !     common /size/ stores control parameters for the problem
 !     nbass: maximum dimension of rotational secular problem
@@ -529,14 +610,18 @@ end subroutine read_8or9_radau
 !     loff : space required for all the off-diagonal blocks
 !     loff0: space required for the largest off-diagonal block
 
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+
+      use size
+      use outp
+      implicit none
+      DOUBLE PRECISION :: X0,G1,G2,RE1,DISS1,WE1
+      INTEGER :: IDIA,KMIN0,NLIM,I
+      LOGICAL :: ZMORS1,ZMORS2,ZNCOR,ZQUAD2
+
+
       character(len=8) title(9)
-      data x0/0.0d0/
+      x0 = 0.0d0
+ 
 
       open(unit=ivec,form='unformatted',recordtype='segmented')
       open(unit=irf2,form='unformatted')
@@ -553,24 +638,24 @@ end subroutine read_8or9_radau
       mxblk2=nmax*(nmax-1)/2
       mbass0=ndvr*maxblk
 
-      if (kmin /= kmin0 .and. kmin0 /= 2) goto 960
-      if (ires < 0) ztran=.true.
-      if (ires > 0) zdiag=.true.
+      if (kmin .ne. kmin0 .and. kmin0 .ne. 2) goto 960
+      if (ires .lt. 0) ztran=.true.
+      if (ires .gt. 0) zdiag=.true.
 
 !     compute size of rotational secular problem
 
       nvib=min(nvib,meval)
-      if (kmin > 0) then
+      if (kmin .gt. 0) then
          nblk=jrot+1
       else
          nblk=jrot
-         if (kmin0 == 2) ipar=1-ipar
+         if (kmin0 .eq. 2) ipar=1-ipar
       endif
       nbass=nblk*nvib
-      if (ibass > 0) nbass=min(nbass,ibass)
-      if (neval <= 0) neval = 10
+      if (ibass .gt. 0) nbass=min(nbass,ibass)
+      if (neval .le. 0) neval = 10
       neval=min(neval,nbass)
-      if (neval2 <= 0) neval2 = neval
+      if (neval2 .le. 0) neval2 = neval
       npnt=max(ndvr,npnt)
 
       write(6,1000) meval,mbass0,ndvr,nvib,npnt,neval,nbass
@@ -582,7 +667,7 @@ end subroutine read_8or9_radau
              /i9,3x,'point gauss-associated legendre integration',&
              /i9,3x,'lowest rotational eigenvectors required for',&
              /i9,3x,'dimension rotation secular problem')
-      if (ibass > 0) write(6,1005)
+      if (ibass .gt. 0) write(6,1005)
  1005 format(12x,'with basis selected by energy ordering')
 
       read(5,500)   title
@@ -602,15 +687,15 @@ end subroutine read_8or9_radau
          else
             write(6,1014)
  1014 format(/5x,'Diagonalisation performed iteratively using f02fjf')
-            if (toler /= x0) write(6,1016) toler
+            if (toler .ne. x0) write(6,1016) toler
  1016 format(5x,'Eigenvalue convergence tolerance, TOLER =',d12.3)
-            if (toler == x0) write(6,1017)
+            if (toler .eq. x0) write(6,1017)
  1017 format(5x,'Eigenvalues converged to machine accuracy')
          endif
       endif
-      if (ires /= 0) write(6,1018) ires
+      if (ires .ne. 0) write(6,1018) ires
  1018 format(/5x,'***** restart run, IRES =',i2,' *****')
-      if (ires < 0) write(6,1019)
+      if (ires .lt. 0) write(6,1019)
  1019 format(/'      transformation only')
       if (zpham) write(6,1020)
  1020 format(/5x,'Printing of hamiltonian matrix requested')
@@ -628,11 +713,11 @@ end subroutine read_8or9_radau
           if (.not.zptra) write(6,1043)
  1043     format(5x,'Printing of transformed vectors not requested')
       endif
-      if (ires == 0) write(6,1051) 'IVEC',ivec
-      if (ires /= 0) write(6,1051) 'IRTF1',irf1
+      if (ires .eq. 0) write(6,1051) 'IVEC',ivec
+      if (ires .ne. 0) write(6,1051) 'IRTF1',irf1
  1051 format(/5x,'DVR3DRJZ data  to be read         from stream ',&
              a4,'  =',i4)
-      if (nblk > 2) write(6,1052) ivec2
+      if (nblk .gt. 2) write(6,1052) ivec2
  1052 format( 5x,'and                               from stream ',&
              'IVEC2 =',i4)
       if (zdiag) write(6,1053) iscr
@@ -644,40 +729,40 @@ end subroutine read_8or9_radau
       if (zvec) write(6,1054) jvec
  1054 format( 5x,'Eigenvalues & vectors to be written to stream ',&
              'JVEC  =',i4)
-      if (zvec .and. kmin > 1) write(6,1056) jvec2
+      if (zvec .and. kmin .gt. 1) write(6,1056) jvec2
  1056 format( 5x,'Second set            to be written to stream ',&
              'JVEC2 =',i4)
       if (ztran) write(6,1058) kvec
  1058 format( 5x,'Transformed vectors   to be written to stream ',&
              'KVEC  =',i4)
-      if (ztran .and. kmin > 1) write(6,1059) kvec2
+      if (ztran .and. kmin .gt. 1) write(6,1059) kvec2
  1059 format( 5x,'Second set            to be written to stream ',&
              'KVEC2 =',i4)
-      if (.not. zdiag .and. ires==0) write(6,1061) irf1
+      if (.not. zdiag .and. ires.eq.0) write(6,1061) irf1
  1061 format( 5x,'Restart data file one to be written to stream ',&
              'IRF1  =',i4)
-      if (ires == 0) write(6,1062) irf2
+      if (ires .eq. 0) write(6,1062) irf2
  1062 format( 5x,'Restart data file two to be written to stream ',&
              'IRF2  =',i4)
-      if (ires /= 0) write(6,1063) irf2
+      if (ires .ne. 0) write(6,1063) irf2
  1063 format( 5x,'Restart data file two to be read from  stream ',&
              'IRF2  =',i4)
 
       write(6,1080)
  1080 format(/5x,'Radau coordinates used')
-      if (ipar == 0) write(6,1100)
+      if (ipar .eq. 0) write(6,1100)
  1100 format(/5x,'Diatomic assumed homonuclear',&
              /5x,'even parity functions in basis set')
-      if (ipar == 1) write(6,1110)
+      if (ipar .eq. 1) write(6,1110)
  1110 format(/5x,'Diatomic assumed homonuclear',&
              /5x,'odd parity functions in basis set')
       write(6,1120) jrot
  1120 format(/5x,'J =',i3,' rotational state')
-      if (kmin == 0) write(6,1130)
+      if (kmin .eq. 0) write(6,1130)
  1130 format(12x,'with anti-symmetric |Jk> - |J-k> functions in basis')
-      if (kmin == 1) write(6,1140)
+      if (kmin .eq. 1) write(6,1140)
  1140 format(12x,'with symmetric |Jk> + |J-k> functions in basis')
-      if (kmin > 1) write(6,1150)
+      if (kmin .gt. 1) write(6,1150)
  1150 format(12x,'loop over symmetric and anti-symmetric functions')
       return
 
@@ -693,14 +778,13 @@ end subroutine read_8or9_radau
 !     subroutine select determines which vibrational basis          #007
 !     functions are to be used
  
-      implicit double precision (a-h,o-y), logical (z)
- 
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+      use size
+      use outp
+      implicit none
+      INTEGER :: I,IPT,IOFF,K2,MAXLEG,IDVR,LINCR,IANG2,IBASS2,MAX,MEVAL2,MVIB,LMIN,NANG,NRAD,LBASIS,NKBAS,IVIB,IV,MIN,N,JPT,J,KZ,IPU,IPD,LENG,LWORK
+      LOGICAL :: ZMORS1,ZMORS2,ZNCOR,ZQUAD2
+      DOUBLE PRECISION :: G1,G2,REQ,DISS1,WE1,RE2,DISS2,WE2,DUMMY,ABS,RE1,EMIN,EVIBR
+    
       
       DOUBLE PRECISION, DIMENSION(NVIB,NBLK) :: EVIB
       DIMENSION IV(NBLK),MVIB(NBLK),nkbas(NBLK),lmin(NBLK),lbasis(NBLK) 
@@ -710,7 +794,7 @@ end subroutine read_8or9_radau
       character(len=4) symm(2)
       data symm/'even','odd '/
 !     read energies from file ivec,
-      if (ires == 0) then
+      if (ires .eq. 0) then
       if (zdiag) then
 !        first skip matrix elements
          do 10 i=1,4
@@ -737,10 +821,10 @@ end subroutine read_8or9_radau
       read(ivec,end=900)
 !     if k2=0 and we are doing an f parity calculation, read k=1 from
 !     end of file
-      if (k2 == 0 .and. kmin == 0) then
+      if (k2 .eq. 0 .and. kmin .eq. 0) then
          call endiv(ivec,jrot+1)
          read(ivec,end=900) k2,maxleg,idvr,lincr
-         if (abs(k2) /= 1) then
+         if (abs(k2) .ne. 1) then
             write(6,950) ivec,k2
   950       format(//' Last block on stream',i3,' has k =',i3,&
                     /' 1 expected: STOP')
@@ -782,7 +866,7 @@ end subroutine read_8or9_radau
       do 110 i=1,3
       read(ivec)
   110 continue
-      if (ibass <= 0 .or. ibass >= ipt) then
+      if (ibass .le. 0 .or. ibass .ge. ipt) then
           nbass=ipt
           ivib=nvib
       else
@@ -796,7 +880,7 @@ end subroutine read_8or9_radau
   160    continue
          ipt=1
          do 200 n=1,ibass
-  210    if (iv(ipt) <= mvib(ipt)) then
+  210    if (iv(ipt) .le. mvib(ipt)) then
             evibr=evib(iv(ipt),ipt)
             jpt=ipt
          else
@@ -804,8 +888,8 @@ end subroutine read_8or9_radau
             goto 210
          endif
          do 220 j=ipt+1,nblk
-         if (iv(j) > mvib(j)) goto 220
-         if (evib(iv(j),j) >= evibr) goto 220
+         if (iv(j) .gt. mvib(j)) goto 220
+         if (evib(iv(j),j) .ge. evibr) goto 220
          evibr=evib(iv(j),j)
          jpt=j
   220    continue
@@ -841,7 +925,7 @@ end subroutine read_8or9_radau
  
        write(6,1010)
  1010 format(//5x,' basis functions selected')
-      if (kmin == 0) then
+      if (kmin .eq. 0) then
          kz=1
       else
          kz=0
@@ -866,7 +950,7 @@ end subroutine read_8or9_radau
       ipu=ipd+mvib(ioff)
       write(6,1020) kz,ipd+1,ipu,symm(mod(ipar+kz,2)+1)
  1020 format(5x,'k =',i3,', i runs from',i5,' to',i5,2x,a4)
-      if(ipu==nbass) exit
+      if(ipu.EQ.nbass) exit
   310 continue
 
       nblk = kz + 1
@@ -899,27 +983,26 @@ end subroutine read_8or9_radau
 !     subroutine vrmain is the 'real' main program & contains       #006
 !     the calls to the various subroutines which set & solve hamil
 !
-      implicit double precision (a-h,o-y), logical (z)
+      use size
+      use outp
+      implicit none
+      DOUBLE PRECISION :: X0,EZERO
+      INTEGER :: MVIB,LWORK,NKBAS,LMIN,LBASIS,IDVR
 
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
 
       DIMENSION MVIB(NBLK),nkbas(NBLK), lmin(NBLK),lbasis(NBLK)
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: DIAG,eval
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: vec
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: radmee,radmoo,radmeo,radmoe
-      data x0/0.0d0/
+      x0 = 0.0d0
 
-      if (abs(ires) == 2) goto 100
-      if (ires < 0) then
+
+      if (abs(ires) .eq. 2) goto 100
+      if (ires .lt. 0) then
          allocate(eval(neval))
          goto 50
       endif
-      if (ires == 0) then
+      if (ires .eq. 0) then
           ALLOCATE(radmee(maxblk),radmoo(mxblk2),radmeo(mxblk2),radmoe(mxblk2))
 
 !        2d symmetrised radial matrix elements from 1d componants
@@ -937,7 +1020,7 @@ end subroutine read_8or9_radau
       endif
  
       if (.not.zdiag) stop
-      if (ires >= 0) then
+      if (ires .ge. 0) then
          ezero=x0
          read(5,505,end=555) ezero
   505    format(f20.0)
@@ -959,15 +1042,15 @@ end subroutine read_8or9_radau
  
 !        diagonalise the hamiltonian (twice if requested)
  
-         if (kmin == 0) write(6,1000) jrot,ibass
+         if (kmin .eq. 0) write(6,1000) jrot,ibass
  1000 format('1'/5x,'J =',i3,' rotational state,',i7,' basis functions'&
           /12x,'f parity, anti-symmetric |jk> - |j-k> functions in basis')
-         if (kmin >= 1) write(6,1010) jrot,ibass
+         if (kmin .ge. 1) write(6,1010) jrot,ibass
  1010 format('1'/5x,'J =',i3,' rotational state,',i7,' basis functions'&
           /12x,'e parity, symmetric |jk> + |j-k> functions in basis')
-         if (ipar == 0) write(6,1020)
+         if (ipar .eq. 0) write(6,1020)
  1020    format(12x,'even parity radial functions in basis set')
-         if (ipar == 1) write(6,1030)
+         if (ipar .eq. 1) write(6,1030)
  1030    format(12x,'odd parity radial functions in basis set')
  
          call dgrot(diag,mvib,eval,vec,1,ezero,lwork)
@@ -984,7 +1067,7 @@ end subroutine read_8or9_radau
           call dstore(mvib,1,nkbas,lmin,lbasis,eval,idvr)
           call nftim('end of transformation')
       endif
-      if (kmin<=1 .or. abs(ires)==3) goto 200
+      if (kmin.le.1 .or. abs(ires).eq.3) goto 200
  
 !     diagonalise/transform a second time if kmin > 1
  
@@ -992,31 +1075,31 @@ end subroutine read_8or9_radau
       neval=min(neval2,ibass)
       if (.not. zdcore) keval=min(ibass,neval+4)
       if (      zdcore) keval=ibass
-      if (abs(ires)==2) allocate(eval(keval))
+      if (abs(ires).eq.2) allocate(eval(keval))
       jvec=jvec2
       ipar=1-ipar
       kvec=kvec2
 
 
-      if (jrot==1) then
+      if (jrot.eq.1) then
 !     J=1f: treat as a special case
          write(6,1001) jrot
  1001 format('1'/5x,'J =',i3,' rotational state special case for'&
           /12x,'f parity, anti-symmetric |jk> - |j-k> functions in basis')
-         if (ipar == 0) write(6,1020)
-         if (ipar == 1) write(6,1030)
+         if (ipar .eq. 0) write(6,1020)
+         if (ipar .eq. 1) write(6,1030)
          call dstore1(2,eval,idvr,ezero)
          goto 200
       endif
 
-      if (ires >= 0) then
+      if (ires .ge. 0) then
          write(6,1000) jrot,ibass
-         if (ipar == 0) write(6,1020)
-         if (ipar == 1) write(6,1030)
+         if (ipar .eq. 0) write(6,1020)
+         if (ipar .eq. 1) write(6,1030)
  
 !        re-load the hamiltonian matrix elements
 !        (for a restart run, first position the file)
-         if (ires==2 .or. ztran .or. zdcore) then
+         if (ires.eq.2 .or. ztran .or. zdcore) then
             if (zdcore) then
                lwork=max(loff0,3*nbass)
                allocate(vec(nbass,nbass),diag(lwork))
@@ -1052,14 +1135,10 @@ end subroutine read_8or9_radau
 !     subroutine radint calculates the two-dimensional radial basis
 !     functions between two symmetrised orthogonal coordinates.
  
-      implicit double precision (a-h,o-y), logical (z)
- 
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+      use size
+      use outp
+      implicit none
+      
 
       DOUBLE PRECISION, DIMENSION(nmax) :: rm2
       DOUBLE PRECISION, DIMENSION(maxblk) :: radmee
@@ -1072,7 +1151,7 @@ end subroutine read_8or9_radau
  
 !     then use this data to construct the radial matrices
       call mkrad(radmee,nmax,rm2,0,0,0)
-      if (mxblk2 > 0) then
+      if (mxblk2 .gt. 0) then
          call mkrad(radmoo,nmax,rm2,1,0,0)
          call mkrad(radmeo,nmax,rm2,1,1,0)
          call mkrad(radmoe,nmax,rm2,1,1,1)
@@ -1110,11 +1189,17 @@ end subroutine read_8or9_radau
 !     evaluating the matrix element in an fbr using gaussian quadrature
 !     and then transforming to the appropriate dvrs.
  
-      implicit double precision (a-h,o-y), logical (z)
+      use size
  
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                   kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                   nblk,loff,loff0,mbass0
+      implicit none
+      DOUBLE PRECISION :: X0
+      DOUBLE PRECISION :: xp5
+      DOUBLE PRECISION :: x1
+      DOUBLE PRECISION :: x2
+      DOUBLE PRECISION :: toler,realk,DBLE,tswalf,cswalf,TERM,FACT,XKPH,SUM1,SUM2,angfac
+      INTEGER :: K1,NPNT2,I,X,MN,J,K,KKP1,I1,IV1,I2,IV2,JJ,JP,IP,nang1,NANG2
+     
+
 
       DIMENSION iv1(ndvr),iv2(ndvr)
       DOUBLE PRECISION, DIMENSION(ndvr,ndvr) :: fbrmat,pleg1,pleg2
@@ -1122,8 +1207,12 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, DIMENSION(npnt) :: xalf,walf
       DOUBLE PRECISION, DIMENSION(nang1,npnt) :: plega
       DOUBLE PRECISION, DIMENSION(nang2,npnt) :: plegb
-      data x0/0.0d0/,xp5/0.5d0/,x1/1.0d0/,x2/2.0d0/,toler/1.0d-8/
- 
+      x0 = 0.0d0
+      xp5 = 0.5d0
+      x1 = 1.0d0
+      x2 = 2.0d0
+      toler = 1.0d-8
+
 !     first: set up an npnt gauss-associated legendre quadrature scheme
       realk = dble(k1)
       npnt2 = (npnt+1)/2
@@ -1140,7 +1229,7 @@ end subroutine read_8or9_radau
       write(6,1010) cswalf,tswalf
  1010 format(/5x,'computed sum of weights',d26.15,&
              /5x,'exact    sum of weights',d26.15)
-      if (abs((cswalf-tswalf)/tswalf) > toler) then
+      if (abs((cswalf-tswalf)/tswalf) .gt. toler) then
          write(6,910)
   910    format(//5x,'points & weights in error, adjust algorithm'//)
          stop
@@ -1153,7 +1242,7 @@ end subroutine read_8or9_radau
 !     evaluate the polynomials at the quadrature points
       call asleg(plega,fbrmat,nang1-1,xalf,npnt,k1)
 !     return if the matrix elements are not actually needed
-      if (mn == 0) return
+      if (mn .eq. 0) return
       call asleg(plegb,fbrmat,nang2-1,xalf,npnt,k1+1)
 !     compute the fbr matrix elements
       fbrmat = x0
@@ -1172,17 +1261,17 @@ end subroutine read_8or9_radau
       xkph=dble(k1)+xp5
       i1=0
       do 60 i= 1,nang1
-      if (iv1(i) == 0) goto 60
+      if (iv1(i) .eq. 0) goto 60
       i1=i1+1
       i2=0
       do 65 ip=1,nang2
-      if (iv2(ip) == 0) goto 65
+      if (iv2(ip) .eq. 0) goto 65
       i2=i2+1
       sum1=x0
       sum2=x0
       jj=k1
       do 70 j =1,nang1
-      if (j > 1) then
+      if (j .gt. 1) then
          jj=jj+1
          sum1 = sum1 + pleg1(j,i) * pleg2(j-1,ip)&
              * sqrt(dble(jj*(jj+1)-kkp1))
@@ -1207,11 +1296,16 @@ end subroutine read_8or9_radau
 !     evaluating the matrix element in an fbr using gaussian quadrature
 !     and then transforming to the appropriate dvrs.
  
-      implicit double precision (a-h,o-y), logical (z)
+      use size
  
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
+      implicit none
+      DOUBLE PRECISION :: X0
+
+      DOUBLE PRECISION :: x1,TERM,FACT,SUM,angfac
+      INTEGER :: K1,I,J,K,I1,IV1,I2,IP,JP,NANG1,NANG2,IV2
+ 
+
+
 
       DIMENSION iv1(ndvr),iv2(ndvr)
       DOUBLE PRECISION, DIMENSION(ndvr,ndvr) :: fbrmat,pleg1,pleg2
@@ -1219,8 +1313,10 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, DIMENSION(npnt) :: xalf,walf
       DOUBLE PRECISION, DIMENSION(nang1,npnt) :: plega
       DOUBLE PRECISION, DIMENSION(nang2,npnt) :: plegb 
+      x0 = 0.0d0
  
-      data x0/0.0d0/,x1/1.0d0/
+      x1 = 1.0d0
+
 !     evaluate the polynomials at the quadrature points
       call asleg(plegb,fbrmat,nang2-1,xalf,npnt,k1+2)
 !     now compute the fbr matrix elements
@@ -1238,11 +1334,11 @@ end subroutine read_8or9_radau
  
       i1=0
       do 60 i= 1,nang1
-      if (iv1(i) == 0) goto 60
+      if (iv1(i) .eq. 0) goto 60
       i1=i1+1
       i2=0
       do 65 ip=1,nang2
-      if (iv2(ip) == 0) goto 65
+      if (iv2(ip) .eq. 0) goto 65
       i2=i2+1
       sum=x0
       do 70 j =1,nang1
@@ -1286,21 +1382,21 @@ end subroutine read_8or9_radau
       cc= cc*c(i)
  1    continue
       do 12 i=1,nn2
-      if (i == 1) then
+      if (i .eq. 1) then
 !        largest zero
          an= alf/fn
          bn= bta/fn
          r1= (x1 + alf)*(2.78d0/(x4 + fn*fn) +0.768*an/fn)
          r2= x1 + 1.48d0*an + 0.96d0*bn + 0.452*an*an + 0.83d0*an*bn
          xt= x1 - r1/r2
-      else if (i == 2) then
+      else if (i .eq. 2) then
 !        second zero
          r1= (4.1d0 + alf)/((x1 + alf)*(x1 + 0.156*alf))
          r2= x1 + 0.06d0*(fn - x8)*(x1 + 0.12d0*alf)/fn
          r3= x1 + 0.012*bta*(x1 + abs(alf)/x4)/fn
          ratio= r1*r2*r3
          xt= xt - ratio*(x1 - xt)
-      else if (i == 3) then
+      else if (i .eq. 3) then
 !        third zero
          r1= (1.67d0 + 0.28d0*alf)/(x1 + 0.37d0*alf)
          r2= x1 + 0.22d0*(fn - x8)/fn
@@ -1317,7 +1413,7 @@ end subroutine read_8or9_radau
       a(i)= cc/(dpn*pn1)
       csa= csa + a(i)*x2
   12  continue
-      if (2*nn2 /= nn) csa = csa - a(nn2)
+      if (2*nn2 .ne. nn) csa = csa - a(nn2)
       return
       end
 
@@ -1362,19 +1458,19 @@ end subroutine read_8or9_radau
  30   continue
       call recur(p,dp,pn1,xxx,nn,alf,bta,b,c)
 
-      if (pm1*p < x0) then
+      if (pm1*p .lt. x0) then
          pm1 = -pm1
          ii = ii +1
          xt(ii)=xxx-0.5*xstep
       endif
 
-      if (ii == nn2) then
+      if (ii .eq. nn2) then
          do 40 i=1,nn2
          call recur(ptemp,dp,pn1,xt(i),nn,alf,bta,b,c)
 40      continue
       else
          xxx=xxx-xstep
-         if (xxx > -1.5*xstep) goto 30
+         if (xxx .gt. -1.5*xstep) goto 30
          write(6,*) "Incorrect number",ii-1," of zeros found in JACOBI"
          stop
       endif 
@@ -1385,7 +1481,7 @@ end subroutine read_8or9_radau
        a(i)= cc/(dpn*pn1)
        csa= csa + a(i) + a(i)
   20  continue
-      if (2*nn2 /= nn) csa=csa-a(nn2)
+      if (2*nn2 .ne. nn) csa=csa-a(nn2)
       return
       end
 
@@ -1404,8 +1500,8 @@ end subroutine read_8or9_radau
       call recur(p,dp,pn1,x,nn,alf,bta,b,c)
       d = p/dp
       x = x - d
-      if(abs(d) <= eps) goto 3
-      if (iter < 10) goto 1
+      if(abs(d) .le. eps) goto 3
+      if (iter .lt. 10) goto 1
 3     dpn= dp
       return
       end
@@ -1414,7 +1510,13 @@ end subroutine read_8or9_radau
       subroutine recur(pn,dpn,pn1,x,nn,alf,bta,b,c)
       implicit double precision(a-h,o-z)
       DOUBLE PRECISION, DIMENSION(nn) :: b,c
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
+      DOUBLE PRECISION :: x2
+      DOUBLE PRECISION :: x1
+      DOUBLE PRECISION :: x0
+      x0 = 0.0d0
+
+      x2 = 2.0d0
+      x1 = 1.0d0
       p1= x1
       p= x + (alf-bta)/(alf + bta + x2)
       dp1= x0
@@ -1444,16 +1546,21 @@ end subroutine read_8or9_radau
  
       implicit double precision (a-h,o-z)
       dimension pleg(0:lmax,nn2),x(nn2),pnorm(0:lmax)
-      data x1/1.0d0/,x2/2.0d0/
+      DOUBLE PRECISION :: x2
+      DOUBLE PRECISION :: x1
 
-      if (m < 0) goto 999
+      x2 = 2.0d0
+      x1 = 1.0d0
+
+
+      if (m .lt. 0) goto 999
       do 10 i=1,nn2
 
       !For high J and high k the value pmm can become too large over this loop
       !Therefore in these instances we need pmm to be very small to begin with
       !We later divide by this factor to achieve the originally required number
       !For so2 at J = 200 and k > 90 we find this necessary, so we add this conditional
-	if(m<90)then
+	if(m.LT.90)then
 	  pmm = x1
 	else
 	  pmm = 1d-250
@@ -1468,7 +1575,7 @@ end subroutine read_8or9_radau
       !Even when we use the above trick to reduce the size of pmm, it can still be too large for subsequent loops
       !We therefore conditionally divide pmm by a large enough factor - we take this to be for k > 150 (for so2)
       !write(*,*) pmm
-      if(m>150)then
+      if(m.GT.150)then
 	pmm = pmm/1.0d200
       end if
  
@@ -1500,7 +1607,7 @@ end subroutine read_8or9_radau
   
 !After a certain point, square-rooting this factor doesn't reduce the number sufficiently to a coping level
 !Therefore we take the fourth root instead. We set the cut-off point to be the same as that for pmm, k > 90
-	 if(m<90)then
+	 if(m.LT.90)then
 	   facti = sqrt(dble(i))
 	 else
 	   facti = dble(i)**(1.0d0/4.0d0)
@@ -1511,7 +1618,7 @@ end subroutine read_8or9_radau
       rj = dble(j)
       jj = jj + 1
 
-      if(m<90)then
+      if(m.LT.90)then
 	   pnorm(jj) = sqrt((rj + rj + x1) /2)/fact
 	 else
 	   pnorm(jj) = (((rj + rj + x1) /2)**(1.0d0/4.0d0))/fact
@@ -1524,12 +1631,12 @@ end subroutine read_8or9_radau
 	do 15 jj=0,lmax
 	  pleg(jj,i) = pleg(jj,i) * pnorm(jj)
 	   !This is where we multiply by the large factor initially divided from pmm at the beginning of its loop
-	    if(m>=90)then
+	    if(m.GE.90)then
 	      pleg(jj,i) = pleg(jj,i) * 1.0d250 * pnorm(jj)
 	    end if
 	    
 	    !And for the k's which are greater than 150, we need to divide by the reducing factor again
-	     if(m>150)then
+	     if(m.GT.150)then
 	      pleg(jj,i) = pleg(jj,i) * 1.0d200
 	    end if
 	15 continue
@@ -1582,33 +1689,35 @@ end subroutine read_8or9_radau
  
 !     subroutine loadh loads the hamiltonian matrix from disk
  
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+      use size
+      use outp
+ 
+      implicit none
+      DOUBLE PRECISION :: X0,ANGFAC
+      INTEGER :: IST2,IPT,ITIME,LENG,MVIB,I1,I2,IST3,I,J,J0,IST1,IANG2,IBASS2,MN
+
+
 
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, dimension(*) :: diag
       DOUBLE PRECISION, dimension(ibass,ibass) :: hamil
-      data x0/0.0d0/
+      x0 = 0.0d0
+
       if (zdcore) then
          hamil=x0
          ist2=0
       endif
  
       ipt=1+ibass
-      if (itime > 1) then
+      if (itime .gt. 1) then
 !     first the blocks involving k=1 from the end of iscr
          if (.not. zdcore) then
             leng=mvib(3)*mvib(2)
-            if (leng > 0)  call getrow(diag(ipt),leng,iscr)
+            if (leng .gt. 0)  call getrow(diag(ipt),leng,iscr)
             ipt=ipt+leng
-            if (nblk > 3) then
+            if (nblk .gt. 3) then
                leng=mvib(4)*mvib(2)
-               if (leng > 0) call getrow(diag(ipt),leng,iscr)
+               if (leng .gt. 0) call getrow(diag(ipt),leng,iscr)
                ipt=ipt+leng
             endif
 !           then the diagonal elements
@@ -1616,7 +1725,7 @@ end subroutine read_8or9_radau
          else
             ist2=ist2+mvib(2)
             leng=mvib(3)*mvib(2)
-            if (leng > 0) call getrow(diag,leng,iscr)
+            if (leng .gt. 0) call getrow(diag,leng,iscr)
             ipt=0
             do 10 i1=1,mvib(2)
             do 20 i2=ist2+1,ist2+mvib(3)
@@ -1625,10 +1734,10 @@ end subroutine read_8or9_radau
             hamil(i2,i1)=diag(ipt)
    20       continue
    10       continue
-            if (nblk > 3) then
+            if (nblk .gt. 3) then
                ist3=ist2+mvib(3)
                leng=mvib(4)*mvib(2)
-               if (leng > 0) call getrow(diag,leng,iscr)
+               if (leng .gt. 0) call getrow(diag,leng,iscr)
                ipt=ipt+leng
                ipt=0
                do 30 i1=1,mvib(2)
@@ -1648,12 +1757,12 @@ end subroutine read_8or9_radau
       endif
 !     reposition iscr (skipping k=0 and k=1 blocks if already read)
       rewind iscr
-      if (itime > 1) then
-         if (mvib(1)*mvib(2) > 0) read(iscr)
-         if (mvib(1)*mvib(3) > 0) read(iscr)
-         if (mvib(2)*mvib(3) > 0) read(iscr)
-         if (nblk > 3) then
-         if (mvib(2)*mvib(4) > 0) read(iscr)
+      if (itime .gt. 1) then
+         if (mvib(1)*mvib(2) .gt. 0) read(iscr)
+         if (mvib(1)*mvib(3) .gt. 0) read(iscr)
+         if (mvib(2)*mvib(3) .gt. 0) read(iscr)
+         if (nblk .gt. 3) then
+         if (mvib(2)*mvib(4) .gt. 0) read(iscr)
          end if
          j0=4
       else
@@ -1663,15 +1772,15 @@ end subroutine read_8or9_radau
       if (.not. zdcore) then
          do 100 j=j0,nblk
          leng=mvib(j)*mvib(j-1)
-         if (leng > 0) call getrow(diag(ipt),leng,iscr)
+         if (leng .gt. 0) call getrow(diag(ipt),leng,iscr)
          ipt=ipt+leng
-         if (j < nblk) then
+         if (j .lt. nblk) then
             leng=mvib(j+1)*mvib(j-1)
-            if (leng > 0) call getrow(diag(ipt),leng,iscr)
+            if (leng .gt. 0) call getrow(diag(ipt),leng,iscr)
             ipt=ipt+leng
          endif
   100    continue
-         if (itime <= 1) call getrow(diag,nbass,iscr)
+         if (itime .le. 1) call getrow(diag,nbass,iscr)
  
 !     print hamiltonian matrix- if requested
  
@@ -1682,7 +1791,7 @@ end subroutine read_8or9_radau
          ist1=ist2
          ist2=ist2+mvib(j-1)
          leng=mvib(j)*mvib(j-1)
-         if (leng > 0) call getrow(diag,leng,iscr)
+         if (leng .gt. 0) call getrow(diag,leng,iscr)
          ipt=0
          do 130 i1=ist1+1,ist1+mvib(j-1)
          do 135 i2=ist2+1,ist2+mvib(j)
@@ -1691,10 +1800,10 @@ end subroutine read_8or9_radau
          hamil(i2,i1)=diag(ipt)
   135    continue
   130    continue
-         if (j < nblk) then
+         if (j .lt. nblk) then
             ist3=ist2+mvib(j)
             leng=mvib(j+1)*mvib(j-1)
-            if (leng > 0) call getrow(diag,leng,iscr)
+            if (leng .gt. 0) call getrow(diag,leng,iscr)
             ipt=ipt+leng
             ipt=0
             do 140 i1=ist1+1,ist1+mvib(j-1)
@@ -1706,7 +1815,7 @@ end subroutine read_8or9_radau
   140       continue
          endif
   150    continue
-         if (itime == 1) then
+         if (itime .eq. 1) then
             call getrow(diag,ibass,iscr)
             do 160 i=1,ibass
             hamil(i,i)=diag(i)
@@ -1727,14 +1836,11 @@ end subroutine read_8or9_radau
 !     including the computation of the k dependent angular matrix
 !     elements
  
-      implicit double precision (a-h,o-y), logical (z)
+      use size
+      use outp
  
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+      implicit none
+    
 
       DIMENSION MVIB(NBLK)
       DIMENSION iv1(ndvr),iv2(ndvr)
@@ -1744,8 +1850,14 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: pleg1,pleg2,plega,plegb
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: DIAG,OFFDG
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: COEF1,COEF2,angmat
+      DOUBLE PRECISION :: x2
+      DOUBLE PRECISION :: x16
+      DOUBLE PRECISION :: sqrt2,ANGFAC
+      INTEGER :: JJP1,IP,K1,MAXLEG,NANG1,IANG1,IBASS1,IV1,I,MVIB,MEVAL2,IDPT,K2,NANG2,IV2,IOFF,IANG2,MN,IBASS2
+      x2 = 2.0d0
+      x16 = 16.0d0
+      sqrt2 = 1.4142135623731d0
  
-      data x2/2.0d0/,x16/16.0d0/,sqrt2/1.4142135623731d0/
 
       ALLOCATE(COEF1(MBASS,NVIB),COEF2(MBASS,NVIB),angmat(iang,iang),&
                pleg1(ndvr,ndvr),pleg2(ndvr,ndvr),diag(nbass),offdg(loff0),&
@@ -1758,14 +1870,14 @@ end subroutine read_8or9_radau
       ip = ipar
  
 !     position ket input file (and load first ket data)
-!     for nblk == 2 also load bra file
+!     for nblk .eq. 2 also load bra file
   
       read(ivec)
       read(ivec)
       read(ivec) k1,maxleg,nang1
 !     if k1=0 and we are doing an f parity calculation, read k=1 from
 !     end of file
-      if (k1 == 0 .and. kmin == 0) then
+      if (k1 .eq. 0 .and. kmin .eq. 0) then
          read(ivec)
          call endiv(ivec,jrot+1)
  
@@ -1773,10 +1885,10 @@ end subroutine read_8or9_radau
          call getrow(pleg1,nang1*ndvr,ivec)
          read(ivec) iang1,ibass1
          read(ivec) (iv1(i),i=1,nang1)
-         if (mvib(1) > 0) then
+         if (mvib(1) .gt. 0) then
             read(ivec)
             call getrow(diag(1),mvib(1),ivec)
-            if (nblk <= 2)&
+            if (nblk .le. 2)&
                call rdcoef(coef1,ibass1,mvib(1),mvib(1),ivec)
          endif
          call reseti(ivec)
@@ -1785,9 +1897,9 @@ end subroutine read_8or9_radau
          read(ivec) iang1,ibass1
          read(ivec) (iv1(i),i=1,nang1)
          read(ivec) meval2
-         if (mvib(1) > 0) then
+         if (mvib(1) .gt. 0) then
             call getrow(diag(1),mvib(1),ivec)
-            if (nblk <= 2) then
+            if (nblk .le. 2) then
                call rdcoef(coef1,ibass1,mvib(1),meval2,ivec)
             else
                call rdcoef(coef1,ibass1,0,meval2,ivec)
@@ -1805,7 +1917,7 @@ end subroutine read_8or9_radau
       read(ivec) (iv2(i),i=1,nang2)
  
       read(ivec) meval2
-      if (mvib(2) > 0) then
+      if (mvib(2) .gt. 0) then
          call getrow(diag(idpt),mvib(2),ivec)
          idpt=idpt+mvib(2)
       else
@@ -1813,7 +1925,7 @@ end subroutine read_8or9_radau
       endif
       call rdcoef(coef2,ibass2,mvib(2),meval2,ivec)
 !     position second vectors file if it is required
-      if (nblk > 2) then
+      if (nblk .gt. 2) then
          open(unit=ivec2,form='unformatted',recordtype='segmented')
          rewind ivec2
          do 10 i=1,5
@@ -1825,12 +1937,12 @@ end subroutine read_8or9_radau
  
       do 300 ioff=2,nblk
 !     read in next set of bra vibrational vectors & diagonal elements
-      if (nblk > 2) then
+      if (nblk .gt. 2) then
          read(ivec2)
          read(ivec2) k1,maxleg,nang1
 !     if k1=0 and we are doing an f parity calculation, read k=1 from
 !     end of file
-         if (k1 == 0 .and. kmin == 0) then
+         if (k1 .eq. 0 .and. kmin .eq. 0) then
             read(ivec2)
             call endiv(ivec2,jrot+1)
  
@@ -1839,7 +1951,7 @@ end subroutine read_8or9_radau
             read(ivec2) iang1,ibass1
             read(ivec2) (iv1(i),i=1,nang1)
             read(ivec2)
-            if (mvib(1) > 0) then
+            if (mvib(1) .gt. 0) then
                call getrow(diag(1),mvib(1),ivec2)
                call rdcoef(coef1,ibass1,mvib(1),mvib(1),ivec2)
             endif
@@ -1860,12 +1972,12 @@ end subroutine read_8or9_radau
       mn = mvib(ioff-1)*mvib(ioff)
 !     angular factor for the present off-diagonal block
       angfac = +sqrt(dble(jjp1-k1*(k1+1)))/x2
-      if (k1 == 0) angfac = sqrt2 * angfac
+      if (k1 .eq. 0) angfac = sqrt2 * angfac
 
       call angin1(angmat,xalf,walf,pleg1,pleg2,mn,k1,&
                   plega,plegb,iv1,iv2,nang1,nang2,angfac)
-      if (mn > 0) then
-         if (ip == 0) then
+      if (mn .gt. 0) then
+         if (ip .eq. 0) then
             call solofd(mn,radmeo,angmat,nmax,1,1,0,offdg,iang,&
                         iang1,iang2,mvib(ioff-1),mvib(ioff),coef1,coef2,&
                         ibass1,ibass2)
@@ -1878,7 +1990,7 @@ end subroutine read_8or9_radau
  
 !     next block: kp = k+2 (skip if we are near end of matrix)
  
-      if (ioff == nblk) goto 300
+      if (ioff .eq. nblk) goto 300
       read(ivec)
       read(ivec) k2,maxleg,nang2
       call getrow(pleg2,nang2*ndvr,ivec)
@@ -1886,7 +1998,7 @@ end subroutine read_8or9_radau
       read(ivec) (iv2(i),i=1,nang2)
       read(ivec) meval2
  
-      if (mvib(ioff+1) > 0) then
+      if (mvib(ioff+1) .gt. 0) then
          call getrow(diag(idpt),mvib(ioff+1),ivec)
          idpt=idpt+mvib(ioff+1)
       else
@@ -1897,14 +2009,14 @@ end subroutine read_8or9_radau
 !     compute angular off diagonal elements (if needed)
  
       mn = mvib(ioff-1)*mvib(ioff+1)
-      if (mn > 0) then
+      if (mn .gt. 0) then
 !        angular factor for the present off-diagonal block
          angfac = -sqrt(dble((jjp1-(k1+1)*(k1+2))*(jjp1-k1*(k1+1))))/x16
-         if (k1 == 0) angfac = sqrt2 * angfac
+         if (k1 .eq. 0) angfac = sqrt2 * angfac
          call angin2(angmat,xalf,walf,pleg1,pleg2,k1,&
                   plega,plegb,iv1,iv2,nang1,nang2,angfac)
  
-         if (ip == 0) then
+         if (ip .eq. 0) then
             call solofd(mn,radmee,angmat,nmax,0,0,0,offdg,iang,&
                      iang1,iang2,mvib(ioff-1),mvib(ioff+1),coef1,coef2,&
                      ibass1,ibass2)
@@ -1920,7 +2032,7 @@ end subroutine read_8or9_radau
 !     place diagonal elements at end of scratch file
  
       call outrow(diag,nbass,iscr)
-      if (kmin < 2) goto 600
+      if (kmin .lt. 2) goto 600
  
 !     compute k=1 f blocks and place them at the end of the scratch file
  
@@ -1929,7 +2041,7 @@ end subroutine read_8or9_radau
       call getrow(pleg1,nang1*ndvr,ivec)
       read(ivec) iang1,ibass1
       read(ivec) (iv1(i),i=1,nang1)
-      if (mvib(2) <= 0 .or. nblk<=2) goto 500
+      if (mvib(2) .le. 0 .or. nblk.le.2) goto 500
       read(ivec)
       call getrow(diag(mvib(1)+1),mvib(2),ivec)
       call rdcoef(coef1,ibass1,mvib(2),mvib(2),ivec)
@@ -1953,8 +2065,8 @@ end subroutine read_8or9_radau
       angfac = +sqrt(dble(jjp1-2))/x2
       call angin1(angmat,xalf,walf,pleg1,pleg2,mn,k1,&
                   plega,plegb,iv1,iv2,nang1,nang2,angfac)
-      if (mn > 0) then
-         if (ip == 0) then
+      if (mn .gt. 0) then
+         if (ip .eq. 0) then
             call solofd(mn,radmeo,angmat,nmax,1,1,0,offdg,iang,&
                         iang1,iang2,mvib(2),mvib(3),coef1,coef2,&
                         ibass1,ibass2)
@@ -1967,7 +2079,7 @@ end subroutine read_8or9_radau
  
 !     next block: kp = k+2 (skip if we are near end of matrix)
  
-      if (nblk <= 3) goto 500
+      if (nblk .le. 3) goto 500
       read(ivec)
       read(ivec) k2,maxleg,nang2
       call getrow(pleg2,nang2*ndvr,ivec)
@@ -1981,13 +2093,13 @@ end subroutine read_8or9_radau
 !     compute angular off diagonal elements (if needed)
  
       mn = mvib(2)*mvib(4)
-      if (mn > 0) then
+      if (mn .gt. 0) then
 !        angular factor for the present off-diagonal block
          angfac = -sqrt(dble((jjp1-6)*(jjp1-2)))/x16
          call angin2(angmat,xalf,walf,pleg1,pleg2,k1,&
                   plega,plegb,iv1,iv2,nang1,nang2,angfac)
  
-         if (ip == 0) then
+         if (ip .eq. 0) then
             call solofd(mn,radmee,angmat,nmax,0,0,0,offdg,iang,&
                      iang1,iang2,mvib(2),mvib(4),coef1,coef2,&
                      ibass1,ibass2)
@@ -2071,20 +2183,22 @@ end subroutine read_8or9_radau
 !     matrix elements and first step vectors.
 !     New algorithm introduced. JT June 2012.
 
-      implicit double precision (a-h,o-y), logical (z)
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,& 
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,& 
-                    zdiag,zdcore,iscr,ires,irf1,irf2
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,& 
-                    nblk,loff,loff0,mbass0
+      use size
+      use outp
+ 
+      implicit none
 
       DOUBLE PRECISION, DIMENSION(mn) :: offdg
       DOUBLE PRECISION, DIMENSION(*) :: coef1,coef2
       DOUBLE PRECISION, DIMENSION(*) :: radmat
       DOUBLE PRECISION, DIMENSION(iang11,iang11) :: angmat
       DOUBLE PRECISION, DIMENSION(iang1,mvib2) :: pdg
-      data x0/0.0d0/,x1/1.0d0/
+      DOUBLE PRECISION :: x0
+      DOUBLE PRECISION :: x1
+      INTEGER :: IR1,IR2,IR,I1,NMAX1,I2,IQ,I0,J0,IANG2,IBASS2,MN,IANG11,IANG1,MVIB2,MVIB1,IBASS1,IQ1,IQ2
+      x0 = 0.0d0
+      x1 = 1.0d0
+
       offdg = x0
       ir1=0
       ir2=0
@@ -2119,26 +2233,30 @@ end subroutine read_8or9_radau
 !          hamil * vec = eval * vec
 !     by using iterative nag routine f02fjf to do diagonalisations.
  
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+      use size
+      use outp
+ 
+      implicit none
+      DOUBLE PRECISION :: x0
+      DOUBLE PRECISION :: autocm,EZERO,VBIG,ESMALL
+      INTEGER :: IFAIL,LWORK,MVIB,K1,IP,KZ,MEND,K,MBEG,J,I,IPT,VV,IBIG,MAX
+     
+    
 
       DOUBLE PRECISION, DIMENSION(NEVAL) :: EVAL
       DOUBLE PRECISION, DIMENSION(*) :: DIAG
       DOUBLE PRECISION, DIMENSION(IBASS,*) :: VEC
       DIMENSION MVIB(NBLK),IBIG(IBASS)
+      x0 = 0.0d0
+      autocm = 2.19474624d+05
 
 !          autocm converts atomic units (hartree) to cm-1.
-      data autocm/2.19474624d+05/,x0/0.0d0/
+
 
       if (zdcore) then
           ifail=0
           call dsyev('V','U',ibass,vec,ibass,eval,diag,lwork,ifail)
-          if (ifail /= 0) write(6,950) ifail
+          if (ifail .ne. 0) write(6,950) ifail
  950     format(/5x,'LAPACK routine SSYEV returned INFO =',i5)  
       else
          LWORK=3*KEVAL+MAX(KEVAL*KEVAL,NBASS+NBASS)
@@ -2151,7 +2269,7 @@ end subroutine read_8or9_radau
  1000 format(//5x,'lowest',i4,' eigenvalues in Hartrees',/)
       write(6,1020) eval
       if (zpfun) then
-         if (k1 == 1) then
+         if (k1 .eq. 1) then
             open(unit=ilev,form='formatted')
             rewind ilev
   200       read(ilev,*,end=210,err=210)
@@ -2161,7 +2279,7 @@ end subroutine read_8or9_radau
             backspace ilev
          endif
          ip=1-kmin
-         if (kmin > 1) ip=k1-1
+         if (kmin .gt. 1) ip=k1-1
          write(ilev,1025) jrot,ip,0,0,(2-4*ipar),neval
  1025    format(6i6) 
          write(ilev,1026) eval
@@ -2170,7 +2288,7 @@ end subroutine read_8or9_radau
       if (zvec) then
 !        write eigenvalues, eigenvectors, etc to stream jvec
          kz=kmin
-         if (kmin > 1) kz=2-k1
+         if (kmin .gt. 1) kz=2-k1
          open(unit=jvec,form='unformatted')
          rewind jvec
          write(jvec) jrot,kz,ipar,neval,ibass
@@ -2180,7 +2298,7 @@ end subroutine read_8or9_radau
          do 100 k=1,nblk
          mbeg=mend+1
          mend=mend+mvib(k)
-         if(mvib(k)>0) write(jvec) ((vec(j,i),j=mbeg,mend),i=1,neval)
+         if(mvib(k).gt.0) write(jvec) ((vec(j,i),j=mbeg,mend),i=1,neval)
   100    continue
       endif
       do 60 i=1,neval
@@ -2193,7 +2311,7 @@ end subroutine read_8or9_radau
  1020 format(5d24.12/)
 
       if (zpvec) then
-          if (thresh <= x0) then
+          if (thresh .le. x0) then
 !             print complete eigenvectors
               write(6,1030)
  1030         format(//'    eigenvectors',/)
@@ -2211,11 +2329,11 @@ end subroutine read_8or9_radau
               ipt=0
               do 90 j=1,ibass
               vv=abs(vec(j,i))
-              if (vv > thresh) then
+              if (vv .gt. thresh) then
                   ipt=ipt+1
                   ibig(ipt)=j
               endif
-              if (ipt <= 0 .and. vv > vbig) then
+              if (ipt .le. 0 .and. vv .gt. vbig) then
                   vbig=vv
                   ibig(1)=j
               endif
@@ -2235,23 +2353,29 @@ end subroutine read_8or9_radau
 !          hamil * vec = eval * vec
 !     by using iterative nag routine f02fjf to do diagonalisations.
  
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+      use size
+      use outp
+ 
+      implicit none
       double precision, external :: vecvec
       external matvec,f02fjz
+      INTEGER :: MVIB
 
       DOUBLE PRECISION, DIMENSION(KEVAL) :: EVAL
       DOUBLE PRECISION, DIMENSION(*) :: DIAG
       DOUBLE PRECISION, DIMENSION(IBASS,keval) :: VEC
       DIMENSION MVIB(NBLK)
       DOUBLE PRECISION, DIMENSION(lwork) :: WORK
+      DOUBLE PRECISION :: x0
+      DOUBLE PRECISION :: x1
+      DOUBLE PRECISION :: emax
+      DOUBLE PRECISION :: noffd,EBIG,ESMALL,ESHIFT
+      INTEGER :: I,IND,MAX,IFAIL,MOITS,NDIAG,LWORK,J,NOITS
+      x0 = 0.0d0
+      x1 = 1.0d0
+      emax = 1.0d50
+      noffd = 1
 
-      data x0/0.0d0/,x1/1.0d0/,emax/1.0d50/,noffd/1/
  
 !     create some starting vectors by using the diagonal elements
       vec=x0
@@ -2259,8 +2383,8 @@ end subroutine read_8or9_radau
       do 10 i=1,keval
       ebig=emax
       do 20 j=1,ibass
-      if (diag(j) > ebig) goto 20
-      if (diag(j) <= esmall) goto 20
+      if (diag(j) .gt. ebig) goto 20
+      if (diag(j) .le. esmall) goto 20
       ind=j
       ebig=diag(j)
    20 continue
@@ -2286,7 +2410,7 @@ end subroutine read_8or9_radau
       call f02fjf(ibass,neval,keval,noits,toler,vecvec,matvec,f02fjz,&
                   keval,vec,ibass,eval,work,lwork,diag,noffd,&
                   mvib,ndiag,ifail)
-      if (ifail /= 0) write(6,900) ifail
+      if (ifail .ne. 0) write(6,900) ifail
   900 format(//5x,'f02fjf returned ifail =',i3)
  
       write(6,1000) noits
@@ -2306,13 +2430,13 @@ end subroutine read_8or9_radau
 !     results in a form suitable for program dipole3.
 !     This version treats each k-block seperately.
  
-      implicit double precision(a-h,o-y), logical(z)
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+      use size
+      use outp
+ 
+      implicit none
+      DOUBLE PRECISION :: x0
+      DOUBLE PRECISION :: x1
+      
 
       DIMENSION MVIB(nblk),NKBAS(nblk),lmin(nblk),lbasis(nblk)
 !      DOUBLE PRECISION, DIMENSION(3) :: XMASS
@@ -2329,13 +2453,18 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, allocatable :: r (:)
       DIMENSION ivt(ndvr)
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: B
+      DOUBLE PRECISION :: G1,G2,RE1,DISS1,WE1,WE2,DISS2,RE2
+      INTEGER :: J,NOITS,MVIB,IDIA,IDVR,NPNT1,NPNT2,JROT0,KMIN0,MVAL,JORT1,KMIN1,IPAR1,NVAL,MIN,JROT1,ITRA,NEND,NKMAX,K,LMIN,LBASIS,iiout,I,IVT,NKBAS
+      LOGICAL :: ZMORS1,ZMORS2,ZNCOR,ZQUAD2
+      x0 = 0.0d0
+      x1 = 1.0d0
 
       allocate(XMASS(3))
       allocate(d(mbass0,neval))
       allocate(c(nvib,neval))
       allocate(r(nmax))
       
-      data x0/0.0d0/,x1/1.0d0/
+    
  
       write(6,1000) ivec,jvec,kvec
  1000 format('1'/5x,'eigenvector transformation:',&
@@ -2355,20 +2484,20 @@ end subroutine read_8or9_radau
       read(jvec) mvib
       nval=min(nval,neval)
 !     check for compatability
-      if (jrot1 /= abs(jrot0)) then
+      if (jrot1 .ne. abs(jrot0)) then
           write(6,900) jrot1,abs(jrot0)
   900     format(/5x,'j levels mismatched',&
                  /5x,'jrot1 =',i3,'  jrot0 =',i3)
           stop
       endif
-      if (kmin1 > kmin0) then
+      if (kmin1 .gt. kmin0) then
          write(6,910)
   910    format(/5x,'kmin1 and kmin0 incompatible')
          stop
       endif
-      if (itra == 2) ipar=1-ipar
-      if (itra==1 .and. kmin0==2 .and. kmin1==0)  ipar=1-ipar
-      if (ipar /= ipar1) then
+      if (itra .eq. 2) ipar=1-ipar
+      if (itra.eq.1 .and. kmin0.eq.2 .and. kmin1.eq.0)  ipar=1-ipar
+      if (ipar .ne. ipar1) then
          write(6,920) ipar,ipar1
   920    format(/5x,'parities mismatched'/5x,'ipar= ',i2,'  ipar1= ',i2)
          stop
@@ -2402,7 +2531,7 @@ end subroutine read_8or9_radau
       do 50 k=1,nblk
 !     transform dvr basis to fbr in theta for current k-block
       call tofbr(nkbas(k),mvib(k),ivt,b,itra,idvr)
-      if (mvib(k) <= 0) goto 50
+      if (mvib(k) .le. 0) goto 50
 !     read in the untransformed vectors for current k-block
       call getrow(c,mvib(k)*nval,jvec)
 
@@ -2444,13 +2573,12 @@ end subroutine read_8or9_radau
 !     `Transformation' step for J=1f special case      
 !     RESULTS IN A FORM SUITABLE FOR program DIPOLE3.
 
-      implicit double precision(a-h,o-y), logical(z)
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+      use size
+      use outp
+ 
+      implicit none
+      DOUBLE PRECISION :: autocm
+      
 
       DOUBLE PRECISION, DIMENSION(3) :: XMASS
       DOUBLE PRECISION, DIMENSION(mbass) :: d
@@ -2458,7 +2586,12 @@ end subroutine read_8or9_radau
       DOUBLE PRECISION, DIMENSION(nmax) :: r
       DOUBLE PRECISION, DIMENSION((ndvr+1)**2) :: pleg
       DIMENSION ivt(ndvr)
-      data autocm/2.19474624d+05/
+      INTEGER :: IDIA,IDVR0,NPNT1,NPNT2,JROT0,KMIN0,MVAL,NKBAS,MAX,KMIN1,ITRA,IDVR,NANG,max2d,K1,MAXLEG,NANG1,IANG1,IBASS1,IVT,I,IP,MEVAL0,K,J
+      LOGICAL :: ZMORS1,ZMORS2,ZNCOR,ZQUAD2,RE1,DISS1,WE1,WE2,RE2,DISS2
+      DOUBLE PRECISION :: G1,G2,EZERO
+
+      autocm = 2.19474624d+05
+ 
  
 !     read dvr3d header
       rewind ivec
@@ -2468,8 +2601,8 @@ end subroutine read_8or9_radau
       read(ivec)
       read(ivec) r
       kmin1=0
-      if (itra == 2) ipar=1-ipar
-      if (itra==1 .and. kmin0==2 .and. kmin1==0)  ipar=1-ipar
+      if (itra .eq. 2) ipar=1-ipar
+      if (itra.eq.1 .and. kmin0.eq.2 .and. kmin1.eq.0)  ipar=1-ipar
       if (ztran) then
 !        write header on new file
          open(unit=kvec,form='unformatted',recordtype='segmented')
@@ -2485,7 +2618,7 @@ end subroutine read_8or9_radau
       if (ztran) write(kvec) r
 !     if file contains e and f, we are doing an f parity calculation, 
 !     read k=1 from  end of file
-      if (kmin0 == 2) then
+      if (kmin0 .eq. 2) then
          read(ivec)
          read(ivec)
          read(ivec)
@@ -2513,7 +2646,7 @@ end subroutine read_8or9_radau
  1000 format(//5x,'lowest',i4,' eigenvalues in hartrees',/)
       write(6,1020) (energy(i),i=1,neval)
       if (zpfun) then
-         if (itra == 1) then
+         if (itra .eq. 1) then
             open(unit=ilev,form='formatted')
             rewind ilev
   200       read(ilev,*,end=210,err=210)
@@ -2568,23 +2701,22 @@ end subroutine read_8or9_radau
 !     take the dvr vectors from unit ivec and transform them to fbr in
 !     theta. also construct pointer arrays for dipole3.
  
-      implicit double precision(a-h,o-y), logical(z)
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+      use size
+      use outp
+ 
+      implicit none
 
       DOUBLE PRECISION, DIMENSION(*) :: fbrvec
       DOUBLE PRECISION, DIMENSION(ndvr,idvr) :: pleg
       DIMENSION iv1(ndvr)
  
+      INTEGER :: KZ,MAXLEG,LINCR,ITRA,IANG1,IBASS1,IV1,I1,IVRES,NRAD,NANG,MVIB,NKBAS,L,IDVR,II
+ 
       read(ivec)
       read(ivec) kz,maxleg,idvr,lincr
 !     if k=0 and we are doing an f parity calculation, read k=1 from
 !     end of file
-      if (kz == 0 .and. (kmin == 0 .or. itra == 2)) then
+      if (kz .eq. 0 .and. (kmin .eq. 0 .or. itra .eq. 2)) then
          read(ivec)
          call endiv(ivec,jrot+1)
  
@@ -2604,9 +2736,9 @@ end subroutine read_8or9_radau
       read(ivec) meval
       read(ivec)
 !     read basis vectors and transform to associated legendres
-      if (mvib > 0) &
+      if (mvib .gt. 0) &
          call jtran(fbrvec,mvib,pleg,idvr,nrad,nang,ibass1,iv1,nkbas)
-      if (ivres == 0) then
+      if (ivres .eq. 0) then
 !        skip vectors that are not needed
          do 106 l=mvib+1,meval
          read(ivec)
@@ -2620,20 +2752,21 @@ end subroutine read_8or9_radau
 !#######################################################################
       subroutine jtran(coef,mvib,pleg,idvr,nrad,nang,ibass1,iv,nkbas)
   
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
-      common /outp/ toler,thresh,zpham,zpvec,zvec,ztran,zptra,&
-                    zpfun,ilev,ivec,ivec2,jvec,jvec2,kvec,kvec2,&
-                    zdiag,zdcore,iscr,ires,irf1,irf2
+      use size
+      use outp
+ 
+      implicit none
+      DOUBLE PRECISION :: x0
+      INTEGER :: L,I,IOFF,NDIAG,I2,K,MVIB,J1,I1,JOFF2,IOFF2,J2,IFLAG,N,NOFFD,II,J,IANG1,KK,IV,MN,IPT,IDVR,NRAD,NANG,NKBAS,IBASS1
+
 
       DOUBLE PRECISION, DIMENSION(ndvr,idvr) :: pleg
       DOUBLE PRECISION, DIMENSION(iang,nrad) :: dvrvec
       DOUBLE PRECISION, DIMENSION(nkbas,mvib) :: coef
       DOUBLE PRECISION, DIMENSION(nrad) :: sumk
       DIMENSION iv(nang)
-      data x0/0.0d0/
+      x0 = 0.0d0
+  
 
 !     transform back to the original fbr-type basis in the
 !     associated legendre functions
@@ -2646,7 +2779,7 @@ end subroutine read_8or9_radau
       sumk=x0
       kk=0
       do 40 k=1,idvr
-      if (iv(k) == 0) goto 40
+      if (iv(k) .eq. 0) goto 40
       kk=kk+1
       do 50 mn=1,nrad
       sumk(mn)=sumk(mn) + dvrvec(kk,mn) * pleg(j,k)
@@ -2701,10 +2834,12 @@ end subroutine read_8or9_radau
 !     hamil contains arrays diag & offdg relying on them being
 !     adjacent in the dynamic store allocation
  
-      implicit double precision (a-h,o-z)
-      common /size/ nbass,mbass,ibass,neval,ipar,nmax,maxblk,jrot,&
-                    kmin,kmax,meval,ndvr,iang,npnt,keval,nvib,mxblk2,neval2,&
-                    nblk,loff,loff0,mbass0
+      use size
+   
+ 
+      implicit none
+      DOUBLE PRECISION :: x1
+      INTEGER :: I,IOFF,NDIAG,I2,K,MVIB,J1,I1,JOFF2,N,IOFF2,IFLAG,NOFFD,J2
 
       DOUBLE PRECISION, DIMENSION(IBASS) :: W,Z
       DOUBLE PRECISION, DIMENSION(*) :: HAMIL
@@ -2719,28 +2854,28 @@ end subroutine read_8or9_radau
       ioff=ndiag
       i2=1
       do 20 k=1,nblk
-      if (mvib(k) < 1) goto 20
+      if (mvib(k) .lt. 1) goto 20
 !     (k,k-2) block
-      if (k > 2 .and. mvib(k-2) > 0) then
+      if (k .gt. 2 .and. mvib(k-2) .gt. 0) then
          j1=i1-mvib(k-2)
          joff2=ioff-mvib(k-2)*mvib(k)
          call dgemv('N',mvib(k),&
                    mvib(k-2),x1,hamil(joff2),mvib(k),z(j1),1,x1,w(i2),1)
       endif
 !     (k,k-1) block
-       if (k > 1 .and. mvib(k-1) > 0) call dgemv('N',mvib(k),&
+       if (k .gt. 1 .and. mvib(k-1) .gt. 0) call dgemv('N',mvib(k),&
                    mvib(k-1),x1,hamil(ioff),mvib(k),z(i1),1,x1,w(i2),1)
-      if (k>1.and.k<nblk) ioff=ioff2+mvib(k-1)*mvib(k+1)
+      if (k.gt.1.and.k.lt.nblk) ioff=ioff2+mvib(k-1)*mvib(k+1)
       i1=i2
       i2=i2+mvib(k)
 !     (k,k+1) block
-      if (k < nblk .and. mvib(k+1) > 0) then
+      if (k .lt. nblk .and. mvib(k+1) .gt. 0) then
           call dgemv('T',mvib(k+1),&
                    mvib(k),x1,hamil(ioff),mvib(k+1),z(i2),1,x1,w(i1),1)
          ioff2=ioff+mvib(k+1)*mvib(k)
       endif
 !     (k,k+2) block
-      if (k < nblk-1 .and. mvib(k+2) > 0) then
+      if (k .lt. nblk-1 .and. mvib(k+2) .gt. 0) then
          j2=i2+mvib(k+1)
          call dgemv('T',mvib(k+2),&
                    mvib(k),x1,hamil(ioff2),mvib(k+2),z(j2),1,x1,w(i1),1)
@@ -2752,7 +2887,7 @@ end subroutine read_8or9_radau
 !###########################
 
       subroutine nftim(text)
-      common/timing/itime0
+      use timing
       character text*(*)
       write(6,10)
       write(6,*) 'Time at ',text,' is.........'

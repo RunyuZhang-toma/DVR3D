@@ -1,10 +1,186 @@
-      program DVR3DRJZ
-      call dvr3d
-      stop
-      end
+module outp
+   save
+     integer :: idiag1 = 20        ! the final Hamiltonian matrix is written on units IDIAG1 and IDIAG2.
+     integer :: idiag2 = 21        ! the final Hamiltonian matrix is written on units IDIAG1 and IDIAG2.
+     integer :: iout1 = 24         ! stream for arrays iv1 and iv2, which record the sizes of
+                                   ! the truncated vctors. used when zvec = t.
+     integer :: iout2 = 25         ! stream for the 1d, 2d and 3d vectors for use when zvec = t.
+     integer :: iwave = 26         ! stores the wavefunction amplitudes at the grid points when
+     integer :: ilev = 14          ! stream for final eigenvalues (formatted).
+                                   ! holds input/output of eigenvalues used if zpfun = .true.
+     integer :: ieigs1 = 7         ! stream for eigenvalues of the 1d solutions.
+     integer :: ieigs2 = 2         ! stream for eigenvalues of the 2d solutions.
+     integer :: ivecs1 = 3         ! stream for eigenvectors of the 1d solutions.
+     integer :: ivecs2 = 4         ! stream for eigenvectors of the 2d solutions.
+     integer :: ivint = 17         ! a scratch stream used for storing intermediate vectors in
+                                   ! building the final hamiltonian.
+     integer :: iband = 15         ! scratch file used for storing bands of the final hamiltonian.
+     integer :: intvec = 16        ! a scratch stream for intermediate storage of the 2d vectors.
+     logical :: zpham = .false.    ! T request printing of the hamiltonian matrix
+     logical :: zprad = .false.    ! T request printing of the radial matrix elements
+     logical :: zpvec = .false.    ! T request printing of the eigenvectors
+     logical :: zrot = .true.      ! F do vibrational part of rotational calculation by looping over k
+     logical :: zladd = .true.     ! T NALF kept constant as k increases
+                                   ! F NALF decreases with k (=f has a bug), (only if zrot = .true.)
+     logical :: zembed = .true.    ! T z axis is along r2, = f z axis is along r1.
+                                   ! only used if J > 0 ZBISC = in JHMAIN ie if zbisc=f and zperp=f.
+     logical :: zmors2 = .true.    ! T use morse oscillator-like functions for r_2 coordinate;
+                                   ! F use spherical oscillator functions.
+     logical :: zs0 = .false.
+     logical :: zx = .false.
+     logical :: zs1 = .false.
+     logical :: zpmin = .false.    ! T requests only minimal printing.
+     logical :: zvec = .false.     ! T store the eigenvectors from all the parts of the calculation
+                                   ! eigenvalues and eigenvectors written to disk file.
+                                   ! (1d,2d and 3d) on stream iout2.
+                                   ! further information relating to this (arrays iv1 and iv2) is
+                                   ! stored on stream iout1.
+     logical :: zquad2 = .true.    ! T use the dvr quadrature approximation for the integrals of
+                                   ! the r_2^{-2} matrix, and hence make its dvr transformation diagonal.
+                                   ! F evaluate the r_2^{-2} integrals fully and perform the
+                                   ! full dvr transformation on them.
+                                   ! Note that zquad2 = f is not implemented for zmors2 = t
+                                   ! or for ztheta = f.
+     logical :: zdiag = .true.     ! F do not do final diagonalisation, instead the final Hamiltonian
+                                   ! matrix is written on units IDIAG1 and IDIAG2. 
+     logical :: zlmat = .false.    ! T requests printing of the L-matrix.
+     logical :: zcut = .false.     ! T final dimension selected using an energy cut-off given  by emax2.
+                                   ! F final dimension determined by nham3.
+     logical :: zall = .false.     ! T requests no truncation of the intermediate solution.
+     logical :: zlin = .false.     ! T NALF kept constant as k increases
+                                   ! F NALF decreases with k (=f has a bug), (only if zrot = .true.)
+     logical :: zp1d = .false.     ! T requests printing of the results of 1d calculations.
+     logical :: zp2d = .false.     ! T requests printing of the results of 2d calculations.
+     logical :: zr2r1 = .true.     ! T let r_2 come before r_1 in the order of solution;
+                                   ! F let r_1 come before r_2 in the order of solution. (only idia > -2).
+     logical :: ztheta = .true.    ! T let theta be first in the order of solution;
+                                   ! F let theta be last in the order of solution,
+     logical :: ztran = .false.    ! T perform the transformation of the solution coefficients
+                                   ! to the expression for the wavefunction amplitudes at the grid
+                                   ! points. store the data on stream iwave.
+                                   ! ztran = T automatically sets zvec = t for idia > -2.
+     logical :: zmors1 = .true.    ! T use morse oscillator-like functions for r_1 coordinate;
+                                   ! F use spherical oscillator functions.
+     logical :: ztwod = .false.    ! T perform 2D calculation only at specified grid point.
+     logical :: zbisc              ! T place the Z-axis along the bisector
+     logical :: zperp = .false.    ! T place the Z-axis perpendicular to the molecule place
+     logical :: zpfun = .false.    ! F store energy levels on stream ilev
+    logical :: zpseg = .false.
+end module outp
+
+module mass
+   save
+
+    double precision:: xmass(3)
+    double precision :: xmassr(3)
+    double precision :: g1
+    double precision :: g2
+    double precision :: ezero
+
+end module mass
+
+module size
+   save
+!constant count: integer 69, real 2.
+
+     integer :: npnt1    ! number of (gauss-laguerre) dvr points in r1
+     integer :: npnt2    ! number of (gauss-laguerre) dvr points in r2
+     integer :: nalf     ! number of (gauss-legendre) dvr points in theta
+     integer :: nmax1    ! max order of r1 radial laguerre polynomial ( = npnt1-1)
+     integer :: nmax2    ! max order of r2 radial laguerre polynomial ( = npnt2-1)
+     integer :: maxleg   ! max order of angular legendre polynomial   ( = nalf -1)
+     integer :: nalf2
+     integer :: idvr     ! number of unique dvr points
+     integer :: npnt     ! max(npnt1,npnt2) number of gauss-associated legendre grid points requested
+     integer :: nlim1    ! nmax1+1*(nmax1+1+1)/2
+     integer :: nlim2    ! nmax2+1*(nmax2+1+1)/2
+     integer :: neval    ! number of eigenvalues which have to actually be supplied as output
+     integer :: ncoord   ! number of vibrational coordinates explicitly considered
+                         ! ncoord = 2: atom-diatom problem with diatom rigid
+                         ! ncoord=2: also need lmax,lpot,idia,kmin
+                         ! ncoord = 3: full 3-d triatomic problem
+                         ! ncoord=3: all paramters required
+
+     integer :: jrot     ! total angular momentum of the molecule
+     integer :: kmin     ! zrot=t, kmin=1 sym. rot. basis, =0 anti-sym.
+                         ! kmin=2 loop over both sym & anti-sym (zbisc=t only)
+                         ! zrot=f, kmin=fixed value of k
+
+     integer :: idia     ! 1 scattering coordinates heteronuclear diatomic
+                         ! 2 scattering coordinates homonuclear diatomic
+                         ! -1 radau  coordinates hetronuclear diatomic
+                         ! -2 radau  coordinates homonuclear  diatomic
+                         ! 0 radau   coordinates with the z axis perpendicular to the molecular plane.
+
+     integer :: ipar     ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
+     integer :: max2d    ! upper bound on size of intermediate 2d hamiltonian
+     integer :: max3d    ! upper bound on size of full 3d hamiltonian
+     integer :: max2d2   ! max2d for smaller block (zbisc=t only)
+     integer :: max3d2   ! max3d for smaller block (zbisc=t only)
+     integer :: npnta    ! the number of dvr points in
+                         ! the coordinate to be treated first in the dvr successive
+                         ! diagonalisation-truncation procedure
+
+     integer :: npntb    ! the number of dvr points in the coordinate to come second
+     integer :: npntc    ! the number of dvr points in the coordinate to come last
+     integer :: ndima    ! set equal to npnta at the start - used for dimensioning
+     integer :: ndimb    ! set equal to npntb at the start - used for dimensioning
+     integer :: ndimc    ! set equal to npntc at the start - used for dimensioning
+     integer :: iq
+    double precision :: emax1
+    double precision :: emax2
+     
+end module size
+
+module split1
+    save
+
+     integer :: iu1
+
+    double precision :: re1
+    double precision :: diss1
+    double precision :: we1
+    double precision :: beta1
+    double precision :: ur1
+    double precision:: urr1
+    double precision:: a1
+
+end module split1
+
+module split2
+    save
+
+    integer :: iu2
+
+    double precision:: re2
+    double precision:: diss2
+    double precision:: we2
+    double precision:: beta2
+    double precision:: ur2
+    double precision:: urr2
+    double precision:: a2
+
+end module split2
+
+module oupb
+    save
+    double precision :: xp0
+    double precision :: xp1
+    double precision :: xp2
+end module oupb
+
+module timing
+    save
+    integer :: itime0
+end module timing
+
+program DVR3DRJZ
+call dvr3d
+stop
+end
 
 !######################################################################
-      subroutine dvr3d
+subroutine dvr3d
 !
 !     program               d v r 3 d r j z
 !                           ~~~~~~~~~~~~~~~
@@ -44,21 +220,18 @@
 !     4. the eigenvalues are printed in both hartree & wavenumbers.
 !
 !     Rewritten into fortran 95 by Max Kostin and Jonathan Tennyson
-      implicit double precision (a-h,o-y), logical (z)
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common /oupb/   xp0,xp1,xp2
-      namelist/prt/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
+ 
+    use outp
+    use oupb
+    use timing
+    implicit none
+    integer :: irate2, imax2, itime2, itime
+    namelist/prt/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
                     zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
                     zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zperp,&
                     idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
                     ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
                     zpseg
-      common/timing/itime0
 
       write(6,1000)
  1000 format(5x,'Program DVR3DRJZ (version of March 2002)')
@@ -81,102 +254,10 @@
       stop
       end
 
-!##############################################################################
-      block data
-!     stores defaults for namelist parameters  
-      implicit logical (z)
-
-!  zpham[f] = t requests printing of the hamiltonian matrix.
-!  zprad[f] = t requests printing of the radial matrix elements.
-!  zp1d [f] = t requests printing of the results of 1d calculations.
-!  zp2d [f] = t requests printing of the results of 2d calculations.
-!  zpmin[f] = t requests only minimal printing.
-!  zpvec[f] = t requests printing of the eigenvectors.
-!  zlmat[f] = t requests printing of the L-matrix.
-!  zcut[f]  = t final dimension selected using an energy cut-off given
-!             by emax2.
-!            = f final dimension determined by nham3.
-!  zmors1[t]= t use morse oscillator-like functions for r_1 coordinate;
-!           = f use spherical oscillator functions.
-!  zmors2[t]= t use morse oscillator-like functions for r_2 coordinate;
-!           = f use spherical oscillator functions.
-!  zrot[f]  = f do vibrational part of rotational calculation by
-!               looping over k
-!  zperp[f] = f  z in plane calculation (uses JHMAIN or NFMAIN)
-!           = t  z perpendicular calculation (use MKMAIN)
-!  zbisc[f] = t  bisector embedding (use NFMAIN), set by the program
-!  zembed[t]= t z axis is along r2, = f z axis is along r1.
-!               only used if J > 0 ZBISC = in JHMAIN ie if zbisc=f and zperp=f.
-!  zlin     = t forces suppresion of functions at last dvr point
-!               (zbisc=t only).
-!  zladd[t] = t NALF kept constant as k increases
-!           = f NALF decreases with k (=f has a bug), (only if zrot = .true.)
-!  ztwod[f] = t perform 2D calculation only at specified grid point.
-!  zvec[f]  = t store the eigenvectors from all the parts of the calculation
-!             (1d,2d and 3d) on stream iout2.
-!             further information relating to this (arrays iv1 and iv2) is
-!             stored on stream iout1.
-!  zall[f]  = t requests no truncation of the intermediate solution.
-!  ztheta[t]= t let theta be first in the order of solution;
-!           = f let theta be last in the order of solution,
-!             (used if idia > -2 only).
-!  zr2r1[t] = t let r_2 come before r_1 in the order of solution;
-!           = f let r_1 come before r_2 in the order of solution.
-!             (used if idia > -2 only).
-!  ztran[f]= t perform the transformation of the solution coefficients
-!             to the expression for the wavefunction amplitudes at the grid
-!             points. store the data on stream iwave, ztran = t
-!             automatically sets zvec = t for idia > -2.
-!  zquad2[t]= t use the dvr quadrature approximation for the integrals of
-!             the r_2^{-2} matrix, and hence make its dvr transformation
-!             diagonal.
-!           = f evaluate the r_2^{-2} integrals fully and perform the
-!             full dvr transformation on them.
-!             note that zquad2 = f is not implemented for zmors2 = t
-!             or for ztheta = f.
-!  zdiag[t] = f do not do final diagonalisation, instead the final Hamiltonian
-!             matrix is written on units IDIAG1 and IDIAG2. 
-!  zpfun[t] = t store energy levels on stream ilev
-!  ilev[14]     stream for final eigenvalues (formatted).
-!  ieigs1[7]    stream for eigenvalues of the 1d solutions.
-!  ivecs1[3]    stream for eigenvectors of the 1d solutions.
-!  ieigs2[2]    stream for eigenvalues of the 2d solutions.
-!  ivecs2[4]    stream for eigenvectors of the 2d solutions.
-!  ivint[17]    a scratch stream used for storing intermediate vectors in
-!               building the final hamiltonian.
-!  intvec[16]   a scratch stream for intermediate storage of the 2d vectors.
-!  iband[15]    scratch file used for storing bands of the final hamiltonian.
-!  iout1[24]    stream for arrays iv1 and iv2, which record the sizes of
-!               the truncated vctors. used when zvec = t.
-!  iout2[25]    stream for the 1d, 2d and 3d vectors for use when zvec = t.
-!  iwave[26]    stores the wavefunction amplitudes at the grid points when
-!               ztran = t.
-!
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,& 
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,& 
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,& 
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,& 
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      data zpham/.false./,zprad/.false./,zpvec/.false./,zrot/.true./,& 
-           zladd/.true./,zembed/.true./,zmors2/.true./,& 
-           zpmin/.false./,zvec/.false./,zquad2/.true./,zcut/.false./,& 
-           zdiag/.true./,zlmat/.false./,zall/.false./,& 
-           zp1d/.false./,zp2d/.false./,zr2r1/.true./,ztheta/.true./,& 
-           zmors1/.true./,ztran/.false./,ztwod/.false./,zperp/.false./,& 
-            zx/.false./,zs0/.false./,zs1/.false./,zpseg/.false./,& 
-           ieigs1/7/,ivecs1/3/,ieigs2/2/,ivecs2/4/,ivint/17/,& 
-           iband/15/,intvec/16/,idiag1/20/,idiag2/21/,iout1/24/,& 
-           iout2/25/,iwave/26/,zlin/.false./,zpfun/.false./,ilev/14/
-      end
-
 !############################################################################
-      subroutine insize
+    subroutine insize
 
 !     set up common /size/ & write control parameters of problem
-
-      implicit double precision (a-h,o-y), logical (z)
-
 !     common /size/ stores control parameters for the problem
 !     npnt1: number of (gauss-laguerre) dvr points in r1
 !     npnt2: number of (gauss-laguerre) dvr points in r2
@@ -215,20 +296,13 @@
 !            as output
 !     ncoord: number of vibrational coordinates explicitly considered
 !     if (ncoord .ne. 3) some of the above are dummies, see below.
-
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intveci,&
-                    zpseg
-      common /oupb/   xp0,xp1,xp2
-      character(len=8) title(9)
+    use size
+    use outp
+    use oupb
+    implicit none
+    integer :: nmax
+    double precision :: fixcos
+    character(len=8) title(9)
 !     read in control parameters of problem:
 
 !     ncoord = 2: atom-diatom problem with diatom rigid
@@ -657,23 +731,18 @@
 !     the calls to the various subroutines which set & solve the
 !     intermediate and the final hamiltonians.
 
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,& 
-                    npnt,nlim1,nlim2,neval,ncoord,& 
-                    jrot,kmin,idia,ipar,& 
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,& 
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,& 
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,& 
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,& 
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,& 
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common /mass/ xmass(3),g1,g2,xmassr(3)
-      common /oupb/   xp0,xp1,xp2
+    use size
+    use outp
+    use oupb
+    use split1
+    use split2
+    use mass
+    implicit none
 
+    integer :: kd, ku, kkz12, kkz0, i, j, jdia, jstart, nang, mbass, max2d1, max3d1, &
+        & kk, kz, ii, ia, nidvr, nang2, lincr, ipar0
+    double precision :: fixcos, cc1, cc2, fke, realkz, tswalf, cswalf, alf, realj, bet
+    DOUBLE PRECISION :: x0,x1,x2,x8,xp5,toler
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: dnorm1
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: r1m2
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: dnorm2
@@ -703,8 +772,7 @@
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: sjwalf
       DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: pjac
  
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/,x8/8.0d0/,xp5/0.5d0/,&
-           toler/1.0d-8/
+
 
      ALLOCATE(dnorm1(0:nmax1),r1m2(nlim1),dnorm2(0:nmax2),&
                r2m2(nlim2),bass1(0:nmax1,npnt1),bass2(0:nmax2,npnt2),&
@@ -713,7 +781,12 @@
                hbl1(nlim1),hbl2(nlim2),xalf(idvr),walf(idvr),&
                xlmatr(idvr,idvr),pleg (0:maxleg,idvr),&
                xk1(npnt1,npnt1),xk2(npnt2,npnt2),r2m2t(npnt2,npnt2))
-
+      x0 = 0.0d0
+      x1 = 1.0d0
+      x2 = 2.0d0
+      x8 = 8.0d0
+      xp5 = 0.5d0
+      toler = 1.0d-8
     if (zperp) ALLOCATE(sjwalf(idvr),&
                  jxcos(idvr),jwalf(idvr),pjac(0:maxleg,idvr),&
                  plegw(0:maxleg,idvr))
@@ -1039,30 +1112,24 @@
       end
 
 !#############################################################################
-      subroutine setcon(fixcos)
-
+subroutine setcon(fixcos)
 !     read in masses & set constants for radial basis sets          #007
-
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      common /oupb/   xp0,xp1,xp2
-!     save masses & g in case they are needed in the potential routine
-      common /mass/ xmass(3),g1,g2,xmassr(3)
-!     amtoau converts amu (proton masses) to au (electron masses).
-      data amtoau/1.8228883d03/
-      data x0,xp5,x1,x4/0.0d0,0.5d0,1.0d0,4.0d0/
+    use size
+    use outp
+    use split1
+    use split2
+    use oupb
+    use mass
+    implicit none
+    integer :: nlim
+    double precision :: fixcos, a, b
+    double precision :: amtoau,x0,xp5,x1,x4
+    logical :: zncor
+    amtoau = 1.8228883d03
+    x0 = 0.0d0
+    xp5 = 0.5d0
+    x1 = 1.0d0
+    x4 = 4.0d0
 
 !     read cos(theta) for fixed angle 2-d calculation
 
@@ -1215,34 +1282,28 @@
       end
 
 !#########################################################################
-      subroutine setfac(dnorm1,dnorm2,cc1,cc2)
+subroutine setfac(dnorm1,dnorm2,cc1,cc2)
 
 !     setfac initialises binomial array:                            #021
 !       binom(i+1,j+1) = i! / (j! * (i-j)!)
 !     and pseudo-normalisation array:
 !       dnorm(m) = sqrt((m-1)! * binom(npnt+iu,npnt-m))
+    use size
+    use outp
+    use split1
+    use split2
+    use oupb
 
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      common /oupb/   xp0,xp1,xp2
+    implicit none
+    integer :: i
+    double precision :: xp5,x1, count, alf, cc1, cc2
+    double precision, dimension(0:nmax1) :: dnorm1
+    double precision, dimension(0:nmax2) :: dnorm2
+    double precision, dimension(npnt+1) :: fact
+    
+    xp5 = 0.5d0
+    x1 = 1.0d0
 
-      double precision, dimension(0:nmax1) :: dnorm1
-      double precision, dimension(0:nmax2) :: dnorm2
-      double precision, dimension(npnt+1) :: fact
-
-      data xp5/0.5d0/,x1/1.0d0/
       fact(1) = x1
       count = x1
       do 10 i=1,npnt
@@ -1289,13 +1350,14 @@
       subroutine norms(dnorm,fact,cc,alf,npnt,nmax)
 !     set up factors for normalising the radial basis functions     #022
 
-      implicit double precision (a-h,o-y)
+    implicit none
+    integer :: i, npt1, n, npnt, nmax
+    double precision :: x1, count, alf, cc
+    double precision, dimension(0:nmax) :: dnorm
+    double precision, dimension(npnt+1) :: fact
+    double precision, dimension(npnt+1) :: bin
 
-      double precision, dimension(0:nmax) :: dnorm
-      double precision, dimension(npnt+1) :: fact
-      double precision, dimension(npnt+1) :: bin
-
-      data x1/1.0d0/
+    x1 = 1.0d0
       count = dble(npnt) + alf
 !     cc is exact sum of weights for npnt Gauss-Laguerre integration
       cc = fact(npnt) / count
@@ -1322,17 +1384,25 @@
 !     npnt gauss laguerre integration and sets up basis
 !     functions at the integration points.
 
-      implicit double precision(a-h,o-y), logical (z)
+    implicit none
+    integer :: iu, ir, i, n, n2, npnt, nmax
+    double precision :: x0, xp5, x1, x2, toler, &
+        & alf, a, alfm1, csx, csa, tsx, cc, tsa, re, beta, amx, en
+    logical :: zmorse
 
-      double precision, dimension(npnt+1) :: b
-      double precision, dimension(npnt+1) :: c
-      double precision, dimension(npnt) :: y
-      double precision, dimension(npnt) :: r
-      double precision, dimension(npnt) :: wt
-      double precision, dimension(0:nmax) :: dnorm
-      double precision, dimension(0:nmax,npnt) :: bass
+    double precision, dimension(npnt+1) :: b
+    double precision, dimension(npnt+1) :: c
+    double precision, dimension(npnt) :: y
+    double precision, dimension(npnt) :: r
+    double precision, dimension(npnt) :: wt
+    double precision, dimension(0:nmax) :: dnorm
+    double precision, dimension(0:nmax,npnt) :: bass
          
-      data x0,xp5,x1,x2/0.0d0,0.5d0,1.0d0,2.0d0/,toler/1.0d-8/
+    x0 = 0.0d0
+    xp5 = 0.5d0
+    x1 = 1.0d0
+    x2 = 2.0d0
+    toler = 1.0d-8
 
       if (zmorse) alf=dble(iu)
       if (.not. zmorse) alf = a + xp5
@@ -1403,17 +1473,21 @@
 !     **** version to avoid overflows (j.t. 25/11/81) ****
 !     calculates weights divided by gamma(nn+alf+1)
 !     this is an initialsation entry
+    implicit none
+    integer :: j, n, i, nn
+    double precision :: eps, x1, csx, csa, fa, cc, alf, tsx, &
+        & fn, xt1, xt, step, pt, dpn, pn1, xt2, pt2, fi, r1, r2, ratio
 
-      implicit double precision (a-h,o-y)
-      double precision, dimension(nn) :: x
-      double precision, dimension(nn) :: a
-      double precision, dimension(nn+1) :: b
-      double precision, dimension(nn+1) :: c      
+    double precision, dimension(nn) :: x
+    double precision, dimension(nn) :: a
+    double precision, dimension(nn+1) :: b
+    double precision, dimension(nn+1) :: c      
 
-      data eps/1.0d-12/,x1/1.0d0/
-      csx=0.0d0
-      csa=0.0d0
-      fa=alf+1.0d0
+    eps = 1.0d-12
+    x1 = 1.0d0
+    csx = 0.0d0
+    csa = 0.0d0
+    fa = alf+1.0d0
 !     cc = n!                      denominator for pseudo-weights: a
 !     b(n) = (alf + 2n -1)             b & c for recurrence relation
 !     c(n) = (n - 1) * ( alf + n - 1)
@@ -1464,20 +1538,22 @@
       end
 
 !##############################################################################
-      subroutine lgroot(x,nn,alf,dpn,pn1,b,c,eps)
+subroutine lgroot(x,nn,alf,dpn,pn1,b,c,eps)
 
 !     improves the approximate root x; in addition obtains          #017
 !          dpn = derivative of p(n) at x
 !          pn1 = value of p(n-1) at x
 !     this routine is due to stroud & secrest (see subroutine laguer)
 
-      implicit double precision (a-h,o-y)
+    implicit none
+    integer :: nn, itmax, iter
+    double precision:: x, alf, dpn, pn1, eps, &
+        & d, p
+    double precision, dimension(nn+1) :: b
+    double precision, dimension(nn+1) :: c     
 
-      double precision, dimension(nn+1) :: b
-      double precision, dimension(nn+1) :: c     
-
-      data itmax/10/
-      iter=0
+    itmax = 10
+    iter=0
     1 iter=iter+1
       call lgrecr(p,dpn,pn1,x,nn,alf,b,c)
       d = p/dpn
@@ -1496,10 +1572,14 @@
 !     uses recurrence relations to set up polynomials               #018
 !     this routine is due to stroud & secrest (see subroutine laguer)
 
-      implicit double precision (a-h,o-y)
+    implicit none
 
-      double precision, dimension(nn+1) :: b
-      double precision, dimension(nn+1) :: c     
+    integer :: nn, j
+    double precision :: pn, dpn, pn1, x, alf, p1, p, &
+        & dp, dp1, q, dq
+
+    double precision, dimension(nn+1) :: b
+    double precision, dimension(nn+1) :: c     
 
       p1 = 1.0d0
       p = x - alf - 1.0d0
@@ -1525,20 +1605,17 @@
 !     keints calculates analytic kinetic energy integrals over r    #012
 !     for morse oscillator-like functions
 
-      implicit double precision (a-h,o-y), logical (z)
-
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-
-      common /oupb/   xp0,xp1,xp2
-      double precision, dimension(nlim) ::  hbl
-
-      data x0/0.0d0/
-      index = 0
+    use outp
+    use oupb
+ 
+    implicit none
+    integer :: index, n2, nmax, n1, nlim, iu
+    double precision :: x0, fke
+    double precision, dimension(nlim) ::  hbl
+    
+    x0 = 0.0d0
+    
+    index = 0
       do 10 n2=1,nmax+1
         do 20 n1=1,n2
           index=index+1
@@ -1568,22 +1645,19 @@
 
 !     keint2 calculates analytic kinetic energy integrals over r2   #013
 !     and moment of intertia integral for spherical oscillator functions
+    use outp
+    use oupb
 
-      implicit double precision (a-h,o-y), logical (z)
+    implicit none
+    integer :: n1, npnt, nmax, index, n2, nlim
+    double precision :: x0,xp5,x1, gam, fke, alf, fn, fact, sum
+    double precision, dimension(nlim) :: hbl
+    double precision, dimension(nlim) :: rm2
+    double precision, dimension(*) :: dnorm
 
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-       common /oupb/   xp0,xp1,xp2
-
-      double precision, dimension(nlim) :: hbl
-      double precision, dimension(nlim) :: rm2
-      double precision, dimension(*) :: dnorm
-
-      data x0/0.0d0/,xp5/0.5d0/,x1/1.0d0/
+    x0 = 0.0d0
+    xp5 = 0.5d0
+    x1 = 1.0d0
       gam = fke / (alf + xp5)
       do 10 n1=1,npnt
          gam = gam /(dble(n1)+alf+xp5)
@@ -1636,12 +1710,13 @@
 !                                                       ~  ~~~  ~
 !     (note that the radial basis functions are already normalised)
 
-      implicit double precision (a-h,o-y), logical (z)
-
-      double precision, dimension(npnt,npnt) :: xk
-      double precision, dimension(nlim) :: hbl
-      double precision, dimension(0:nmax,npnt) :: bass
-      double precision, dimension(npnt) :: wt
+    implicit none
+    integer :: k, kp, m, mp, in, npnt, nmax, nlim
+    double precision :: wtkkp, t
+    double precision, dimension(npnt,npnt) :: xk
+    double precision, dimension(nlim) :: hbl
+    double precision, dimension(0:nmax,npnt) :: bass
+    double precision, dimension(npnt) :: wt
 
       xk = 0.0d0
 
@@ -1669,12 +1744,18 @@
 !     for gauss-jacobi integration. this routine uses a brute force
 !     search for zeros due to GJ Harris (2001).
 !     note that for our purposes, alf= bta= nu.
+    implicit none
+    integer :: i, ii, nn2, nn
+    double precision, dimension(nn) :: x,a,b,c,xt
+    double precision :: x0, x1, x2, x3, x4, eps, &
+        & fn, csa, xi, alf, bta, cc, tsa, pm1, xxx, p, dp, pn1, ptemp, dpn
+    x0 = 0.0d0
+    x1 = 1.0d0
+    x2 = 2.0d0
+    x3 = 3.0d0
+    x4 = 4.0d0
+    eps = 1.0d-12
 
-
-      implicit double precision(a-h,o-z)
-      double precision, dimension(nn) :: x,a,b,c,xt
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/,x3/3.0d0/,x4/4.0d0/,&
-           eps/1.0d-12/
       fn= dble(nn)
       csa= x0
       c(1) = x0
@@ -1729,15 +1810,15 @@
       end
 
 !#####################################################################
-      subroutine root(x,nn,alf,bta,dpn,pn1,b,c,eps)
+subroutine root(x,nn,alf,bta,dpn,pn1,b,c,eps)
 
 !     improves the approximate root x; in addition obtains
 !          dpn = derivative of p(n) at x
 !          pn1 = value of p(n-1) at x.
-
-      implicit double precision(a-h,o-z)
-      double precision, dimension(nn) :: b
-      double precision, dimension(nn) :: c
+    implicit none
+    integer :: iter, nn
+    double precision :: x, alf, bta, dpn, pn1, eps, d, p, dp
+    double precision, dimension(nn) :: b, c
    
       iter= 0
 1     iter= iter + 1
@@ -1749,12 +1830,18 @@
 3     dpn= dp
       return
       end
-      subroutine recur(pn,dpn,pn1,x,nn,alf,bta,b,c)
-      implicit double precision(a-h,o-z)
-      double precision, dimension(nn) :: b
-      double precision, dimension(nn) :: c
-    
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
+
+!=========================================================================
+subroutine recur(pn,dpn,pn1,x,nn,alf,bta,b,c)
+    implicit none
+    integer :: nn, j, i
+    double precision :: x0, x1, x2, pn, dpn, pn1, x, alf, &
+        &bta, p1, dp1, dp,p, q, dq
+    double precision, dimension(nn) :: b, c
+    x0 = 0.0d0
+    x1 = 1.0d0
+    x2 = 2.0d0
+
       p1= x1
       p= x + (alf-bta)/(alf + bta + x2)
       dp1= x0
@@ -1774,20 +1861,14 @@
       end
 
 !################################################################
-      subroutine allpts(xalf,walf,nang,nang2)
-
+subroutine allpts(xalf,walf,nang,nang2)
 !     takes the points & weights generated by legpt for the half-range
 !     and creates new arrays for the full-range (-1,+1).
-
-      implicit double precision (a-h,o-y)
-
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-
-      double precision, dimension(idvr) :: xalf,walf
+    use size 
+    implicit none
+    integer :: nang, nang2, i
+    double precision :: scale
+    double precision, dimension(idvr) :: xalf,walf
 
       scale = dble(max(1,idia))
       do 10 i=1,nang2
@@ -1811,12 +1892,15 @@
 !     this enables us to use jacobi integration with alf = bta = nu,
 !     using routines derived from beidenharn and louck.
 
-      implicit double precision (a-h,o-z)
-      double precision, dimension(0:lmax,nn2) :: pleg
-      double precision, dimension(nn2) :: x
-      double precision, dimension(0:lmax) :: pnorm
+    implicit none
+    integer :: nn2, lincr, lmax, m, i, j, ll, l, jstart, jj
+    double precision :: kz, x1, x2, pmm, fact, pmmp1, r2lm1, rlpmm1, rlmm, pll, facti, rj
+    double precision, dimension(0:lmax,nn2) :: pleg
+    double precision, dimension(nn2) :: x
+    double precision, dimension(0:lmax) :: pnorm
 
-      data x1/1.0d0/,x2/2.0d0/
+    x1 = 1.0d0
+    x2 = 2.0d0
       m = kz
       if (m.lt.0) goto 999
       do 10 i=1,nn2
@@ -1877,26 +1961,18 @@
 
 !     this subroutine sets up the lower triangle of the transformed
 !     angular momentum matrix l(alpha,alpha')
+    use outp
+    use size
+    use oupb
+    implicit none
+    integer :: ipar0, nidvr, lincr, jstart, iparam, jdia, jj0, &
+        & k, jj, j
+    double precision :: x0, kz, alf, realkz, term, kp, sumj1
+    double precision, dimension(idvr,idvr) :: xlmatr
+    double precision, dimension(0:maxleg,idvr) :: pleg
+    double precision, dimension(idvr) :: walf
 
-      implicit double precision (a-h,o-y), logical (z) 
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common /oupb/   xp0,xp1,xp2
-
-      double precision, dimension(idvr,idvr) :: xlmatr
-      double precision, dimension(0:maxleg,idvr) :: pleg
-      double precision, dimension(idvr) :: walf
-
-      data x0/0.0d0/
+    x0 = 0.0d0
 
       if(zperp) then      
         jstart = 0
@@ -1948,20 +2024,14 @@
 !     this routine controls the dvr calculation in all cases except
 !     symmetrised radau coordinates.
 !     written by james henderson
+    use size
+    use outp 
+    use oupb
 
-      implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common /oupb/   xp0,xp1,xp2
+    implicit none
+    
+    integer :: icall, nsum, ione, nham2, itwo, low3d, ii, nham3, i1, iv
+    double precision :: term, kz, ka
 
       double precision, dimension(npnt1) :: r1
       double precision, dimension(npnt2) :: r2
@@ -2157,31 +2227,29 @@
 !#########################################################################
       subroutine mkham1(ham1,xlmatr,i1,i2,term,r1,r2,xalf,xk1,xk2,kz)
 
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      common /oupb/   xp0,xp1,xp2
+    use size
+    use outp
+    use split1
+    use split2
+    use oupb
+    implicit none
 
-      double precision, dimension(ndima,ndima) :: ham1
-      double precision, dimension(idvr,idvr) :: xlmatr
-      double precision, dimension(npnt1) :: r1
-      double precision, dimension(npnt2) :: r2
-      double precision, dimension(idvr) :: xalf
-      double precision, dimension(npnt1,npnt1) :: xk1
-      double precision, dimension(npnt2,npnt2) :: xk2
+    integer :: i1, i2, k, kp
+    double precision :: x0,xp5,x1, term, kz, &
+        & wterm, w1gama, w2beta, wsum, s1, s2, w3, v
+  
+    double precision, dimension(ndima,ndima) :: ham1
+    double precision, dimension(idvr,idvr) :: xlmatr
+    double precision, dimension(npnt1) :: r1
+    double precision, dimension(npnt2) :: r2
+    double precision, dimension(idvr) :: xalf
+    double precision, dimension(npnt1,npnt1) :: xk1
+    double precision, dimension(npnt2,npnt2) :: xk2
 
-      data x0/0.0d0/,xp5/0.50d0/,x1/1.0d0/
+    x0 = 0.0d0
+    xp5 = 0.5d0
+    x1 = 1.0d0
+ 
 
 !     zero ham1
       ham1 = x0
@@ -2264,26 +2332,21 @@
 
 !####################################################################
       subroutine mkham2(ham2,eigs1d,vecs1d,xk1,xk2,iv1,ione,nham2)
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common /oupb/   xp0,xp1,xp2
 
-      double precision, dimension(max2d,max2d) :: ham2
-      double precision, dimension(npnt2,npnt2) :: xk2
-      dimension iv1(ndimc,ndimb)
-      double precision, dimension(max2d) :: eigs1d
-      double precision, dimension(max2d,ndima) :: vecs1d
-      double precision, dimension(npnt1,npnt1) :: xk1
+    use size
+    use outp
+    use oupb
+    implicit none
+
+    integer :: ione, nham2, i3, j, k, ivbsm, itwo, ivbpsm, &
+        & ivb, itwop, ivbp, jp, ind2, nn, ind1
+    integer :: iv1(ndimc,ndimb)
+    double precision :: xkterm
+    double precision, dimension(max2d,max2d) :: ham2
+    double precision, dimension(npnt2,npnt2) :: xk2
+    double precision, dimension(max2d) :: eigs1d
+    double precision, dimension(max2d,ndima) :: vecs1d
+    double precision, dimension(npnt1,npnt1) :: xk1
 
 !     zero ham2
       ham2 = 0.0d0
@@ -2343,40 +2406,35 @@
 
 !     build the final 3-d hamiltonian matrix.
 
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      common  /oupb/   xp0,xp1,xp2
+    use size
+    use outp
+    use split1
+    use split2
+    use oupb
+    implicit none
 
-      double precision, dimension(ndima*ndimb,max2d) :: cint
-      double precision, dimension(max2d,max2d) :: ham2
-      dimension iv1(ndimc,ndimb),iv2(ndimc),ndim2d(npntc)
-      double precision, dimension(max2d,ndima) :: vecs1d
-      double precision, dimension(ndima*ndimb,max2d) :: cintp
-      double precision, dimension(npnt1,npnt1) :: xk1
-      double precision, dimension(nham3) :: eigs2d
-      double precision, dimension(npnt2,npnt2) :: xk2
-      double precision, dimension(max2d,nham3) :: hband
-      double precision, dimension(max2d,ndimc) :: eigs2
-      double precision, dimension(idvr,idvr) :: xlmatr
-      double precision, dimension(npnt1) :: r1
-      double precision, dimension(npnt2) :: r2
-      double precision, dimension(nham3) :: work3
-      double precision, dimension(npnt2,npnt2) :: r2m2t
-
-      data xp5/0.50d0/
-
+    integer :: nham3, neig, ione, iv, ii, ncint, ndint, nham2, kk, j, &
+        & ind2, ind1, itwo, i, in2, ia, ib, ii1, ii2, k, length, &
+        & ivsm, ivpsm, ionep, ivp, jp, ind3, na, ndimt, ind4, nap, jj, isave, &
+        & jsave
+    integer :: iv1(ndimc,ndimb),iv2(ndimc),ndim2d(npntc)
+    double precision :: xp5, w1, w2, wsum, rm2t, d1r2, d2r2, xkterm, term
+    double precision, dimension(ndima*ndimb,max2d) :: cint
+    double precision, dimension(max2d,max2d) :: ham2
+    double precision, dimension(max2d,ndima) :: vecs1d
+    double precision, dimension(ndima*ndimb,max2d) :: cintp
+    double precision, dimension(npnt1,npnt1) :: xk1
+    double precision, dimension(nham3) :: eigs2d
+    double precision, dimension(npnt2,npnt2) :: xk2
+    double precision, dimension(max2d,nham3) :: hband
+    double precision, dimension(max2d,ndimc) :: eigs2
+    double precision, dimension(idvr,idvr) :: xlmatr
+    double precision, dimension(npnt1) :: r1
+    double precision, dimension(npnt2) :: r2
+    double precision, dimension(nham3) :: work3
+    double precision, dimension(npnt2,npnt2) :: r2m2t
+      
+    xp5 = 0.5d0
 !     if zdiag = .false. want eigs2d now
       if (.not. zdiag) then
         rewind ieigs2
@@ -2590,29 +2648,20 @@
        endif
        return
        end
-
+! =================================================================================
       subroutine loadh(ham3,nham3,iv2,ndim2d,eigs2d,eigs2)
 
 !     load the final 3-d hamiltonian matrix.
-
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common  /oupb/   xp0,xp1,xp2
-
-      dimension iv2(ndimc),ndim2d(npntc)
-      double precision, dimension(nham3,nham3) :: ham3
-      double precision, dimension(nham3) :: eigs2d
-      double precision, dimension(max2d,ndimc) :: eigs2
+    use size
+    use outp
+    use oupb
+    implicit none
+    
+    integer :: ivsm, ione, ndim2d, iv, iv2, jj, nn, ii, i, nham3
+    dimension iv2(ndimc),ndim2d(npntc)
+    double precision, dimension(nham3,nham3) :: ham3
+    double precision, dimension(nham3) :: eigs2d
+    double precision, dimension(max2d,ndimc) :: eigs2
 
       ham3 = 0.0d0
       rewind iband
@@ -2679,17 +2728,13 @@
       SUBROUTINE diag(ham,maxham,nham,eig)
 
 !     diagonalise the appropriate hamiltonian matrices
-      implicit real*8 (a-h,o-y), logical (z)
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zplot,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,idip,idipd,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,iwvpb,iplot,&
-                    zpseg
+    use outp
+    implicit none
 
-      real*8, dimension(maxham,nham) :: ham
-      real*8, dimension(nham) :: eig
-      real*8, dimension(maxham*3) :: work
+    integer :: ifail, nnham, maxham, nham
+    double precision, dimension(maxham,nham) :: ham
+    double precision, dimension(nham) :: eig
+    double precision, dimension(maxham*3) :: work
       
       ifail=0
       nnham=maxham*3
@@ -2702,23 +2747,19 @@
 !########################################################################
       subroutine diag3d(ham3,nham3,eval,kz)
 
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common  /oupb/   xp0,xp1,xp2
+    use size
+    use outp
+    use oupb
+    implicit none
 
-      double precision, dimension(nham3,nham3) :: ham3
-      double precision, dimension(nham3) :: eval
-      double precision, dimension(nham3) :: evalcm
+    integer :: nham3, meval, i, ip, jdia, jpar, isym, j, l, ii
+    double precision :: amtoau,x0, kz, autocm, ezero
+    double precision, dimension(nham3,nham3) :: ham3
+    double precision, dimension(nham3) :: eval
+    double precision, dimension(nham3) :: evalcm
+
+    amtoau = 1.8228883d03
+    x0 = 0.0d0
 
 !     autocm converts atomic units (hartree) to cm-1.
       data autocm/2.19474624d+05/
@@ -2810,27 +2851,19 @@
       subroutine choose(eigs2,ndim2d,ham2,iv2,low3d)
 
 !     this routine chooses the max3d lowest eigenvalues from eigs2.
+    use size
+    use outp
+    use oupb
+    implicit none
+      
+    integer :: iv2(ndimc), ndim2d(ndimc), &
+        & nhamsm, i, low3d, ipt, n, jpt, j, ivib, jone, iv3, ivm, &
+        & ivj, ione, nham2, ind
+    double precision :: amtoau, eigmin, eigvib, autocm
+    double precision, dimension(max2d,ndimc) :: eigs2
+    double precision, dimension(max2d,max2d) :: ham2
 
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common  /oupb/   xp0,xp1,xp2
-
-      double precision, dimension(max2d,ndimc) :: eigs2
-      dimension iv2(ndimc)
-      dimension ndim2d(ndimc)
-      double precision, dimension(max2d,max2d) :: ham2
-
-      data autocm/2.19474624d+05/
+    amtoau = 1.8228883d03
 
       eigmin = eigs2(1,1)
       nhamsm = 0
@@ -2917,27 +2950,21 @@
 !     the cut-off energy emax1, which is user-supplied in wavenumbers.
 !     these eigenvalues & their corresponding vectors are then saved
 !     to disk.
+    use size
+    use outp
+    use oupb
+    implicit none
+      
+    integer :: iv2(ndimc), ndim2d(ndimc), &
+        & nhamsm, i, low3d, ipt, n, jpt, j, ivib, jone, iv3, ivm, &
+        & ivj, ione, nham2, ind, icall,ivn, iv
+    double precision :: amtoau, eigmin, eigvib, autocm, emaxau
+    double precision, dimension(ndima) :: eig1
+    double precision, dimension(ndima,ndima) :: ham1
+    double precision, dimension(max2d) :: eigs1d
+    double precision, dimension(max2d,ndima) :: vecs1d
 
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common  /oupb/   xp0,xp1,xp2
-
-      double precision, dimension(ndima,ndima) :: ham1
-      double precision, dimension(ndima) :: eig1
-      double precision, dimension(max2d) :: eigs1d
-      double precision, dimension(max2d,ndima) :: vecs1d
-
-      data autocm/2.19474624d+05/
+    amtoau = 1.8228883d03
 !     change emax1 to hartree for the selection
       emaxau=emax1/autocm
 
@@ -2989,25 +3016,16 @@
 !     the cut-off energy emax2, which is user-supplied in wavenumbers.
 !     these eigenvalues & their corresponding vectors are then saved
 !     to disk.
+    use size
+    use outp 
+    use oupb
+    implicit none
+    integer :: ivm, nham2, low3d, icall, n, i, ind
+    double precision :: amtoau, autocm, emaxau
+    double precision, dimension(max2d,max2d) :: ham2
+    double precision, dimension(nham2) :: eig2
 
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common  /oupb/   xp0,xp1,xp2
-
-      double precision, dimension(max2d,max2d) :: ham2
-      double precision, dimension(nham2) :: eig2
-
-      data autocm/2.19474624d+05/
+    amtoau = 1.8228883d03
 !     change emax2 to hartree for the selection
       emaxau=emax2/autocm
 
@@ -3054,38 +3072,33 @@
 !     this routine controls the dvr calculation in the case of
 !     symmetrised radau coordinates.
 !     written by nic fulton, feb 1993.
+    use size
+    use outp
+    use oupb
+    implicit none
+    integer :: kz, igamma, nham2, itmp, nbass, nham3
+    double precision :: x8,x16,x4, asw, bsw, csw, xtscw, term, term2, &
+        & term3
+    double precision, dimension(npnt,npnt) :: hr
+    double precision, dimension(nalf,nalf) :: htheta
+    double precision, dimension(npnt) :: r
+    double precision, dimension(nalf) :: theta
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) ::ham2
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eig2,eigtmp
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) ::vecs2d
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eigs2d
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) ::ham3
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eig3
+    INTEGER, ALLOCATABLE, DIMENSION(:,:) ::iv2
+    INTEGER, ALLOCATABLE, DIMENSION(:) ::nv2
 
-      implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common  /oupb/   xp0,xp1,xp2
+    ALLOCATE(ham2(max2d,max2d),eig2(max2d),iv2(2,nalf),& 
+             vecs2d(max2d,max3d),eigs2d(max3d),nv2(nalf))
+    if (.not.zcut) ALLOCATE(eigtmp(nalf*max2d))
 
-      double precision, dimension(npnt,npnt) :: hr
-      double precision, dimension(nalf,nalf) :: htheta
-      double precision, dimension(npnt) :: r
-      double precision, dimension(nalf) :: theta
-      DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) ::ham2
-      DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eig2,eigtmp
-      DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) ::vecs2d
-      DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eigs2d
-      DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) ::ham3
-      DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eig3
-      INTEGER, ALLOCATABLE, DIMENSION(:,:) ::iv2
-      INTEGER, ALLOCATABLE, DIMENSION(:) ::nv2
-      data x4/4.0d0/,x8/8.0d0/,x16/1.6d1/
-
-      ALLOCATE(ham2(max2d,max2d),eig2(max2d),iv2(2,nalf),& 
-               vecs2d(max2d,max3d),eigs2d(max3d),nv2(nalf))
-      if (.not.zcut) ALLOCATE(eigtmp(nalf*max2d))
+    x8 = 0.8d0
+    x16 = 1.6d1
+    x4 = 4.0d0
 
 ! Schwenke rotational corrections (times 1.1 !!!)
 
@@ -3169,22 +3182,22 @@
 
 !    ***********************************************************************
 
-      subroutine blc2d1(xcos,r,hr,ham2,nham2,term,term2,term3,xtscw,kz)
-      implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,& 
-                    npnt,nlim1,nlim2,neval,ncoord,& 
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,max1dv,& 
-                    ndima,ndimb,ndimc,& 
-                    emax1,emax2
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common  /oupb/   xp0,xp1,xp2
+subroutine blc2d1(xcos,r,hr,ham2,nham2,term,term2,term3,xtscw,kz)
 
-      double precision, dimension(npnt,npnt) :: hr
-      double precision, dimension(npnt,npnt) :: hrpb
-      double precision, dimension(npnt) :: r
-      double precision, dimension(nham2,nham2) :: ham2
-      data xp5/0.5d0/,x1/1.0d0/
+    use size
+    use split1
+    use oupb
+    implicit none
+    integer :: kz, ia, ibeta, ialpha, iap, ibetap, ialphp, nham2
+    double precision :: xp5,x1, factr2, xsen2, scos, fact, term, term2, term3, &
+        & walpha, wbeta, wsum, xtscw, wsum2, q, v, xcos
+    double precision, dimension(npnt,npnt) :: hr
+    double precision, dimension(npnt,npnt) :: hrpb
+    double precision, dimension(npnt) :: r
+    double precision, dimension(nham2,nham2) :: ham2
+    xp5 = 0.5d0
+    x1 = 1.0d0
+
       factr2 = sqrt(xp5)
 
       ham2 = 0.0d0
@@ -3271,29 +3284,22 @@
 
 !     this routine chooses the max3d lowest eigenvalues from eigs2.
 
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common  /oupb/   xp0,xp1,xp2
+    use size
+    use outp
+    use oupb
+    implicit none
 
-      double precision, dimension(nham2) :: eig2
-      double precision, dimension(nham2,nham2) :: ham2
-      dimension iv2(2,nalf)
-      double precision, dimension(max3d) :: eigs2d
-      double precision, dimension(nalf*max2d) :: eigtmp
-      double precision, dimension(max2d,max3d) :: vecs2d
-      dimension nv2(nalf)
-      save itotal
-      data autocm/2.19474624d+05/
+    integer :: igamma, itotal, i, j, iprev, inew, ipos, ichose, k, nham2
+    integer :: iv2(2,nalf), nv2(nalf)
+    double precision :: autocm, emax, eig
+    double precision, dimension(nham2) :: eig2
+    double precision, dimension(nham2,nham2) :: ham2
+    double precision, dimension(max3d) :: eigs2d
+    double precision, dimension(nalf*max2d) :: eigtmp
+    double precision, dimension(max2d,max3d) :: vecs2d
+    save itotal
+
+    autocm = 2.19474624d+05
 
       if (igamma .eq. 1) then
          itotal = 0
@@ -3374,28 +3380,23 @@
 !     the cut-off energy emax1, which is user-supplied in wavenumbers.
 !     these eigenvalues & their corresponding vectors are then saved
 !     in the array vecs1d.
+    use size
+    use outp
+    use oupb
+    implicit none
 
-      implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common  /oupb/   xp0,xp1,xp2
+    integer :: igamma, npos, nvec, ialpha, ntot, j, nham2, &
+        & iend, iv, ioff, i, ii, iang, nbass
+    integer :: iv2(2,nalf)
+    double precision :: autocm, emaxau
+    double precision, dimension(nham2) :: eig2
+    double precision, dimension(nham2,nham2) :: ham2
+    double precision, dimension(max3d) :: eigs2d
+    double precision, dimension(max2d,max3d) :: vecs2d
+    save npos
 
-      double precision, dimension(nham2) :: eig2
-      double precision, dimension(nham2,nham2) :: ham2
-      dimension iv2(2,nalf)
-      double precision, dimension(max3d) :: eigs2d
-      double precision, dimension(max2d,max3d) :: vecs2d
-      save npos
-      data autocm /2.19474624d+05/
+    autocm = 2.19474624d+05
+
       if (igamma .eq. 1) npos = 1
 
 !     change emax2 to hartree for the selection
@@ -3431,22 +3432,13 @@
 !     selection vectors for the bisector embedding to ensure that
 !     singular region of theta = 0 is not sampled when j > 0.
 !     also calculate which angular grid points are redundant.
+    use size
+    use outp     
+    use oupb
+    implicit none
 
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common  /oupb/   xp0,xp1,xp2
-
-      dimension iv(2,nalf)
+    integer :: nbass, iend, ioff, i , iang, ii
+    integer :: iv(2,nalf)
 
       if (jrot .gt. 0) then
 !        first find the extent of the functions in low theta direction
@@ -3502,28 +3494,22 @@
 
 !***********************************************************************
 
-      subroutine bloc3d(htheta,ham3,eigs2d,vecs2d,iv2,nv2,ham2,nham3,r)
-      implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-      common  /oupb/   xp0,xp1,xp2
+ subroutine bloc3d(htheta,ham3,eigs2d,vecs2d,iv2,nv2,ham2,nham3,r)
+    use size
+    use outp 
+    use oupb
+    implicit none
+    integer :: iv2(2,nalf),nv2(nalf), &
+        & ndim1g, igamma, ndim2g, igammp, i, nham3
+    double precision :: autocm
+    double precision, dimension(nalf,nalf) ::  htheta
+    double precision, dimension(nham3,nham3) ::  ham3
+    double precision, dimension(max3d) :: eigs2d
+    double precision, dimension(max2d,max3d) :: vecs2d
+    double precision, dimension(max2d,max2d) :: ham2
+    double precision, dimension(npnt) :: r
 
-      double precision, dimension(nalf,nalf) ::  htheta
-      double precision, dimension(nham3,nham3) ::  ham3
-      double precision, dimension(max3d) :: eigs2d
-      double precision, dimension(max2d,max3d) :: vecs2d
-      dimension iv2(2,nalf),nv2(nalf)
-      double precision, dimension(max2d,max2d) :: ham2
-      double precision, dimension(npnt) :: r
+    autocm = 2.19474624d+05
 
 ! zero ham3
       ham3 = 0.0d0
@@ -3557,21 +3543,19 @@
 
 !    ***********************************************************************
 
-      subroutine blc2d2(r,igamma,igammp,htheta,ham2,nham2)
-      implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,& 
-                    jrot,kmin,idia,ipar,& 
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,& 
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common  /oupb/   xp0,xp1,xp2
+subroutine blc2d2(r,igamma,igammp,htheta,ham2,nham2)
+    use size
+    use split1
+    use oupb
+    implicit none
 
-      double precision, dimension(nalf,nalf) ::  htheta
-      double precision, dimension(npnt) :: r
-      double precision, dimension(nham2,nham2) :: ham2
-      data xp5 /0.5d0/
-      factr2 = sqrt(xp5)
+    integer :: igamma, igammp, nham2, iap, ibetap, ia, ibeta, ialphp, ialpha
+    double precision :: xp5, factr2, q, walpha, wbeta, wsum
+    double precision, dimension(nalf,nalf) ::  htheta
+    double precision, dimension(npnt) :: r
+    double precision, dimension(nham2,nham2) :: ham2
+
+    xp5 = 0.5d0
 
       ham2 = 0.0d0
 
@@ -3623,12 +3607,13 @@
 
 ! this routine does hb = hb + va^T * ha * vb
 ! could be replaced by blas?
-
-      implicit double precision(a-h,o-y),logical(z)
-      double precision, dimension(nvecln,jdima) ::  veca
-      double precision, dimension(nvecln,jdimb) :: vecb
-      double precision, dimension(idima,idimb) :: hama
-      double precision, dimension(ndim,jdimb) :: hamb
+    implicit none
+    integer :: ib, ia, ja, jb, idima, jdima, idimb, jdimb, nvecln, ndim
+    double precision :: temp1, temp2
+    double precision, dimension(nvecln,jdima) ::  veca
+    double precision, dimension(nvecln,jdimb) :: vecb
+    double precision, dimension(idima,idimb) :: hama
+    double precision, dimension(ndim,jdimb) :: hamb
 
       do 10 ib = 1,idimb
         do 20 ia = 1,idima
@@ -3648,24 +3633,15 @@
 !     ***********************************************************************
 
       subroutine transr(iv2,vecs2d,ham3,eig3,nham3,nbass)
-      implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,& 
-                    npnt,nlim1,nlim2,neval,ncoord,& 
-                    jrot,kmin,idia,ipar,& 
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,& 
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,& 
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,& 
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,& 
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,& 
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-     
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /mass/ xmass(3),g1,g2,xmassr(3)
-      common  /oupb/   xp0,xp1,xp2
+   
+    use size
+    use split1
+    use outp
+    use mass
+    use oupb
+    implicit none
 
-      dimension iv2(2,nalf)
+      integer :: iv2(2,nalf), level3, index, irs, igamma, level2, ivec2, nham3, nbass
       double precision, dimension(max2d,max3d) :: vecs2d
       double precision, dimension(nham3,nham3) :: ham3
       double precision, dimension(nham3) :: eig3
@@ -3704,34 +3680,23 @@
 
 !     if ztran then this routine transforms the sets of 1d, 2d and 3d
 !     coefficients to psi, the wavefunction amplitudes at the dvr points
-
-      implicit double precision (a-h,o-y), logical (z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
-     
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-      common /split2/ re2,diss2,we2,beta2,ur2,urr2,a2,iu2
-      common /mass/ xmass(3),g1,g2,xmassr(3)
-      common  /oupb/   xp0,xp1,xp2
-
-      double precision, dimension(max2d,ndima) :: vecs1l
-      double precision, dimension(max2d,max2d) :: vecs2l
-      double precision, dimension(nham3) :: vecs3l
-      dimension iv1l(ndimc,ndimb)
-      dimension ndim2l(ndimc)
-      double precision, dimension(idvr,npnt1,npnt2) :: psi
-      dimension iv2l(ndimc)
-      double precision, dimension(neval) :: evall
-      double precision, dimension(nham3,ndima,ndimb) :: phi
+    use size
+    use split1
+    use split2
+    use outp
+    use mass
+    use oupb
+    implicit none
+    integer :: i, ione, nham2, itwo, ndimal, kk,ivm, meval, ind2, ic, j, &
+        & ia, ind1, ib, ind, k, ll, nham3
+    double precision :: sum1
+    integer :: iv2l(ndimc), iv1l(ndimc,ndimb), ndim2l(ndimc)
+    double precision, dimension(max2d,ndima) :: vecs1l
+    double precision, dimension(max2d,max2d) :: vecs2l
+    double precision, dimension(nham3) :: vecs3l
+    double precision, dimension(idvr,npnt1,npnt2) :: psi
+    double precision, dimension(neval) :: evall
+    double precision, dimension(nham3,ndima,ndimb) :: phi
 
       rewind iout1
       rewind iout2
@@ -3991,31 +3956,24 @@
 !     molecular plane.
 !     written by max kostin, 2001.
 
-      implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /outp/ zpham,zprad,zpvec,zrot,zladd,zembed,zmors2,zs0,zx,zs1,&
-                    zpmin,zvec,zquad2,zdiag,zlmat,zcut,zall,zlin,&
-                    zp1d,zp2d,zr2r1,ztheta,ztran,zmors1,ztwod,zbisc,zperp,&
-                    idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
-                    ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec,&
-                    zpseg
+    use size
+    use outp
+    implicit none
 
-      double precision, dimension(npnt,npnt) :: hr
-      double precision, dimension(nalf,nalf) :: htheta
-      double precision, dimension(npnt) :: r
-      double precision, dimension(nalf) :: theta
-      DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) ::ham2
-      DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eig2,eigtmp
-      DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) ::vecs2d
-      DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eigs2d
-      DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) ::ham3
-      DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eig3
-      INTEGER, ALLOCATABLE, DIMENSION(:,:) ::iv2
-      INTEGER, ALLOCATABLE, DIMENSION(:) ::nv2
+    integer :: igamma, nham2, kz, itmp, nbass, nham3
+    INTEGER, ALLOCATABLE, DIMENSION(:,:) ::iv2
+    INTEGER, ALLOCATABLE, DIMENSION(:) ::nv2
+    double precision :: term, term2
+    double precision, dimension(npnt,npnt) :: hr
+    double precision, dimension(nalf,nalf) :: htheta
+    double precision, dimension(npnt) :: r
+    double precision, dimension(nalf) :: theta
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) ::ham2
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eig2,eigtmp
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) ::vecs2d
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eigs2d
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) ::ham3
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eig3
 
       ALLOCATE(ham2(max2d,max2d),eig2(max2d),iv2(2,nalf),&
                vecs2d(max2d,max3d),eigs2d(max3d),nv2(nalf))
@@ -4082,21 +4040,21 @@
       end
       
 !########################################################################     
+subroutine z_blc2d1(xcos,r,hr,ham2,nham2,term,term2,kz)
 
+    use size
+    use split1
+    implicit none
 
-      subroutine z_blc2d1(xcos,r,hr,ham2,nham2,term,term2,kz)
-      implicit double precision(a-h,o-y),logical(z)
-      common /size/ npnt1,npnt2,nalf,nmax1,nmax2,maxleg,nalf2,idvr,&
-                    npnt,nlim1,nlim2,neval,ncoord,&
-                    jrot,kmin,idia,ipar,&
-                    max2d,max3d,max2d2,max3d2,npnta,npntb,npntc,&
-                    ndima,ndimb,ndimc,iq,emax1,emax2
-      common /split1/ re1,diss1,we1,beta1,ur1,urr1,a1,iu1
-
-      double precision, dimension(npnt,npnt) :: hr
-      double precision, dimension(npnt) :: r
-      double precision, dimension(nham2,nham2) :: ham2
-      data xp5/0.5d0/,x1/1.0d0/,x4/4.0d0/
+    integer :: nham2, kz, ia, ibeta, ialpha, iap, ibetap, ialphp
+    double precision :: xp5,x1,x4, factr2, realj, realkz, &
+        & term, fact, xcos, s, term2, fact2, walpha, wbeta, wsum, wsum2, q, v
+    double precision, dimension(npnt,npnt) :: hr
+    double precision, dimension(npnt) :: r
+    double precision, dimension(nham2,nham2) :: ham2
+    xp5 = 0.5d0
+    x1 = 1.0d0 
+    x4 = 4.0d0
       factr2 = sqrt(xp5)
 
       ham2 = 0.0d0
