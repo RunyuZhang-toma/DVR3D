@@ -170,8 +170,8 @@
 !     spectrum to compute a simulated spectrum.
 !  *  the default values of all three parameters are .false.
 !
-      read(5,prt)
-      read(5,100) title
+      read(*,prt)
+      read(*,100) title
 100   format(9a8)
       write(6,202) title
 202   format(5x,9a8)
