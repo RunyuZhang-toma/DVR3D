@@ -174,8 +174,8 @@ end
                     zpseg
       implicit double precision (a-h,o-y), logical (z)
 
-      write(6,1000)
- 1000 format(5x,'Program DVR3DRJZ (version of March 2002)')
+      write(6, '(5x"Program DVR3DRJZ (version of March 2002)")') 
+      write(6, "(5x'Program DVR3DRJZ (version of March 2002)')")
 
 !     read in namelist input data (defaults in block data)
       read(5,prt)
@@ -190,8 +190,7 @@ end
 
       call SYSTEM_CLOCK(itime2,irate2,imax2)
       itime=(itime2-itime0)/irate2
-      write(6,1)itime
- 1    format(/i10,' secs CPU time used'/)
+      write(6,'(/i10," secs CPU time used"/)') itime
       stop
 end
 
@@ -337,13 +336,14 @@ subroutine insize
 
 !     ncoord = 2: atom-diatom problem with diatom rigid
 !     ncoord = 3: full 3-d triatomic problem
-      read(5,5) ncoord
-    5 format(15i5)
+!       read(5,5) ncoord
+!     5 format(15i5)
+      read(5,'(15i5)') ncoord
 !     other paramters: see comments above on /size/ for meaning
 !     if ncoord=2: also need lmax,lpot,idia,kmin
 !     if ncoord=3: all paramters required
 
-      read(5,5) npnt2,jrot,neval,nalf,max2d,max3d,idia,&
+      read(5,'(15i5)') npnt2,jrot,neval,nalf,max2d,max3d,idia,&
                 kmin,npnt1,ipar,max3d2
       
       zbisc = .false.
@@ -391,22 +391,23 @@ subroutine insize
       if (ncoord .eq. 2) then
 !        atom - rigid diatom case, set dummy /size/
          if (zr2r1) then
-            write(6,1010)
- 1010 format(/10x,'atom - rigid diatom vibrational analysis with:'/)
+            write(6,'(/10x,"atom - rigid diatom vibrational analysis with:"/)')
+!  1010 format(/10x,'atom - rigid diatom vibrational analysis with:'/)
             npnt1 = 1
             nmax1 = 0
          else
-            write(6,1011)
- 1011 format(/5x,'Fixed - r2 vibrational analysis with:'/)
+            write(6,'(/5x,"Fixed - r2 vibrational analysis with:"/)')
+!  1011 format(/5x,'Fixed - r2 vibrational analysis with:'/)
             npnt2 = 1
             nmax2 = 0
          endif
       else
 !        full case: print data about extra radial basis
          ncoord  = 3
-         write(6,1020) npnt1
- 1020    format(/5x,'Full triatomic vibrational problem with'/ &
-                /5x,i5,3x,'radial r1 dvr points used,')
+         write(6,'(/5x,"Full triatomic vibrational problem with"/ &
+                /5x,i5,3x,"radial r1 dvr points used,")') npnt1
+!  1020    format(/5x,'Full triatomic vibrational problem with'/ &
+!                 /5x,i5,3x,'radial r1 dvr points used,')
       endif
       
   887 continue
@@ -461,108 +462,121 @@ subroutine insize
 
       if (neval .le. 0) neval = 10
       neval=min(max3d,neval)
-      if (ztwod) write(6,1023) npnt1
- 1023 format(/5x,i5,3x,'radial r1 dvr points used,')
-      if (ncoord .eq. 3) write(6,1030) npnt2,2,nalf,neval,max3d
+      if (ztwod) write(6,'(/5x,i5,3x,"radial r1 dvr points used,")') npnt1
+!  1023 format(/5x,i5,3x,'radial r1 dvr points used,')
+      if (ncoord .eq. 3) &
+            write(6, '(5x,i5,3x,"radial r",i1," dvr points used,",&
+            /5x,i5,3x,"angular dvr points used, with",&
+            /5x,i5,3x,"lowest eigenvectors chosen from",&
+            /5x,i5,3x,"maximum dimension secular problem"/)') npnt2,2,nalf,neval,max3d
       if (ncoord .eq. 2 .and. zr2r1)&
-          write(6,1030) npnt2,2,nalf,neval,max3d
+          write(6,'(5x,i5,3x,"radial r",i1," dvr points used,",&
+            /5x,i5,3x,"angular dvr points used, with",&
+            /5x,i5,3x,"lowest eigenvectors chosen from",&
+            /5x,i5,3x,"maximum dimension secular problem"/)') npnt2,2,nalf,neval,max3d
       if(ncoord .eq. 2 .and. .not. zr2r1)&
-          write(6,1030) npnt1,1,nalf,neval,max3d
- 1030 format(5x,i5,3x,'radial r',i1,' dvr points used,',&
-            /5x,i5,3x,'angular dvr points used, with',&
-            /5x,i5,3x,'lowest eigenvectors chosen from',&
-            /5x,i5,3x,'maximum dimension secular problem'/)
+          write(6,'(5x,i5,3x,"radial r",i1," dvr points used,",&
+            /5x,i5,3x,"angular dvr points used, with",&
+            /5x,i5,3x,"lowest eigenvectors chosen from",&
+            /5x,i5,3x,"maximum dimension secular problem"/)') npnt1,1,nalf,neval,max3d
+!  1030 format(5x,i5,3x,'radial r',i1,' dvr points used,',&
+!             /5x,i5,3x,'angular dvr points used, with',&
+!             /5x,i5,3x,'lowest eigenvectors chosen from',&
+!             /5x,i5,3x,'maximum dimension secular problem'/)
       if(idia .eq. 2 .and. zperp) then
-        write(6,1035)
+        write(6,'(/5x,"STOP!!!  ZPERP should be .true. for IDIA=2")')
         stop
- 1035  format(/5x,'STOP!!!  ZPERP should be .true. for IDIA=2')
+!  1035  format(/5x,"STOP!!!  ZPERP should be .true. for IDIA=2")
       endif      
-      read(5,500)   title
-  500 format(9a8)
-      write(6,1040) title
- 1040 format(5x,'Title: ',9a8/)
+      read(5,'(9a8)')   title
+!   500 format(9a8)
+      write(6,'(5x,"Title: ",9a8/)') title
+!  1040 format(5x,'Title: ',9a8/)
       if (ncoord .eq. 3) then
-         if (zmors1)  write(6,1050) 1
-         if (.not. zmors1) write(6,1060) 1
+         if (zmors1)  write(6,'(5x,"Morse oscillators used for r",i1," basis")') 1
+         if (.not. zmors1) write(6,'(5x,"Spherical oscillators used for r",i1," basis")') 1
       endif
       if (ncoord .eq. 2 .and. .not. zr2r1) then
-         if (zmors1)  write(6,1050) 1
-         if (.not. zmors1) write(6,1060) 1
+         if (zmors1)  write(6,'(5x,"Morse oscillators used for r",i1," basis")') 1
+         if (.not. zmors1) write(6,'(5x,"Morse oscillators used for r",i1," basis")') 1
       else
-         if (zmors2) write(6,1050) 2
-         if (.not. zmors2) write(6,1060) 2
- 1050 format(5x,'Morse oscillators used for r',i1,' basis')
- 1060 format(5x,'Spherical oscillators used for r',i1,' basis')
+         if (zmors2) write(6,'(5x,"Morse oscillators used for r",i1," basis")') 2
+         if (.not. zmors2) write(6,'(5x,"Morse oscillators used for r",i1," basis")') 2
+!  1050 format(5x,'Morse oscillators used for r',i1,' basis')
+!  1060 format(5x,'Spherical oscillators used for r',i1,' basis')
          if (zquad2) then
-            write(6,1051)
- 1051 format(/5x,'Quadrature approximation used for the r2**(-2) terms'/)
+            write(6,'(/5x,"Quadrature approximation used for the r2**(-2) terms"/)')
+!  1051 format(/5x,'Quadrature approximation used for the r2**(-2) terms'/)
          else
-            write(6,1052)
- 1052 format(/5x,'Quadrature approximation abandoned for r2**(-2) terms'/)
+            write(6,'(/5x,"Quadrature approximation abandoned for r2**(-2) terms"/)')
+!  1052 format(/5x,'Quadrature approximation abandoned for r2**(-2) terms'/)
          endif
       endif
-      if (zall) write(6,1067)
- 1067 format(/5x,'All solutions from lower dimensions have been used')
+      if (zall) write(6,'(/5x,"All solutions from lower dimensions have been used")')
+!  1067 format(/5x,'All solutions from lower dimensions have been used')
       if (ztheta) then
-         if (zr2r1) write(6,1042)
- 1042    format(5x,'Problem solved in the order: theta -> r2 -> r1')
-         if (.not. zr2r1) write(6,1043)
- 1043    format(5x,'Problem solved in the order: theta -> r1 -> r2')
+         if (zr2r1) write(6,'(5x,"Problem solved in the order: theta -> r2 -> r1")')
+!  1042    format(5x,'Problem solved in the order: theta -> r2 -> r1')
+         if (.not. zr2r1) write(6,'(5x,"Problem solved in the order: theta -> r1 -> r2")')
+!  1043    format(5x,'Problem solved in the order: theta -> r1 -> r2')
       else
          if (.not.ztwod) then
-            if (zr2r1) write(6,1044)
- 1044    format(5x,'Problem solved in the order: r2 -> r1 -> theta')
-            if (.not. zr2r1) write(6,1045)
- 1045    format(5x,'Problem solved in the order: r1 -> r2 -> theta')
+            if (zr2r1) write(6,'(5x,"Problem solved in the order: r2 -> r1 -> theta")')
+!  1044    format(5x,'Problem solved in the order: r2 -> r1 -> theta')
+            if (.not. zr2r1) write(6,'(5x,"Problem solved in the order: r1 -> r2 -> theta")')
+!  1045    format(5x,'Problem solved in the order: r1 -> r2 -> theta')
          else
-            if (zr2r1) write(6,1046)
- 1046    format(5x,'Problem solved in the order: r2 -> r1')
-            if (.not. zr2r1) write(6,1047)
- 1047    format(5x,'Problem solved in the order: r1 -> r2')
+            if (zr2r1) write(6,'(5x,"Problem solved in the order: r2 -> r1")')
+!  1046    format(5x,'Problem solved in the order: r2 -> r1')
+            if (.not. zr2r1) write(6,'(5x,"Problem solved in the order: r1 -> r2")')
+!  1047    format(5x,'Problem solved in the order: r1 -> r2')
          endif
       endif
       if (zcut) then
-         write(6,1061)
- 1061    format(5x,'Final basis selected using energy cut-off')
+         write(6,'(5x,"Final basis selected using energy cut-off")')
+!  1061    format(5x,'Final basis selected using energy cut-off')
       else
          if (zrot .and. zbisc .and. (jrot+kmin).gt.1) then
-            write(6,1062) max3d,max3d2
- 1062    format(/5x,'Final basis comprises',i5,' lowest functions',&
-                   ' for even parity hamiltonian'/&
-                 5x,'Final basis comprises',i5,' lowest functions',&
-                   ' for odd  parity hamiltonian')
+            write(6,'(/5x,"Final basis comprises",i5," lowest functions",&
+                   " for even parity hamiltonian"/&
+                 5x,"Final basis comprises",i5," lowest functions",&
+                   " for odd  parity hamiltonian")') max3d,max3d2
+!  1062    format(/5x,'Final basis comprises',i5,' lowest functions',&
+!                    ' for even parity hamiltonian'/&
+!                  5x,'Final basis comprises',i5,' lowest functions',&
+!                    ' for odd  parity hamiltonian')
          else
-           if (.not. zcut) write(6,1064) max3d
- 1064      format(5x,'final basis comprises',i5,' lowest functions')
+           if (.not. zcut) write(6,'(5x,"final basis comprises",i5," lowest functions")') max3d
+!  1064      format(5x,'final basis comprises',i5,' lowest functions')
          endif
       endif
       if (.not.ztwod) then
-         if (zlmat) write(6,1065)
- 1065    format(/5x,'Printing of L-matrix requested')
-         if (.not.zlmat) write(6,1066)
- 1066    format(/5x,'Printing of L-matrix not requested')
+         if (zlmat) write(6,'(/5x,"Printing of L-matrix requeste")')
+!  1065    format(/5x,'Printing of L-matrix requested')
+         if (.not.zlmat) write(6,'(/5x,"Printing of L-matrix not requested")')
+!  1066    format(/5x,'Printing of L-matrix not requested')
       endif
-      if (zp1d) write(6,1071)
- 1071 format(5x,'Printing of 1d eigenvalues requested')
-      if (zp2d) write(6,1072)
- 1072 format(5x,'Printing of 2d eigenvalues requested')
-      if (zpham) write(6,1070)
- 1070 format(5x,'Printing of hamiltonian matrix requested')
-      if (.not.zpham) write(6,1080)
- 1080 format(5x,'Printing of hamiltonian matrix not requested')
-      if (zprad) write(6,1090)
- 1090 format(5x,'Printing of radial matrix elements requested')
-      if (.not.zprad) write(6,1100)
- 1100 format(5x,'Printing of radial matrix elements not requested')
-      if (zpvec) write(6,1110)
- 1110 format(5x,'Printing of eigenvectors requested'/)
-      if (.not.zpvec) write(6,1120)
- 1120 format(5x,'Printing of eigenvectors not requested'/)
+      if (zp1d) write(6,'(5x,"Printing of 1d eigenvalues requested")')
+!  1071 format(5x,'Printing of 1d eigenvalues requested')
+      if (zp2d) write(6,'(5x,"Printing of 2d eigenvalues requested")')
+!  1072 format(5x,'Printing of 2d eigenvalues requested')
+      if (zpham) write(6,'(5x,"Printing of hamiltonian matrix requested")')
+!  1070 format(5x,'Printing of hamiltonian matrix requested')
+      if (.not.zpham) write(6,'(5x,"Printing of hamiltonian matrix not requested")')
+!  1080 format(5x,'Printing of hamiltonian matrix not requested')
+      if (zprad) write(6,'(5x,"Printing of radial matrix elements requested")')
+!  1090 format(5x,'Printing of radial matrix elements requested')
+      if (.not.zprad) write(6,'(5x,"Printing of radial matrix elements not requested")')
+!  1100 format(5x,'Printing of radial matrix elements not requested')
+      if (zpvec) write(6,'(5x,"Printing of eigenvectors requested"/)')
+!  1110 format(5x,'Printing of eigenvectors requested'/)
+      if (.not.zpvec) write(6,'(5x,"Printing of eigenvectors not requested"/)')
+!  1120 format(5x,'Printing of eigenvectors not requested'/)
       if (zvec) then
-         write(6,1130) iout2
-         write(6,1131) iout1
- 1130 format(5x,'Eigenvalues & vectors   written to stream IOUT2 =',i4)
- 1131 format(5x,'Restart information     written to stream IOUT1 =',i4)
+         write(6,'(5x,"Eigenvalues & vectors   written to stream IOUT2 =",i4)') iout2
+         write(6,'(5x,"Restart information     written to stream IOUT1 =",i4)') iout1
+!  1130 format(5x,'Eigenvalues & vectors   written to stream IOUT2 =',i4)
+!  1131 format(5x,'Restart information     written to stream IOUT1 =',i4)
          if (zpseg==.true.) then 
             open(unit=iout1, form='unformatted',recordtype='segmented')
             open(unit=iout2, form='unformatted',recordtype='segmented')
@@ -572,8 +586,8 @@ subroutine insize
          end if 
       endif
       if (ztran) then
-         write(6,1132) iwave
- 1132 format(5x,'Wavefunction amplitudes written to stream IWAVE =',i4)
+         write(6,'(5x,"Wavefunction amplitudes written to stream IWAVE =",i4)') iwave
+!  1132 format(5x,'Wavefunction amplitudes written to stream IWAVE =',i4)
           if (zpseg==.true.) then
             open(unit=iwave, form='unformatted',recordtype='segmented')
          else 
@@ -585,9 +599,9 @@ subroutine insize
          open(unit=ilev,form='formatted')
          if (jrot .eq. 0 .and. mod(ipar,2) .eq. 0) then
 !           header on file ilev
-            write(ilev,500) title
-            write(6,1134) ilev
- 1134 format(/5x,'Eigenvalues      written to start of stream ilev =',i4)
+            write(ilev,'(9a8)') title
+            write(6,'(/5x,"Eigenvalues      written to start of stream ilev =",i4)') ilev
+!  1134 format(/5x,'Eigenvalues      written to start of stream ilev =',i4)
          else
 !           position file ilev
   200       read(ilev,*,end=210,err=210)
@@ -595,18 +609,19 @@ subroutine insize
   210       continue
 ! ******  inclusion of the following card is machine dependent ******
 !           backspace ilev
-            write(6,1135) ilev
- 1135 format(/5x,'Eigenvalues      written at end   of stream ilev =',i4)
+            write(6,'(/5x,"Eigenvalues      written at end   of stream ilev =",i4)') ilev
+!  1135 format(/5x,'Eigenvalues      written at end   of stream ilev =',i4)
          endif
       endif
 
-      if (idia .gt. 0) write(6,1140)
- 1140 format(/5x,'Calculation performed in scattering coordinates')
-      if (idia .le. 0 .and.  .not.zperp) write(6,1150)
- 1150 format(/5x,'Calculation performed in Radau coordinates')
-      if (idia .le. 0 .and. zperp) write(6,1151)
- 1151 format(/5x,'Calculation performed in Radau coordinates with Z axis', &
-              /5x,'perpendicular to the plane')
+      if (idia .gt. 0) write(6,'(/5x,"Calculation performed in scattering coordinates")')
+!  1140 format(/5x,'Calculation performed in scattering coordinates')
+      if (idia .le. 0 .and.  .not.zperp) write(6,'(/5x,"Calculation performed in Radau coordinates")')
+!  1150 format(/5x,'Calculation performed in Radau coordinates')
+      if (idia .le. 0 .and. zperp)&
+            write(6,'(5x,"Calculation performed in Radau coordinates with Z axis",/5x,"perpendicular to the plane")')
+!  1151 format(/5x,'Calculation performed in Radau coordinates with Z axis', &
+!               /5x,'perpendicular to the plane')
  
       if (zperp) write(6,1152) iq
  1152 format(/5x,'Q symmetry =', i3)
@@ -614,17 +629,17 @@ subroutine insize
       if (ztwod) goto 886
 
       if (abs(idia) .eq. 2) then
-         write(6,1180)
- 1180    format(/5x,'Diatomic assumed homonuclear')
+         write(6,'(/5x,"Diatomic assumed homonuclear")')
+!  1180    format(/5x,'Diatomic assumed homonuclear')
          if (ipar .eq. 1) then
-            write(6,1190)
- 1190       format(5x,'Odd parity functions in basis set')
+            write(6,'(5x,"Odd parity functions in basis set")')
+!  1190       format(5x,'Odd parity functions in basis set')
          else if (ipar .eq. 0) then
-            write(6,1200)
- 1200       format(5x,'Even parity functions in basis set')
+            write(6,'(5x,"Even parity functions in basis set")')
+!  1200       format(5x,'Even parity functions in basis set')
          else
-            write(6,1205)
- 1205       format(5x,'Illegal value of ipar for idia = +/-2: STOP')
+            write(6,'(5x,"Illegal value of ipar for idia = +/-2: STOP")')
+!  1205       format(5x,'Illegal value of ipar for idia = +/-2: STOP')
             stop
          endif
          if (idia .eq. 2) then
@@ -632,8 +647,8 @@ subroutine insize
             if (2*idvr .ne. nalf) goto 960
          endif
       else
-         write(6,1210)
- 1210    format(/5x,'Diatomic assumed hetronuclear')
+         write(6,'(/5x,"Diatomic assumed hetronuclear")')
+!  1210    format(/5x,'Diatomic assumed hetronuclear')
          idvr=nalf
          ipar=0
       endif
@@ -641,78 +656,79 @@ subroutine insize
          jrot=abs(jrot)
          if (zrot) then
             if (kmin .ne. 0 .and. .not. zbisc) kmin=1
-            write(6,1220)
- 1220 format(/5x,'***  vibrational part of rot-vib calculation  ***')
-            write(6,1260) jrot
+            write(6,'(/5x,"***  vibrational part of rot-vib calculation  ***")')
+!  1220 format(/5x,'***  vibrational part of rot-vib calculation  ***')
+            write(6,'(/5x,"J =",i3," rotational state")') jrot
             if (kmin .eq. 1) then
-               write(6,1270)
- 1270 format(12x,'with symmetric |Jk> + |J-k> functions in basis')
+               write(6,'(12x,"with symmetric |Jk> + |J-k> functions in basis")')
+!  1270 format(12x,'with symmetric |Jk> + |J-k> functions in basis')
             else if (kmin .eq. 0) then
-               write(6,1280)
- 1280 format(12x,'with anti-symmetric |Jk> - |J-k> functions in basis')
+               write(6,'(12x,"with anti-symmetric |Jk> - |J-k> functions in basis")')
+!  1280 format(12x,'with anti-symmetric |Jk> - |J-k> functions in basis')
             else
                kmin=2
-               write(6,1275)
- 1275 format(12x,'loop over symmetric & anti-symmetric |jk> functions')
+               write(6,'(12x,"loop over symmetric & anti-symmetric |jk> functions")')
+!  1275 format(12x,'loop over symmetric & anti-symmetric |jk> functions')
             endif
-            if (zladd) write(6,1240)
- 1240 format(5x,'Number of angular grid points to be kept constant with k')
-            if (.not. zladd) write(6,1250)
- 1250 format(/5x,'Nunber of angular grid points to decrease with k')
+            if (zladd) write(6,'(5x,"Number of angular grid points to be kept constant with k")')
+!  1240 format(5x,'Number of angular grid points to be kept constant with k')
+            if (.not. zladd) write(6,'(/5x,"Nunber of angular grid points to decrease with k")')
+!  1250 format(/5x,'Nunber of angular grid points to decrease with k')
          else
-            write(6,1230) jrot,kmin
- 1230 format(5x,'J =',i3,'  k =',i3,&
-             /5x,'***  option to neglect coriolis interactions  ***')
+            write(6,&
+      & '(5x,"J =",i3,"  k =",i3,/5x,"***  option to neglect coriolis interactions  ***")') jrot,kmin
+!  1230 format(5x,'J =',i3,'  k =',i3,&
+!              /5x,'***  option to neglect coriolis interactions  ***')
             if (abs(kmin) .gt. abs(jrot)) then
-               write(6,1235)
- 1235 format(5x,'Error: k greater than J. STOP')
+               write(6,'(5x,"Error: k greater than J. STOP")')
+!  1235 format(5x,'Error: k greater than J. STOP')
                stop
             endif 
          endif
          if (zbisc) then
             zembed=.false.
-            write(6,1330)
+            write(6,'(/5x,"z axis embedded along the biscetor of r1 and r2")')
  1330 format(/5x,'z axis embedded along the biscetor of r1 and r2')
-            if (zlin) write(6,1340)
- 1340 format(/5x,'Removal of functions with theta = 0 enforced')
+            if (zlin) write(6,"(/5x,'Removal of functions with theta = 0 enforced')")
+!  1340 format(/5x,'Removal of functions with theta = 0 enforced')
          else
-            if (zembed) write(6,1290) 2
- 1290       format(/5x,'z axis embeded along the r',i1,' coordinate')
-            if (.not. zembed) write(6,1290) 1
+            if (zembed) write(6,"(/5x,'z axis embeded along the r',i1,' coordinate')") 2
+!  1290       format(/5x,'z axis embeded along the r',i1,' coordinate')
+            if (.not. zembed) write(6,"(/5x,'z axis embeded along the r',i1,' coordinate')") 1
          endif
       else
 !        case j = 0
-         write(6,1260) jrot
- 1260    format(/5x,'J =',i3,' rotational state')
+         write(6,"(/5x,'J =',i3,' rotational state')") jrot
+!  1260    format(/5x,'J =',i3,' rotational state')
       endif
       if (zx) then
-         write(6,*)'the rotational x-term is active'
+         write(6,"(5x,'the rotational x-term is active')")
         xp0=1.d0
       else
-         write(6,*)'the rotational x-term is ignored'
+         write(6,"(5x,'the rotational x-term is ignored')")
         xp0=0.d0
        end if
     if (zs0) then
-    write(6,*)'diagonal NBO vibrational corrections are implemented:'
-    write(6,*)'Those corrections are active only for the Radau hamiltonian'
-    write(6,*)'(BODC Corrections follow procedure by D. Schwenke...)'
+    write(6,"(5x,'diagonal NBO vibrational corrections are implemented:')")
+    write(6,"(5x,'Those corrections are active only for the Radau hamiltonian')")
+    write(6,"(5x,'(BODC Corrections follow procedure by D. Schwenke...)')")
     xp1=1.d0
     else
     xp1=0.d0
-    write(6,*)'diagonal NBO vibrational corrections are ignored'
+    write(6,"(5x,'diagonal NBO vibrational corrections are ignored')")
     end if
     if (zs1) then
-    write(6,*)'NBO vib-rotational corrections are implemented:'
-    write(6,*)'Those corrections are active only for the Radau hamiltonian'
-    write(6,*)'(see MNRAS 480, 2597–2608 (2018) doi:10.1093/mnras/sty1877)'
+    write(6,"(5x,'NBO vib-rotational corrections are implemented:')")
+    write(6,"(5x,'Those corrections are active only for the Radau hamiltonian')")
+    write(6,"(5x,'(see MNRAS 480, 2597–2608 (2018) doi:10.1093/mnras/sty1877)')")
     xp2=1.d0
     else
     xp2=0.d0
-    write(6,*)'NBO vib-rotational corrections are ignored'
+    write(6,"(5x,'NBO vib-rotational corrections are ignored')")
     end if
 
-       write (6,1440)
- 1440 format(/5x,'Routine DSYEV to do in core diagonalisation')
+       write (6,"(/5x,'Routine DSYEV to do in core diagonalisation')")
+!  1440 format(/5x,'Routine DSYEV to do in core diagonalisation')
   886 continue
 
 !     check input parameters are consistent
@@ -737,8 +753,8 @@ subroutine insize
       if (idia .le. -2 .and. .not. zquad2) goto 963
 
       return
-  960 write(6,970)
-  970 format(//6x,'** nalf must be even when idia=2: stop **')
+  960 write(6,"(//6x,'** nalf must be even when idia=2: stop **')")
+!   970 format(//6x,'** nalf must be even when idia=2: stop **')
       stop
   961 write(6,972)
   972 format(//6x,'** can''t have zquad2 = f with zmors2 = t : stop **',&
@@ -1050,15 +1066,15 @@ subroutine insize
       if(.not. zperp) then
         call jacobi(nang,nang2,xalf,walf,realkz,realkz,cswalf,tswalf)
         write(6,1000) nang,kz,(xalf(ii),walf(ii),ii=1,nang2)
- 1000   format(//i8,' point Gauss-associated Legendre integration with',&
-             ' k =',i3//5x,'integration points',11x,'weights',&
-              //(f23.15,d25.12))
+  1000   format(//i8,' point Gauss-associated Legendre integration with',&
+              ' k =',i3//5x,'integration points',11x,'weights',&
+               //(f23.15,d25.12))
         write(6,1010) cswalf,tswalf
  1010   format(/4x,'Computed sum of weights',d22.15,&
               /4x,'Exact    sum of weights',d22.15//)
           if (abs((cswalf-tswalf)/tswalf) .gt. toler) then
-             write(6,910)
-  910       format(//5x,'Points & weights in error, adjust algorithm'//)
+             write(6,"(//5x,'Points & weights in error, adjust algorithm'//)")
+!   910       format(//5x,'Points & weights in error, adjust algorithm'//)
              stop
           endif
         call allpts(xalf,walf,nang,nang2)
@@ -1150,32 +1166,32 @@ subroutine insize
 
 !     read cos(theta) for fixed angle 2-d calculation
 
-      read(5,5) fixcos
+      read(5,'(3f20.0)') fixcos
       if (ztwod) write(6,1088) fixcos
  1088 format(//5x,'two-d fixed angle vibrational problem with'&
              //5x,'***** fixed value of cos(theta) =',f6.2,' *****'/)
 
 !     read masses of the atoms in atomic mass units
 !     first vibrational mass...
-      read(5,5)     xmass
-    5 format(3f20.0)
+      read(5,'(3f20.0)')     xmass
+!     5 format(3f20.0)
 !     .... then rotational mass
-      read(5,5)     xmassr
+      read(5,'(3f20.0)')     xmassr
 !     Default rotational mass to vibration mass if it is not set
       if (xmassr(1).le.x0) xmassr = xmass
 
 !     read cut off energies
 !     read parameters defining energy cut offs for each block
-      read(5,5) emax1,emax2
+      read(5,'(3f20.0)') emax1,emax2
       if (.not. zall) then
          if (zcut) then
-            if (idia .gt. -2) write(6,990) emax1,emax2
-  990       format(//5x,'Cut-off energies in wavenumbers:',2d16.8/)
-            if (idia .eq. -2) write(6,991)       emax2
-  991       format(//5x,'Final cut-off energy in wavenumbers:',2d16.8/)
+            if (idia .gt. -2) write(6,"(//5x,'Cut-off energies in wavenumbers:',2d16.8/)") emax1,emax2
+!   990       format(//5x,'Cut-off energies in wavenumbers:',2d16.8/)
+            if (idia .eq. -2) write(6,"(//5x,'Final cut-off energy in wavenumbers:',2d16.8/)") emax2
+!   991       format(//5x,'Final cut-off energy in wavenumbers:',2d16.8/)
          else
-            if (idia .gt. -2) write(6,992) emax1
-  992       format(//5x,'First cut-off energy in wavenumbers:',1d16.8/)
+            if (idia .gt. -2) write(6,"(//5x,'First cut-off energy in wavenumbers:',1d16.8/)") emax1
+!   992       format(//5x,'First cut-off energy in wavenumbers:',1d16.8/)
          endif
       endif
 !     set default value of g1 and g2
@@ -1192,7 +1208,7 @@ subroutine insize
       endif
 !     ncoord = 3: read parameters for r1 radial basis (see below)
 !     ncoord = 2: read fixed r1 bondlength re1. diss1 & we1 dummy
-      read(5,5)     re1,diss1,we1
+      read(5,'(3f20.0)')     re1,diss1,we1
 !     read parameters for r2 radial basis function,
 !     for morse oscillator functions use the following:
 !     re2: equilibrium bondlength of r2 coordinate (in bohr)
@@ -1203,11 +1219,11 @@ subroutine insize
 !     diss2: order of laguerre polynomials used (dimensionless)
 !     we2: fundamental stretching vibration of r2 (in hartree)
 !     all are treated as variationally optimisable parameters.
-      read(5,5)     re2,diss2,we2
-      write(6,1000) xmass
- 1000 FORMAT(/5X,'Vibrational nuclear mass in AMU:',3F12.6)
-      if (jrot.ne.0) write(6,1001) xmassr
- 1001 FORMAT( 5X,'Rotational  nuclear mass in AMU:',3F12.6/)
+      read(5,'(3f20.0)')     re2,diss2,we2
+      write(6,'(/5X,"Vibrational nuclear mass in AMU:",3F12.6)') xmass
+!  1000 FORMAT(/5X,'Vibrational nuclear mass in AMU:',3F12.6)
+      if (jrot.ne.0) write(6,'(5X,"Rotational  nuclear mass in AMU:",3F12.6/)') xmassr
+!  1001 FORMAT( 5X,'Rotational  nuclear mass in AMU:',3F12.6/)
 !     compute the effective moments of inertia
       ur1 = amtoau/(g2*g2/xmass(1)+x1/xmass(2)+(x1-g2)**2/xmass(3))
       ur2 = amtoau/(x1/xmass(1)+g1*g1/xmass(2)+(x1-g1)**2/xmass(3))
@@ -1216,13 +1232,13 @@ subroutine insize
  
       if (ncoord .eq. 3) goto 20
       if (zr2r1) then
-         write(6,1010) re1,ur1
- 1010 format(/5x,'r1 fixed bondlength =',f8.4,' bohr',&
-                  ' & reduced mass =',d16.7,' a.u.'/)
+         write(6,"(/5x,'r1 fixed bondlength =',f8.4,' bohr',' & reduced mass =',d16.7,' a.u.'/)") re1,ur1
+!  1010 format(/5x,'r1 fixed bondlength =',f8.4,' bohr',&
+!                   ' & reduced mass =',d16.7,' a.u.'/)
       else
-         write(6,1011) re2,ur2
- 1011 format(/5x,'r2 fixed bondlength =',f8.4,' bohr',&
-                  ' & reduced mass =',d16.7,' a.u.'/)
+         write(6,"(/5x,'r2 fixed bondlength =',f8.4,' bohr',' & reduced mass =',d16.7,' a.u.'/)") re2,ur2
+!  1011 format(/5x,'r2 fixed bondlength =',f8.4,' bohr',&
+!                   ' & reduced mass =',d16.7,' a.u.'/)
       endif
       if (zr2r1) goto 30
    20 continue
@@ -1429,9 +1445,10 @@ subroutine insize
       endif
       write(6,1010) y(i),wt(i),r(i)
  1010 format (f23.15,d25.12,f13.5)
-      if (r(i) .lt. x0) write(6,1015) i
- 1015 format(5x,'***** warning: for integration point',i3,&
-             ', r less than zero *****')
+      if (r(i) .lt. x0) &
+      write(6,"(5x,'***** warning: for integration point',i3,', r less than zero *****')") i
+!  1015 format(5x,'***** warning: for integration point',i3,&
+!              ', r less than zero *****')
 
 !     calculate unnormalised laguerre polynomials at y
 
@@ -1463,8 +1480,8 @@ subroutine insize
       if (abs((csx-tsx)/tsx) .gt. toler) goto 900
       if (abs((csa-tsa)/tsa) .gt. toler) goto 900
       return
-  900 write(6,910)
-  910 format(//5x,'points & weights in error, adjust algorithm',//)
+  900 write(6,"(//5x,'points & weights in error, adjust algorithm',//)")
+!   910 format(//5x,'points & weights in error, adjust algorithm',//)
       stop
       end
 
@@ -1624,9 +1641,9 @@ subroutine insize
    10 continue
       if (.not. zprad) return
 !     write kinetic energy integrals if requested
-      write(6,500)
-  500 format(//,5x,'radial kinetic energy matrix calculated',&
-              ' analytically',/)
+      write(6,"(//,5x,'radial kinetic energy matrix calculated analytically',/)")
+!   500 format(//,5x,'radial kinetic energy matrix calculated',&
+!               ' analytically',/)
       call symout(hbl,nmax+1)
       return
       end
@@ -1680,12 +1697,12 @@ subroutine insize
    50 continue
       if (.not. zprad) return
 !     write kinetic energy & inertia integrals if requested
-      write(6,500)
-  500 format(//5x,'radial kinetic energy matrix calculated',&
-                   ' analytically'/)
+      write(6,"(//5x,'radial kinetic energy matrix calculated analytically'/)")
+!   500 format(//5x,'radial kinetic energy matrix calculated',&
+!                    ' analytically'/)
       call symout(hbl,nmax+1)
-      write(6,510)
-  510 format(//5x,'moment of inertia matrix calculated analytically'/)
+      write(6,"(//5x,'moment of inertia matrix calculated analytically'/)")
+!   510 format(//5x,'moment of inertia matrix calculated analytically'/)
       call symout(rm2,nmax+1)
       return
       end
@@ -1923,8 +1940,8 @@ subroutine insize
    15    continue
    14 continue
       return
-999   write(6,200)
-200   format(/,/,5x,'improper argument in subroutine asleg',/)
+999   write(6,"(/,/,5x,'improper argument in subroutine asleg',/)")
+! 200   format(/,/,5x,'improper argument in subroutine asleg',/)
       stop
       end
 
@@ -1981,8 +1998,8 @@ subroutine insize
    10 continue   
       if (.not. zlmat) return
 !     write xlmatr if requested
-      write(6,1010) kz,ipar0
- 1010 format(5x,'L-matrix for kz =',i3,', ipar =',i2/)
+      write(6,"(5x,'L-matrix for kz =',i3,', ipar =',i2/)") kz,ipar0
+!  1010 format(5x,'L-matrix for kz =',i3,', ipar =',i2/)
       call sqout(xlmatr,nidvr)
       return
       end
@@ -2056,11 +2073,11 @@ subroutine insize
       call diag(ham1,ndima,npnta,eig1)
       call cut1d(ham1,eig1,iv1(ione,itwo),eigs1d,vecs1d,nham2,icall)
    20 continue
-      write(6,985) nham2
-  985 format(5x,' nham2 = ',i4)
+      write(6,"(5x,' nham2 = ',i4)") nham2
+!   985 format(5x,' nham2 = ',i4)
       nsum = nsum + nham2
-      if (ione .eq. npntc) write(6,986) nsum
-  986 format(/5x,' sum = ',i5)
+      if (ione .eq. npntc) write(6,"(/5x,' sum = ',i5)") nsum
+!   986 format(/5x,' sum = ',i5)
       if (nham2 .gt. 0) then
 !        dump the 1d eigenavlues & vectors to disk for each ione
          call outrow(eigs1d,nham2,ieigs1)
@@ -2114,8 +2131,9 @@ subroutine insize
 
       endif
 
-      if (ione .eq. npntc .and. zcut) write(6,987)  low3d,emax2
-  987 format(/i14,' eigenvalues selected below ',d20.10)
+      if (ione .eq. npntc .and. zcut)&
+      & write(6,"(/i14,' eigenvalues selected below ',d20.10)")  low3d,emax2
+!   987 format(/i14,' eigenvalues selected below ',d20.10)
 
    31 continue
 
@@ -2594,10 +2612,10 @@ subroutine insize
       endif
 
       if (.not. zdiag) then
-         write(6,1080)
- 1080    format(/5x,'hamiltonian written to disk - not diagonalised')
-         write(6,1081) idiag2
- 1081    format(/5x,'hamiltonian bands written to stream idiag =',i4/)
+         write(6,"(/5x,'hamiltonian written to disk - not diagonalised')")
+!  1080    format(/5x,'hamiltonian written to disk - not diagonalised')
+         write(6,"(/5x,'hamiltonian bands written to stream idiag =',i4/)") idiag2
+!  1081    format(/5x,'hamiltonian bands written to stream idiag =',i4/)
          stop
        endif
        return
@@ -2694,9 +2712,10 @@ subroutine insize
       nnham=maxham*3
       call dsyev ('V','L',nham,ham,maxham,eig,work,nnham,ifail)
 
-      if (ifail .ne. 0) write(6,100) ifail
+      if (ifail .ne. 0) &
+      &write(6,"(' diagonalisation has failed with, ifail=',i3)") ifail
       return
-100   format(' diagonalisation has failed with, ifail=',i3)
+! 100   format(' diagonalisation has failed with, ifail=',i3)
     END SUBROUTINE diag
 !########################################################################
       subroutine diag3d(ham3,nham3,eval,kz)
@@ -2714,13 +2733,13 @@ subroutine insize
       data autocm/2.19474624d+05/
       data x0/0.0d0/
       if (zrot) then
-         write(6,1040) jrot,kz
- 1040    format(/5x,'Solutions with J =',i3,' k =',i3)
+         write(6,"(/5x,'Solutions with J =',i3,' k =',i3)") jrot,kz
+!  1040    format(/5x,'Solutions with J =',i3,' k =',i3)
          if (idia .eq. -2) then
-            if (ipar .eq. 0)  write(6,1025)
- 1025       format(/5x,'even parity solutions')
-            if (ipar .eq. 1)  write(6,1035)
- 1035       format(/5x,'odd parity solutions')
+            if (ipar .eq. 0)  write(6,"(/5x,'even parity solutions')")
+!  1025       format(/5x,'even parity solutions')
+            if (ipar .eq. 1)  write(6,"(/5x,'odd parity solutions')")
+!  1035       format(/5x,'odd parity solutions')
          endif
       endif
 !     we need this in special cases (nham3 < neval)
@@ -2734,9 +2753,9 @@ subroutine insize
 !     print eigenvalues in atomic untis & wavenumbers
 
       if (.not.zpmin) then
-         write(6,1010) meval
- 1010    format(/5x,'lowest',i4,' eigenvalues in hartrees:',/)
-         write(6,1020) (eval(i),i=1,meval)
+         write(6,"(/5x,'lowest',i4,' eigenvalues in hartrees:',/)") meval
+!  1010    format(/5x,'lowest',i4,' eigenvalues in hartrees:',/)
+         write(6,"(5d24.12/)") (eval(i),i=1,meval)
       endif
       if (zpfun) then
          ip=jrot-kmin
@@ -2745,10 +2764,10 @@ subroutine insize
          jpar=min(jdia,ipar)
          isym=abs(min(0,idia))
          if (ipar .eq. 1) isym=-isym
-         write(ilev,1125) jrot,ip,jdia,jpar,isym,meval
- 1125    format(6i6)
-         write(ilev,1126) (eval(i),i=1,meval)
- 1126    format(4d20.12)
+         write(ilev,"(6i6)") jrot,ip,jdia,jpar,isym,meval
+!  1125    format(6i6)
+         write(ilev,"(4d20.12)") (eval(i),i=1,meval)
+!  1126    format(4d20.12)
       endif
    10 continue
 
@@ -2757,18 +2776,18 @@ subroutine insize
       do 20 i=1,meval
       evalcm(i) = eval(i) * autocm
    20 continue
-      write(6,1030) meval
- 1030 format(//5x,'Lowest',i4,' eigenvalues in wavenumbers:'/)
-      write(6,1020) (evalcm(i),i=1,meval)
- 1020 format(5d24.12/)
+      write(6,"(//5x,'Lowest',i4,' eigenvalues in wavenumbers:'/)") meval
+!  1030 format(//5x,'Lowest',i4,' eigenvalues in wavenumbers:'/)
+      write(6,"(5d24.12/)") (evalcm(i),i=1,meval)
+!  1020 format(5d24.12/)
 
 !     if requested print the eigenvectors
       if (zpvec) then
-         write(6,1050)
+         write(6,"(//'  Eigenvectors'/)")
  1050    format(//'  Eigenvectors'/)
          do 40 i=1,meval
-         write(6,1060) (ham3(j,i),j=1,nham3)
- 1060    format((1x,10f13.7))
+         write(6,"(1x,10f13.7)") (ham3(j,i),j=1,nham3)
+!  1060    format((1x,10f13.7))
    40    continue
       endif
 !     write the final vectors to disk if required
@@ -2781,17 +2800,17 @@ subroutine insize
       if (abs(idia) .eq. 2 .and. ipar .eq. 1) then
          ii=1
          ezero=x0
-         read(5,5,end=55) ezero
-    5    format(f20.0)
+         read(5,'(f20.0)',end=55) ezero
+!     5    format(f20.0)
    55    continue
       else
          ezero=evalcm(1)
          ii=2
       endif
-      write(6,1070)
- 1070 format(//'  Band origins in wavenumbers:'/)
-      write(6,1021) (evalcm(i)-ezero,i=ii,meval)
- 1021 format(5f15.6/)
+      write(6,"(//'  Band origins in wavenumbers:'/)")
+!  1070 format(//'  Band origins in wavenumbers:'/)
+      write(6,"(5f15.6/)") (evalcm(i)-ezero,i=ii,meval)
+!  1021 format(5f15.6/)
 
       return
       end
@@ -2842,33 +2861,34 @@ subroutine insize
 !     store the number of eigenvalues selected for each alpha
       iv2(1) = iv2(1) - 1
       ivib = iv2(1)
-      write(6,800)
-  800 format(//5x,'Selection outcome for the final, contracted basis:'/)
-      write(6,900)  1,iv2(1)
+      write(6,"(//5x,'Selection outcome for the final, contracted basis:'/)")
+!   800 format(//5x,'Selection outcome for the final, contracted basis:'/)
+      write(6,"(5x,'npntc =',i3, ',', ' no. of eigenvectors =',i3 )")  1,iv2(1)
       do 230 i=2,npntc
        iv2(i) = iv2(i) - 1
-       write(6,900)  i,iv2(i)
-  900  format(5x,'npntc =',i3, ',', ' no. of eigenvectors =',i3 )
+       write(6,"(5x,'npntc =',i3, ',', ' no. of eigenvectors =',i3 )")  i,iv2(i)
+!   900  format(5x,'npntc =',i3, ',', ' no. of eigenvectors =',i3 )
        ivib = max(ivib,iv2(i))
   230 continue
 
-      write(6,998)  low3d,eigmin,eigvib
-  998 format(/i14,' eigenvalues selected from ',d20.10,' to',d20.10,&
-          ' hartrees')
-      write(6,999)  low3d,eigmin*autocm,eigvib*autocm
-  999 format(/i14,' eigenvalues selected from ',d20.10,' to',d20.10,&
-          ' cm-1')
+      write(6,"(/i14,' eigenvalues selected from ',d20.10,' to',d20.10,' hartrees')") &
+            &low3d,eigmin,eigvib
+!   998 format(/i14,' eigenvalues selected from ',d20.10,' to',d20.10,' hartrees')
+      write(6,"(/i14,' eigenvalues selected from ',d20.10,' to',d20.10,' cm-1')") &
+            & low3d,eigmin*autocm,eigvib*autocm
+!   999 format(/i14,' eigenvalues selected from ',d20.10,' to',d20.10,&
+!           ' cm-1')
 
 
       if (zp2d) then
-         write(6,1051)
- 1051    format(//5x,'2d eigenvalues in wavenumbers:'/)
+         write(6,"(//5x,'2d eigenvalues in wavenumbers:'/)")
+!  1051    format(//5x,'2d eigenvalues in wavenumbers:'/)
          do 32 jone = 1,npntc
          ivj = iv2(jone)
-         write(6,1050) (eigs2(i,jone)*autocm,i=1,ivj)
- 1050    format(5d24.12/)
-         write(6,1052)
- 1052    format(/5x,'------------------------------'/)
+         write(6,"(5d24.12/)") (eigs2(i,jone)*autocm,i=1,ivj)
+!  1050    format(5d24.12/)
+         write(6,"(/5x,'------------------------------'/)")
+!  1052    format(/5x,'------------------------------'/)
    32    continue
       endif      
 
@@ -2928,12 +2948,13 @@ subroutine insize
       endif
 
       if (zp1d) then
-         if (icall .eq. 1) write(6,1051)
- 1051    format(//5x,'1d eigenvalues in wavenumbers:'/)
-         write(6,1050) (eig1(i)*autocm,i=1,npnta)
- 1050    format(5d24.12/)
-         write(6,1052)
- 1052    format(/5x,'------------------------------'/)
+         if (icall .eq. 1) &
+            &write(6,"(//5x,'1d eigenvalues in wavenumbers:'/)")
+!  1051    format(//5x,'1d eigenvalues in wavenumbers:'/)
+         write(6,"(5d24.12/)") (eig1(i)*autocm,i=1,npnta)
+!  1050    format(5d24.12/)
+         write(6,"(/5x,'------------------------------'/)")
+!  1052    format(/5x,'------------------------------'/)
       endif
 
 !     save the vectors and eigenvalues (overwrite for each gamma).
@@ -2941,8 +2962,8 @@ subroutine insize
          nham2 = nham2 + 1
 
       if (nham2 .gt. max2d .and. .not. zall)  then
-         write(6,999)
-  999    format(//6x,'**** core exceeded: reduce cut-off emax1 ****')
+         write(6,"(//6x,'**** core exceeded: reduce cut-off emax1 ****')")
+!   999    format(//6x,'**** core exceeded: reduce cut-off emax1 ****')
          stop
       endif
 
@@ -2989,18 +3010,18 @@ subroutine insize
       endif
 
       if (low3d .gt. max3d .and. .not. zall)  then
-         write(6,999)
-  999    format(//6x,'**** core exceeded: reduce cut-off emax2 ****')
+         write(6,"(//6x,'**** core exceeded: reduce cut-off emax2 ****')")
+!   999    format(//6x,'**** core exceeded: reduce cut-off emax2 ****')
          stop
       endif
 
       if (zp2d) then
-         if (icall .eq. 1) write(6,1051)
- 1051    format(//5x,'2d eigenvalues in wavenumbers:'/)
-         write(6,1050) (eig2(i)*autocm,i=1,nham2)
- 1050    format(5d24.12/)
-         write(6,1052)
- 1052    format(/5x,'------------------------------'/)
+         if (icall .eq. 1) write(6,"(//5x,'2d eigenvalues in wavenumbers:'/)")
+!  1051    format(//5x,'2d eigenvalues in wavenumbers:'/)
+         write(6,"(5d24.12/)") (eig2(i)*autocm,i=1,nham2)
+!  1050    format(5d24.12/)
+         write(6,"(/5x,'------------------------------'/)")
+!  1052    format(/5x,'------------------------------'/)
       endif
 
 !     save the vectors and eigenvalues
@@ -3067,7 +3088,7 @@ subroutine insize
 
 ! no need for the 1d diagonalisations as there is no possiblity of
 ! truncation as the symmetry would be broken.
-      write(6,130)
+      write(6,"(5x,'starting the 2d calculations.')")
       call nftim('beginning of 2d loop')
       do 30 igamma = 1,nalf
   
@@ -3083,18 +3104,20 @@ subroutine insize
                       vecs2d,nv2,eigtmp)
 
           if(igamma .eq. nalf .and. .not. zpmin)&
-              write(6,110) (itmp, iv2(2,itmp),itmp=1,nalf)
+              write(6,"(5x,'for gamma = ',i2,' selected ',i3,' energies.')") &
+                  &(itmp, iv2(2,itmp),itmp=1,nalf)
         else
            call cut2dr(igamma,nham2,eig2,ham2,iv2,eigs2d,vecs2d)
-          if (.not. zpmin) write(6,110) igamma, iv2(2,igamma)
+          if (.not. zpmin) write(6,"(5x,'for gamma = ',i2,' selected ',i3,' energies.')") &
+            & igamma, iv2(2,igamma)
         endif
 30    continue
       call testiv(iv2,nbass)
 
       nham3 = iv2(1,nalf) + iv2(2,nalf) - 1
-      if (.not. zpmin) write(6,120) nham3
+      if (.not. zpmin) write(6,"(25x,'total = ',i5)") nham3
       call nftim('end of 2d loop')
-      write(6,160)
+      write(6,"(5x,'building the 3d hamiltonian.')")
 
       if (.not.zcut) DEALLOCATE(eigtmp)
       ALLOCATE(ham3(nham3,nham3))
@@ -3104,7 +3127,7 @@ subroutine insize
       DEALLOCATE(ham2,eig2,eigs2d,nv2)
  
       call nftim('end of 3d ham building')
-      write(6,170)
+      write(6,"(5x,'diagonalising the 3d hamiltonian.')")
       ALLOCATE(eig3(nham3))
 
       call diag3d(ham3,nham3,eig3,kz)
@@ -3115,11 +3138,11 @@ subroutine insize
 
       DEALLOCATE(iv2,vecs2d,ham3,eig3)
       return
-110   format(5x,'for gamma = ',i2,' selected ',i3,' energies.')
-120   format(25x,'total = ',i5)
-130   format(5x,'starting the 2d calculations.')
-160   format(5x,'building the 3d hamiltonian.')
-170   format(5x,'diagonalising the 3d hamiltonian.')
+! 110   format(5x,'for gamma = ',i2,' selected ',i3,' energies.')
+! 120   format(25x,'total = ',i5)
+! 130   format(5x,'starting the 2d calculations.')
+! 160   format(5x,'building the 3d hamiltonian.')
+! 170   format(5x,'diagonalising the 3d hamiltonian.')
       end
 
 !    ***********************************************************************
@@ -3800,8 +3823,8 @@ subroutine insize
 !     print lower triangle of square matrix
       double precision sqmat(ndim,ndim)
       do 30 i=1,ndim
-      write(6,1020) (sqmat(i,j),j=1,i)
- 1020 format(10f13.7)
+      write(6,"(10f13.7)") (sqmat(i,j),j=1,i)
+!  1020 format(10f13.7)
    30 continue
       return
       end
@@ -3815,14 +3838,14 @@ subroutine insize
       ip=0
     3 llow=10*ip+1
       lup=min(llow+9,ndim)
-      write(6,4) (i,i=llow,lup)
-    4 format(/,i11,9i13)
+      write(6,"(/,i11,9i13)") (i,i=llow,lup)
+!     4 format(/,i11,9i13)
       ind0=llow*(llow+1)/2
       do 5 i=llow,ndim
       itop=min(lup,i)
       ktop=itop-llow+ind0
-      write(6,7) i,(symmat(j),j=ind0,ktop)
-    7 format(i4,f12.7,9f13.7)
+      write(6,"(i4,f12.7,9f13.7)") i,(symmat(j),j=ind0,ktop)
+!     7 format(i4,f12.7,9f13.7)
       ind0=ind0+i
     5 continue
       if(lup.ge.ndim) return
@@ -3833,11 +3856,11 @@ subroutine insize
       subroutine wrtham(hamil,nham)
 !     print hamiltonian matrix                                      #011
       double precision hamil(nham,nham)
-      write(6,1010)
- 1010 format(5x,'hamiltonian matrix'/)
+      write(6,"(5x,'hamiltonian matrix'/)")
+!  1010 format(5x,'hamiltonian matrix'/)
       do 30 i=1,nham
-      write(6,1020) (hamil(i,j),j=1,i)
- 1020 format(10f13.7)
+      write(6,"(10f13.7)") (hamil(i,j),j=1,i)
+!  1020 format(10f13.7)
    30 continue
       return
       end
@@ -3870,14 +3893,14 @@ subroutine insize
       subroutine nftim(text)
       use dvr3drjz_timing
       character text*(*)
-      write(6,10)
+      write(6,"(/)")
       write(6,*) 'Time at ',text,' is.........'
       call SYSTEM_CLOCK(itime2,irate2,imax2)
       itime=(itime2-itime0)/irate2
-      write(6,1)itime
- 1    format(/i10,' secs CPU time used'/) 
+      write(6,"(/i10,' secs CPU time used'/) ")itime
+!  1    format(/i10,' secs CPU time used'/) 
       return
-10    format(/)
+! 10    format(/)
       end
 
 !########################################################################
@@ -3910,7 +3933,7 @@ subroutine insize
 
 ! no need for the 1d diagonalisations as there is no possiblity of
 ! truncation as the symmetry would be broken.
-      write(6,130)
+      write(6,"(5x,'starting the 2d calculations.')")
       call nftim('beginning of 2d loop')
 
       do 30 igamma = 1,nalf     
@@ -3926,19 +3949,21 @@ subroutine insize
                       vecs2d,nv2,eigtmp)
 
           if(igamma .eq. nalf .and. .not. zpmin)&
-              write(6,110) (itmp, iv2(2,itmp),itmp=1,nalf)
+              write(6,"(5x,'for gamma = ',i2,' selected ',i3,' energies.')") &
+            &(itmp, iv2(2,itmp),itmp=1,nalf)
         else
            call cut2dr(igamma,nham2,eig2,ham2,iv2,eigs2d,vecs2d)
-          if (.not. zpmin) write(6,110) igamma, iv2(2,igamma)
+          if (.not. zpmin) write(6,"(5x,'for gamma = ',i2,' selected ',i3,' energies.')")&
+            & igamma, iv2(2,igamma)
         endif
 30    continue
 
       call testiv(iv2,nbass)
 
       nham3 = iv2(1,nalf) + iv2(2,nalf) - 1
-      if (.not. zpmin) write(6,120) nham3
+      if (.not. zpmin) write(6,"(25x,'total = ',i5)") nham3
       call nftim('end of 2d loop')
-      write(6,160)
+      write(6,"(5x,'building the 3d hamiltonian.')")
 
       if (.not.zcut) DEALLOCATE(eigtmp)
       ALLOCATE(ham3(nham3,nham3))
@@ -3949,7 +3974,7 @@ subroutine insize
       DEALLOCATE(ham2,eig2,eigs2d,nv2)
  
       call nftim('end of 3d ham building')
-      write(6,170)
+      write(6,"(5x,'diagonalising the 3d hamiltonian.') ")
       ALLOCATE(eig3(nham3))
 
       call diag3d(ham3,nham3,eig3,kz)
@@ -3960,11 +3985,11 @@ subroutine insize
 
       DEALLOCATE(iv2,vecs2d,ham3,eig3)
       return
-110   format(5x,'for gamma = ',i2,' selected ',i3,' energies.')
-120   format(25x,'total = ',i5)
-130   format(5x,'starting the 2d calculations.')
-160   format(5x,'building the 3d hamiltonian.')
-170   format(5x,'diagonalising the 3d hamiltonian.')  
+! 110   format(5x,'for gamma = ',i2,' selected ',i3,' energies.')
+! 120   format(25x,'total = ',i5)
+! 130   format(5x,'starting the 2d calculations.')
+! 160   format(5x,'building the 3d hamiltonian.')
+! 170   format(5x,'diagonalising the 3d hamiltonian.')  
     
       end
       
