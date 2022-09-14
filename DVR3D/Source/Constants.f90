@@ -1,12 +1,12 @@
-!model.f90
-!====================================================================================================
+!Constants.f90
+!==================================================================================================
 !Copyright(C). 2022, University College London
 !File name: model.f90
 !Author: Runyu Zhang & Jonathan Tennyson
 !Version: 1.1
-!Data: 7th/Sep/2022
-!Description: this Fortran90 file contains the module for the source folder common constants
-!             divided by the common group
+!Data: 7th/july/2022
+!Description: this Fortran90 file contains the module template for the source folder common 
+!             constants divided by the common group
 !Dependency: Folder source
 !===================================================================================================
 

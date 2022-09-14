@@ -60,7 +60,7 @@ end module rotlev3_outp
       END 
 
 !######################################################################
-      SUBROUTINE ROTLEV
+SUBROUTINE ROTLEV
 
 !     PROGRAM               R O T L E V 3
 !
@@ -222,12 +222,12 @@ end module rotlev3_outp
       mbass=npnt1*npnt2*npntt
       NVIB=MIN(NVIB,MEVAL)
       NBLK=JROT
-      IF (KMIN .GT. 0) NBLK=NBLK+1
+      IF (KMIN > 0) NBLK=NBLK+1
       NBASS=NBLK*NVIB
-      IF (IBASS .GT. 0) NBASS=MIN(NBASS,IBASS)
-      IF (NEVAL .LE. 0) NEVAL = 10
+      IF (IBASS > 0) NBASS=MIN(NBASS,IBASS)
+      IF (NEVAL <= 0) NEVAL = 10
       NEVAL=MIN(NEVAL,NBASS)
-      IF (NEVAL2 .LE. 0) NEVAL2 = NEVAL
+      IF (NEVAL2 <= 0) NEVAL2 = NEVAL
 
       WRITE(6,1000) MEVAL,MBASS,NVIB,NEVAL,NBASS
  1000 FORMAT(/5X,'ROTATIONAL PART OF ROT-VIB CALCULATION  WITH:',&
@@ -236,7 +236,7 @@ end module rotlev3_outp
              /I9,3X,'LOWEST VIBRATIONAL EIGENVECTORS ACTUALLY USED',&
              /I9,3X,'LOWEST ROTATIONAL EIGENVECTORS REQUIRED FOR',&
              /I9,3X,'DIMENSION ROTATION SECULAR PROBLEM')
-      IF (IBASS .GT. 0) WRITE(6,1005)
+      IF (IBASS > 0) WRITE(6,1005)
  1005 FORMAT(17X,'WITH BASIS SELECTED BY ENERGY ORDERING')
 
       READ(5,500)   TITLE
@@ -258,15 +258,15 @@ end module rotlev3_outp
          else
             write(6,1014)
  1014 format(/5x,'Diagonalisation performed iteratively using F02FJF')
-            IF (TOLER .NE. X0) WRITE(6,1060) TOLER
+            IF (TOLER /= X0) WRITE(6,1060) TOLER
  1060 FORMAT(5X,'EIGENVALUE CONVERGENCE TOLERANCE, TOLER =',D20.3)
-            IF (TOLER .EQ. X0) WRITE(6,1070)
+            IF (TOLER == X0) WRITE(6,1070)
  1070 FORMAT(5X,'EIGENVALUES CONVERGED TO MACHINE ACCURACY')
          endif
       ENDIF
-      IF (IRES .NE. 0) WRITE(6,1015) IRES
+      IF (IRES /= 0) WRITE(6,1015) IRES
  1015 FORMAT(/5X,'***** RESTART RUN, IRES =',I2,' *****')
-      IF ( IRES .EQ. -1)WRITE(6,1016)
+      IF ( IRES == -1)WRITE(6,1016)
  1016 FORMAT(/5X,'***** TRANSFORMATION ONLY *****')
       IF (ZPHAM) WRITE(6,1020)
  1020 FORMAT(/5X,'PRINTING OF HAMILTONIAN MATRIX REQUESTED')
@@ -296,7 +296,7 @@ end module rotlev3_outp
       IF (ZVEC) WRITE(6,1054) JVEC
  1054 FORMAT(/5X,'EIGENVALUES & VECTORS TO BE WRITTEN TO STREAM ',&
              'JVEC  =',I4)
-      IF (ZVEC .AND. KMIN .GT. 1) WRITE(6,1056) JVEC2
+      IF (ZVEC .AND. KMIN > 1) WRITE(6,1056) JVEC2
  1056 FORMAT( 5X,'SECOND SET            TO BE WRITTEN TO STREAM ',&
              'JVEC2 =',I4)
       IF (ZTRAN) WRITE(6,1057) jscr
@@ -305,35 +305,35 @@ end module rotlev3_outp
       IF (ZTRAN) WRITE(6,1058) KVEC
  1058 FORMAT(/5X,'TRANSFORMED VECTORS   TO BE WRITTEN TO STREAM ',&
              'KVEC  =',I4)
-      IF (ZTRAN .AND. KMIN .GT. 1) WRITE(6,1059) KVEC2
+      IF (ZTRAN .AND. KMIN > 1) WRITE(6,1059) KVEC2
  1059 FORMAT( 5X,'SECOND SET            TO BE WRITTEN TO STREAM ',&
              'KVEC2 =',I4)
-      IF (TOLER .NE. X0) WRITE(6,1066) TOLER
+      IF (TOLER /= X0) WRITE(6,1066) TOLER
  1066 FORMAT(/5X,'EIGENVALUE CONVERGENCE TOLERANCE, TOLER =',D20.3)
-      IF (TOLER .EQ. X0) WRITE(6,1077)
+      IF (TOLER == X0) WRITE(6,1077)
  1077 FORMAT(/5X,'EIGENVALUE CONVERGENCE TO MACHINE ACCURACY')
-      IF (IDIA .NE. 2) THEN
-         IF (IDIA .EQ. 1) WRITE(6,1080)
+      IF (IDIA /= 2) THEN
+         IF (IDIA == 1) WRITE(6,1080)
  1080    FORMAT(/5X,'DIATOMIC ASSUMED HETRONUCLEAR')
-         IF (IDIA .EQ. 0) WRITE(6,1085)
+         IF (IDIA == 0) WRITE(6,1085)
  1085    FORMAT(/5X,'RADAU COORDINATES USED')
       ELSE
-         IF (IPAR .EQ. 0) WRITE(6,1100)
+         IF (IPAR == 0) WRITE(6,1100)
  1100    FORMAT(/5X,'DIATOMIC ASSUMED HOMONUCLEAR',&
                 /5X,'EVEN PARITY FUNCTIONS IN BASIS SET')
-         IF (IPAR .EQ. 1) WRITE(6,1110)
+         IF (IPAR == 1) WRITE(6,1110)
  1110    FORMAT(/5X,'DIATOMIC ASSUMED HOMONUCLEAR',&
                 /5X,'ODD PARITY FUNCTIONS IN BASIS SET')
       ENDIF
       WRITE(6,1120) JROT
  1120 FORMAT(/5X,'J =',I3,' ROTATIONAL STATE')
-      IF (KMIN .EQ. 0) WRITE(6,1130)
+      IF (KMIN == 0) WRITE(6,1130)
  1130 FORMAT(12X,'WITH ANTI-SYMMETRIC |JK> - |J-K> FUNCTIONS IN BASIS')
-      IF (KMIN .EQ. 1) WRITE(6,1140)
+      IF (KMIN == 1) WRITE(6,1140)
  1140 FORMAT(12X,'WITH SYMMETRIC |JK> + |J-K> FUNCTIONS IN BASIS')
-      IF (KMIN .GT. 1) WRITE(6,1150)
+      IF (KMIN > 1) WRITE(6,1150)
  1150 FORMAT(12X,'LOOP OVER SYMMETRIC AND ANTI-SYMMETRIC FUNCTIONS')
-      IF (KMIN .GT. 0 .AND. KMIN0 .NE. 1) GOTO 960
+      IF (KMIN > 0 .AND. KMIN0 /= 1) GOTO 960
       IF (ZEMBED) then
          WRITE(6,1160) 2
       else
@@ -361,7 +361,7 @@ end module rotlev3_outp
 
       ALLOCATE(evib(nvib,nblk),iv(nblk),mvib(nblk))
 
-      if (ires .eq. 0)then
+      if (ires == 0)then
 
 !     READ ENERGIES FROM FILE iwave, FIRST SKIP MATRIX ELEMENTS etc
        IF (.NOT. ZDIAG) THEN
@@ -390,7 +390,7 @@ end module rotlev3_outp
   110 READ(iwave,end=900)
       READ(iwave,end=900) K2,maxleg,idvr,lincr
 !     SKIP BACK IF K2=0 AND WE ARE DOING AN F PARITY CALCULATION
-      IF (K2 .EQ. 0 .AND. KMIN .EQ. 0) THEN
+      IF (K2 == 0 .AND. KMIN == 0) THEN
           READ(iwave,END=900)
           READ(iwave,END=900) meval
           do 120 i=1,meval+1
@@ -416,7 +416,7 @@ end module rotlev3_outp
       READ(iwave)
       READ(iwave)
       READ(iwave)
-      IF (IBASS .LE. 0 .OR. IBASS >= IPT) THEN
+      IF (IBASS <= 0 .OR. IBASS >= IPT) THEN
           IBASS=IPT
           IVIB=NVIB
 !          write(6,*)'ci sono 300  ',mvib
@@ -432,7 +432,7 @@ end module rotlev3_outp
   160 continue
       IPT=1
       DO 200 N=1,IBASS
-  210 IF (IV(IPT) .LE. MVIB(IPT)) THEN
+  210 IF (IV(IPT) <= MVIB(IPT)) THEN
           EVIBR=EVIB(IV(IPT),IPT)
           JPT=IPT
       ELSE
@@ -440,7 +440,7 @@ end module rotlev3_outp
           GOTO 210
       ENDIF
       DO 220 J=IPT+1,NBLK
-      IF (IV(J) .GT. MVIB(J)) GOTO 220
+      IF (IV(J) > MVIB(J)) GOTO 220
       IF (EVIB(IV(J),J) >= EVIBR) GOTO 220
       EVIBR=EVIB(IV(J),J)
       JPT=J
@@ -458,10 +458,10 @@ end module rotlev3_outp
   230 continue
       WRITE(6,1000) NBASS,EMIN,EVIBR
  1000 FORMAT(/,I9,'FUNCTIONS SELECTED FROM E =',D20.10,' TO',D20.10)
-      else  !if ires.ne.0
+      else  !if ires/=0
          read(IRF2) nbass,neval,neval2,ipar,idia,jrot,kmin,nblk
          read(IRF2) mvib
-         if(ires .le. -1 .OR. ZTRAN)then
+         if(ires <= -1 .OR. ZTRAN)then
             read(IRF2) kbass
          else
             kbass=1
@@ -477,7 +477,7 @@ end module rotlev3_outp
   300 WRITE(6,1010)
  1010 FORMAT(//5X,' BASIS FUNCTIONS SELECTED')
 !      write(6,*)'ci sono !'
-      IF (KMIN .EQ. 0) THEN
+      IF (KMIN == 0) THEN
          KZ=0
       ELSE
          KZ=-1
@@ -486,7 +486,7 @@ end module rotlev3_outp
       LOFF=0
       LOFF0=0
       DO 310 j=1,NBLK
-      IF (J .GT. 1) THEN
+      IF (J > 1) THEN
          LENG=MVIB(J-1)*MVIB(J)
          LOFF=LOFF+LENG
          LOFF0=MAX(LOFF0,LENG)
@@ -494,7 +494,7 @@ end module rotlev3_outp
       KZ=KZ+1
       IPD=IPU
       IPU=IPD+MVIB(j)
-      if (mvib(j).eq.nvib) then
+      if (mvib(j)==nvib) then
       WRITE(6,1021) KZ,IPD+1,IPU,1.d2*dble(mvib(j))/dble(nvib)
       else
       WRITE(6,1020) KZ,IPD+1,IPU,1.d2*dble(mvib(j))/dble(nvib)
@@ -541,8 +541,8 @@ end module rotlev3_outp
     
       if (ztran .and. zpseg) open(unit=jscr,form='unformatted',recordtype='segmented')
       if (ztran) open(unit=jscr,form='unformatted')
-      IF (abs(IRES) .EQ. 2) GOTO 20
-      if (jrot.eq.1 .and. kmin.eq.0) then
+      IF (abs(IRES) == 2) GOTO 20
+      if (jrot==1 .and. kmin==0) then
 !     J=1f: treat as a special case
          call DSTORE1(eval,kvec2,ezero,2)
          goto 100
@@ -550,7 +550,7 @@ end module rotlev3_outp
 
 !     SET UP THE HAMILTONIAN MATRIX (NOT FOR RESTART RUNS)
 
-      IF (IRES .EQ. 0) then
+      IF (IRES == 0) then
          CALL SOLRT(MVIB,maxleg)
          WRITE(6,1050)
  1050    FORMAT(/5X,'HAMILTONIAN CONSTRUCTION COMPLETE')
@@ -579,16 +579,16 @@ end module rotlev3_outp
 !     DIAGONALISE THE HAMILTONIAN (TWICE IF REQUESTED)
 
       NOFFD=NBASS+1
-      IF (KMIN .EQ. 0) WRITE(6,1000) JROT,IBASS
+      IF (KMIN == 0) WRITE(6,1000) JROT,IBASS
  1000 FORMAT(5X,'J =',I3,' ROTATIONAL STATE,',I7,' BASIS FUNCTIONS',&
              /12X,'F PARITY, ANTI-SYMMETRIC |JK> - |J-K> FUNCTIONS IN BASIS')
       IF (KMIN >= 1) WRITE(6,1010) JROT,IBASS
  1010 FORMAT(5X,'J =',I3,' ROTATIONAL STATE,',I7,' BASIS FUNCTIONS',&
              /12X,'E PARITY, SYMMETRIC |JK> + |J-K> FUNCTIONS IN BASIS')
-      IF (IDIA .EQ. 2) THEN
-         IF (IPAR .EQ. 0) WRITE(6,1020)
+      IF (IDIA == 2) THEN
+         IF (IPAR == 0) WRITE(6,1020)
  1020    FORMAT(12X,'EVEN PARITY FUNCTIONS IN BASIS SET')
-         IF (IPAR .EQ. 1) WRITE(6,1030)
+         IF (IPAR == 1) WRITE(6,1030)
  1030    FORMAT(12X,'ODD PARITY FUNCTIONS IN BASIS SET')
       ENDIF
      
@@ -608,7 +608,7 @@ end module rotlev3_outp
           DEALLOCATE(bvec,cvec,dvec)
       ENDIF
 
-      IF (KMIN .LE. 1) goto 100
+      IF (KMIN <= 1) goto 100
 
 !     DIAGONALISE A SECOND TIME IF KMIN > 1
 
@@ -616,7 +616,7 @@ end module rotlev3_outp
       IBASS=NBASS-MVIB(1)
       NEVAL=MIN(NEVAL2,IBASS)
 
-      if (jrot.eq.1) then
+      if (jrot==1) then
 !     J=1f: treat as a special case
          call DSTORE1(eval,kvec2,ezero,2)
          goto 100
@@ -624,24 +624,24 @@ end module rotlev3_outp
 
       if (.not. zdcore) KEVAL=MIN(IBASS,NEVAL+4)
       if (zdcore)       keval=ibass
-      if (abs(ires).eq.2) allocate(eval(keval))
+      if (abs(ires)==2) allocate(eval(keval))
       NOFFD=IBASS+MVIB(1)*MVIB(2)+1
       JVEC=JVEC2
       IF (IRES >= 0)THEN
-         if (ires .eq. 2)then
+         if (ires == 2)then
            ezero=x0
            read(5,505,end=556) ezero
  556      continue
          endif
        WRITE(6,1000) JROT,IBASS
-       IF (IDIA .EQ. 2) THEN
-         IF (IPAR .EQ. 0) WRITE(6,1020)
-         IF (IPAR .EQ. 1) WRITE(6,1030)
+       IF (IDIA == 2) THEN
+         IF (IPAR == 0) WRITE(6,1020)
+         IF (IPAR == 1) WRITE(6,1030)
        ENDIF
 
 !     LOAD THE HAMILTONIAN MATRIX IF NECESSARY
 
-       IF (ztran .or. IRES.EQ.2 .or. zdcore) then     
+       IF (ztran .or. IRES==2 .or. zdcore) then     
           If (zdcore) then
              lwork=max(loff0,3*nbass)  
              allocate(vec(nbass,ibass),diag(lwork))
@@ -746,8 +746,8 @@ end module rotlev3_outp
       if (zquad2) n2max=1
       if (.not.zquad2) n2max=npnt2
       nrad=npnt1*npnt2
-      IF (KMIN .EQ. 0) K=1
-      IF (KMIN .NE. 0) K=0
+      IF (KMIN == 0) K=1
+      IF (KMIN /= 0) K=0
       MOFF=0
       IDPT=1
 !     START A NEW BAND OF THE HAMILTONIAN MATRIX
@@ -758,7 +758,7 @@ end module rotlev3_outp
       ibass2=idvr*nrad
 
 !     SKIP BACK IF KZ=0 AND WE ARE DOING AN F PARITY CALCULATION
-      IF (ABS(KZ) .LT. K) THEN
+      IF (ABS(KZ) < K) THEN
          READ(iwave)
          READ(iwave) meval
          do 105 i=1,meval+1
@@ -768,9 +768,9 @@ end module rotlev3_outp
       ENDIF
 
       maxlg2=maxleg+lincr
-      IF (MOD(maxlg2,JDIA) .NE. IPAR) maxlg2=maxlg2-1
+      IF (MOD(maxlg2,JDIA) /= IPAR) maxlg2=maxlg2-1
 
-      IF (MVIB(MOFF) .GT. 0) THEN
+      IF (MVIB(MOFF) > 0) THEN
 
          call getrow(pleg,(maxleg+1)*idvr,iwave)
          read(iwave) meval
@@ -793,8 +793,8 @@ end module rotlev3_outp
 
 !     COMPUTE OFF DIAGONAL ELEMENTS (NONE FOR FIRST TIME THROUGH)
 
-      IF (MOFF .EQ. 1) GOTO 250
-      IF (MN .EQ. 0) GOTO 250
+      IF (MOFF == 1) GOTO 250
+      IF (MN == 0) GOTO 250
 !     ZERO THE NEXT OFF-DIAGONAL BLOCK
       OFFDG = X0
       KKP1=K*(K-1)
@@ -812,7 +812,7 @@ end module rotlev3_outp
       CJLP = -SQRT(DBLE((LLP1-KKP1)*(JJP1-KKP1)))
 
 !     SPECIAL CASE: K1=0
-      IF (K .EQ. 1) CJLP = SQRT2 * CJLP
+      IF (K == 1) CJLP = SQRT2 * CJLP
       ii=ii+1
       j=j+1
       if (.not.zquad2) i=mod(ii-1,nblk1)+1
@@ -844,7 +844,7 @@ end module rotlev3_outp
 
 !     NEXT BLOCK: HAVE WE FINISHED?
   250 K=K+1
-      IF (K .GT. JROT) GOTO 400
+      IF (K > JROT) GOTO 400
 !     size the NEXT OFF-DIAGONAL BLOCK
       MN=MVIB(MOFF)*MVIB(MOFF+1)
 
@@ -885,7 +885,7 @@ end module rotlev3_outp
 
       JSTART=KZ
       JJ0=-JDIA
-      IF (MOD(JSTART,JDIA) .NE. IPAR) THEN
+      IF (MOD(JSTART,JDIA) /= IPAR) THEN
          JJ0=JJ0+1
          JSTART=JSTART+1
       ENDIF
@@ -950,7 +950,7 @@ end module rotlev3_outp
          IPT=1+nbass
          DO 10 J=2,NBLK
          LENG=MVIB(J)*MVIB(J-1)
-         IF (LENG .GT. 0) CALL GETROW(diag(IPT),LENG,ISCR)
+         IF (LENG > 0) CALL GETROW(diag(IPT),LENG,ISCR)
          IPT=IPT+LENG
    10    continue
          CALL GETROW(DIAG,NBASS,ISCR)
@@ -962,14 +962,14 @@ end module rotlev3_outp
 
          hamil = x0
 
-         if (itime.gt.1 .and. mvib(1)*mvib(2).gt.0) read(iscr)
+         if (itime>1 .and. mvib(1)*mvib(2)>0) read(iscr)
          ist2=0
          DO 20 J=itime+1,NBLK
          ist1=ist2
          ist2=ist2+mvib(j-1)
          LENG=MVIB(J)*MVIB(J-1)
 
-         IF (LENG .GT. 0) CALL GETROW(diag,LENG,ISCR)
+         IF (LENG > 0) CALL GETROW(diag,LENG,ISCR)
          ipt=0
          do 30 i1=ist1+1,ist1+mvib(j-1)
          do 40 i2=ist2+1,ist2+mvib(j)
@@ -1021,8 +1021,8 @@ end module rotlev3_outp
       DO 10 I=1,KEVAL
       EBIG=EMAX
       DO 20 J=1,IBASS
-      IF (DIAG(J) .GT. EBIG) GOTO 20
-      IF (DIAG(J) .LE. ESMALL) GOTO 20
+      IF (DIAG(J) > EBIG) GOTO 20
+      IF (DIAG(J) <= ESMALL) GOTO 20
       IND=J
       EBIG=DIAG(J)
    20 CONTINUE
@@ -1032,7 +1032,7 @@ end module rotlev3_outp
 
 !     SHIFT DIAGONALS TO ENSURE WE GET THE LOWEST EIGENVALULES
 
-      IF (ztran .or. K1 .LE. 1 .OR. IRES .EQ. 2) THEN
+      IF (ztran .or. K1 <= 1 .OR. IRES == 2) THEN
          ESHIFT=EBIG
          DO 30 I=1,IBASS
          ESHIFT=MAX(ESHIFT,DIAG(I))
@@ -1048,7 +1048,7 @@ end module rotlev3_outp
       CALL F02FJF(IBASS,NEVAL,KEVAL,NOITS,TOLER,VECVEC,MATVEC,F02FJZ,&
                   KEVAL,VEC,IBASS,EVAL,WORK,LWORK,diag,NOFFD,&
                   MVIB,K1,IFAIL)
-      IF (IFAIL .NE. 0) WRITE(6,900) IFAIL
+      IF (IFAIL /= 0) WRITE(6,900) IFAIL
   900 FORMAT(//5X,'F02FJF RETURNED IFAIL =',I3)
 
       WRITE(6,1000) NOITS
@@ -1091,9 +1091,9 @@ end module rotlev3_outp
          call DSYEVX('V','I','U',ibass,vec,ibass,0.d0,0.d0,1,neval,&
                      0.d0,nfound,eval,evec,ibass, WORK, 8*ibass, IWORK,&
                      IWORK2, IFAIL )
-         IF (IFAIL .NE. 0) WRITE(6,900) IFAIL
+         IF (IFAIL /= 0) WRITE(6,900) IFAIL
          write(6,*)' Found ',nfound,' evalues (out of ',neval,')'
-         IF (NEVAL.ne.nfound) stop
+         IF (NEVAL/=nfound) stop
          do i=1,neval
             do j=1,ibass
                vec(j,i)=evec(j,i)
@@ -1113,7 +1113,7 @@ end module rotlev3_outp
       WRITE(6,1020) EVAL
  1020 FORMAT(5D24.12)
       IF (ZPFUN) THEN
-         IF (K1 .EQ. 1) THEN
+         IF (K1 == 1) THEN
             OPEN(UNIT=ILEV,FORM='FORMATTED')
             REWIND ILEV
   200       READ(ILEV,*,END=210,ERR=210)
@@ -1123,7 +1123,7 @@ end module rotlev3_outp
 !           backspace ilev
          ENDIF
          IP=1-KMIN
-         IF (KMIN .GT. 1) IP=K1-1
+         IF (KMIN > 1) IP=K1-1
          WRITE(ILEV,1025) JROT,IP,IDIA,IPAR,0,NEVAL,IBASS
  1025    FORMAT(7I6)
          WRITE(ILEV,1026) EVAL
@@ -1132,7 +1132,7 @@ end module rotlev3_outp
       IF (ZVEC) THEN
 !        WRITE EIGENVALUES, EIGENVECTORS, ETC TO STREAM JVEC
          KZ=KMIN
-         IF (KMIN .GT. 1) KZ=2-K1
+         IF (KMIN > 1) KZ=2-K1
          if (zpseg==.true.) then 
             OPEN(UNIT=JVEC,FORM='UNFORMATTED',recordtype='segmented')
          else 
@@ -1152,7 +1152,7 @@ end module rotlev3_outp
 ! set end of k block
          mend=mend+mvib(k)
 ! write entire row, all of same k
-         if(mvib(k).gt.0) write(jvec) ((vec(j,i),j=mbeg,mend),i=1,neval)
+         if(mvib(k)>0) write(jvec) ((vec(j,i),j=mbeg,mend),i=1,neval)
 543      continue
 ! END OF GJH CODE.
 
@@ -1166,7 +1166,7 @@ end module rotlev3_outp
       WRITE(6,1022) EVALCM
  1022 FORMAT(1x,10f13.5/)
 
-      If (IP.eq.0) then
+      If (IP==0) then
       do i=1,neval
          write(62,1034)i,eval(i),evalcm(i)
       end do
@@ -1179,7 +1179,7 @@ end module rotlev3_outp
 1034 format(1I4,2f30.20)
 
       IF (ZPVEC) THEN
-          IF (THRESH .LE. X0) THEN
+          IF (THRESH <= X0) THEN
 !             PRINT COMPLETE EIGENVECTORS
               WRITE(6,1030)
  1030         FORMAT(//,'    EIGENVECTORS',/)
@@ -1197,11 +1197,11 @@ end module rotlev3_outp
               IPT=0
               DO 90 J=1,IBASS
               VV=ABS(VEC(J,I))
-              IF (VV .GT. THRESH) THEN
+              IF (VV > THRESH) THEN
                   IPT=IPT+1
                   IBIG(IPT)=J
               ENDIF
-              IF (IPT .LE. 0 .AND. VV .GT. VBIG) THEN
+              IF (IPT <= 0 .AND. VV > VBIG) THEN
                   VBIG=VV
                   IBIG(1)=J
               ENDIF
@@ -1251,18 +1251,18 @@ end module rotlev3_outp
       READ(JVEC) MVIB
 
 !     CHECK FOR COMPATABILITY
-      IF (JROT1 .NE. ABS(JROT0)) THEN
+      IF (JROT1 /= ABS(JROT0)) THEN
           WRITE(6,900) JROT1,ABS(JROT0)
   900     FORMAT(/5X,'J LEVELS MISMATCHED',&
                  /5X,'JROT1 =',I3,'  JROT0 =',I3)
           STOP
       ENDIF
-      IF (KMIN1 .GT. KMIN0) THEN
+      IF (KMIN1 > KMIN0) THEN
          WRITE(6,910)
   910    FORMAT(/5X,'KMIN1 AND KMIN0 INCOMPATIBLE')
          STOP
       ENDIF
-      IF (IPAR .NE. IPAR1) THEN
+      IF (IPAR /= IPAR1) THEN
          WRITE(6,920) IPAR,IPAR1
   920    FORMAT(/5X,'PARITIES MISMATCHED'/5X,'IPAR= ',I2,'  IPAR1= ',I2)
          STOP
@@ -1271,7 +1271,7 @@ end module rotlev3_outp
  1010 FORMAT(/5X,'J =',I3,' KMIN =',I2,'  PARITY =',I2,' NVAL =',I3/)
 !     Read basis set parameters from scratch file JSCR
       rewind jscr
-      IF (itra .GT. 1) THEN
+      IF (itra > 1) THEN
           READ(jscr)
           READ(jscr)
       ENDIF
@@ -1281,7 +1281,7 @@ end module rotlev3_outp
       READ(jscr)
       nend=nend+nkbas(k)
    20 CONTINUE
-      IF (NEND .GT. KBASS) THEN
+      IF (NEND > KBASS) THEN
          WRITE(6,930) NEND,KBASS
   930    FORMAT(/5X,'ERROR IN SIZE OF TOTAL BASIS',&
                 /5X,'NEND =',I7,'  KBASS =',I7/)
@@ -1313,7 +1313,7 @@ end module rotlev3_outp
 
 
 ! begining of GJH's code
-      IF (itra .gt. 1) THEN
+      IF (itra > 1) THEN
           READ(jscr)
           READ(jscr)
       ENDIF
@@ -1324,7 +1324,7 @@ end module rotlev3_outp
 ! set dmatrix elements to zero
          d=0.0d0
 
-         IF (MVIB(K) .GT. 0) THEN
+         IF (MVIB(K) > 0) THEN
 ! read in B matrix 
             read(jscr)
             CALL GETROW(B,MBASS*MVIB(K),jscr)
@@ -1382,14 +1382,14 @@ end module rotlev3_outp
       kmin1=0
 !     Read basis set parameters from scratch file JSCR
       rewind jscr
-      IF (itra .GT. 1) THEN
+      IF (itra > 1) THEN
           READ(jscr)
           READ(jscr)
       ENDIF
       read(jscr) lmin,lbasis,nkbas
       READ(jscr)
       nend=nkbas
-      IF (NEND .GT. KBASS) THEN
+      IF (NEND > KBASS) THEN
          WRITE(6,930) NEND,KBASS
   930    FORMAT(/5X,'ERROR IN SIZE OF TOTAL BASIS',&
                 /5X,'NEND =',I7,'  KBASS =',I7/)
@@ -1413,7 +1413,7 @@ end module rotlev3_outp
       if (ztran) CALL OUTROW(b,NPNT1,kvec1)
       CALL getROW(b,NPNT2,iwave)
       if (ztran) CALL OUTROW(b,NPNT2,kvec1)
-      IF (itra .GT. 1) THEN
+      IF (itra > 1) THEN
 
           READ(iwave)
           READ(iwave)
@@ -1443,7 +1443,7 @@ end module rotlev3_outp
       WRITE(6,1020) EVAL
  1020 FORMAT(5D24.12)
       IF (ZPFUN) THEN
-         IF (itra .EQ. 1) THEN
+         IF (itra == 1) THEN
             OPEN(UNIT=ILEV,FORM='FORMATTED')
             REWIND ILEV
   200       READ(ILEV,*,END=210,ERR=210)
@@ -1543,8 +1543,8 @@ end module rotlev3_outp
       IOFF=NOFFD
       I2=1
       DO 20 K=K1,NBLK
-      IF (MVIB(K) .LT. 1) GOTO 20
-      IF (K .GT. K1) then 
+      IF (MVIB(K) < 1) GOTO 20
+      IF (K > K1) then 
       if (MVIB(K-1) >= 1) THEN
 
          call dgemv('N',MVIB(K), MVIB(K-1), x1, HAMIL(IOFF),&
@@ -1555,7 +1555,7 @@ end module rotlev3_outp
       ENDIF
       I1=I2
       I2=I2+MVIB(K)
-      IF (K .LT. NBLK) then
+      IF (K < NBLK) then
       if (MVIB(K+1) >= 1) then
 
          call dgemv('T', mvib(k+1), mvib(k), x1, hamil(ioff),&
