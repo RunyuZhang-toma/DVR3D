@@ -299,8 +299,8 @@ if (ee1(ie1).lt.emi) goto 2
 if (ee1(ie1).gt.ema) goto 1
 if (ss(ie1).lt.smi) goto 2
 w= ee - ee1(ie1)
-if (abs(w).ge.wsmi .and. abs(w).le.wsma) then
-if (w.ge.0.0d0) then
+if (abs(w)>=wsmi .and. abs(w).le.wsma) then
+if (w>=0.0d0) then
 write(item) ipar1,j2,kmin2,ie2,j1,kmin1,ie1, &
 ee2(ie2),ee1(ie1),w,ss(ie1),ibase2,ibase1
 else
@@ -946,12 +946,12 @@ write(ilist,204) (iqnum(ir,ic),ic=1,7),(a(ir,ic),ic=1,6),aa
 
 !if (zlist) &
 !write(ilist,204) (iqnum(ir,ic),ic=1,7),(a(ir,ic),ic=1,6),aa
-if(a(ir,6).ge.prthr) then
+if(a(ir,6)>=prthr) then
 write(6,204) (iqnum(ir,ic),ic=1,7),(a(ir,ic),ic=1,6),aa
 i20= i20 + 1
 endif
 if(zplot.and..not.zprof) then
-if( a(ir,6) .ge.tinte) then
+if( a(ir,6) >=tinte) then
 if ( zfreq ) then
 xval= a(ir,3)
 else

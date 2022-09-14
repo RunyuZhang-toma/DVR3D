@@ -450,10 +450,10 @@ subroutine dipole3b
 888      format(/,5x,'diatomic parameter idia  =',i4)
 	endif
 !cccccccccccccccccccc
-	if (jrot1.eq.0.or.jrot2.eq.0) then
+	if (jrot1==0.or.jrot2==0) then
 	   zembed= zemb1
-	   if (jrot1.eq.0) zembed= zemb2
-	   if (jrot1.eq.0.and.jrot2.eq.0) then
+	   if (jrot1==0) zembed= zemb2
+	   if (jrot1==0.and.jrot2==0) then
 		 write(6,980)
 980        format(//,5x,'j = 0 -> 0 not allowed: stop')
 		 stop
@@ -472,14 +472,14 @@ subroutine dipole3b
 !ccccccccccccccccc
 	if (idia .gt. -2) then
 	   if (zembed) then
-		if (ipar1.ne.ipar2 .and. idia.eq.2) then
+		if (ipar1.ne.ipar2 .and. idia==2) then
 		   write(6,997) ipar1,ipar2
 997          format(//,5x,'** fatal ** parity mismatch, spin forbidden',&
 			 /,5x,'ipar1=',i2,'  ipar2=',i2,/)
 		   stop
 		endif
 	   else
-		if (ipar1.eq.ipar2 .and. idia.eq.2) then
+		if (ipar1==ipar2 .and. idia==2) then
 		   write(6,997) ipar1,ipar2
 		   stop
 		endif
@@ -488,15 +488,15 @@ subroutine dipole3b
 	else
 	   zbisc=.true.
 	   zembed=.true.
-	   if (jrot1 .eq. jrot2) then
+	   if (jrot1 == jrot2) then
 		if (ipar1.ne.ipar2) then
 		   write(6,997) ipar1,ipar2
 		   stop
 		endif
 	   else
-		if (ipar1.eq.ipar2) then
-		 if((zrme2 .eq. .false.) .and.(zrme3 .eq. .false.) )  write(6,997) ipar1,ipar2
-		 if((zrme2 .eq. .false.) .and.(zrme3 .eq. .false.) )  stop
+		if (ipar1==ipar2) then
+		 if((zrme2 == .false.) .and.(zrme3 == .false.) )  write(6,997) ipar1,ipar2
+		 if((zrme2 == .false.) .and.(zrme3 == .false.) )  stop
 		endif
 	   endif
 	endif
@@ -671,9 +671,9 @@ subroutine dipole3b
 	   endif
 	   mblock=1
 	else
-	   if (jrot1.eq.0) kmin1= 1
+	   if (jrot1==0) kmin1= 1
 	   jk1= jrot1 + kmin1
-	   if (jrot2.eq.0) kmin2= 1
+	   if (jrot2==0) kmin2= 1
 	   jk2= jrot2 + kmin2
 	   mblock=jk1+jk2+min(jk1,jk2)-2
 	endif
@@ -695,7 +695,7 @@ subroutine dipole3b
 	   mbass1=(nrade+nrado)*jt
 !
 	   if (2*jt .ne. jk1) then
-		 if (ipar1 .eq. 0) mbass1=mbass1+nrade
+		 if (ipar1 == 0) mbass1=mbass1+nrade
 		 if (ipar1 .ne. 0) mbass1=mbass1+nrado
 	   endif
 !
@@ -705,7 +705,7 @@ subroutine dipole3b
 	   mbass2=(nrade+nrado)*jt
 !
 	   if (2*jt .ne. jk2) then
-		 if (ipar2 .eq. 0) mbass2=mbass2+nrade
+		 if (ipar2 == 0) mbass2=mbass2+nrade
 		 if (ipar2 .ne. 0) mbass2=mbass2+nrado
 	   endif
 	   mbass2=mbass2*lmax2
@@ -752,9 +752,9 @@ read(5,505,end=555) ezero
 !
 	itot= jrot1 + jrot2 + 1 + kmin1 + kmin2
 	if (mod(itot,2) .ne. 0 .or. abs(jrot1 - jrot2) .gt. 1 ) then
-	if( (zrme2 .eq. .false.) .and.(zrme3 .eq. .false.) ) write(6,9999)
+	if( (zrme2 == .false.) .and.(zrme3 == .false.) ) write(6,9999)
 9999     format(/,/,5x,'selection rules violated',/)
-	if( (zrme2 .eq. .false.) .and.(zrme3 .eq. .false.) )       stop
+	if( (zrme2 == .false.) .and.(zrme3 == .false.) )       stop
 	endif
 !
 !     reset number of vib-rot functions to be considered
@@ -966,7 +966,7 @@ allocate( tx3_3(neval1,neval2) )
 !     call to setfac
 	call setfac(binom,nbin)
 
-	if (ires.eq.0) then
+	if (ires==0) then
 !     zero tz and tx.....
 	   tz = x0
 	   tx = x0
@@ -988,7 +988,7 @@ allocate( tx3_3(neval1,neval2) )
 	  read(ibra)
 	  read(ibra)
 	  read(ibra)
-	  if (idia .eq. -2) then
+	  if (idia == -2) then
 		 read(ibra)
 		 read(ibra)
 	  endif
@@ -1002,7 +1002,7 @@ allocate( tx3_3(neval1,neval2) )
 	  read(iket)
 	  read(iket)
 	  read(iket)
-	  if (idia .eq. -2) then
+	  if (idia == -2) then
 		 read(iket)
 		 read(iket)
 	  endif
@@ -1064,11 +1064,11 @@ allocate( tx3_3(neval1,neval2) )
 !cccccccccccccccccc!
 
 !-----Djedjiga phase correction for Radau coordinate system
-	if(idia.eq.-2) then
+	if(idia==-2) then
 	ipar11=ipar1
 	ipar22=ipar2
-	if(kmin1.eq.0) ipar11=ipar1+1
-	if(kmin2.eq.0) ipar22=ipar2+1
+	if(kmin1==0) ipar11=ipar1+1
+	if(kmin2==0) ipar22=ipar2+1
 	endif
 !------------------
 
@@ -1084,7 +1084,7 @@ allocate( tx3_3(neval1,neval2) )
 	 write(*,*) 'k1, k2', k1, k2
 	 write(*,*) 'nbass1(k1) =', nbass1(k1)
 	 write(*,*) 'nbass1(k2) =', nbass2(k2)
-	 if (nbass1(k1) .eq. 0 .or. nbass2(k2) .eq. 0) then
+	 if (nbass1(k1) == 0 .or. nbass2(k2) == 0) then
 	   write(6,2020) iblock,k1-kmin1,k2-kmin2
  2020   format(/5x,'Block',i4,' k1 =',i3,' to k2 =',i3,' skipped')
 	else
@@ -1096,13 +1096,13 @@ allocate( tx3_3(neval1,neval2) )
 		 k2,kbeg2,jk2,1-ip,ibase2,xd,kk,nu,ipar2)
 	   xfac= x1
 
-	   if (idia.eq.-2 .and. mod((kk+ipar11)/2+(kk+ipar22)/2,2).ne.0)&
+	   if (idia==-2 .and. mod((kk+ipar11)/2+(kk+ipar22)/2,2).ne.0)&
 		 xfac=-xfac
 	   call trans(tz,dipol,binom,dc1,dc2,k1,k2,xfac,nu,1,1)
 ! NEW
-if(zrme1 .eq. .true. ) call trans(tz1_0,RME,binom,dc1,dc2,k1,k2,xfac,nu,1,1)
-if(zrme2 .eq. .true. ) call trans(tz2_0,RME,binom,dc1,dc2,k1,k2,xfac,nu,1,2)
-if(zrme3 .eq. .true. ) call trans(tz3_0,RME,binom,dc1,dc2,k1,k2,xfac,nu,1,3)
+if(zrme1 == .true. ) call trans(tz1_0,RME,binom,dc1,dc2,k1,k2,xfac,nu,1,1)
+if(zrme2 == .true. ) call trans(tz2_0,RME,binom,dc1,dc2,k1,k2,xfac,nu,1,2)
+if(zrme3 == .true. ) call trans(tz3_0,RME,binom,dc1,dc2,k1,k2,xfac,nu,1,3)
 	   call wrscr(tz,tx,neval1*neval2,iscr,iblock)
 	   write(6,2000) iblock,k1-kmin1,k2-kmin2
  2000    format(/5x,'Block',i4,' k1 =',i3,' to k2 =',i3,' completed')
@@ -1134,7 +1134,7 @@ if(zrme3 .eq. .true. ) call trans(tz3_0,RME,binom,dc1,dc2,k1,k2,xfac,nu,1,3)
 	ip=ipar1
 	do 11 k1= 1,jk1
 	kk1= k1 - kmin1
-	if (nbass1(k1).eq.0) goto 110
+	if (nbass1(k1)==0) goto 110
 
 	if (jblock-iblock.gt.-2) call dsrd(dc1,dstemp,iket,mbass1,&
 		nbass1(k1),neval1,k1,kbeg1,jk1,ip,ibase1,xd,kk1,nu,ipar1)
@@ -1151,11 +1151,11 @@ if(zrme3 .eq. .true. ) call trans(tz3_0,RME,binom,dc1,dc2,k1,k2,xfac,nu,1,3)
 ! The code cycles through these and avoids doing rewinds of the bra file inside the dsrd subroutine, which proves to be prohibitive for large files.
 !
 !cccccccccccccccccccccccccccccccc
-if (k1.eq.1) then
+if (k1==1) then
 !    write(*,*) "Start modification"
 
-	if (kmin1.eq.0) then
-	  if(kmin2.eq.kmin1) then
+	if (kmin1==0) then
+	  if(kmin2==kmin1) then
 	  call dsrd(dmiddle,dstemp,ibra,mbass2,nbass2(1),neval2,&
 	  1,kbeg2,jk2,1-ip,ibase2,xd,1,1,ipar2)
 if(jk2 .ne. 1) call dsrd(dupper,dstemp,ibra,mbass2,nbass2(2),neval2,&
@@ -1169,7 +1169,7 @@ if(jk2 .ne. 1) call dsrd(dupper,dstemp,ibra,mbass2,nbass2(2),neval2,&
 	  3,kbeg2,jk2,ip,ibase2,xd,2,1,ipar2)
 	  endif
 	else
-	  if(kmin2.eq.kmin1) then
+	  if(kmin2==kmin1) then
 
 	  call dsrd(dmiddle,dstemp,ibra,mbass2,nbass2(1),neval2,&
 	  1,kbeg2,jk2,1-ip,ibase2,xd,0,1,ipar2)
@@ -1195,21 +1195,21 @@ if(jk2 .le. 1) go to 108
 	 jblock=jblock+1
 	 if (jblock.gt.iblock) then
 	  iblock=iblock+1
-	  if (nbass2(k2).eq.0) then
+	  if (nbass2(k2)==0) then
 	   write(6,2020) iblock,k1-kmin1,k2-kmin2
 	  else
 	   xfac= -x1/sqrt(x2)
-	   if (kk1.eq.0) xfac= -x1
-	   if (idia.eq.-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2).ne.0)&
+	   if (kk1==0) xfac= -x1
+	   if (idia==-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2).ne.0)&
 		 xfac=-xfac
 	   if (.not. zembed .and. idia .lt. 0) xfac=-xfac
 	  call dsrd(dc2,dstemp,ibra,mbass2,nbass2(k2),neval2,&
 			 k2,kbeg2,jk2,ip,ibase2,xd,kk2,nu,ipar2)
 	   call trans(tx,dipol,binom,dc1,dupper,k1,k2,xfac,nu,ip,1)
 
-if(zrme1 .eq. .true. ) call trans(tx1_p1,RME,binom,dc1,dupper,k1,k2,xfac,nu,ip,1)
-if(zrme2 .eq. .true. ) call trans(tx2_p1,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,2)
-if(zrme3 .eq. .true. ) call trans(tx3_p1,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,3)
+if(zrme1 == .true. ) call trans(tx1_p1,RME,binom,dc1,dupper,k1,k2,xfac,nu,ip,1)
+if(zrme2 == .true. ) call trans(tx2_p1,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,2)
+if(zrme3 == .true. ) call trans(tx3_p1,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,3)
 	   call wrscr(tz,tx,neval1*neval2,iscr,iblock)
 	   write(6,2000) iblock,k1-kmin1,k2-kmin2
 	   if (iblock .ge. kblock) goto 108
@@ -1228,21 +1228,21 @@ if(zrme3 .eq. .true. ) call trans(tx3_p1,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,3)
 	 jblock=jblock+1
 	 if (jblock.gt.iblock) then
 	  iblock=iblock+1
-	  if (nbass2(k2).eq.0) then
+	  if (nbass2(k2)==0) then
 	   write(6,2020) iblock,k1-kmin1,k2-kmin2
 	  else
 	   xfac= x1/sqrt(x2)
-	   if (kk2.eq.0) xfac= x1
-	   if (idia.eq.-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2).ne.0)&
+	   if (kk2==0) xfac= x1
+	   if (idia==-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2).ne.0)&
 		 xfac=-xfac
 	   if (.not. zembed .and. idia .lt. 0) xfac=-xfac
 	   call dsrd(dc2,dstemp,ibra,mbass2,nbass2(k2),neval2,&
 			 k2,kbeg2,jk2,ip,ibase2,xd,kk2,nu,ipar2)
 	   call trans(tx,dipol,binom,dc1,dlower,k1,k2,xfac,nu,ip,1)
 
-if(zrme1 .eq. .true. ) call trans(tx1_m1,RME,binom,dc1,dlower,k1,k2,xfac,nu,ip,1)
-if(zrme2 .eq. .true. ) call trans(tx2_m1,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,2)
-if(zrme3 .eq. .true. ) call trans(tx3_m1,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,3)
+if(zrme1 == .true. ) call trans(tx1_m1,RME,binom,dc1,dlower,k1,k2,xfac,nu,ip,1)
+if(zrme2 == .true. ) call trans(tx2_m1,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,2)
+if(zrme3 == .true. ) call trans(tx3_m1,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,3)
 	   call wrscr(tz,tx,neval1*neval2,iscr,iblock)
 	   write(6,2000) iblock,k1-kmin1,k2-kmin2
 	   if (iblock.ge.kblock .and. k1.lt.jk1) goto 50
@@ -1253,13 +1253,13 @@ if(zrme3 .eq. .true. ) call trans(tx3_m1,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,3)
 
 ! HERE WE COMPUTE QUADRUPOLE MATRIX ELEMENTS IF ZMRE2 .TRUE.
 50 continue 
-if ((zrme2 .eq. .true.) .or. (zrme3 .eq. .true.)) then
+if ((zrme2 == .true.) .or. (zrme3 == .true.)) then
 
 nu = 2
 kk2 = abs(kk1 + 2)
 
 
-if((kmin1 .eq. 0) .and. (kmin2 .eq. 0)) then
+if((kmin1 == 0) .and. (kmin2 == 0)) then
 k2= abs(kk2)
 else
 k2= abs(kk2) + kmin2
@@ -1273,19 +1273,19 @@ if (k2.le.jk2) then
 jblock=jblock+1
 	if (jblock.gt.iblock) then
 	iblock=iblock+1
-	  if (nbass2(k2).eq.0) then
+	  if (nbass2(k2)==0) then
 	  write(6,2020) iblock,k1-kmin1,k2-kmin2
 	  else
 	  xfac= -x1/sqrt(x2)
-	  if (kk1.eq.0) xfac= -x1
-	  if (idia.eq.-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2).ne.0)&
+	  if (kk1==0) xfac= -x1
+	  if (idia==-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2).ne.0)&
 	  xfac=-xfac
 
 	  if (.not. zembed .and. idia .lt. 0) xfac=-xfac
 	  call dsrd(dc2,dstemp,ibra,mbass2,nbass2(k2),neval2,&
 	  k2,kbeg2,jk2,ip,ibase2,xd,kk2,1,ipar2)
-if(zrme2 .eq. .true. ) call trans(tx2_p2,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,2)
-if(zrme3 .eq. .true. ) call trans(tx3_p2,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,3)
+if(zrme2 == .true. ) call trans(tx2_p2,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,2)
+if(zrme3 == .true. ) call trans(tx3_p2,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,3)
 
 	  if (iblock .ge. kblock) goto 96
 	  endif
@@ -1302,7 +1302,7 @@ nu= -2
 kk2 = abs(kk1 - 2)
 
 
-if((kmin1 .eq. 0) .and. (kmin2 .eq. 0)) then
+if((kmin1 == 0) .and. (kmin2 == 0)) then
 k2= abs(kk2)
 else
 k2= abs(kk2) + kmin2
@@ -1310,8 +1310,8 @@ end if
 
 
 
-if(kk1 .eq. 0)  go to 97
-if((k2 .eq. 0) .and. (kmin2 .eq. 0)) go to 97
+if(kk1 == 0)  go to 97
+if((k2 == 0) .and. (kmin2 == 0)) go to 97
 if (k2 .gt. jk2) go to 97
 
 if (k2 .ge. 1) then 
@@ -1319,17 +1319,17 @@ jblock=jblock+1
 	if (jblock.gt.iblock) then
 	iblock=iblock+1
 
-	  if (nbass2(k2).eq.0) then
+	  if (nbass2(k2)==0) then
 	  else
 	  xfac= 1/sqrt(x2)
-	  if (kk2.eq.0) xfac= x1
-	  if (idia.eq.-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2).ne.0)&
+	  if (kk2==0) xfac= x1
+	  if (idia==-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2).ne.0)&
 	  xfac=-xfac
 	  if (.not. zembed .and. idia .lt. 0) xfac=-xfac
 	  call dsrd(dc2,dstemp,ibra,mbass2,nbass2(k2),neval2,&
 	  k2,kbeg2,jk2,ip,ibase2,xd,kk2,1,ipar2)
-	  if(zrme2 .eq. .true. ) call trans(tx2_m2,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,2)
-	  if(zrme3 .eq. .true. ) call trans(tx3_m2,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,3)
+	  if(zrme2 == .true. ) call trans(tx2_m2,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,2)
+	  if(zrme3 == .true. ) call trans(tx3_m2,RME,binom,dc1,dc2,k1,k2,xfac,nu,ip,3)
 
 	  endif
 	endif
@@ -1345,7 +1345,7 @@ end if
 
 
 
-if( zrme3 .eq. .true. ) then 
+if( zrme3 == .true. ) then 
 
 nu=3
 
@@ -1365,12 +1365,12 @@ if (k2.le.jk2) then
 jblock=jblock+1
 if (jblock.gt.iblock) then
 iblock=iblock+1
-if (nbass2(k2).eq.0) then
+if (nbass2(k2)==0) then
 	  write(6,2020) iblock,k1-kmin1,k2-kmin2
 else
 xfac= -x1/sqrt(x2)
-if (kk1.eq.0) xfac= -x1
-if (idia.eq.-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2).ne.0)&
+if (kk1==0) xfac= -x1
+if (idia==-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2).ne.0)&
 xfac=-xfac
 
 if (.not. zembed .and. idia .lt. 0) xfac=-xfac
@@ -1405,11 +1405,11 @@ if (jblock.gt.iblock) then
 iblock=iblock+1
 
 
-if (nbass2(k2).eq.0) then
+if (nbass2(k2)==0) then
 else
 xfac= 1/sqrt(x2)
-if (kk2.eq.0) xfac= x1
-if (idia.eq.-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2).ne.0)&
+if (kk2==0) xfac= x1
+if (idia==-2 .and. mod((kk1+ipar11)/2+(kk2+ipar22)/2,2).ne.0)&
 xfac=-xfac
 if (.not. zembed .and. idia .lt. 0) xfac=-xfac
 call dsrd(dc2,dstemp,ibra,mbass2,nbass2(k2),neval2,&
@@ -1433,7 +1433,7 @@ end if
 dlower = dmiddle
 dmiddle = dupper
 if (kbeg2.ne.jk2) then
-	if (kmin1.eq.kmin2) then
+	if (kmin1==kmin2) then
 	kk2 = kbeg2+(1 - INT((kmin1 + kmin2)/2))
 	else
 	kk2 = kbeg2+kmin1
@@ -1459,7 +1459,7 @@ endif
 	 write(*,*) 'checkpoint 8 : in dmain'
 	nu= abs(kmin2-kmin1)
 	nrad=nrado
-	if (nu .eq. 1) nrad=nrade
+	if (nu == 1) nrad=nrade
 
 !     call to lagpt
 	write(6,602)
@@ -1477,16 +1477,16 @@ endif
 	call dsrd(dc2,dstemp,ibra,mbass2,nbass2(1),neval2,&
 			1,kbeg2,jk2,ipar2,ibase2,xd,k2,nu,ipar2)
 
-	if (nu.eq.0) then
+	if (nu==0) then
 	   xfac= x1
-	else if (nu.eq.1) then
+	else if (nu==1) then
 	   xfac= -x1/sqrt(x2)
-	   if (k1.eq.0.or.k2.eq.0) xfac= -x1
-	else if (nu.eq.-1) then
+	   if (k1==0.or.k2==0) xfac= -x1
+	else if (nu==-1) then
 	   xfac= x1/sqrt(x2)
-	   if (k1.eq.0.or.k2.eq.0) xfac= x1
+	   if (k1==0.or.k2==0) xfac= x1
 	endif
-	if (idia.eq.-2 .and. mod((k1+ipar1)/2+(k2+ipar2)/2,2).ne.0)&
+	if (idia==-2 .and. mod((k1+ipar1)/2+(k2+ipar2)/2,2).ne.0)&
 		 xfac=-xfac
 	call trans(tx,dipol,binom,dc1,dc2,k1,k2,xfac,nu,ipar1,1)
 
@@ -1499,7 +1499,7 @@ endif
 	call timer
 
 
-if(zrme1 .eq. .true. ) then
+if(zrme1 == .true. ) then
 
 tx1_p1 =   tx1_p1*(sqrt(dble(2.0d0*j2 + 1.0d0)))
 tx1_m1 =   tx1_m1*(sqrt(dble(2.0d0*j2 + 1.0d0)))
@@ -1516,7 +1516,7 @@ else
 continue
 end if
 
-if(zrme2 .eq. .true. ) then
+if(zrme2 == .true. ) then
 
 ! ZERO COMPONENT
 tz2_0 = tz2_0*(sqrt(dble(2*j2 + 1)))
@@ -1544,7 +1544,7 @@ else
 continue
 end if
 
-if(zrme3 .eq. .true. ) then
+if(zrme3 == .true. ) then
 
 ! ZERO COMPONENT
 tz3_0 = tz3_0*(sqrt(dble(2*j2 + 1)))
@@ -1685,7 +1685,7 @@ call spect(tz,tx,e1,e2,sint,xe2)
 	endif
    20 continue
 !     calculate dipole at (r1,r2,cos\theta)
-	if (idia .eq. -2) then
+	if (idia == -2) then
 	   iadd=1-abs(nu)
 	else
 	   i0=npnt1
@@ -1693,7 +1693,7 @@ call spect(tz,tx,e1,e2,sint,xe2)
 	jdia = max(1, idia)
 	ii=0
 	do 30 i2=1,npnt2
-	if (idia .eq. -2) then
+	if (idia == -2) then
 	   rr2=r1(i2)
 	   i0=i2-iadd
 	else
@@ -1703,8 +1703,8 @@ call spect(tz,tx,e1,e2,sint,xe2)
 	do 50 j=1,ipot
 	ii=ii+1
 	call dipd(d0(ii),RME(ii),r1(i1),rr2,xd(j),nu)
-	if (jdia.eq.2) d0(ii)=x2*d0(ii)
-	if (jdia.eq.2) RME(ii)=x2*RME(ii)
+	if (jdia==2) d0(ii)=x2*d0(ii)
+	if (jdia==2) RME(ii)=x2*RME(ii)
 	d0(ii)=wtd(j)*d0(ii)
 	RME(ii)=wtd(j)*RME(ii)
    50 continue
@@ -1810,28 +1810,28 @@ call spect(tz,tx,e1,e2,sint,xe2)
 	nn2= nn/2
 	csa= x0
 	beta= x1
-	if (alf.eq.1) beta = beta/x6
+	if (alf==1) beta = beta/x6
 	cc= beta*x2**(alf+bta+x1)
 	tsa= cc/x2
 	do 10 i=2,nn
 	cc= cc*c(i)
    10 continue
 	do 20 i=1,nn2
-	if (i .eq. 1) then
+	if (i == 1) then
 !         largest zero
 	an= alf/fn
 	bn= bta/fn
 	r1= (x1 + alf)*(2.78d0/(x4 + fn*fn) +0.768*an/fn)
 	r2= x1 + 1.48d0*an + 0.96d0*bn + 0.452*an*an + 0.83d0*an*bn
 	xt= x1 - r1/r2
-	else if (i .eq. 2) then
+	else if (i == 2) then
 !         second zero
 	r1= (4.1d0 + alf)/((x1 + alf)*(x1 + 0.156*alf))
 	r2= x1 + 0.06d0*(fn - x8)*(x1 + 0.12d0*alf)/fn
 	r3= x1 + 0.012*bta*(x1 + abs(alf)/x4)/fn
 	ratio= r1*r2*r3
 	xt= xt - ratio*(x1 - xt)
-	else if (i .eq. 3) then
+	else if (i == 3) then
 !         third zero
 	r1= (1.67d0 + 0.28d0*alf)/(x1 + 0.37d0*alf)
 	r2= x1 + 0.22d0*(fn - x8)/fn
@@ -1918,10 +1918,10 @@ call spect(tz,tx,e1,e2,sint,xe2)
 	x2 = 2.0d0
 
 	nang=nbass/nrade
-	if (ipar.eq.1 .and. zbisc) nang=nbass/nrado
+	if (ipar==1 .and. zbisc) nang=nbass/nrado
 	nrad=nrado
 	jdia=max(1,idia)
-	if (abs(nu).eq.1 .and. ipar.eq.0) nrad=nrade
+	if (abs(nu)==1 .and. ipar==0) nrad=nrade
 
 	if (jk .gt. 1) then
 	   kz=kk
@@ -1940,7 +1940,7 @@ call spect(tz,tx,e1,e2,sint,xe2)
 	   endif
 
 !        for nu=0 drop symmetric grid points
-	   if (nu.eq.0 .and. zbisc .and. ipar.eq.0) then
+	   if (nu==0 .and. zbisc .and. ipar==0) then
 
 		read(ivec)(dum,i=1,nbass*(ibase-1)),&
 			((d(i,j),j=1,nbass),i=1,ne)
@@ -1997,7 +1997,7 @@ call spect(tz,tx,e1,e2,sint,xe2)
 	allocate(plegd(ipot,0:(nang*jdia)-1))
 	call asleg(plegd,d,(nang*jdia)-1,xd,ipot,kz)
 
-	if (idia.eq.2) then
+	if (idia==2) then
 	  if(zembed) then
 	   !r2 case
 		 jfirst = mod(kk+ipar1,2) !ipar1 used as in r2 case parity of basis
@@ -2039,7 +2039,7 @@ call spect(tz,tx,e1,e2,sint,xe2)
 	   do 70 i=1,nbass
 	   xnorm=xnorm+d(1,i)**2
    70    continue
-		if (idia.eq.2) xnorm = x2 * xnorm
+		if (idia==2) xnorm = x2 * xnorm
 		write(6,*) ' Vector 1 with k =',kk,ipar,ivec,&
 			 ' contribution to  normalisation is',xnorm
 	endif
@@ -2073,12 +2073,12 @@ call spect(tz,tx,e1,e2,sint,xe2)
 	jdia=max(idia,1)
 	jj0=-jdia
 	if (zembed) then
-	   if (idia .eq. 2 .and. mod(jstart,2) .ne. ipar1) then !r2 case
+	   if (idia == 2 .and. mod(jstart,2) .ne. ipar1) then !r2 case
 		 jj0=jj0+1
 		 jstart=jstart+1
 	   endif
 	else
-	   if (idia .eq. 2 .and. mod(jstart,2) .ne. jay_ipar) then !r1 case
+	   if (idia == 2 .and. mod(jstart,2) .ne. jay_ipar) then !r1 case
 		jj0=jj0+1
 		jstart=jstart+1
 	   endif
@@ -2089,7 +2089,7 @@ call spect(tz,tx,e1,e2,sint,xe2)
 5     continue
 	do 10 l=1,mvib
 !     first read in a new vector
-	if (nu.eq.0 .and. idia.eq.-2 .and. ipar.eq.0) then
+	if (nu==0 .and. idia==-2 .and. ipar==0) then
 	   call getrow(temp,ibass,ivec)
 	   ipt=0
 	   jpt=0
@@ -2185,19 +2185,19 @@ endif
 
 
 
-if( nu .eq. 2) then 
+if( nu == 2) then 
 kk2=abs(kk1+nu)
 k2= abs(kk2+kmin2)
-else if (nu .eq. -2) then
+else if (nu == -2) then
 kk2=abs(kk1+nu)
 k2= abs(kk2+kmin2)
 end if
 
 
-if( nu .eq. 3) then 
+if( nu == 3) then 
 kk2=abs(kk1+nu)
 k2= abs(kk2+kmin2)
-else if (nu .eq. -3) then
+else if (nu == -3) then
 kk2=abs(kk1+nu)
 k2= abs(kk2+kmin2)
 end if
@@ -2207,24 +2207,24 @@ end if
 
 !     start the calculation
 
-if (order .eq. 3) then ! OCTUPOLE
+if (order == 3) then ! OCTUPOLE
 
-	if(nu .eq. -3 ) then 
+	if(nu == -3 ) then 
 	  if(abs(kk1) .gt. abs(nu)) then
 	  x1= threej(j1,3,j2,kk1,nu,-kk2,binom,nbin)*xfac
 	  else
 	  x1= threej(j1,3,j2,kk1,nu,kk2,binom,nbin)*xfac
 	  end if
-	else if (nu .eq. 3) then 
+	else if (nu == 3) then 
 	  if(abs(kk1) .gt. abs(nu)) then
 	  x1= threej(j1,3,j2,kk1,nu,-kk2,binom,nbin)*xfac
 	  else
 	  x1= threej(j1,3,j2,kk1,nu,-kk2,binom,nbin)*xfac
 	  end if
-	else if (nu .eq. 2 ) then
+	else if (nu == 2 ) then
 	x1= threej(j1,3,j2,kk1,nu,-kk2,binom,nbin)*xfac
-	else if (nu .eq. -2 ) then
-	  if((kk1 .eq. 1) .and. (kk2 .eq. 1)) then
+	else if (nu == -2 ) then
+	  if((kk1 == 1) .and. (kk2 == 1)) then
 	  x1= threej(j1,3,j2,kk1,nu,kk2,binom,nbin)*xfac
 	  else
 	  x1= threej(j1,3,j2,kk1,nu,-kk2,binom,nbin)*xfac
@@ -2236,8 +2236,8 @@ if (order .eq. 3) then ! OCTUPOLE
 
 
 
-else if (order .eq. 2) then !QUADRUPOLE
-	if(nu .eq. -2 ) then 
+else if (order == 2) then !QUADRUPOLE
+	if(nu == -2 ) then 
 
 	  if(abs(kk1) .gt. abs(nu)) then
 	  x1= threej(j1,2,j2,kk1,nu,-kk2,binom,nbin)*xfac
@@ -2245,7 +2245,7 @@ else if (order .eq. 2) then !QUADRUPOLE
 	  x1= threej(j1,2,j2,kk1,nu,kk2,binom,nbin)*xfac
 	  end if
 
-	else if (nu .eq. 2 ) then
+	else if (nu == 2 ) then
 	  x1= threej(j1,2,j2,kk1,nu,-kk2,binom,nbin)*xfac
 	else
 	x1= threej(j1,2,j2,kk1,nu,-kk2,binom,nbin)*xfac
@@ -2262,17 +2262,17 @@ end if
 	if (zprint) write(6,*) 'xfac, x1 =',xfac, x1
 
 	i0=1
-	if (abs(nu).eq.1 .and. ipar.eq.0) i0=0
+	if (abs(nu)==1 .and. ipar==0) i0=0
 	i=0
 	id=0
 	n0=npnt2
 
 	do 10 nn1=1,npnt1
-	if (idia .eq. -2) n0=nn1-i0
+	if (idia == -2) n0=nn1-i0
 	niter=n0*ipot
 
 ! serial case: whole calculation for NCPUS=1 or else the remainder
-	if (ncpus .eq. 1) then
+	if (ncpus == 1) then
 	   irem=niter
 	   nparr=0
 	else
@@ -2313,7 +2313,7 @@ end if
 	i=i+niter
 	id=id+niter
 !     take care of diagonal case in symmetric Radau
-	if (abs(nu).eq.i0 .and. idia .eq. -2) id=id+npot
+	if (abs(nu)==i0 .and. idia == -2) id=id+npot
 10    continue
 
 	if (ncpus .gt. 1) then
@@ -2482,7 +2482,7 @@ end if
 
 	do 2 ie2=1,neval2
 
-	if (ie1.eq.1) xe2(ie2)= e2(ie2)*autocm - ezero
+	if (ie1==1) xe2(ie2)= e2(ie2)*autocm - ezero
 	dd= xe2(ie2) - xe1
 
 	dd3= abs(dd*dd*dd)
@@ -2641,15 +2641,15 @@ end if
 	x2 = 2.0d0
 	pi = 3.1415927d0
 
-	IF (G1 .EQ. X0) THEN       !        BONDLENGTH BONDANGLE COORDINATES: ATOM 1 = ATOM 2
+	IF (G1 == X0) THEN       !        BONDLENGTH BONDANGLE COORDINATES: ATOM 1 = ATOM 2
 	   Q1 = R1
 	   Q2 = R2
 	   THETA = ACOS(XCOS)
-	ELSE IF (G2 .EQ. X0) THEN  !        SCATTERING COORDINATES: ATOM 2 = ATOM 3
+	ELSE IF (G2 == X0) THEN  !        SCATTERING COORDINATES: ATOM 2 = ATOM 3
 	   XX = R1 * G1
 	   YY = R1 * (X1 - G1)
 	   ALPHA= ACOS(XCOS)
-	   IF (R2 .EQ. X0 .OR. XCOS .GE. (X1 - TINY)) THEN
+	   IF (R2 == X0 .OR. XCOS .GE. (X1 - TINY)) THEN
 		Q1 = ABS(XX - R2)
 		Q2 = (YY + R2)
 		COST = -X1
@@ -2685,12 +2685,12 @@ end if
 
 !     BONDLENGTH-BONDANGLE CO-ORDINATES
 !
-	IF (G1.EQ.X0) THEN
+	IF (G1==X0) THEN
 	   GAMMA= THETA/X2
 	   ycos= COS(GAMMA)
 	   ysin= SIN(GAMMA)
 	   IF (ZEMBED) THEN
-		IF (NU.EQ.0) THEN
+		IF (NU==0) THEN
 		   DIPC= +DIPY*ycos - DIPX*ysin
 RME=+1.0d0*ycos - 1.0d0*ysin
 		ELSE
@@ -2698,7 +2698,7 @@ RME=+1.0d0*ycos - 1.0d0*ysin
 RME=+1.0d0*ycos + 1.0d0*ysin
 		ENDIF
 	   ELSE
-		if (NU.EQ.0) THEN
+		if (NU==0) THEN
 		   DIPC= +DIPY*ycos + DIPX*ysin
 RME=+1.0d0*ycos + 1.0d0*ysin
 		ELSE
@@ -2709,12 +2709,12 @@ RME=-1.0d0*ycos + 1.0d0*ysin
 
 !     SCATTERING CO-ORDINATES
 
-	ELSE if (G2.EQ.X0) THEN
+	ELSE if (G2==X0) THEN
 	   GAMMA= BETA - THETA/x2
 	   if (ZEMBED) THEN
 		ycos= COS(GAMMA)
 		ysin= SIN(GAMMA)
-		if (NU.EQ.0) THEN
+		if (NU==0) THEN
 		   DIPC= -DIPX*ysin - DIPY*ycos
 RME= -1.0d0*ysin - 1.0d0*ycos
 		ELSE
@@ -2725,7 +2725,7 @@ RME= +1.0d0*ycos - 1.0d0*ysin
 		DELTA= ALPHA - GAMMA
 		ycos= COS(DELTA)
 		ysin= SIN(DELTA)
-		if (NU.EQ.0) THEN
+		if (NU==0) THEN
 		   DIPC= +DIPX*ysin + DIPY*ycos
 RME= +1.0d0*ysin + 1.0d0*ycos
 		ELSE
@@ -2743,7 +2743,7 @@ RME= +1.0d0*ycos - 1.0d0*ysin
 		alpha = (acos(xcos)-theta)/x2 - acos(cosa)
 		ycos= - COS(ALPHA)
 		ysin= + SIN(ALPHA)
-		if (NU.EQ.1) THEN
+		if (NU==1) THEN
 		   DIPC= +DIPX*ysin - DIPY*ycos 
 RME= +1.0d0*ysin - 1.0d0*ycos
 		ELSE
@@ -2756,7 +2756,7 @@ RME= -1.0d0*ycos - 1.0d0*ysin
 		ALPHA= ACOS(COSA)
 		ycos= - COS(ALPHA + THETA/X2)
 		ysin= + SIN(ALPHA + THETA/X2)
-		if (NU.EQ.0) THEN   
+		if (NU==0) THEN   
 		   DIPC= -DIPX*ysin + DIPY*ycos
 RME= -1.0d0*ysin + 1.0d0*ycos
 		ELSE                 
@@ -2769,7 +2769,7 @@ RME= +1.0d0*ycos + 1.0d0*ysin
 		alpha = ACOS(COSA)
 		ycos= - COS(alpha + THETA/X2)
 		ysin= + SIN(alpha + THETA/X2)
-		if (NU.EQ.0) THEN
+		if (NU==0) THEN
 		   DIPC= +DIPX*ysin + DIPY*ycos
 RME= +1.0d0*ysin + 1.0d0*ycos
 		ELSE
@@ -2817,7 +2817,7 @@ xe1= e1(ie1)*autocm - ezero
 
 	do 2 ie2=1,neval2
 
-	if (ie1.eq.1) xe2(ie2)= e2(ie2)*autocm - ezero
+	if (ie1==1) xe2(ie2)= e2(ie2)*autocm - ezero
 	if (.not.zbisc .and. zembed) txd = -txd
 	if (zpmin .and. max(ie1,ie2).gt.10) goto 2
 	write(14,208) jrot1,jrot2,kmin1,kmin2,ipar1,ipar2,ie1,ie2,xe1,xe2(ie2), &
@@ -2866,7 +2866,7 @@ xe1= e1(ie1)*autocm - ezero
 
 do 2 ie2=1,neval2
 
-if (ie1.eq.1) xe2(ie2)= e2(ie2)*autocm - ezero
+if (ie1==1) xe2(ie2)= e2(ie2)*autocm - ezero
 if (.not.zbisc .and. zembed) txd = -txd
 if (zpmin .and. max(ie1,ie2).gt.10) goto 2
 write(15,209) jrot1,jrot2,kmin1,kmin2,ipar1,ipar2,ie1,ie2,xe1,xe2(ie2), &
@@ -2911,7 +2911,7 @@ xe1= e1(ie1)*autocm - ezero
 
 do 2 ie2=1,neval2
 
-if (ie1.eq.1) xe2(ie2)= e2(ie2)*autocm - ezero
+if (ie1==1) xe2(ie2)= e2(ie2)*autocm - ezero
 if (.not.zbisc .and. zembed) txd = -txd
 if (zpmin .and. max(ie1,ie2).gt.10) goto 2
 write(16,210) jrot1,jrot2,kmin1,kmin2,ipar1,ipar2,ie1,ie2,xe1,xe2(ie2),abs((xe2(ie2)-xe1)),tz1(ie1,ie2),tx1(ie1,ie2),tx2(ie1,ie2),tx3(ie1,ie2)

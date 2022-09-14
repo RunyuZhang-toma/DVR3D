@@ -982,7 +982,7 @@ end module dipole3_mass
          call wrscr(tz,tx,neval1*neval2,iscr,iblock)
          write(6,2000) iblock,k1-kmin1,k2-kmin2
  2000    format(/5x,'Block',i4,' k1 =',i3,' to k2 =',i3,' completed')
-         if (iblock .ge. kblock) goto 154
+         if (iblock >= kblock) goto 154
        endif
       endif
       ip=1-ip
@@ -1084,7 +1084,7 @@ if(jk2 .le. 1) go to 108
          call trans(tx,dipol,binom,dc1,dupper,k1,k2,xfac,nu,ip)
          call wrscr(tz,tx,neval1*neval2,iscr,iblock)
          write(6,2000) iblock,k1-kmin1,k2-kmin2
-         if (iblock .ge. kblock) goto 154
+         if (iblock >= kblock) goto 154
         endif
        endif
       endif
@@ -1096,7 +1096,7 @@ if(jk2 .le. 1) go to 108
       nu= -1
       kk2= kk1 + nu
       k2= kk2 + kmin2
-      if (k2.ge.1) then
+      if (k2>=1) then
        jblock=jblock+1
        if (jblock.gt.iblock) then
         iblock=iblock+1
@@ -1113,7 +1113,7 @@ if(jk2 .le. 1) go to 108
          call trans(tx,dipol,binom,dc1,dlower,k1,k2,xfac,nu,ip)
          call wrscr(tz,tx,neval1*neval2,iscr,iblock)
          write(6,2000) iblock,k1-kmin1,k2-kmin2
-         if (iblock.ge.kblock .and. k1.lt.jk1) goto 154
+         if (iblock>=kblock .and. k1.lt.jk1) goto 154
         endif
        endif
       endif
@@ -1133,7 +1133,7 @@ if(jk2 .le. 1) go to 108
 11    continue
 
       goto 55
-154   if (iblock.ge.mblock) goto 55
+154   if (iblock>=mblock) goto 55
       write(6,1540) iblock
 1540  format(//i7,' blocks calculated. dipole3 shutting down')
       call timer
@@ -1268,7 +1268,7 @@ if(jk2 .le. 1) go to 108
       endif
 !     define other integration points
       do 20 i=1,nn2
-      if (idia .ge.0) then
+      if (idia >=0) then
          j=i+nn2
          xd(j)=-xd(npot-j+1)
          wtd(j)=wtd(npot-j+1)
@@ -2171,7 +2171,7 @@ end if
 !        XX = R1 * G1
 !        YY = R1 * (X1 - G1)
 !        ALPHA= ACOS(XCOS)
-!        IF (R2 .EQ. X0 .OR. XCOS .GE. (X1 - TINY)) THEN
+!        IF (R2 .EQ. X0 .OR. XCOS >= (X1 - TINY)) THEN
 !           Q1 = ABS(XX - R2)
 !           Q2 = (YY + R2)
 !           COST = -X1

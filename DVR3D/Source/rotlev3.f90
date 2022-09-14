@@ -416,7 +416,7 @@ end module rotlev3_outp
       READ(iwave)
       READ(iwave)
       READ(iwave)
-      IF (IBASS .LE. 0 .OR. IBASS .GE. IPT) THEN
+      IF (IBASS .LE. 0 .OR. IBASS >= IPT) THEN
           IBASS=IPT
           IVIB=NVIB
 !          write(6,*)'ci sono 300  ',mvib
@@ -441,7 +441,7 @@ end module rotlev3_outp
       ENDIF
       DO 220 J=IPT+1,NBLK
       IF (IV(J) .GT. MVIB(J)) GOTO 220
-      IF (EVIB(IV(J),J) .GE. EVIBR) GOTO 220
+      IF (EVIB(IV(J),J) >= EVIBR) GOTO 220
       EVIBR=EVIB(IV(J),J)
       JPT=J
   220 CONTINUE
@@ -562,7 +562,7 @@ end module rotlev3_outp
   505 format(f20.0)
   555 continue
      
-      IF (ires .ge. 0) then
+      IF (ires >= 0) then
 
 !     LOAD THE OFF-DIAGONAL BLOCKS
       IBASS=NBASS
@@ -582,7 +582,7 @@ end module rotlev3_outp
       IF (KMIN .EQ. 0) WRITE(6,1000) JROT,IBASS
  1000 FORMAT(5X,'J =',I3,' ROTATIONAL STATE,',I7,' BASIS FUNCTIONS',&
              /12X,'F PARITY, ANTI-SYMMETRIC |JK> - |J-K> FUNCTIONS IN BASIS')
-      IF (KMIN .GE. 1) WRITE(6,1010) JROT,IBASS
+      IF (KMIN >= 1) WRITE(6,1010) JROT,IBASS
  1010 FORMAT(5X,'J =',I3,' ROTATIONAL STATE,',I7,' BASIS FUNCTIONS',&
              /12X,'E PARITY, SYMMETRIC |JK> + |J-K> FUNCTIONS IN BASIS')
       IF (IDIA .EQ. 2) THEN
@@ -627,7 +627,7 @@ end module rotlev3_outp
       if (abs(ires).eq.2) allocate(eval(keval))
       NOFFD=IBASS+MVIB(1)*MVIB(2)+1
       JVEC=JVEC2
-      IF (IRES .ge. 0)THEN
+      IF (IRES >= 0)THEN
          if (ires .eq. 2)then
            ezero=x0
            read(5,505,end=556) ezero
@@ -1545,7 +1545,7 @@ end module rotlev3_outp
       DO 20 K=K1,NBLK
       IF (MVIB(K) .LT. 1) GOTO 20
       IF (K .GT. K1) then 
-      if (MVIB(K-1) .GE. 1) THEN
+      if (MVIB(K-1) >= 1) THEN
 
          call dgemv('N',MVIB(K), MVIB(K-1), x1, HAMIL(IOFF),&
               MVIB(K), Z(I1),1,x1, W(I2), 1)
@@ -1556,7 +1556,7 @@ end module rotlev3_outp
       I1=I2
       I2=I2+MVIB(K)
       IF (K .LT. NBLK) then
-      if (MVIB(K+1) .GE. 1) then
+      if (MVIB(K+1) >= 1) then
 
          call dgemv('T', mvib(k+1), mvib(k), x1, hamil(ioff),&
               mvib(k+1), z(i2),1,x1 ,w(i1), 1)

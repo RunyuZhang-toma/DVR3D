@@ -135,8 +135,8 @@ C
 C     TEST THE INPUT PARAMETERS.
 C
       ITEMP = MAX(P**2,2*N)
-      IF (N.GE.1 .AND. EM.GE.1 .AND. EM.LT.P .AND. P.LE.N .AND.MN.GE.N .
-     *AND. LWORK.GE.(ITEMP+3*P) .AND. LRWORK.GE.1 .AND.LIWORK.GE.1)
+      IF (N>=1 .AND. EM>=1 .AND. EM.LT.P .AND. P.LE.N .AND.MN>=N .
+     *AND. LWORK>=(ITEMP+3*P) .AND. LRWORK>=1 .AND.LIWORK>=1)
      * GO TO 20
       IFAIL = P01AAF(IFAIL,1,SRNAME)
       RETURN
@@ -367,7 +367,7 @@ C
          IF (IFLAG.LT.0) GO TO 1460
          S = 0.0D0
          DO 580 J=1,L
-            IF (ABS(D(J)-D(K)).GE.0.01D0*D(K)) GO TO 580
+            IF (ABS(D(J)-D(K))>=0.01D0*D(K)) GO TO 580
             T = IP(IFLAG,N,WORK,X(1,J),RWORK,LRWORK,IWORK,LIWORK)
             IF (IFLAG.LT.0) GO TO 1460
 C
@@ -385,9 +385,9 @@ C
 C     TEST FOR ACCEPTANCE OF GROUP OF EIGENVECTORS
 C
          ITEMP = F1 + EM - 1
-         IF (L.GE.EM .AND. D(EM)*WORK(ITEMP).LT.TOL*(D(EM)-E)) G =EM
+         IF (L>=EM .AND. D(EM)*WORK(ITEMP).LT.TOL*(D(EM)-E)) G =EM
          ITEMP = F1 + L - 1
-         IF (E2.GE.WORK(ITEMP)) GO TO 600
+         IF (E2>=WORK(ITEMP)) GO TO 600
          ITEMP = F1 + L1 - 1
          TEMP(1) = E2
 C
@@ -413,10 +413,10 @@ C     REDUCE EM IF CONVERGENCE WOULD BE TOO SLOW.
 C
   680 IK = F1 + EM - 1
       IF (WORK(IK).EQ.0.0D0) GO TO 740
-      IF (10*KS.GE.9*KM) GO TO 740
+      IF (10*KS>=9*KM) GO TO 740
       ITEMP = CX1 + EM - 1
       S = DBLE(K)*WORK(ITEMP)
-      IF (S.GE.0.05D0) GO TO 700
+      IF (S>=0.05D0) GO TO 700
       T = 0.5D0*S*WORK(ITEMP)
       GO TO 720
   700 T = WORK(ITEMP) + LOG(0.5D0+0.5D0*EXP(-2.0D0*S))/DBLE(K)
@@ -434,8 +434,8 @@ C
 C
       CALL F01YAX(JP-IG+1, D(IG), 1, WORK(ITEMP), 1)
 C
-      IF (KS.GE.KM) IERR = 4
-      IF (G.GE.EM .OR. KS.GE.KM) GO TO 1280
+      IF (KS>=KM) IERR = 4
+      IF (G>=EM .OR. KS>=KM) GO TO 1280
       ISTATE = 0
       IF (H.EQ.LH) GO TO 760
       LH = H
@@ -528,7 +528,7 @@ C
 C
 C     DISCOUNTING THE ERROR QUANTITIES F
 C
- 1000 IF (G.GE.H) GO TO 1080
+ 1000 IF (G>=H) GO TO 1080
       IF (M.NE.1) GO TO 1040
       ITEMP = F1 + G
       DO 1020 K=IG,H
@@ -550,7 +550,7 @@ C
 C
 C     POSSIBLE REPETITION OF INTERMEDIATE STEPS
 C
-      IF (Z2.GE.0) GO TO 820
+      IF (Z2>=0) GO TO 820
       Z1 = Z1 + 1
       Z2 = 2*Z1
       M = 2*M
@@ -754,7 +754,7 @@ C     OUTPUT PARAMETERS.
 C
 C     SV    - N ELEMENT VECTOR CONTAINING THE SINGULAR
 C             VALUES OF A. THEY ARE ORDERED SO THAT
-C             SV(1).GE.SV(2).GE. ... .GE.SV(N). THE ROUTINE
+C             SV(1)>=SV(2)>= ... >=SV(N). THE ROUTINE
 C             MAY BE CALLED WITH SV=D.
 C
 C     B     - IF WANTB IS .TRUE. THEN B WILL RETURN THE N
@@ -970,7 +970,7 @@ C     NOW MAKE SINGULAR VALUES NON-NEGATIVE.
 C     K WILL BE 1 UNLESS FAILURE HAS OCCURED.
 C
       DO 320 J=K,N
-         IF (SV(J).GE.0.0D0) GO TO 320
+         IF (SV(J)>=0.0D0) GO TO 320
 C
          SV(J) = -SV(J)
 C
@@ -1127,7 +1127,7 @@ C     LOOK FOR SMALL SUB-DIAG ELEMENT
 C     FORM SHIFT
          G = D(L)
          H = D(L+1) - G
-         IF (ABS(H).GE.ABS(E(L))) GO TO 120
+         IF (ABS(H)>=ABS(E(L))) GO TO 120
          P = H*0.5D0/E(L)
          R = SQRT(P*P+1.0D0)
          H = P + R
@@ -1186,7 +1186,7 @@ C     ORDER EIGENVALUES AND EIGENVECTORS
          I1 = I + 1
          IF (I1.GT.N) GO TO 340
          DO 320 J=I1,N
-            IF (D(J).GE.P) GO TO 320
+            IF (D(J)>=P) GO TO 320
             K = J
             P = D(J)
   320    CONTINUE
@@ -1294,7 +1294,7 @@ C     GUARANTEED THE TRANSFORMATION IS SKIPPED
    90    CONTINUE
          GO TO 240
   100    G = SQRT(H)
-         IF (F.GE.0.0D0) G = -G
+         IF (F>=0.0D0) G = -G
          E(I) = G
          H = H - F*G
          D(I-1) = F - G
@@ -1799,12 +1799,12 @@ C
       ABSA = ABS(A)
       ABSB = ABS(B)
       X = 0.0D0
-      IF (ABSA.GE.1.0D0) X = ABSA*SMALL
+      IF (ABSA>=1.0D0) X = ABSA*SMALL
 C
       IF (ABSB.LT.X) RETURN
 C
       X = 0.0D0
-      IF (ABSB.GE.1.0D0) X = ABSB*SMALL
+      IF (ABSB>=1.0D0) X = ABSB*SMALL
 C
       IF (ABSA.LE.X) GO TO 20
 C
@@ -2159,7 +2159,7 @@ C     ..
       COMMON /AX02ZA/ WMACH
       DATA ONE /1.0D+0/, ZERO /0.0D+0/
 C
-      IF (N.GE.1) GO TO 20
+      IF (N>=1) GO TO 20
       F01YAV = ZERO
       RETURN
    20 CONTINUE
@@ -2201,8 +2201,8 @@ C
       DO 300 IX=1,LX,INCX
          IF (X(IX).EQ.ZERO .OR. Y(IX).EQ.ZERO) GO TO 280
          ABSX = ABS(X(IX))
-         IF (ABSX.GE.ONE) GO TO 240
-         IF (ABS(Y(IX)).GE.WMACH(5)/ABSX) SUM = SUM + X(IX)*Y(IX)
+         IF (ABSX>=ONE) GO TO 240
+         IF (ABS(Y(IX))>=WMACH(5)/ABSX) SUM = SUM + X(IX)*Y(IX)
          GO TO 260
   240    CONTINUE
          SUM = SUM + X(IX)*Y(IX)
@@ -2226,8 +2226,8 @@ C
       DO 480 I=1,N
          IF (X(IX).EQ.ZERO .OR. Y(IY).EQ.ZERO) GO TO 460
          ABSX = ABS(X(IX))
-         IF (ABSX.GE.ONE) GO TO 420
-         IF (ABS(Y(IY)).GE.WMACH(5)/ABSX) SUM = SUM + X(IX)*Y(IY)
+         IF (ABSX>=ONE) GO TO 420
+         IF (ABS(Y(IY))>=WMACH(5)/ABSX) SUM = SUM + X(IX)*Y(IY)
          GO TO 440
   420    CONTINUE
          SUM = SUM + X(IX)*Y(IY)
@@ -2371,7 +2371,7 @@ C
       IF (INCX.NE.INCY .OR. INCX.LE.0) GO TO 240
       LX = 1 + (N-1)*INCX
       DO 220 IX=1,LX,INCX
-         IF (ABS(X(IX)).GE.TNY) Y(IX) = ALPHA*X(IX) + Y(IX)
+         IF (ABS(X(IX))>=TNY) Y(IX) = ALPHA*X(IX) + Y(IX)
   220 CONTINUE
       GO TO 360
   240 CONTINUE
@@ -2388,7 +2388,7 @@ C
       IY = 1 - (N-1)*INCY
   320 CONTINUE
       DO 340 I=1,N
-         IF (ABS(X(IX)).GE.TNY) Y(IY) = ALPHA*X(IX) + Y(IY)
+         IF (ABS(X(IX))>=TNY) Y(IY) = ALPHA*X(IX) + Y(IY)
          IX = IX + INCX
          IY = IY + INCY
   340 CONTINUE
@@ -2468,7 +2468,7 @@ C     AND -1.0/R CAN ALL BE COMPUTED WITHOUT OVERFLOW OR UNDERFLOW.
 C     ON MANY MACHINES THE CORRECT VALUE CAN BE DERIVED FROM THOSE
 C     OF X02AAF, X02ABF AND X02ACF AS FOLLOWS
 C
-C     IF (X02ABF(X)*X02ACF(X).GE.1.0) X02AGF = X02ABF(X)
+C     IF (X02ABF(X)*X02ACF(X)>=1.0) X02AGF = X02ABF(X)
 C     IF (X02ABF(X)*X02ACF(X).LT.1.0)
 C    *                            X02AGF = (1.0+X02AAF(X))/X02ACF(X)
 C

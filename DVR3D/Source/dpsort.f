@@ -209,7 +209,7 @@ C
       I = IL(M)
       J = IU(M)
 C
-   90 IF (J-I .GE. 1) GO TO 40
+   90 IF (J-I >= 1) GO TO 40
       IF (I .EQ. 1) GO TO 30
       I = I-1
 C
@@ -241,7 +241,7 @@ C        Use the IPERM vector as a flag.
 C        If IPERM(I) < 0, then the I-th value is in correct location
 C
          DO 150 ISTRT=1,NN
-            IF (IPERM(ISTRT) .GE. 0) THEN
+            IF (IPERM(ISTRT) >= 0) THEN
                INDX = ISTRT
                INDX0 = INDX
                TEMP = DX(ISTRT)
@@ -318,7 +318,7 @@ C     CHECK WHETHER IPERM IS A VALID PERMUTATION
 C
       DO 100 I=1,N
          INDX=ABS(IPERM(I))
-         IF((INDX.GE.1).AND.(INDX.LE.N))THEN
+         IF((INDX>=1).AND.(INDX.LE.N))THEN
             IF(IPERM(INDX).GT.0)THEN
                IPERM(INDX)=-IPERM(INDX)
                GOTO 100
@@ -341,7 +341,7 @@ C
          INDX0 = INDX
          DTEMP = DX(ISTRT)
   320    CONTINUE
-         IF (IPERM(INDX) .GE. 0) GOTO 325
+         IF (IPERM(INDX) >= 0) GOTO 325
             DX(INDX) = DX(-IPERM(INDX))
             INDX0 = INDX
             IPERM(INDX) = -IPERM(INDX)
@@ -403,7 +403,7 @@ C     CHECK WHETHER IPERM IS A VALID PERMUTATION
 C
       DO 100 I=1,N
          INDX=ABS(IPERM(I))
-         IF((INDX.GE.1).AND.(INDX.LE.N))THEN
+         IF((INDX>=1).AND.(INDX.LE.N))THEN
             IF(IPERM(INDX).GT.0)THEN
                IPERM(INDX)=-IPERM(INDX)
                GOTO 100
@@ -426,7 +426,7 @@ C
          INDX0 = INDX
          ITEMP = IX(ISTRT)
   320    CONTINUE
-         IF (IPERM(INDX) .GE. 0) GOTO 325
+         IF (IPERM(INDX) >= 0) GOTO 325
             IX(INDX) = IX(-IPERM(INDX))
             INDX0 = INDX
             IPERM(INDX) = -IPERM(INDX)
@@ -1826,7 +1826,7 @@ C
 C
 C       THEN WHETHER THE PROGRAM WILL CONTINUE.
 C
-         IF ((MKNTRL.EQ.2 .AND. LEVEL.GE.1) .OR.
+         IF ((MKNTRL.EQ.2 .AND. LEVEL>=1) .OR.
      *       (MKNTRL.EQ.1 .AND. LEVEL.EQ.2)) THEN
             TEMP(LTEMP+1:LTEMP+14) = ' PROG ABORTED,'
             LTEMP = LTEMP + 14

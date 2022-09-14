@@ -390,7 +390,7 @@ end module rotlev3b_seg_timing
       do 110 i=1,3
       read(ivec)
   110 continue
-      if (ibass .le. 0 .or. ibass .ge. ipt) then
+      if (ibass .le. 0 .or. ibass >= ipt) then
           nbass=ipt
           ivib=nvib
       else
@@ -413,7 +413,7 @@ end module rotlev3b_seg_timing
          endif
          do 220 j=ipt+1,nblk
          if (iv(j) .gt. mvib(j)) goto 220
-         if (evib(iv(j),j) .ge. evibr) goto 220
+         if (evib(iv(j),j) >= evibr) goto 220
          evibr=evib(iv(j),j)
          jpt=j
   220    continue
@@ -542,7 +542,7 @@ end module rotlev3b_seg_timing
       endif
  
       if (.not.zdiag) stop
-      if (ires .ge. 0) then
+      if (ires >= 0) then
          ezero=x0
          read(5,505,end=555) ezero
   505    format(f20.0)
@@ -567,7 +567,7 @@ end module rotlev3b_seg_timing
          if (kmin .eq. 0) write(6,1000) jrot,ibass
  1000 format('1'/5x,'J =',i3,' rotational state,',i7,' basis functions'&
           /12x,'f parity, anti-symmetric |jk> - |j-k> functions in basis')
-         if (kmin .ge. 1) write(6,1010) jrot,ibass
+         if (kmin >= 1) write(6,1010) jrot,ibass
  1010 format('1'/5x,'J =',i3,' rotational state,',i7,' basis functions'&
           /12x,'e parity, symmetric |jk> + |j-k> functions in basis')
          if (ipar .eq. 0) write(6,1020)
@@ -614,7 +614,7 @@ end module rotlev3b_seg_timing
          goto 200
       endif
 
-      if (ires .ge. 0) then
+      if (ires >= 0) then
          write(6,1000) jrot,ibass
          if (ipar .eq. 0) write(6,1020)
          if (ipar .eq. 1) write(6,1030)
@@ -1120,7 +1120,7 @@ end module rotlev3b_seg_timing
 	do 15 jj=0,lmax
 	  pleg(jj,i) = pleg(jj,i) * pnorm(jj)
 	   !This is where we multiply by the large factor initially divided from pmm at the beginning of its loop
-	    if(m.GE.90)then
+	    if(m>=90)then
 	      pleg(jj,i) = pleg(jj,i) * 1.0d250 * pnorm(jj)
 	    end if
 	    

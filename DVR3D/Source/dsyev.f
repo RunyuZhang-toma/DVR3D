@@ -473,7 +473,7 @@
 *
 *     Compute the eigenvector
 *
-      IF( DF.GE.ZERO ) THEN
+      IF( DF>=ZERO ) THEN
          CS = DF + RT
          SGN2 = 1
       ELSE
@@ -595,7 +595,7 @@
          EMAX = IMAX
          SFMIN = RMIN
          SMALL = ONE / RMAX
-         IF( SMALL.GE.SFMIN ) THEN
+         IF( SMALL>=SFMIN ) THEN
 *
 *           Use SMALL plus a bit, to avoid the possibility of rounding
 *           causing overflow when computing  1/sfmin.
@@ -1347,7 +1347,7 @@
      $      OLDY = Y
          Y = DLAMC3( Y, Z )
    20 CONTINUE
-      IF( Y.GE.ONE )
+      IF( Y>=ONE )
      $   Y = OLDY
 *
 *     Now multiply by BETA**EMAX to get RMAX.
@@ -2872,14 +2872,14 @@
          F1 = F
          G1 = G
          SCALE = MAX( ABS( F1 ), ABS( G1 ) )
-         IF( SCALE.GE.SAFMX2 ) THEN
+         IF( SCALE>=SAFMX2 ) THEN
             COUNT = 0
    10       CONTINUE
             COUNT = COUNT + 1
             F1 = F1*SAFMN2
             G1 = G1*SAFMN2
             SCALE = MAX( ABS( F1 ), ABS( G1 ) )
-            IF( SCALE.GE.SAFMX2 )
+            IF( SCALE>=SAFMX2 )
      $         GO TO 10
             R = SQRT( F1**2+G1**2 )
             CS = F1 / R
@@ -3050,7 +3050,7 @@
          INFO = -7
       ELSE IF( ITYPE.LE.3 .AND. LDA.LT.MAX( 1, M ) ) THEN
          INFO = -9
-      ELSE IF( ITYPE.GE.4 ) THEN
+      ELSE IF( ITYPE>=4 ) THEN
          IF( KL.LT.0 .OR. KL.GT.MAX( M-1, 0 ) ) THEN
             INFO = -2
          ELSE IF( KU.LT.0 .OR. KU.GT.MAX( N-1, 0 ) .OR.
@@ -4625,7 +4625,7 @@
          END IF
       END IF
 *
-      IF( NB.GE.NBMIN .AND. NB.LT.K .AND. NX.LT.K ) THEN
+      IF( NB>=NBMIN .AND. NB.LT.K .AND. NX.LT.K ) THEN
 *
 *        Use blocked code after the first block.
 *        The last kk columns are handled by the block method.
@@ -4839,7 +4839,7 @@
          END IF
       END IF
 *
-      IF( NB.GE.NBMIN .AND. NB.LT.K .AND. NX.LT.K ) THEN
+      IF( NB>=NBMIN .AND. NB.LT.K .AND. NX.LT.K ) THEN
 *
 *        Use blocked code after the last block.
 *        The first kk columns are handled by the block method.
@@ -5462,7 +5462,7 @@
             D( L ) = RT2
             E( L-1 ) = ZERO
             L = L - 2
-            IF( L.GE.LEND )
+            IF( L>=LEND )
      $         GO TO 90
             GO TO 140
          END IF
@@ -5523,7 +5523,7 @@
          D( L ) = P
 *
          L = L - 1
-         IF( L.GE.LEND )
+         IF( L>=LEND )
      $      GO TO 90
          GO TO 140
 *
@@ -5749,7 +5749,7 @@
          L = LENDSV
       END IF
 *
-      IF( LEND.GE.L ) THEN
+      IF( LEND>=L ) THEN
 *
 *        QL Iteration
 *
@@ -5867,7 +5867,7 @@
             D( L-1 ) = RT2
             E( L-1 ) = ZERO
             L = L - 2
-            IF( L.GE.LEND )
+            IF( L>=LEND )
      $         GO TO 100
             GO TO 150
          END IF
@@ -5919,7 +5919,7 @@
          D( L ) = P
 *
          L = L - 1
-         IF( L.GE.LEND )
+         IF( L>=LEND )
      $      GO TO 100
          GO TO 150
 *
@@ -6556,7 +6556,7 @@
       END IF
 *
       NEGINF = -ONE / ZERO
-      IF( NEGINF.GE.ZERO ) THEN
+      IF( NEGINF>=ZERO ) THEN
          IEEECK = 0
          RETURN
       END IF
@@ -6568,7 +6568,7 @@
       END IF
 *
       NEGINF = ONE / NEGZRO
-      IF( NEGINF.GE.ZERO ) THEN
+      IF( NEGINF>=ZERO ) THEN
          IEEECK = 0
          RETURN
       END IF
@@ -6586,7 +6586,7 @@
       END IF
 *
       NEGINF = NEGINF*POSINF
-      IF( NEGINF.GE.ZERO ) THEN
+      IF( NEGINF>=ZERO ) THEN
          IEEECK = 0
          RETURN
       END IF
@@ -6789,11 +6789,11 @@
 *
 *        ASCII character set
 *
-         IF( IC.GE.97 .AND. IC.LE.122 ) THEN
+         IF( IC>=97 .AND. IC.LE.122 ) THEN
             SUBNAM( 1:1 ) = CHAR( IC-32 )
             DO 10 I = 2, 6
                IC = ICHAR( SUBNAM( I:I ) )
-               IF( IC.GE.97 .AND. IC.LE.122 )
+               IF( IC>=97 .AND. IC.LE.122 )
      $            SUBNAM( I:I ) = CHAR( IC-32 )
    10       CONTINUE
          END IF
@@ -6802,15 +6802,15 @@
 *
 *        EBCDIC character set
 *
-         IF( ( IC.GE.129 .AND. IC.LE.137 ) .OR.
-     $       ( IC.GE.145 .AND. IC.LE.153 ) .OR.
-     $       ( IC.GE.162 .AND. IC.LE.169 ) ) THEN
+         IF( ( IC>=129 .AND. IC.LE.137 ) .OR.
+     $       ( IC>=145 .AND. IC.LE.153 ) .OR.
+     $       ( IC>=162 .AND. IC.LE.169 ) ) THEN
             SUBNAM( 1:1 ) = CHAR( IC+64 )
             DO 20 I = 2, 6
                IC = ICHAR( SUBNAM( I:I ) )
-               IF( ( IC.GE.129 .AND. IC.LE.137 ) .OR.
-     $             ( IC.GE.145 .AND. IC.LE.153 ) .OR.
-     $             ( IC.GE.162 .AND. IC.LE.169 ) )
+               IF( ( IC>=129 .AND. IC.LE.137 ) .OR.
+     $             ( IC>=145 .AND. IC.LE.153 ) .OR.
+     $             ( IC>=162 .AND. IC.LE.169 ) )
      $            SUBNAM( I:I ) = CHAR( IC+64 )
    20       CONTINUE
          END IF
@@ -6819,11 +6819,11 @@
 *
 *        Prime machines:  ASCII+128
 *
-         IF( IC.GE.225 .AND. IC.LE.250 ) THEN
+         IF( IC>=225 .AND. IC.LE.250 ) THEN
             SUBNAM( 1:1 ) = CHAR( IC-32 )
             DO 30 I = 2, 6
                IC = ICHAR( SUBNAM( I:I ) )
-               IF( IC.GE.225 .AND. IC.LE.250 )
+               IF( IC>=225 .AND. IC.LE.250 )
      $            SUBNAM( I:I ) = CHAR( IC-32 )
    30       CONTINUE
          END IF
@@ -7253,28 +7253,28 @@ C     ILAENV = 0
 *        ASCII is assumed - ZCODE is the ASCII code of either lower or
 *        upper case 'Z'.
 *
-         IF( INTA.GE.97 .AND. INTA.LE.122 ) INTA = INTA - 32
-         IF( INTB.GE.97 .AND. INTB.LE.122 ) INTB = INTB - 32
+         IF( INTA>=97 .AND. INTA.LE.122 ) INTA = INTA - 32
+         IF( INTB>=97 .AND. INTB.LE.122 ) INTB = INTB - 32
 *
       ELSE IF( ZCODE.EQ.233 .OR. ZCODE.EQ.169 ) THEN
 *
 *        EBCDIC is assumed - ZCODE is the EBCDIC code of either lower or
 *        upper case 'Z'.
 *
-         IF( INTA.GE.129 .AND. INTA.LE.137 .OR.
-     $       INTA.GE.145 .AND. INTA.LE.153 .OR.
-     $       INTA.GE.162 .AND. INTA.LE.169 ) INTA = INTA + 64
-         IF( INTB.GE.129 .AND. INTB.LE.137 .OR.
-     $       INTB.GE.145 .AND. INTB.LE.153 .OR.
-     $       INTB.GE.162 .AND. INTB.LE.169 ) INTB = INTB + 64
+         IF( INTA>=129 .AND. INTA.LE.137 .OR.
+     $       INTA>=145 .AND. INTA.LE.153 .OR.
+     $       INTA>=162 .AND. INTA.LE.169 ) INTA = INTA + 64
+         IF( INTB>=129 .AND. INTB.LE.137 .OR.
+     $       INTB>=145 .AND. INTB.LE.153 .OR.
+     $       INTB>=162 .AND. INTB.LE.169 ) INTB = INTB + 64
 *
       ELSE IF( ZCODE.EQ.218 .OR. ZCODE.EQ.250 ) THEN
 *
 *        ASCII is assumed, on Prime machines - ZCODE is the ASCII code
 *        plus 128 of either lower or upper case 'Z'.
 *
-         IF( INTA.GE.225 .AND. INTA.LE.250 ) INTA = INTA - 32
-         IF( INTB.GE.225 .AND. INTB.LE.250 ) INTB = INTB - 32
+         IF( INTA>=225 .AND. INTA.LE.250 ) INTA = INTA - 32
+         IF( INTB>=225 .AND. INTB.LE.250 ) INTB = INTB - 32
       END IF
       LSAME = INTA.EQ.INTB
 *

@@ -584,7 +584,7 @@ end module rotlev3z_pb
       if (zcut) then
          write(6,*)'Vib levels selected according to energy cut:'
          write(6,*)' E_cut = ',ecut,'  cm-1 .'
-         if (ecut.ge.emax) then
+         if (ecut>=emax) then
             iva=mevala
             ivb=mevalb
             write(6,*)emax
@@ -3300,7 +3300,7 @@ real*8, allocatable, dimension(:,:) :: dz
 data x0,xp5,x1,x4/0.0d0,0.5d0,1.0d0,4.0d0/
 data amtoau/1.8228883d03/
 
-      if (idia .ge. 1) then
+      if (idia >= 1) then
 !        scattering coordinates
          g1 = xmass(2) / (xmass(2) + xmass(3))
          g2 = x0
@@ -3504,7 +3504,7 @@ subroutine lagbasis(aa,nlag,dg,wlag,wln,zd,csx)
   do i=0,nlag-1
      di=dble(i)
      dg(i+1)=(2.d0*di+aa+1.d0)
-     if (i.ge.1) dg1(i)=-dsqrt((di+aa)*di)
+     if (i>=1) dg1(i)=-dsqrt((di+aa)*di)
   end do
   
   

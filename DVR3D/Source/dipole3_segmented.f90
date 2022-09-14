@@ -303,7 +303,7 @@ end module dipole3_seg_mass
              'ibra  =',i4,&
              /5x,'output transition data written to stream ',&
              'itra  =',i4)
-      if (ires.le.0) write(6,1005) iscr
+      if (ires<=0) write(6,1005) iscr
  1005 format(  5x,'restart data written to           stream ',&
              'iscr  =',i4)
       if (ires.gt.0) write(6,1006) iscr
@@ -611,8 +611,8 @@ end module dipole3_seg_mass
 !
       read(5,101) npot,nv1,nv2,ibase1,ibase2
 101   format(5i5)
-       if (ibase1 .le. 0 .or. ibase1 .gt. neval1) ibase1 = 1
-       if (ibase2 .le. 0 .or. ibase2 .gt. neval2) ibase2 = 1
+       if (ibase1 <= 0 .or. ibase1 .gt. neval1) ibase1 = 1
+       if (ibase2 <= 0 .or. ibase2 .gt. neval2) ibase2 = 1
 !
 !     write out data from triatom/rotlev runs
 !
@@ -646,9 +646,9 @@ end module dipole3_seg_mass
 !     reset number of vib-rot functions to be considered
 !
       if (nv1.gt.0) neval1=min(nv1,neval1-ibase1+1)
-      if (nv1.le.0) neval1=neval1-ibase1+1
+      if (nv1<=0) neval1=neval1-ibase1+1
       if (nv2.gt.0) neval2= min(nv2,neval2-ibase2+1)
-      if (nv2.le.0) neval2=neval2-ibase2+1
+      if (nv2<=0) neval2=neval2-ibase2+1
       jdia=max(1,idia)
       nbin=jrot1+jrot2+3
 !
@@ -831,7 +831,7 @@ end module dipole3_seg_mass
       call getrow(r1,npnt1,ibra)
       if (idia .gt. -2) call getrow(r2,npnt2,ibra)
      write(*,*) 'checkpoint 3 : in dmain'
-      if (jk2 .le. 1) then
+      if (jk2 <= 1) then
         read(ibra)
         read(ibra)
         read(ibra)
@@ -845,7 +845,7 @@ end module dipole3_seg_mass
         read(iket)
         if (idia .gt. -2) read(iket)
 !
-      if (jk1 .le. 1) then
+      if (jk1 <= 1) then
         read(iket)
         read(iket)
         read(iket)
@@ -949,7 +949,7 @@ end module dipole3_seg_mass
          call wrscr(tz,tx,neval1*neval2,iscr,iblock)
          write(6,2000) iblock,k1-kmin1,k2-kmin2
  2000    format(/5x,'Block',i4,' k1 =',i3,' to k2 =',i3,' completed')
-         if (iblock .ge. kblock) goto 154
+         if (iblock >= kblock) goto 154
        endif
       endif
       ip=1-ip
@@ -1027,14 +1027,14 @@ if(jk2 .ne. 1) call dsrd(dupper,dstemp,ibra,mbass2,nbass2(3),neval2,&
 	endif
       endif
 
-if(jk2 .le. 1) go to 108
+if(jk2 <= 1) go to 108
 !cccccccccccccccccccccccccccccccccccc
 !     nu = +1 calculation
 !cccccccccccccccccccccccccccccccccccc
       nu= 1
       kk2= kk1 + nu
       k2= kk2 + kmin2
-      if (k2.le.jk2) then
+      if (k2<=jk2) then
        jblock=jblock+1
        if (jblock.gt.iblock) then
         iblock=iblock+1
@@ -1051,7 +1051,7 @@ if(jk2 .le. 1) go to 108
          call trans(tx,dipol,binom,dc1,dupper,k1,k2,xfac,nu,ip)
          call wrscr(tz,tx,neval1*neval2,iscr,iblock)
          write(6,2000) iblock,k1-kmin1,k2-kmin2
-         if (iblock .ge. kblock) goto 154
+         if (iblock >= kblock) goto 154
         endif
        endif
       endif
@@ -1063,7 +1063,7 @@ if(jk2 .le. 1) go to 108
       nu= -1
       kk2= kk1 + nu
       k2= kk2 + kmin2
-      if (k2.ge.1) then
+      if (k2>=1) then
        jblock=jblock+1
        if (jblock.gt.iblock) then
         iblock=iblock+1
@@ -1080,7 +1080,7 @@ if(jk2 .le. 1) go to 108
          call trans(tx,dipol,binom,dc1,dlower,k1,k2,xfac,nu,ip)
          call wrscr(tz,tx,neval1*neval2,iscr,iblock)
          write(6,2000) iblock,k1-kmin1,k2-kmin2
-         if (iblock.ge.kblock .and. k1.lt.jk1) goto 154
+         if (iblock>=kblock .and. k1.lt.jk1) goto 154
         endif
        endif
       endif
@@ -1100,7 +1100,7 @@ if(jk2 .le. 1) go to 108
 11    continue
 
       goto 55
-154   if (iblock.ge.mblock) goto 55
+154   if (iblock>=mblock) goto 55
       write(6,1540) iblock
 1540  format(//i7,' blocks calculated. dipole3 shutting down')
       call timer
@@ -1236,7 +1236,7 @@ if(jk2 .le. 1) go to 108
       endif
 !     define other integration points
       do 20 i=1,nn2
-      if (idia .ge.0) then
+      if (idia >=0) then
          j=i+nn2
          xd(j)=-xd(npot-j+1)
          wtd(j)=wtd(npot-j+1)
@@ -1479,7 +1479,7 @@ if(jk2 .le. 1) go to 108
       if (jk .gt. 1) then
          kz=kk
 !
-         if (kneed .le. kbeg) then
+         if (kneed <= kbeg) then
            rewind ivec
 	   write(*,*) "Rewinded ivec"
 
@@ -1663,7 +1663,7 @@ if(jk2 .le. 1) go to 108
       jj=jj+jdia
       kk=0
       do 40 k=1,idvr
-      if (iv(k) .le. 0) goto 40
+      if (iv(k) <= 0) goto 40
       kk=kk+1
       do 50 mn=1,nrad
       sumk(mn)=sumk(mn) + dvrvec(kk,mn) * pleg(jj,k)
@@ -1821,23 +1821,23 @@ if(jk2 .le. 1) go to 108
       threej = zero
       if (m1+m2+m3 .ne. 0) return
       i1 = -j1+j2+j3+1
-      if (i1 .le. 0) return
+      if (i1 <= 0) return
       i2 = j1-j2+j3+1
-      if (i2 .le. 0) return
+      if (i2 <= 0) return
       i3 =  j1+j2-j3+1
-      if (i3 .le. 0) return
+      if (i3 <= 0) return
       k1 =  j1+m1+1
-      if (k1 .le. 0) return
+      if (k1 <= 0) return
       k2 = j2+m2+1
-      if (k2 .le. 0) return
+      if (k2 <= 0) return
       k3 =  j3+m3+1
-      if (k3 .le. 0) return
+      if (k3 <= 0) return
       l1 = j1-m1+1
-      if (l1 .le. 0) return
+      if (l1 <= 0) return
       l2 = j2-m2+1
-      if (l2 .le. 0) return
+      if (l2 <= 0) return
       l3 = j3-m3+1
-      if (l3 .le. 0) return
+      if (l3 <= 0) return
       n1 = -j1-m2+j3
       n2 = m1-j2+j3
       n3 = j1-j2+m3
@@ -1973,7 +1973,7 @@ if(jk2 .le. 1) go to 108
 206   format(2(i4),3(3x,f14.6),5(2x,es15.8)) ! changed L Lodi 8-Feb-2010
 2     continue
 
-!      if (.not.zpmin .or. ie1.le.10) write(6,207)
+!      if (.not.zpmin .or. ie1<=10) write(6,207)
 !207   format(//)
 
 1     continue
@@ -2108,11 +2108,11 @@ if(jk2 .le. 1) go to 108
          XX = R1 * G1
          YY = R1 * (X1 - G1)
          ALPHA= ACOS(XCOS)
-         IF (R2 .EQ. X0 .OR. XCOS .GE. (X1 - TINY)) THEN
+         IF (R2 .EQ. X0 .OR. XCOS >= (X1 - TINY)) THEN
             Q1 = ABS(XX - R2)
             Q2 = (YY + R2)
             COST = -X1
-         ELSE IF (XCOS .LE. (TINY - X1)) THEN
+         ELSE IF (XCOS <= (TINY - X1)) THEN
             Q1 = (XX + R2)
             Q2 = ABS(YY + R2)
             COST = X1

@@ -1195,7 +1195,7 @@ subroutine insize
          endif
       endif
 !     set default value of g1 and g2
-      if (idia .ge. 1) then
+      if (idia >= 1) then
 !        scattering coordinates
          g1 = xmass(2) / (xmass(2) + xmass(3))
          g2 = x0
@@ -2851,7 +2851,7 @@ subroutine insize
       endif
       do 220 j=ipt+1,npntc
       if(iv2(j) .gt. ndim2d(j)) goto 220
-      if(eigs2(iv2(j),j) .ge. eigvib) goto 220
+      if(eigs2(iv2(j),j) >= eigvib) goto 220
       eigvib = eigs2(iv2(j),j)
       jpt = j
   220 continue
@@ -3082,7 +3082,7 @@ subroutine insize
          term2 = dble(jrot * jrot + jrot - 3 * kz * kz) / x4
          if (abs(kz) .eq. 1) then
             term3 = dble(jrot * jrot + jrot) / x16
-            if (kmin .ge. 1 .and. zrot) term3 = -term3
+            if (kmin >= 1 .and. zrot) term3 = -term3
          endif
       endif
 
@@ -3848,7 +3848,7 @@ subroutine insize
 !     7 format(i4,f12.7,9f13.7)
       ind0=ind0+i
     5 continue
-      if(lup.ge.ndim) return
+      if(lup>=ndim) return
       ip=ip+1
       go to 3
       end
