@@ -1,17 +1,35 @@
+!==================================================================================================
+!Module defintion
+!By Runyu Zhang & Tennyson Jonathan 1/Sep/2022
+!Contains: size, timing, mass, dim
+!Special notice:: The module name contains the file name, it means cannot directly paste to other 
+!                 files and use. There are some difference between the constant numbers, types and 
+!                 default value.
+!==================================================================================================
 
 module xpect3_logic
-    logical :: zmors1
+    logical :: zmors1   ! T use morse oscillator-like functions for r_1 coordinate;
     logical :: zncor = .false.
-    logical :: zprint = .false.
-    logical :: ztra = .true.
-    logical :: zstart = .false.
-    logical :: zmors2
+    logical :: zprint = .false.   ! T supplies extra print out for debugging purposes.  
+    logical :: ztra = .true.    ! T writes out the data needed for program spectra 
+                                   ! to calculate simulated spectra.
+    logical :: zstart = .false.     ! T if we are writing out for spectra for the first time.
+    logical :: zmors2       ! T use morse oscillator-like functions for r_2 coordinate;
+                                   ! F use spherical oscillator functions.
     logical :: zfit = .false.
     logical :: zform = .true.
-    integer :: iket = 11
-    integer :: itra = 12
+    integer :: iket = 11   ! input stream for the ket.
+    integer :: itra = 12    ! output stream to program spectrm (if ztra).
+                              ! note that for all times other than the dipole assumes 
+                              ! that we have accessed the permanent dataset or file which has the
+                              ! data from previous runs and that we are writing to the end of that file.
+                              ! ************************************************
+                              ! **  for the sake of safety you are therefore  **
+                              ! **  advised to keep one previous edition as   **
+                              ! **  backup!                                   **
+                              ! ************************************************
     integer :: itra0 = 28
-    integer :: ilev = 14
+    integer :: ilev = 14   ! stream for final eigenvalues (formatted).
 
 end module xpect3_logic
 
@@ -20,23 +38,30 @@ module xpect3_timing
 end module xpect3_timing
 
 module xpect3_mass
-    logical :: zembed
-    logical :: zbisc
+    logical :: zembed   ! T z axis is along r2, = f z axis is along r1.
+                                   ! only used if J > 0 ZBISC = in JHMAIN ie if zbisc=f and zperp=f.
+
+    logical :: zbisc     ! T place the Z-axis along the bisector
     double precision :: xmass(3)
     double precision :: g1, g2
 end module xpect3_mass
 
 module xpect3_dim
-    integer :: ncoord
-    integer :: npnt
-    integer :: npnt1
-    integer :: npnt2
+    integer :: ncoord    ! number of vibrational coordinates explicitly considered
+                              ! ncoord = 2: atom-diatom problem with diatom rigid
+                              ! ncoord=2: also need lmax,lpot,idia,kmin
+                              ! ncoord = 3: full 3-d triatomic problem
+                              ! ncoord=3: all paramters required
+    integer :: npnt          ! max(npnt1,npnt2) number of gauss-associated legendre grid points requested
+    integer :: npnt1         ! number of (gauss-laguerre) dvr points in r1
+    integer :: npnt2         ! number of (gauss-laguerre) dvr points in r2
     integer :: nrade
     integer :: nrado
     integer :: lpot
-    integer :: npot
+    integer :: npot    ! number of Gauss-Legendre integration points used
+                              ! in i5 format
     integer :: nbmax1
-    integer :: mbass
+    integer :: mbass  ! maximum size of vibrational problem (excluding linear geom)
     integer :: kmin1
     integer :: jk1
     integer :: neval
@@ -46,8 +71,11 @@ module xpect3_dim
     integer :: nprt
     integer :: jrot
     integer :: idia
-    integer :: ipar
-    integer :: nv1
+    integer :: ipar ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
+     integer :: nv1           ! number of bra eigenfunctions considered
+                              ! if this is input as zero, all available
+                              ! ket eigenfunctions will be considered when computing transitions.
+                              ! in i5 format
 
 end module xpect3_dim
 

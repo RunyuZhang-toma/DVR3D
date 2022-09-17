@@ -1,13 +1,26 @@
-module rotlev3z_size
-    integer :: nbass
-    integer :: neval
-    integer :: idia
+
+!==================================================================================================
+!Module defintion
+!By Runyu Zhang & Tennyson Jonathan 1/Sep/2022
+!Contains: size, outp, pb
+!Special notice:: The module name contains the file name, it means cannot directly paste to other 
+!                 files and use. There are some difference between the constant numbers, types and 
+!                 default value.
+!==================================================================================================
+module rotlev3z_size 
+    integer :: nbass    ! maximum dimension of rotational secular problem
+    integer :: neval   ! number of eigenvalues which have to actually be supplied as output
+    integer :: idia    ! 1 scattering coordinates heteronuclear diatomic
+                         ! 2 scattering coordinates homonuclear diatomic
+                         ! -1 radau  coordinates hetronuclear diatomic
+                         ! -2 radau  coordinates homonuclear  diatomic
+                         ! 0 radau   coordinates with the z axis perpendicular to the molecular plane.
     integer :: nr
     integer :: maxblk_even
-    integer :: jrot
-    integer :: ndvr
-    integer :: iang
-    integer :: npnt
+    integer :: jrot   ! total angular momentum of the molecule
+    integer :: ndvr     ! maximum dimension of theta dvr grid used in vibrational problem
+    integer :: iang     ! maximum number of discrete angles retained in vib. problem
+    integer :: npnt    ! max(npnt1,npnt2) number of gauss-associated legendre grid points requested
     integer :: maxblk_odd
     integer :: ibass
     integer :: nktot
@@ -18,25 +31,34 @@ end module rotlev3z_size
 
 module rotlev3z_outp
     integer :: idiag =  2
-    integer :: ilev = 14
-    integer :: ivec = 26
+    integer :: ilev = 14    ! stream for final eigenvalues (formatted).
+                                   ! holds input/output of eigenvalues used if zpfun = .true.
+    integer :: ivec = 26    ! holds input  eigenvalues & eigenvectors used if always
     integer :: ivec1 = 27
-    integer :: jvec = 3
+    integer :: jvec = 3         ! holds output first  set eigenvalues & vectors used if zvec=.true.
     integer :: kvecpb = 9
-    integer :: kvec = 8
-    integer :: iscr = 1
+    integer :: kvec = 8        ! holds output first  set transformed vectors used if ztran=.true.
+    integer :: iscr = 1      ! scratch file used for restart runs
+                                   ! holds hamiltonian file used if always
     integer :: nploti = 1
     integer :: nplotf = 0
     integer :: ithre = -8
-    logical :: zpham = .false.
-    logical :: zpvec = .false.
-    logical :: zvec = .false.
-    logical :: ztran = .false.
-    logical :: zptra = .false.
+    logical :: zpham = .false.   ! T request printing of the hamiltonian matrix
+    logical :: zpvec = .false.     ! T request printing of the eigenvectors
+    logical :: zvec = .false.     ! T store the eigenvectors from all the parts of the calculation
+                                   ! eigenvalues and eigenvectors written to disk file.
+                                   ! (1d,2d and 3d) on stream iout2.
+                                   ! further information relating to this (arrays iv1 and iv2) is
+                                   ! stored on stream iout1.
+    logical :: ztran = .false.     ! T perform the transformation of the solution coefficients
+                                   ! to the expression for the wavefunction amplitudes at the grid
+                                   ! points. store the data on stream iwave.
+                                   ! ztran = T automatically sets zvec = t for idia > -2.
+    logical :: zptra = .false.    ! print the transformed vectors.
     logical :: zcut = .false.
-    logical :: zpfun = .false.
+    logical :: zpfun = .false.     ! F store energy levels on stream ilev
     logical :: zplot = .false.
-    double precision :: thresh = 0.1d0
+    double precision :: thresh = 0.1d0   ! threshold for printing a coefficient if zpvec=.true.
 
 end module rotlev3z_outp
 

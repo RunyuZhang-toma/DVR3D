@@ -1,13 +1,27 @@
+!==================================================================================================
+!Module defintion
+!By Runyu Zhang & Tennyson Jonathan 1/Sep/2022
+!Contains: size
+!Special notice:: The module name contains the file name, it means cannot directly paste to other 
+!                 files and use. There are some difference between the constant numbers, types and 
+!                 default value.
+!==================================================================================================
 
 module wfnread_size
-    integer :: idia
-    integer :: ipar
+    integer :: idia    ! 1 scattering coordinates heteronuclear diatomic
+                         ! 2 scattering coordinates homonuclear diatomic
+                         ! -1 radau  coordinates hetronuclear diatomic
+                         ! -2 radau  coordinates homonuclear  diatomic
+                         ! 0 radau   coordinates with the z axis perpendicular to the molecular plane.
+    integer :: ipar   ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
     integer :: lmax
-    integer :: npnt1
-    integer :: npnt2
-    integer :: jrot
-    integer :: kmin
-    integer :: neval
+    integer :: npnt1    ! number of (gauss-laguerre) dvr points in r1
+    integer :: npnt2    ! number of (gauss-laguerre) dvr points in r2
+    integer :: jrot   ! total angular momentum of the molecule
+    integer :: kmin   ! zrot=t, kmin=1 sym. rot. basis, =0 anti-sym.
+                         ! kmin=2 loop over both sym & anti-sym (zbisc=t only)
+                         ! zrot=f, kmin=fixed value of k
+    integer :: neval   ! number of eigenvalues which have to actually be supplied as output
     integer :: jk
     integer :: ifile
 

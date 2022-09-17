@@ -1,18 +1,30 @@
+!==================================================================================================
+!Module defintion
+!By Runyu Zhang & Tennyson Jonathan 1/Sep/2022
+!Contains: logic, base, timing
+!Special notice:: The module name contains the file name, it means cannot directly paste to other 
+!                 files and use. There are some difference between the constant numbers, types and 
+!                 default value.
+!==================================================================================================
 
 module spectra_logic
 
-    logical :: zout
-    logical :: zsort
-    logical :: zspe
-    logical :: zpfun
-    logical :: zembed
+    logical :: zout    ! this should be true if the sorted line strengths are to be written
+    logical :: zsort   ! if false subroutine sortsp is skipped.
+    logical :: zspe   ! if false the program stops after sortsp. units of ispe are atomic units.
+    logical :: zpfun    ! calculates the partition function from energy levels supplied from
+                                   ! DVR3DRJZ and ROTLEV3/3B.
+                                   ! if zpfun false, the partition function
+                                   ! is set to q read in below.
+
+    logical :: zembed    ! T z axis is along r2, = f z axis is along r1.
     logical :: zpseg
 
 end module
 
 module spectra_base
-    integer :: ibase1
-    integer :: ibase2
+    integer :: ibase1 ! number of lowest ket eigenfunctions skipped
+    integer :: ibase2 ! number of lowest bra eigenfunctions skipped
 end module spectra_base
 
 module spectra_timing

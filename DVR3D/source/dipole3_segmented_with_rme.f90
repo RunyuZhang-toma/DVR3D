@@ -1,4 +1,11 @@
-!MODULE DEFINITIONS--------------------------------------------
+!==================================================================================================
+!Module defintion
+!By Runyu Zhang & Tennyson Jonathan 1/Sep/2022
+!Contains sizes, old, logic, stream, mass, eqm, timing, dim, sym
+!Special notice:: The module name contains the file name, it means cannot directly paste to other 
+!                 files and use. There are some difference between the constant numbers, types and 
+!                 default value.
+!==================================================================================================
 module dipole3_seg_rme_logic
 	save
 	logical :: znco1

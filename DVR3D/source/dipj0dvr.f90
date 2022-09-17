@@ -1,5 +1,12 @@
 !MODULE DEFINITIONS
-
+!==================================================================================================
+!Module defintion
+!By Runyu Zhang & Tennyson Jonathan 1/Sep/2022
+!Contains sizes, diffs, old, logic, stream, mass, eqm, time
+!Special notice:: The module name contains the file name, it means cannot directly paste to other 
+!                 files and use. There are some difference between the constant numbers, types and 
+!                 default value.
+!==================================================================================================
 module dipj0dvr_sizes
     save
     integer :: lbra0

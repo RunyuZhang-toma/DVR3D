@@ -1,4 +1,12 @@
-!MODULE DEFINITIONS--------------------------------------------
+!==================================================================================================
+!Module defintion
+!By Runyu Zhang & Tennyson Jonathan 1/Sep/2022
+!Contains: logic, base
+!Special notice:: The module name contains the file name, it means cannot directly paste to other 
+!                 files and use. There are some difference between the constant numbers, types and 
+!                 default value.
+!==================================================================================================
+
 module spectra_seg_logic
   !save
 !constant count: integer 6, ligical 22.

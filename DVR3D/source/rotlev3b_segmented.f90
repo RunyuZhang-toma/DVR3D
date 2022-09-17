@@ -1,3 +1,11 @@
+!==================================================================================================
+!Module defintion
+!By Runyu Zhang & Tennyson Jonathan 1/Sep/2022
+!Contains: size, outp, timing
+!Special notice:: The module name contains the file name, it means cannot directly paste to other 
+!                 files and use. There are some difference between the constant numbers, types and 
+!                 default value.
+!==================================================================================================
 module rotlev3b_seg_size
     integer :: nbass   ! maximum dimension of rotational secular problem
     integer :: mbass     ! maximum size of vibrational problem (excluding linear geom)

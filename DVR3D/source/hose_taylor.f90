@@ -1,3 +1,11 @@
+!==================================================================================================
+!Module defintion
+!By Runyu Zhang & Tennyson Jonathan 1/Sep/2022
+!Contains: size
+!Special notice:: The module name contains the file name, it means cannot directly paste to other 
+!                 files and use. There are some difference between the constant numbers, types and 
+!                 default value.
+!==================================================================================================
 module hose_taylor_size
     integer :: idia    ! 1 scattering coordinates heteronuclear diatomic
                          ! 2 scattering coordinates homonuclear diatomic
