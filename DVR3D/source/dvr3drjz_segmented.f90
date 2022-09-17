@@ -1,44 +1,58 @@
 !MODULE DEFINITIONS--------------------------------------------
 module logic
    save
+    logical :: znco1
+    logical :: znco2
+    logical :: zpmin   ! T supplies less  print out for large runs.
+    logical :: zrme1     ! F program calculates reduced matrix elements for the dipole order.
+                                   ! We follow defintion of Lamouroux et al.
+                                   ! http://dx.doi.org/10.1016/j.jqsrt.2014.06.011
+    logical :: zrme2    ! F program calculates reduced matrix elements for the quadrupole order.
+    logical :: zrme3    ! F program calculates reduced matrix elements for the octupole order.
 
-     logical :: znco1
-     logical :: znco2
-     logical :: zpmin
-     logical :: zrme1
-     logical :: zrme2
-     logical :: zrme3
+    logical :: zmors1     ! T use morse oscillator-like functions for r_1 coordinate;
 
-     logical :: zmors1
-
-     logical :: zprint
-     logical :: ztra
-     logical :: zstart
-     logical :: zmors2
+    logical :: zprint   ! T supplies extra print out for debugging purposes.  
+    logical :: ztra      ! T writes out the data needed for program spectra 
+                                   ! to calculate simulated spectra.
+    logical :: zstart     ! T if we are writing out for spectra for the first time.
+    logical :: zmors2     ! T use morse oscillator-like functions for r_2 coordinate;
+                                   ! F use spherical oscillator functions.
 
 end module logic
 
 module timing
    save
-     integer :: itime0
+    integer :: itime0
 end module timing
 
 module head
    save
-     double precision :: title
+    double precision :: title
 end module head
 
 
 module stream
     save
 
-    integer :: iket
-    integer :: ibra
-    integer :: itra
-    integer :: iscr
-    integer :: ires
+    integer :: iket    ! input stream from DVR3DRJZ/ROTLEV3/ROTLEV3B for the ket (unformated)
+    integer :: ibra     ! input stream for the bra (unformmatted)
+    integer :: itra    ! output stream to program spectrm (if ztra).
+                              ! note that for all times other than the dipole assumes 
+                              ! that we have accessed the permanent dataset or file which has the
+                              ! data from previous runs and that we are writing to the end of that file.
+                              ! ************************************************
+                              ! **  for the sake of safety you are therefore  **
+                              ! **  advised to keep one previous edition as   **
+                              ! **  backup!                                   **
+                              ! ************************************************
+    integer :: iscr    ! scratch file used for restart runs
+                              ! holds hamiltonian file used if always
+    integer :: ires     ! a) ires (0) restart parameter
+                              ! ires = 0, normal run
+                              ! ires = 1, restart run
     integer :: mblock
-    integer :: nblock
+    integer :: nblock    ! b) nblock (1000) number of k --> k' blocks to be attempted
     ! dimension  iprop(mxprop)
 end module stream
 
@@ -47,45 +61,45 @@ module dim
    save
 !constant count: integer 33.
 
-     integer :: neval         ! number of eigenvalues which have to actually be supplied as output
-     integer :: lpot
-     integer :: ncoord        ! number of vibrational coordinates explicitly considered
+    integer :: neval         ! number of eigenvalues which have to actually be supplied as output
+    integer :: lpot
+    integer :: ncoord        ! number of vibrational coordinates explicitly considered
                               ! ncoord = 2: atom-diatom problem with diatom rigid
                               ! ncoord=2: also need lmax,lpot,idia,kmin
                               ! ncoord = 3: full 3-d triatomic problem
                               ! ncoord=3: all paramters required
 
-     integer :: npnt          ! max(npnt1,npnt2) number of gauss-associated legendre grid points requested
-     integer :: npnt1         ! number of (gauss-laguerre) dvr points in r1
-     integer :: npnt2         ! number of (gauss-laguerre) dvr points in r2
-     integer :: nrade
-     integer :: nrado
-     integer :: npot          ! number of Gauss-Legendre integration points used
+    integer :: npnt          ! max(npnt1,npnt2) number of gauss-associated legendre grid points requested
+    integer :: npnt1         ! number of (gauss-laguerre) dvr points in r1
+    integer :: npnt2         ! number of (gauss-laguerre) dvr points in r2
+    integer :: nrade
+    integer :: nrado
+    integer :: npot          ! number of Gauss-Legendre integration points used
                               ! in i5 format
 
-     integer :: nbin          ! largest binomial coef. required for angular integration(+1)
-     integer :: nbmax1
-     integer :: nbmax2
-     integer :: mbass         ! maximum size of vibrational problem (excluding linear geom)
-     integer :: mbass1
-     integer :: mbass2
-     integer :: kmin1
-     integer :: kmin2
-     integer :: jk1
-     integer :: jk2
-     integer :: neval1
-     integer :: neval2
-     integer :: nn2
-     integer :: ibase1        ! number of lowest ket eigenfunctions skipped
-     integer :: ibase2        ! number of lowest bra eigenfunctions skipped
-     integer :: ipot
-     integer :: lmax
-     integer :: npropin
-     integer :: nprt
-     integer :: jrot          ! total angular momentum of the molecule
-     integer :: idia
-     integer :: ipar          ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
-     integer :: nv1           ! number of bra eigenfunctions considered
+    integer :: nbin          ! largest binomial coef. required for angular integration(+1)
+    integer :: nbmax1
+    integer :: nbmax2
+    integer :: mbass         ! maximum size of vibrational problem (excluding linear geom)
+    integer :: mbass1
+    integer :: mbass2
+    integer :: kmin1
+    integer :: kmin2
+    integer :: jk1
+    integer :: jk2
+    integer :: neval1
+    integer :: neval2
+    integer :: nn2
+    integer :: ibase1        ! number of lowest ket eigenfunctions skipped
+    integer :: ibase2        ! number of lowest bra eigenfunctions skipped
+    integer :: ipot
+    integer :: lmax
+    integer :: npropin
+    integer :: nprt
+    integer :: jrot          ! total angular momentum of the molecule
+    integer :: idia
+    integer :: ipar          ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
+    integer :: nv1           ! number of bra eigenfunctions considered
                               ! if this is input as zero, all available
                               ! ket eigenfunctions will be considered when computing transitions.
                               ! in i5 format
@@ -95,22 +109,21 @@ end module dim
 module sym
    save
 
-     integer :: idia     ! 1 scattering coordinates heteronuclear diatomic
+    integer :: idia     ! 1 scattering coordinates heteronuclear diatomic
                          ! 2 scattering coordinates homonuclear diatomic
                          ! -1 radau  coordinates hetronuclear diatomic
                          ! -2 radau  coordinates homonuclear  diatomic
                          ! 0 radau   coordinates with the z axis perpendicular to the molecular plane.
-     integer :: ipar1
-     integer :: ipar2
-     integer :: jrot1
-     integer :: jrot2
+    integer :: ipar1
+    integer :: ipar2
+    integer :: jrot1
+    integer :: jrot2
 
 end module sym
 
 module split1
     save
-
-     integer :: iu1
+    integer :: iu1
 
     double precision :: re1
     double precision :: diss1
@@ -138,7 +151,7 @@ module split2
 end module split2
 
 module mass
-   save
+    save
 
     double precision:: xmass(3)
     double precision :: xmassr(3)
@@ -149,72 +162,72 @@ module mass
 end module mass
 
 module outp
-   save
-     integer :: idiag1 = 20        ! the final Hamiltonian matrix is written on units IDIAG1 and IDIAG2.
-     integer :: idiag2 = 21        ! the final Hamiltonian matrix is written on units IDIAG1 and IDIAG2.
-     integer :: iout1 = 24         ! stream for arrays iv1 and iv2, which record the sizes of
+    save
+    integer :: idiag1 = 20        ! the final Hamiltonian matrix is written on units IDIAG1 and IDIAG2.
+    integer :: idiag2 = 21        ! the final Hamiltonian matrix is written on units IDIAG1 and IDIAG2.
+    integer :: iout1 = 24         ! stream for arrays iv1 and iv2, which record the sizes of
                                    ! the truncated vctors. used when zvec = t.
-     integer :: iout2 = 25         ! stream for the 1d, 2d and 3d vectors for use when zvec = t.
-     integer :: iwave = 26         ! stores the wavefunction amplitudes at the grid points when
-     integer :: ilev = 14          ! stream for final eigenvalues (formatted).
+    integer :: iout2 = 25         ! stream for the 1d, 2d and 3d vectors for use when zvec = t.
+    integer :: iwave = 26         ! stores the wavefunction amplitudes at the grid points when
+    integer :: ilev = 14          ! stream for final eigenvalues (formatted).
                                    ! holds input/output of eigenvalues used if zpfun = .true.
-     integer :: ieigs1 = 7         ! stream for eigenvalues of the 1d solutions.
-     integer :: ieigs2 = 2         ! stream for eigenvalues of the 2d solutions.
-     integer :: ivecs1 = 3         ! stream for eigenvectors of the 1d solutions.
-     integer :: ivecs2 = 4         ! stream for eigenvectors of the 2d solutions.
-     integer :: ivint = 17         ! a scratch stream used for storing intermediate vectors in
+    integer :: ieigs1 = 7         ! stream for eigenvalues of the 1d solutions.
+    integer :: ieigs2 = 2         ! stream for eigenvalues of the 2d solutions.
+    integer :: ivecs1 = 3         ! stream for eigenvectors of the 1d solutions.
+    integer :: ivecs2 = 4         ! stream for eigenvectors of the 2d solutions.
+    integer :: ivint = 17         ! a scratch stream used for storing intermediate vectors in
                                    ! building the final hamiltonian.
-     integer :: iband = 15         ! scratch file used for storing bands of the final hamiltonian.
-     integer :: intvec = 16        ! a scratch stream for intermediate storage of the 2d vectors.
-     logical :: zpham = .false.    ! T request printing of the hamiltonian matrix
-     logical :: zprad = .false.    ! T request printing of the radial matrix elements
-     logical :: zpvec = .false.    ! T request printing of the eigenvectors
-     logical :: zrot = .true.      ! F do vibrational part of rotational calculation by looping over k
-     logical :: zladd = .true.     ! T NALF kept constant as k increases
+    integer :: iband = 15         ! scratch file used for storing bands of the final hamiltonian.
+    integer :: intvec = 16        ! a scratch stream for intermediate storage of the 2d vectors.
+    logical :: zpham = .false.    ! T request printing of the hamiltonian matrix
+    logical :: zprad = .false.    ! T request printing of the radial matrix elements
+    logical :: zpvec = .false.    ! T request printing of the eigenvectors
+    logical :: zrot = .true.      ! F do vibrational part of rotational calculation by looping over k
+    logical :: zladd = .true.     ! T NALF kept constant as k increases
                                    ! F NALF decreases with k (=f has a bug), (only if zrot = .true.)
-     logical :: zembed = .true.    ! T z axis is along r2, = f z axis is along r1.
+    logical :: zembed = .true.    ! T z axis is along r2, = f z axis is along r1.
                                    ! only used if J > 0 ZBISC = in JHMAIN ie if zbisc=f and zperp=f.
-     logical :: zmors2 = .true.    ! T use morse oscillator-like functions for r_2 coordinate;
+    logical :: zmors2 = .true.    ! T use morse oscillator-like functions for r_2 coordinate;
                                    ! F use spherical oscillator functions.
-     logical :: zs0 = .false.
-     logical :: zx = .false.
-     logical :: zs1 = .false.
-     logical :: zpmin = .false.    ! T requests only minimal printing.
-     logical :: zvec = .false.     ! T store the eigenvectors from all the parts of the calculation
+    logical :: zs0 = .false.
+    logical :: zx = .false.
+    logical :: zs1 = .false.
+    logical :: zpmin = .false.    ! T requests only minimal printing.
+    logical :: zvec = .false.     ! T store the eigenvectors from all the parts of the calculation
                                    ! eigenvalues and eigenvectors written to disk file.
                                    ! (1d,2d and 3d) on stream iout2.
                                    ! further information relating to this (arrays iv1 and iv2) is
                                    ! stored on stream iout1.
-     logical :: zquad2 = .true.    ! T use the dvr quadrature approximation for the integrals of
+    logical :: zquad2 = .true.    ! T use the dvr quadrature approximation for the integrals of
                                    ! the r_2^{-2} matrix, and hence make its dvr transformation diagonal.
                                    ! F evaluate the r_2^{-2} integrals fully and perform the
                                    ! full dvr transformation on them.
                                    ! Note that zquad2 = f is not implemented for zmors2 = t
                                    ! or for ztheta = f.
-     logical :: zdiag = .true.     ! F do not do final diagonalisation, instead the final Hamiltonian
+    logical :: zdiag = .true.     ! F do not do final diagonalisation, instead the final Hamiltonian
                                    ! matrix is written on units IDIAG1 and IDIAG2. 
-     logical :: zlmat = .false.    ! T requests printing of the L-matrix.
-     logical :: zcut = .false.     ! T final dimension selected using an energy cut-off given  by emax2.
+    logical :: zlmat = .false.    ! T requests printing of the L-matrix.
+    logical :: zcut = .false.     ! T final dimension selected using an energy cut-off given  by emax2.
                                    ! F final dimension determined by nham3.
-     logical :: zall = .false.     ! T requests no truncation of the intermediate solution.
-     logical :: zlin = .false.     ! T NALF kept constant as k increases
+    logical :: zall = .false.     ! T requests no truncation of the intermediate solution.
+    logical :: zlin = .false.     ! T NALF kept constant as k increases
                                    ! F NALF decreases with k (=f has a bug), (only if zrot = .true.)
-     logical :: zp1d = .false.     ! T requests printing of the results of 1d calculations.
-     logical :: zp2d = .false.     ! T requests printing of the results of 2d calculations.
-     logical :: zr2r1 = .true.     ! T let r_2 come before r_1 in the order of solution;
+    logical :: zp1d = .false.     ! T requests printing of the results of 1d calculations.
+    logical :: zp2d = .false.     ! T requests printing of the results of 2d calculations.
+    logical :: zr2r1 = .true.     ! T let r_2 come before r_1 in the order of solution;
                                    ! F let r_1 come before r_2 in the order of solution. (only idia > -2).
-     logical :: ztheta = .true.    ! T let theta be first in the order of solution;
+    logical :: ztheta = .true.    ! T let theta be first in the order of solution;
                                    ! F let theta be last in the order of solution,
-     logical :: ztran = .false.    ! T perform the transformation of the solution coefficients
+    logical :: ztran = .false.    ! T perform the transformation of the solution coefficients
                                    ! to the expression for the wavefunction amplitudes at the grid
                                    ! points. store the data on stream iwave.
                                    ! ztran = T automatically sets zvec = t for idia > -2.
-     logical :: zmors1 = .true.    ! T use morse oscillator-like functions for r_1 coordinate;
+    logical :: zmors1 = .true.    ! T use morse oscillator-like functions for r_1 coordinate;
                                    ! F use spherical oscillator functions.
-     logical :: ztwod = .false.    ! T perform 2D calculation only at specified grid point.
-     logical :: zbisc              ! T place the Z-axis along the bisector
-     logical :: zperp = .false.    ! T place the Z-axis perpendicular to the molecule place
-     logical :: zpfun = .false.    ! F store energy levels on stream ilev
+    logical :: ztwod = .false.    ! T perform 2D calculation only at specified grid point.
+    logical :: zbisc              ! T place the Z-axis along the bisector
+    logical :: zperp = .false.    ! T place the Z-axis perpendicular to the molecule place
+    logical :: zpfun = .false.    ! F store energy levels on stream ilev
 end module outp
 module oupb
     save
@@ -229,50 +242,50 @@ module size
    save
 !constant count: integer 69, real 2.
 
-     integer :: npnt1    ! number of (gauss-laguerre) dvr points in r1
-     integer :: npnt2    ! number of (gauss-laguerre) dvr points in r2
-     integer :: nalf     ! number of (gauss-legendre) dvr points in theta
-     integer :: nmax1    ! max order of r1 radial laguerre polynomial ( = npnt1-1)
-     integer :: nmax2    ! max order of r2 radial laguerre polynomial ( = npnt2-1)
-     integer :: maxleg   ! max order of angular legendre polynomial   ( = nalf -1)
-     integer :: nalf2
-     integer :: idvr     ! number of unique dvr points
-     integer :: npnt     ! max(npnt1,npnt2) number of gauss-associated legendre grid points requested
-     integer :: nlim1    ! nmax1+1*(nmax1+1+1)/2
-     integer :: nlim2    ! nmax2+1*(nmax2+1+1)/2
-     integer :: neval    ! number of eigenvalues which have to actually be supplied as output
-     integer :: ncoord   ! number of vibrational coordinates explicitly considered
+    integer :: npnt1    ! number of (gauss-laguerre) dvr points in r1
+    integer :: npnt2    ! number of (gauss-laguerre) dvr points in r2
+    integer :: nalf     ! number of (gauss-legendre) dvr points in theta
+    integer :: nmax1    ! max order of r1 radial laguerre polynomial ( = npnt1-1)
+    integer :: nmax2    ! max order of r2 radial laguerre polynomial ( = npnt2-1)
+    integer :: maxleg   ! max order of angular legendre polynomial   ( = nalf -1)
+    integer :: nalf2
+    integer :: idvr     ! number of unique dvr points
+    integer :: npnt     ! max(npnt1,npnt2) number of gauss-associated legendre grid points requested
+    integer :: nlim1    ! nmax1+1*(nmax1+1+1)/2
+    integer :: nlim2    ! nmax2+1*(nmax2+1+1)/2
+    integer :: neval    ! number of eigenvalues which have to actually be supplied as output
+    integer :: ncoord   ! number of vibrational coordinates explicitly considered
                          ! ncoord = 2: atom-diatom problem with diatom rigid
                          ! ncoord=2: also need lmax,lpot,idia,kmin
                          ! ncoord = 3: full 3-d triatomic problem
                          ! ncoord=3: all paramters required
 
-     integer :: jrot     ! total angular momentum of the molecule
-     integer :: kmin     ! zrot=t, kmin=1 sym. rot. basis, =0 anti-sym.
+    integer :: jrot     ! total angular momentum of the molecule
+    integer :: kmin     ! zrot=t, kmin=1 sym. rot. basis, =0 anti-sym.
                          ! kmin=2 loop over both sym & anti-sym (zbisc=t only)
                          ! zrot=f, kmin=fixed value of k
 
-     integer :: idia     ! 1 scattering coordinates heteronuclear diatomic
+    integer :: idia     ! 1 scattering coordinates heteronuclear diatomic
                          ! 2 scattering coordinates homonuclear diatomic
                          ! -1 radau  coordinates hetronuclear diatomic
                          ! -2 radau  coordinates homonuclear  diatomic
                          ! 0 radau   coordinates with the z axis perpendicular to the molecular plane.
 
-     integer :: ipar     ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
-     integer :: max2d    ! upper bound on size of intermediate 2d hamiltonian
-     integer :: max3d    ! upper bound on size of full 3d hamiltonian
-     integer :: max2d2   ! max2d for smaller block (zbisc=t only)
-     integer :: max3d2   ! max3d for smaller block (zbisc=t only)
-     integer :: npnta    ! the number of dvr points in
+    integer :: ipar     ! parity of basis - if idia=+/-2: ipar=0 for even & =1 for odd
+    integer :: max2d    ! upper bound on size of intermediate 2d hamiltonian
+    integer :: max3d    ! upper bound on size of full 3d hamiltonian
+    integer :: max2d2   ! max2d for smaller block (zbisc=t only)
+    integer :: max3d2   ! max3d for smaller block (zbisc=t only)
+    integer :: npnta    ! the number of dvr points in
                          ! the coordinate to be treated first in the dvr successive
                          ! diagonalisation-truncation procedure
 
-     integer :: npntb    ! the number of dvr points in the coordinate to come second
-     integer :: npntc    ! the number of dvr points in the coordinate to come last
-     integer :: ndima    ! set equal to npnta at the start - used for dimensioning
-     integer :: ndimb    ! set equal to npntb at the start - used for dimensioning
-     integer :: ndimc    ! set equal to npntc at the start - used for dimensioning
-     integer :: iq
+    integer :: npntb    ! the number of dvr points in the coordinate to come second
+    integer :: npntc    ! the number of dvr points in the coordinate to come last
+    integer :: ndima    ! set equal to npnta at the start - used for dimensioning
+    integer :: ndimb    ! set equal to npntb at the start - used for dimensioning
+    integer :: ndimc    ! set equal to npntc at the start - used for dimensioning
+    integer :: iq
     double precision :: emax1
     double precision :: emax2
      
@@ -283,8 +296,8 @@ end module size
 
 
 program DVR3DRJZ
-call dvr3d
-stop
+    call dvr3d
+    stop
 end
 
 !######################################################################
@@ -342,26 +355,25 @@ subroutine dvr3d
                     idiag1,idiag2,iout1,iout2,iwave,zpfun,ilev,&
                     ieigs1,ivecs1,ieigs2,ivecs2,ivint,iband,intvec
 
-      write(6,"(5x,'Program DVR3DRJZ (version of March 2002)')")
- !1000 format(5x,'Program DVR3DRJZ (version of March 2002)')
+    write(6,"(5x,'Program DVR3DRJZ (version of March 2002)')")
+
 
 !     read in namelist input data (defaults in block data)
-      read(5,prt)
+    read(5,prt)
 
-      call SYSTEM_CLOCK(itime0,irate2,imax2)
+    call SYSTEM_CLOCK(itime0,irate2,imax2)
 
 !     read in control parameters of problem.
-      call insize
+    call insize
 
 !     now do the calculation
-      call ccmain
+    call ccmain
 
-      call SYSTEM_CLOCK(itime2,irate2,imax2)
-      itime=(itime2-itime0)/irate2
-      write(6,"(/i10,' secs CPU time used'/)")itime
- !1    format(/i10,' secs CPU time used'/)
-      stop
-      end
+    call SYSTEM_CLOCK(itime2,irate2,imax2)
+    itime=(itime2-itime0)/irate2
+    write(6,"(/i10,' secs CPU time used'/)")itime
+    stop
+    end
 
 !############################################################################
 subroutine insize
@@ -420,22 +432,21 @@ subroutine insize
 
 !     ncoord = 2: atom-diatom problem with diatom rigid
 !     ncoord = 3: full 3-d triatomic problem
-      read(5,"(15i5)") ncoord
-    !5 format(15i5)
+    read(5,"(15i5)") ncoord
 !     other paramters: see comments above on /size/ for meaning
 !     if ncoord=2: also need lmax,lpot,idia,kmin
 !     if ncoord=3: all paramters required
 
-      read(5,"(15i5)") npnt2,jrot,neval,nalf,max2d,max3d,idia,&
+    read(5,"(15i5)") npnt2,jrot,neval,nalf,max2d,max3d,idia,&
                 kmin,npnt1,ipar,max3d2
       
-      zbisc = .false.
-      if (jrot == 0) then
+    zbisc = .false.
+    if (jrot == 0) then
          zembed = .true.
          kmin = 0
          zrot = .false.
-      endif
-      if (idia == -2) then
+    endif
+    if (idia == -2) then
          ncoord=3
          npnt1=npnt2
          idvr=nalf
@@ -450,11 +461,11 @@ subroutine insize
             kmin=1
             if (jrot == 0) kmin=0
          endif
-      else
+    else
           if (ztran) zvec=.true.
-      endif
+    endif
 
-      if (ztwod) then
+    if (ztwod) then
          ncoord = 3
          idia = 1
          nalf = 1
@@ -465,41 +476,37 @@ subroutine insize
          max3d=max2d
          neval=min(max2d,neval)
          goto 887
-      endif
+    endif
 
 !     the gauss-legendre integration points are only acually
 !     calculated for the half-range:
-      nalf2 = (nalf+1)/2
+    nalf2 = (nalf+1)/2
 !     are we doing atom, atom-rigid diatom or the full problem?
-      if (ncoord == 2) then
+    if (ncoord == 2) then
 !        atom - rigid diatom case, set dummy /size/
          if (zr2r1) then
             write(6,"(/10x,'atom - rigid diatom vibrational analysis with:'/)")
- !1010 format(/10x,'atom - rigid diatom vibrational analysis with:'/)
             npnt1 = 1
             nmax1 = 0
          else
             write(6,"(/5x,'Fixed - r2 vibrational analysis with:'/)")
- !1011 format(/5x,'Fixed - r2 vibrational analysis with:'/)
             npnt2 = 1
             nmax2 = 0
          endif
-      else
+    else
 !        full case: print data about extra radial basis
          ncoord  = 3
          write(6,"(/5x,a100,i5,a100)") 'Full triatomic vibrational problem with',npnt1,&
                 &'radial r1 dvr points used,'
- !1020    format(/5x,'Full triatomic vibrational problem with'/ &
-    !            /5x,i5,3x,'radial r1 dvr points used,')
-      endif
+    endif
       
   887 continue
 !     maximum order of polynomials;
-      maxleg = nalf - 1
-      nmax2  = npnt2- 1
-      nmax1  = npnt1- 1
+    maxleg = nalf - 1
+    nmax2  = npnt2- 1
+    nmax1  = npnt1- 1
 
-      if (ztheta) then
+    if (ztheta) then
           npnta = nalf/max(1,idia)
           if (zr2r1) then
              npntb = npnt2
@@ -508,7 +515,7 @@ subroutine insize
              npntb = npnt1
              npntc = npnt2
           endif
-      else
+    else
           if (zr2r1) then
              npnta = npnt2
              npntb = npnt1
@@ -517,9 +524,9 @@ subroutine insize
              npntb = npnt2
           endif
           npntc = nalf/max(1,idia)
-      endif
+    endif
 
-      if (idia == -2) then
+    if (idia == -2) then
          if (zrot .and. (jrot+kmin)>1) then
             max2d  = npnt1*(npnt1+1)/2
             max2d2 = npnt1*(npnt1-1)/2
@@ -533,7 +540,7 @@ subroutine insize
             if (max3d2 <= 0) max3d2=max3d
             max3d2=min(max3d,max2d2*nalf,max3d2)
          endif
-      else
+    else
          if (zall) then
             max2d = npnta*npntb
             max3d = max2d*npntc
@@ -541,74 +548,58 @@ subroutine insize
             max2d=min(max2d,npnta*npntb)
             max3d=min(max3d,npnta*npntb*npntc)
          endif
-      endif
+    endif
 
-      if (neval <= 0) neval = 10
-      neval=min(max3d,neval)
-      if (ztwod) write(6,"(/5x,i5,3x,'radial r1 dvr points used,')") npnt1
- !1023 format(/5x,i5,3x,'radial r1 dvr points used,')
-      if (ncoord == 3) write(6,1030) npnt2,2,nalf,neval,max3d
-      if (ncoord == 2 .and. zr2r1)&
+    if (neval <= 0) neval = 10
+    neval=min(max3d,neval)
+    if (ztwod) write(6,"(/5x,i5,3x,'radial r1 dvr points used,')") npnt1
+    if (ncoord == 3) write(6,1030) npnt2,2,nalf,neval,max3d
+    if (ncoord == 2 .and. zr2r1)&
           write(6,1030) npnt2,2,nalf,neval,max3d
-      if(ncoord == 2 .and. .not. zr2r1)&
+    if(ncoord == 2 .and. .not. zr2r1)&
           write(6,1030) npnt1,1,nalf,neval,max3d
  1030 format(5x,i5,3x,'radial r',i1,' dvr points used,',&
             /5x,i5,3x,'angular dvr points used, with',&
             /5x,i5,3x,'lowest eigenvectors chosen from',&
             /5x,i5,3x,'maximum dimension secular problem'/)
-      if(idia == 2 .and. zperp) then
+    if(idia == 2 .and. zperp) then
         write(6,"(/5x,'STOP!!!  ZPERP should be .true. for IDIA=2')")
         stop
-! 1035  format(/5x,'STOP!!!  ZPERP should be .true. for IDIA=2')
-      endif      
-      read(5,"(9a8)")   title
-  !500 format(9a8)
-      write(6,"(5x,'Title: ',9a8/)") title
- !1040 format(5x,'Title: ',9a8/)
-      if (ncoord == 3) then
+    endif      
+    read(5,"(9a8)")   title
+    write(6,"(5x,'Title: ',9a8/)") title
+    if (ncoord == 3) then
          if (zmors1)  write(6,"(5x,'Morse oscillators used for r',i1,' basis')") 1
          if (.not. zmors1) write(6,"(5x,'Spherical oscillators used for r',i1,' basis')") 1
-      endif
-      if (ncoord == 2 .and. .not. zr2r1) then
+    endif
+    if (ncoord == 2 .and. .not. zr2r1) then
          if (zmors1)  write(6,"(5x,'Morse oscillators used for r',i1,' basis')") 1
          if (.not. zmors1) write(6,"(5x,'Spherical oscillators used for r',i1,' basis')") 1
-      else
+    else
          if (zmors2) write(6,"(5x,'Morse oscillators used for r',i1,' basis')") 2
          if (.not. zmors2) write(6,"(5x,'Spherical oscillators used for r',i1,' basis')") 2
- !1050 format(5x,'Morse oscillators used for r',i1,' basis')
- !1060 format(5x,'Spherical oscillators used for r',i1,' basis')
          if (zquad2) then
             write(6,"(/5x,'Quadrature approximation used for the r2**(-2) terms'/)")
- !1051 format(/5x,'Quadrature approximation used for the r2**(-2) terms'/)
          else
             write(6,"(/5x,'Quadrature approximation abandoned for r2**(-2) terms'/)")
- !1052 format(/5x,'Quadrature approximation abandoned for r2**(-2) terms'/)
          endif
-      endif
-      if (zall) write(6,"(/5x,'All solutions from lower dimensions have been used')")
- !1067 format(/5x,'All solutions from lower dimensions have been used')
-      if (ztheta) then
+    endif
+    if (zall) write(6,"(/5x,'All solutions from lower dimensions have been used')")
+    if (ztheta) then
          if (zr2r1) write(6,"(5x,'Problem solved in the order: theta -> r2 -> r1')")
- !1042    format(5x,'Problem solved in the order: theta -> r2 -> r1')
          if (.not. zr2r1) write(6,"(5x,'Problem solved in the order: theta -> r1 -> r2')")
-! 1043    format(5x,'Problem solved in the order: theta -> r1 -> r2')
-      else
+    else
          if (.not.ztwod) then
             if (zr2r1) write(6,"(5x,'Problem solved in the order: r2 -> r1 -> theta')")
- !1044    format(5x,'Problem solved in the order: r2 -> r1 -> theta')
             if (.not. zr2r1) write(6,"(5x,'Problem solved in the order: r1 -> r2 -> theta')")
- !1045    format(5x,'Problem solved in the order: r1 -> r2 -> theta')
          else
             if (zr2r1) write(6,"(5x,'Problem solved in the order: r2 -> r1')")
- !1046    format(5x,'Problem solved in the order: r2 -> r1')
             if (.not. zr2r1) write(6,"(5x,'Problem solved in the order: r1 -> r2')")
- !1047    format(5x,'Problem solved in the order: r1 -> r2')
          endif
-      endif
-      if (zcut) then
+    endif
+    if (zcut) then
          write(6,"(5x,'Final basis selected using energy cut-off')")
- !1061    format(5x,'Final basis selected using energy cut-off')
-      else
+    else
          if (zrot .and. zbisc .and. (jrot+kmin)>1) then
             write(6,1062) max3d,max3d2
  1062    format(/5x,'Final basis comprises',i5,' lowest functions',&
@@ -617,42 +608,28 @@ subroutine insize
                    ' for odd  parity hamiltonian')
          else
            if (.not. zcut) write(6,"(5x,'final basis comprises',i5,' lowest functions')") max3d
- !1064      format(5x,'final basis comprises',i5,' lowest functions')
          endif
-      endif
-      if (.not.ztwod) then
+    endif
+    if (.not.ztwod) then
          if (zlmat) write(6,"(/5x,'Printing of L-matrix requested')")
- !1065    format(/5x,'Printing of L-matrix requested')
          if (.not.zlmat) write(6,"(/5x,'Printing of L-matrix not requested')")
- !1066    format(/5x,'Printing of L-matrix not requested')
-      endif
-      if (zp1d) write(6,"(5x,'Printing of 1d eigenvalues requested')")
- !1071 format(5x,'Printing of 1d eigenvalues requested')
+    endif
+    if (zp1d) write(6,"(5x,'Printing of 1d eigenvalues requested')")
       if (zp2d) write(6,"(5x,'Printing of 2d eigenvalues requested')")
- !1072 format(5x,'Printing of 2d eigenvalues requested')
       if (zpham) write(6,"(5x,'Printing of hamiltonian matrix requested')")
-! 1070 format(5x,'Printing of hamiltonian matrix requested')
       if (.not.zpham) write(6,"(5x,'Printing of hamiltonian matrix not requested')")
- !1080 format(5x,'Printing of hamiltonian matrix not requested')
       if (zprad) write(6,"(5x,'Printing of radial matrix elements requested')")
-! 1090 format(5x,'Printing of radial matrix elements requested')
       if (.not.zprad) write(6,"(5x,'Printing of radial matrix elements not requested')")
- !1100 format(5x,'Printing of radial matrix elements not requested')
       if (zpvec) write(6,"(5x,'Printing of eigenvectors requested'/)")
- !1110 format(5x,'Printing of eigenvectors requested'/)
       if (.not.zpvec) write(6,"(5x,'Printing of eigenvectors not requested'/)")
- !1120 format(5x,'Printing of eigenvectors not requested'/)
       if (zvec) then
          write(6,"(5x,'Eigenvalues & vectors   written to stream IOUT2 =',i4)") iout2
          write(6,"(5x,'Restart information     written to stream IOUT1 =',i4)") iout1
- !1130 format(5x,'Eigenvalues & vectors   written to stream IOUT2 =',i4)
- !1131 format(5x,'Restart information     written to stream IOUT1 =',i4)
          open(unit=iout1, form='unformatted',recordtype='segmented')
          open(unit=iout2, form='unformatted',recordtype='segmented')
       endif
       if (ztran) then
          write(6,"(5x,'Wavefunction amplitudes written to stream IWAVE =',i4)") iwave
- !1132 format(5x,'Wavefunction amplitudes written to stream IWAVE =',i4)
          open(unit=iwave, form='unformatted',recordtype='segmented')
       endif
       if (abs(jrot) > 1) zpfun=.false.
@@ -662,7 +639,6 @@ subroutine insize
 !           header on file ilev
             write(ilev,"(9a8)") title
             write(6,"(/5x,'Eigenvalues      written to start of stream ilev =',i4)") ilev
- !1134 format(/5x,'Eigenvalues      written to start of stream ilev =',i4)
          else
 !           position file ilev
   200       read(ilev,*,end=210,err=210)
@@ -671,94 +647,70 @@ subroutine insize
 ! ******  inclusion of the following card is machine dependent ******
 !           backspace ilev
             write(6,"(/5x,'Eigenvalues      written at end   of stream ilev =',i4)") ilev
-! 1135 format(/5x,'Eigenvalues      written at end   of stream ilev =',i4)
          endif
-      endif
+    endif
 
-      if (idia > 0) write(6,"(/5x,'Calculation performed in scattering coordinates')")
- !1140 format(/5x,'Calculation performed in scattering coordinates')
-      if (idia <= 0 .and.  .not.zperp) write(6,"(/5x,'Calculation performed in Radau coordinates')")
- !1150 format(/5x,'Calculation performed in Radau coordinates')
-      if (idia <= 0 .and. zperp) write(6,1151)
- 1151 format(/5x,'Calculation performed in Radau coordinates with Z axis', &
-              /5x,'perpendicular to the plane')
- 
-      if (zperp) write(6,"(/5x,'Q symmetry =', i3)") iq
-! 1152 format(/5x,'Q symmetry =', i3)
-
-      if (ztwod) goto 886
-
-      if (abs(idia) == 2) then
+    if (idia > 0) write(6,"(/5x,'Calculation performed in scattering coordinates')")
+    if (idia <= 0 .and.  .not.zperp) write(6,"(/5x,'Calculation performed in Radau coordinates')")
+    if (idia <= 0 .and. zperp) write(6,"(a100)") 'Calculation performed in Radau coordinates with Z axis perpendicular to the plane'
+    if (zperp) write(6,"(/5x,'Q symmetry =', i3)") iq
+    if (ztwod) goto 886
+    if (abs(idia) == 2) then
          write(6,"(/5x,'Diatomic assumed homonuclear')")
-! 1180    format(/5x,'Diatomic assumed homonuclear')
          if (ipar == 1) then
             write(6,"(5x,'Odd parity functions in basis set')")
- !1190       format(5x,'Odd parity functions in basis set')
          else if (ipar == 0) then
             write(6,"(5x,'Even parity functions in basis set')")
-! 1200       format(5x,'Even parity functions in basis set')
          else
             write(6,"(5x,'Illegal value of ipar for idia = +/-2: STOP')")
-! 1205       format(5x,'Illegal value of ipar for idia = +/-2: STOP')
             stop
          endif
          if (idia == 2) then
             idvr=nalf2
             if (2*idvr /= nalf) goto 960
          endif
-      else
+    else
          write(6,"(/5x,'Diatomic assumed hetronuclear')")
- !1210    format(/5x,'Diatomic assumed hetronuclear')
          idvr=nalf
          ipar=0
-      endif
-      if (jrot /= 0) then
+    endif
+    if (jrot /= 0) then
          jrot=abs(jrot)
          if (zrot) then
             if (kmin /= 0 .and. .not. zbisc) kmin=1
             write(6,"(/5x,'***  vibrational part of rot-vib calculation  ***')")
- !1220 format(/5x,'***  vibrational part of rot-vib calculation  ***')
             write(6,"(/5x,'J =',i3,' rotational state')") jrot
             if (kmin == 1) then
                write(6,"(12x,'with symmetric |Jk> + |J-k> functions in basis')")
- !1270 format(12x,'with symmetric |Jk> + |J-k> functions in basis')
             else if (kmin == 0) then
                write(6,"(12x,'with anti-symmetric |Jk> - |J-k> functions in basis')")
- !1280 format(12x,'with anti-symmetric |Jk> - |J-k> functions in basis')
             else
                kmin=2
                write(6,"(12x,'loop over symmetric & anti-symmetric |jk> functions')")
- !1275 format(12x,'loop over symmetric & anti-symmetric |jk> functions')
             endif
             if (zladd) write(6,"(5x,'Number of angular grid points to be kept constant with k')")
- !1240 format(5x,'Number of angular grid points to be kept constant with k')
             if (.not. zladd) write(6,"(/5x,'Nunber of angular grid points to decrease with k')")
- !1250 format(/5x,'Nunber of angular grid points to decrease with k')
          else
             write(6,1230) jrot,kmin
  1230 format(5x,'J =',i3,'  k =',i3,&
              /5x,'***  option to neglect coriolis interactions  ***')
             if (abs(kmin) > abs(jrot)) then
                write(6,"(5x,'Error: k greater than J. STOP')")
-! 1235 format(5x,'Error: k greater than J. STOP')
+
                stop
             endif 
-         endif
-         if (zbisc) then
+    endif
+    if (zbisc) then
             zembed=.false.
             write(6,"(/5x,'z axis embedded along the biscetor of r1 and r2')")
- !1330 format(/5x,'z axis embedded along the biscetor of r1 and r2')
             if (zlin) write(6,"(/5x,'Removal of functions with theta = 0 enforced')")
- !1340 format(/5x,'Removal of functions with theta = 0 enforced')
          else
             if (zembed) write(6,"(/5x,'z axis embeded along the r',i1,' coordinate')") 2
- !1290       format(/5x,'z axis embeded along the r',i1,' coordinate')
             if (.not. zembed) write(6,"(/5x,'z axis embeded along the r',i1,' coordinate')") 1
          endif
-      else
+    else
 !        case j = 0
          write(6,"(/5x,'J =',i3,' rotational state')") jrot
- !1260    format(/5x,'J =',i3,' rotational state')
       endif
       if (zx) then
          write(6,*)'the rotational x-term is active'
@@ -786,48 +738,46 @@ subroutine insize
     write(6,*)'NBO vib-rotational corrections are ignored'
     end if
 
-       write (6,"(/5x,'Routine DSYEV to do in core diagonalisation')")
- !1440 format(/5x,'Routine DSYEV to do in core diagonalisation')
+    write (6,"(/5x,'Routine DSYEV to do in core diagonalisation')")
   886 continue
 
 !     check input parameters are consistent
-      npnt = max(npnt1,npnt2)
-      nmax = max(nmax1,nmax2)
+    npnt = max(npnt1,npnt2)
+    nmax = max(nmax1,nmax2)
 !     dimension of square matrices stored in triangular form :
-      nlim1 = npnt1 * (npnt1+1) / 2
-      nlim2 = npnt2 * (npnt2+1) / 2
+    nlim1 = npnt1 * (npnt1+1) / 2
+    nlim2 = npnt2 * (npnt2+1) / 2
 
 !     declare dvr sizes for dimensioning the arrays
-      ndima=npnta
-      if (idia <= -2 .and. .not. zrot) ndima=ndima-ipar
-      ndimb=npntb
-      ndimc=npntc
+    ndima=npnta
+    if (idia <= -2 .and. .not. zrot) ndima=ndima-ipar
+    ndimb=npntb
+    ndimc=npntc
 
 !     store parameters on disk files requested
 
-      if (zvec) write (iout2) idia,ipar,npnta,npntb,npntc,max2d,max3d,neval
+    if (zvec) write (iout2) idia,ipar,npnta,npntb,npntc,max2d,max3d,neval
 
-      if (zmors2 .and. .not. zquad2) goto 961
-      if (.not. ztheta .and. .not. zquad2) goto 962
-      if (idia <= -2 .and. .not. zquad2) goto 963
+    if (zmors2 .and. .not. zquad2) goto 961
+    if (.not. ztheta .and. .not. zquad2) goto 962
+    if (idia <= -2 .and. .not. zquad2) goto 963
 
-      return
-  960 write(6,"(//6x,'** nalf must be even when idia=2: stop **')")
-  !970 format(//6x,'** nalf must be even when idia=2: stop **')
-      stop
-  961 write(6,972)
-  972 format(//6x,'** can''t have zquad2 = f with zmors2 = t : stop **',&
+    return
+960 write(6,"(//6x,'** nalf must be even when idia=2: stop **')")
+    stop
+961 write(6,972)
+972 format(//6x,'** can''t have zquad2 = f with zmors2 = t : stop **',&
               /6x,'               (not yet implemented)               ')
-      stop
-  962 write(6,973)
-  973 format(//6x,'** can''t have zquad2 = f with ztheta = f : stop **',&
+    stop
+962 write(6,973)
+973 format(//6x,'** can''t have zquad2 = f with ztheta = f : stop **',&
               /6x,'               (not yet implemented)               ')
-      stop
-  963 write(6,974)
-  974 format(//6x,'** can''t have zquad2 = f with idia = -2: stop **',&
+    stop
+963 write(6,974)
+974 format(//6x,'** can''t have zquad2 = f with idia = -2: stop **',&
               /6x,'               (not yet implemented)               ')
-      stop
-      end
+    stop
+    end
 
 !##############################################################################
 subroutine ccmain
@@ -877,15 +827,15 @@ subroutine ccmain
     DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: sjwalf
     DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: pjac
 
-      x0 = 0.0d0
-      x1 = 1.0d0
-      x2 = 2.0d0
-      x8 = 8.0d0
-      xp5 = 0.5d0
-      toler = 1.0d-8
+    x0 = 0.0d0
+    x1 = 1.0d0
+    x2 = 2.0d0
+    x8 = 8.0d0
+    xp5 = 0.5d0
+    toler = 1.0d-8
  
 
-     ALLOCATE(dnorm1(0:nmax1),r1m2(nlim1),dnorm2(0:nmax2),&
+    ALLOCATE(dnorm1(0:nmax1),r1m2(nlim1),dnorm2(0:nmax2),&
                r2m2(nlim2),bass1(0:nmax1,npnt1),bass2(0:nmax2,npnt2),&
                y1(npnt1),r1(npnt1),wt1(npnt1),y2(npnt2),r2(npnt2),&
                wt2(npnt2),b(npnt+1),c(npnt+1),&
@@ -898,29 +848,29 @@ subroutine ccmain
                  plegw(0:maxleg,idvr))
 
 !     open the streams......(most not needed for symmetrised radau case)
-      if (idia > -2) then
+    if (idia > -2) then
          open(unit=ieigs1,form='unformatted',recordtype='segmented')
          open(unit=ieigs2,form='unformatted',recordtype='segmented')
          open(unit=ivecs1,form='unformatted',recordtype='segmented')
          open(unit=ivecs2,form='unformatted',recordtype='segmented')
          open(unit=ivint, form='unformatted',recordtype='segmented')
          open(unit=iband, form='unformatted',recordtype='segmented')
-      endif
-      open(unit=intvec,form='unformatted',recordtype='segmented')
+    endif
+    open(unit=intvec,form='unformatted',recordtype='segmented')
 
 !     read in masses & basis set parameters
-      call setcon(fixcos)
+    call setcon(fixcos)
 !.....and save them if necessary
-      if (zvec) write(iout2) zembed,zmors1,zmors2,ztheta,zr2r1,xmass,&
+    if (zvec) write(iout2) zembed,zmors1,zmors2,ztheta,zr2r1,xmass,&
                              g1,g2
 
 !     set up binomial and normalisation arrays
 
-      call setfac(dnorm1,dnorm2,cc1,cc2)
+    call setfac(dnorm1,dnorm2,cc1,cc2)
 
 !     set up points, weights & basis for numerical integration
 
-      if (ncoord == 2) then
+    if (ncoord == 2) then
 !     in less than 3-d cases fix the 3-d paramters
          if (zr2r1) then
             bass1(0,1) = x1
@@ -953,7 +903,7 @@ subroutine ccmain
                call keint2(hbl2,fke,r2m2,dnorm2,nlim2,nmax2,npnt2,a2)
             endif
          endif
-      else
+    else
          call lagpt(1,y1,r1,wt1,b,c,cc1,bass1,dnorm1,npnt1,nmax1,zmors1,&
                     re1,beta1,a1,iu1)
          if (idia > -2) then
@@ -979,41 +929,41 @@ subroutine ccmain
       endif
 
 !     write the quadrature points to disk for zvec = .true.
-      if (zvec) then
+    if (zvec) then
          write (iout2) r1
          if (idia > -2) write (iout2) r2
-      endif
-      if (ncoord == 3) then
-      endif
+    endif
+    if (ncoord == 3) then
+    endif
 
 !     take square roots of the weights
-      wt1=sqrt(wt1)
-      if (idia > -2) wt2=sqrt(wt2)
+    wt1=sqrt(wt1)
+    if (idia > -2) wt2=sqrt(wt2)
 
 !     set up the transformed kinetic energy integrals,  t'(hbl) t
 !                                                       ~  ~~~  ~
       call k1k2(xk1,hbl1,bass1,wt1,npnt1,nmax1,nlim1)
-      if (idia > -2)&
+    if (idia > -2)&
          call k1k2(xk2,hbl2,bass2,wt2,npnt2,nmax2,nlim2)
 
 !     ...... and the inertia integrals for spherical oscillators
-      if (.not.zmors2 .and. .not.ztwod .and. idia > -2)&
+    if (.not.zmors2 .and. .not.ztwod .and. idia > -2)&
           call k1k2(r2m2t,r2m2,bass2,wt2,npnt2,nmax2,nlim2)
 
 !     some of the j>0 stuff to get the loop over k correct
-      if (zrot) then
+    if (zrot) then
         kd = 1-min(kmin,1)
         ku = jrot
 !       if looping over sym & anti-sym, do one extra k=1 block
         if (kmin == 2) ku=ku+1
-      else
+    else
         kd = kmin
         ku = kmin
-      endif
-      kkz12 = 0
-      kkz0  = 0
+    endif
+    kkz12 = 0
+    kkz0  = 0
 !     for j > 0, store r**(-2) term for rotlev3
-      if (ztran) then
+    if (ztran) then
          if (ku > kd) then
             if (zembed) then
               if (zquad2) then
@@ -1035,30 +985,30 @@ subroutine ccmain
          endif
          write(iwave) r1
          if (idia > -2) write(iwave) r2
-      endif
+    endif
 
-      if (idia == -2) then
+    if (idia == -2) then
          max2d1=max2d
          max3d1=max3d
          DEALLOCATE(xk2,r2,r2m2t)
-      endif
+    endif
 
-      DEALLOCATE(dnorm1,r1m2,dnorm2,r2m2,bass1,bass2,&
+    DEALLOCATE(dnorm1,r1m2,dnorm2,r2m2,bass1,bass2,&
                  y1,wt1,y2,wt2,b,c,hbl1,hbl2)
 
 !     -------------  start rotational loop here  -------------
-      do 40 kk=kd,ku
-      if (kk <= jrot) then
+    do 40 kk=kd,ku
+    if (kk <= jrot) then
          kz=kk
-      else
+    else
          kz=1
          kmin=0
          if(.not.zperp) ipar=mod(ipar+jrot,2)
-      endif
+    endif
 
 !     first rewind the scratch files for a calculation with j>0
 !     and, if needed, reposition iout2 after set up data.
-      if (kk > kd) then
+    if (kk > kd) then
         if (idia > -2) then
            rewind ieigs1
            rewind ieigs2
@@ -1075,21 +1025,21 @@ subroutine ccmain
              read(iout2)
    45     continue
         endif
-      endif
+    endif
 
-      realkz = dble(kz)
+    realkz = dble(kz)
 !     tswalf is the exact sum of weights for gauss-jacobi integration
-      tswalf= x2**(kz+kz+1)/dble(kz+1)
-      do 30 ia=1,kz
+    tswalf= x2**(kz+kz+1)/dble(kz+1)
+    do 30 ia=1,kz
          tswalf=tswalf*dble(ia)/dble(kz+ia+1)
    30 continue
 
-      if (zladd .or. kz == kd) then
+    if (zladd .or. kz == kd) then
          nidvr = idvr
          nang  = nalf
          nang2 = nalf2
          lincr = kz
-      else
+    else
          lincr = 0
          if (idia /= 2) then
             nidvr = idvr - kz
@@ -1106,21 +1056,21 @@ subroutine ccmain
             nang  = nalf - kkz12
             nang2 = (nang+1)/2
          endif
-      endif
-      if (.not. zladd) then
+    endif
+    if (.not. zladd) then
          if (ztheta) then
             npnta=nidvr
          else
             npntc=nidvr
          endif
-      endif
+    endif
 
-      if (ztwod) then
+    if (ztwod) then
          xalf(1) = fixcos
          goto 333
-      endif
+    endif
 
-      if(.not. zperp) then
+    if(.not. zperp) then
         call jacobi(nang,nang2,xalf,walf,realkz,realkz,cswalf,tswalf)
         write(6,1000) nang,kz,(xalf(ii),walf(ii),ii=1,nang2)
  1000   format(//i8,' point Gauss-associated Legendre integration with',&
@@ -1131,12 +1081,11 @@ subroutine ccmain
               /4x,'Exact    sum of weights',d22.15//)
           if (abs((cswalf-tswalf)/tswalf) > toler) then
              write(6,"(//5x,'Points & weights in error, adjust algorithm'//)")
-  !910       format(//5x,'Points & weights in error, adjust algorithm'//)
              stop
           endif
         call allpts(xalf,walf,nang,nang2)
         alf = x0
-      else
+    else
         realj = DBLE(jrot)
         alf = dsqrt(0.5d0*(((realj)**2+realj)-realkz**2))
         bet = alf
@@ -1145,40 +1094,40 @@ subroutine ccmain
  1020   format(//i8,' point Gauss-Jacobi integration with',&
              ' alpha = beta =',f7.3//5x,'integration points',11x,'weights',&
               //(f23.15,d25.12))
-      endif
+    endif
 
-      if (zvec) write(iout2) xalf
+    if (zvec) write(iout2) xalf
 
-      if (.not.zperp) then
+    if (.not.zperp) then
 !     set up Legendre polynomials for the transformation matrix
 !     for z in plane case
-        call asleg(pleg,maxleg,xalf,nidvr,kz,lincr)
+    call asleg(pleg,maxleg,xalf,nidvr,kz,lincr)
       else
 !     set up Jacobi polynomials for the transformation matrix
 !     for z perpendicular case
-        call jac_basis(nidvr,maxleg,alf,bet,xalf,pleg)
+    call jac_basis(nidvr,maxleg,alf,bet,xalf,pleg)
         do  i=1,nidvr
             walf(i) = sqrt(walf(i))
         enddo
-      endif
+    endif
 
 !     save polinomials for rotlev3 or rotlev3b, or rotlev3z
-      if (ztran) then
+    if (ztran) then
         write(iwave) xalf
         write(iwave) kz,maxleg,nidvr,lincr
         write(iwave) ((pleg(i,j)*walf(j),i=0,maxleg),j=1,nidvr)
-      endif
+    endif
       
 !     build the transformed angular momentum matrix xlmatr;
-      ipar0=0
-      if (idia == 2 .and. ipar == 1) ipar0=1
-      call lmatrx(xlmatr,pleg,walf,kz,ipar0,nidvr,lincr,alf)
+    ipar0=0
+    if (idia == 2 .and. ipar == 1) ipar0=1
+    call lmatrx(xlmatr,pleg,walf,kz,ipar0,nidvr,lincr,alf)
 
   333 continue
 
 !     for ab2 molecules in radau coordinates, use separate main
 !     driving routine
-      if (idia <= -2) then
+    if (idia <= -2) then
          if (zrot) then
             if (kz > kd .and. .not.zperp) ipar=mod(ipar+1,2)
             if (ipar > 0) then
@@ -1194,16 +1143,16 @@ subroutine ccmain
          else
            call nfmain(xk1,xlmatr,r1,xalf,kz)
          endif    
-      else
+    else
          call jhmain(xk1,xk2,xlmatr,r1,r2,xalf,r2m2t,kz)
-      endif
+    endif
    40 continue
 
-      DEALLOCATE(xalf,walf,xlmatr,pleg,xk1,r1)
-      if (zperp) DEALLOCATE(jxcos,jwalf,sjwalf,pjac,plegw)
-      if (idia > -2) DEALLOCATE(r2,xk2,r2m2t)
-      return
-      end
+    DEALLOCATE(xalf,walf,xlmatr,pleg,xk1,r1)
+    if (zperp) DEALLOCATE(jxcos,jwalf,sjwalf,pjac,plegw)
+    if (idia > -2) DEALLOCATE(r2,xk2,r2m2t)
+    return
+    end
 
 !#############################################################################
 subroutine setcon(fixcos)
@@ -1231,49 +1180,45 @@ subroutine setcon(fixcos)
       
 !     read cos(theta) for fixed angle 2-d calculation
 
-      read(5,"(15i5)") fixcos
-      if (ztwod) write(6,1088) fixcos
+    read(5,"(15i5)") fixcos
+    if (ztwod) write(6,1088) fixcos
  1088 format(//5x,'two-d fixed angle vibrational problem with'&
              //5x,'***** fixed value of cos(theta) =',f6.2,' *****'/)
 
-!     read masses of the atoms in atomic mass units
+!    read masses of the atoms in atomic mass units
 !     first vibrational mass...
-      read(5,"(15i5)")     xmass
-    5 format(3f20.0)
+    read(5,"(15i5)")     xmass
 !     .... then rotational mass
-      read(5,"(15i5)")     xmassr
+    read(5,"(15i5)")     xmassr
 !     Default rotational mass to vibration mass if it is not set
-      if (xmassr(1)<=x0) xmassr = xmass
+    if (xmassr(1)<=x0) xmassr = xmass
 
 !     read cut off energies
 !     read parameters defining energy cut offs for each block
-      read(5,"(15i5)") emax1,emax2
+    read(5,"(15i5)") emax1,emax2
       if (.not. zall) then
          if (zcut) then
             if (idia > -2) write(6,"(//5x,'Cut-off energies in wavenumbers:',2d16.8/)") emax1,emax2
-  !990       format(//5x,'Cut-off energies in wavenumbers:',2d16.8/)
             if (idia == -2) write(6,"(//5x,'Final cut-off energy in wavenumbers:',2d16.8/)")       emax2
-  !991       format(//5x,'Final cut-off energy in wavenumbers:',2d16.8/)
          else
             if (idia > -2) write(6,"(//5x,'First cut-off energy in wavenumbers:',1d16.8/)") emax1
- ! 992       format(//5x,'First cut-off energy in wavenumbers:',1d16.8/)
          endif
       endif
 !     set default value of g1 and g2
-      if (idia >= 1) then
+    if (idia >= 1) then
 !        scattering coordinates
          g1 = xmass(2) / (xmass(2) + xmass(3))
          g2 = x0
-      else
+    else
 !        radau coordinates
          a = sqrt(xmass(3) / (xmass(1)+xmass(2)+xmass(3)))
          b = xmass(2) / (xmass(1)+xmass(2))
          g1 = x1 - a / (a+b-a*b)
          g2 = x1 - a / (x1-b+a*b)
-      endif
+    endif
 !     ncoord = 3: read parameters for r1 radial basis (see below)
 !     ncoord = 2: read fixed r1 bondlength re1. diss1 & we1 dummy
-      read(5,"(15i5)")     re1,diss1,we1
+    read(5,"(15i5)")     re1,diss1,we1
 !     read parameters for r2 radial basis function,
 !     for morse oscillator functions use the following:
 !     re2: equilibrium bondlength of r2 coordinate (in bohr)
@@ -1284,30 +1229,28 @@ subroutine setcon(fixcos)
 !     diss2: order of laguerre polynomials used (dimensionless)
 !     we2: fundamental stretching vibration of r2 (in hartree)
 !     all are treated as variationally optimisable parameters.
-      read(5,"(15i5)")     re2,diss2,we2
-      write(6,"(/5X,'Vibrational nuclear mass in AMU:',3F12.6)") xmass
- !1000 FORMAT(/5X,'Vibrational nuclear mass in AMU:',3F12.6)
-      if (jrot/=0) write(6,"( 5X,'Rotational  nuclear mass in AMU:',3F12.6/)") xmassr
- !1001 FORMAT( 5X,'Rotational  nuclear mass in AMU:',3F12.6/)
+    read(5,"(15i5)")     re2,diss2,we2
+    write(6,"(/5X,'Vibrational nuclear mass in AMU:',3F12.6)") xmass
+    if (jrot/=0) write(6,"( 5X,'Rotational  nuclear mass in AMU:',3F12.6/)") xmassr
 !     compute the effective moments of inertia
-      ur1 = amtoau/(g2*g2/xmass(1)+x1/xmass(2)+(x1-g2)**2/xmass(3))
-      ur2 = amtoau/(x1/xmass(1)+g1*g1/xmass(2)+(x1-g1)**2/xmass(3))
-      urr1 = amtoau/(g2*g2/xmassr(1)+x1/xmassr(2)+(x1-g2)**2/xmassr(3))
-      urr2 = amtoau/(x1/xmassr(1)+g1*g1/xmassr(2)+(x1-g1)**2/xmassr(3))
+    ur1 = amtoau/(g2*g2/xmass(1)+x1/xmass(2)+(x1-g2)**2/xmass(3))
+    ur2 = amtoau/(x1/xmass(1)+g1*g1/xmass(2)+(x1-g1)**2/xmass(3))
+    urr1 = amtoau/(g2*g2/xmassr(1)+x1/xmassr(2)+(x1-g2)**2/xmassr(3))
+    urr2 = amtoau/(x1/xmassr(1)+g1*g1/xmassr(2)+(x1-g1)**2/xmassr(3))
  
-      if (ncoord == 3) goto 20
-      if (zr2r1) then
+    if (ncoord == 3) goto 20
+    if (zr2r1) then
          write(6,1010) re1,ur1
  1010 format(/5x,'r1 fixed bondlength =',f8.4,' bohr',&
                   ' & reduced mass =',d16.7,' a.u.'/)
-      else
+    else
          write(6,1011) re2,ur2
  1011 format(/5x,'r2 fixed bondlength =',f8.4,' bohr',&
                   ' & reduced mass =',d16.7,' a.u.'/)
-      endif
-      if (zr2r1) goto 30
+    endif
+    if (zr2r1) goto 30
    20 continue
-      if (zmors1) then
+    if (zmors1) then
           write(6,1020) 1,re1,diss1,we1
  1020 format(/5x,'Morse function parameters for r',i1,' basis',&
              /5x,'r equilibrium =',f8.4,' bohr, dissociation energy',&
@@ -1319,7 +1262,7 @@ subroutine setcon(fixcos)
  1030 format(/5x,'Constants used to construct morse oscillators:',&
              /5x,'reduced mass =',d16.7,' a.u., beta =',f8.4,&
                   ' (1/bohr), a =',d16.7,' and u =',i5)
-      else
+    else
           a1=diss1
           beta1 = sqrt(we1 * ur1)
           write(6,1039) a1,we1,ur1,beta1
@@ -1329,17 +1272,17 @@ subroutine setcon(fixcos)
             //5x,'Constants used to construct spherical oscillators:',&
              /5x,'reduced mass =',d16.7,' a.u., beta =',f12.6,&
                   ' bohr**-2')
-      endif
-      if (ncoord == 2 .and. .not. zr2r1) goto 40
-      if (idia == -2) goto 40
+    endif
+    if (ncoord == 2 .and. .not. zr2r1) goto 40
+    if (idia == -2) goto 40
    30 continue
-      if (zmors2) then
+    if (zmors2) then
          write(6,1020) 2,re2,diss2,we2
          beta2 = we2 * sqrt(xp5*ur2/diss2)
          a2 = x4 * diss2 / we2
          iu2 = int(a2+xp5)
          write(6,1030) ur2,beta2,a2,iu2
-      else
+    else
          a2=diss2
          beta2 = sqrt(we2 * ur2)
          write(6,1040) a2,we2,ur2,beta2
@@ -1349,9 +1292,9 @@ subroutine setcon(fixcos)
             //5x,'Constants used to construct spherical oscillators:',&
              /5x,'reduced mass =',d16.7,' a.u., beta =',f12.6,&
                   ' bohr**-2')
-      endif
+    endif
    40 continue
-      if (ztran) then
+    if (ztran) then
          if (zrot) then
             if (zembed) then
                if (zquad2) then
@@ -1375,12 +1318,12 @@ subroutine setcon(fixcos)
             write(iwave) zembed,zmors1,zmors1,xmass,g1,g2,zncor,zquad2
             write(iwave) re1,diss1,we1,re1,diss1,we1
          endif
-      endif
-      return
-      end
+    endif
+    return
+    end
 
 !#########################################################################
-      subroutine setfac(dnorm1,dnorm2,cc1,cc2)
+    subroutine setfac(dnorm1,dnorm2,cc1,cc2)
 
 !     setfac initialises binomial array:                            #021
 !       binom(i+1,j+1) = i! / (j! * (i-j)!)
@@ -1404,13 +1347,13 @@ subroutine setcon(fixcos)
     xp5 = 0.5d0
     x1 = 1.0d0
 
-      fact(1) = x1
-      count = x1
-      do 10 i=1,npnt
-      fact(i+1) = count * fact(i)
-      count = count + x1
+    fact(1) = x1
+    count = x1
+    do 10 i=1,npnt
+    fact(i+1) = count * fact(i)
+    count = count + x1
    10 continue
-      if (ncoord == 2) then
+    if (ncoord == 2) then
         if (.not. zr2r1) then
           if (zmors1) then
             alf=dble(iu1)
@@ -1426,7 +1369,7 @@ subroutine setcon(fixcos)
           endif
           call norms(dnorm2,fact,cc2,alf,npnt2,nmax2)
         endif
-      else
+    else
         if (zmors1) then
           alf=dble(iu1)
         else
@@ -1441,10 +1384,10 @@ subroutine setcon(fixcos)
            endif
            call norms(dnorm2,fact,cc2,alf,npnt2,nmax2)
         endif
-      endif
+    endif
 
-      return
-      end
+    return
+    end
 
 !##############################################################################
 subroutine norms(dnorm,fact,cc,alf,npnt,nmax)
@@ -1458,23 +1401,23 @@ subroutine norms(dnorm,fact,cc,alf,npnt,nmax)
     double precision, dimension(npnt+1) :: bin
 
     x1 = 1.0d0
-      count = dble(npnt) + alf
+    count = dble(npnt) + alf
 !     cc is exact sum of weights for npnt Gauss-Laguerre integration
-      cc = fact(npnt) / count
+    cc = fact(npnt) / count
 !     normalisation array for l(i,alf): first set up binomials
-      npt1 = npnt + 1
-      bin(npt1) = x1
-      do 20 i=1,npnt
-      n = npt1 - i
-      bin(n) = bin(n+1) * count / dble(i)
-      count = count - x1
+    npt1 = npnt + 1
+    bin(npt1) = x1
+    do 20 i=1,npnt
+    n = npt1 - i
+    bin(n) = bin(n+1) * count / dble(i)
+    count = count - x1
    20 continue
-      npt1 = npt1 + 1
-      do 30 i=0,nmax
-      dnorm(i) = sqrt(bin(i+1)*fact(i+1)*fact(npt1-i-1))
+    npt1 = npt1 + 1
+    do 30 i=0,nmax
+    dnorm(i) = sqrt(bin(i+1)*fact(i+1)*fact(npt1-i-1))
    30 continue
-      return
-      end
+    return
+    end
 
 !############################################################################
 subroutine lagpt(ir,y,r,wt,b,c,cc,bass,dnorm,npnt,nmax,zmorse,&
@@ -1504,64 +1447,62 @@ subroutine lagpt(ir,y,r,wt,b,c,cc,bass,dnorm,npnt,nmax,zmorse,&
     x2 = 2.0d0
     toler = 1.0d-8
 
-      if (zmorse) alf=dble(iu)
-      if (.not. zmorse) alf = a + xp5
-      alfm1=alf-x1
+    if (zmorse) alf=dble(iu)
+    if (.not. zmorse) alf = a + xp5
+    alfm1=alf-x1
 !     set up integration points and weights.
-      call laguer(npnt,y,wt,alf,b,c,csx,csa,tsx,cc)
-      tsa = x1 / (dnorm(0) * dnorm(0))
-      write(6,1000) npnt,ir
+    call laguer(npnt,y,wt,alf,b,c,csx,csa,tsx,cc)
+    tsa = x1 / (dnorm(0) * dnorm(0))
+    write(6,1000) npnt,ir
  1000 format(/,i8,' point Gauss-Laguerre integration',&
              /,5x,'integration points',11x,'weights',9x,&
                   'corresponding r',i1,/)
-      do 60 i=1,npnt
-      if (zmorse) then
+    do 60 i=1,npnt
+    if (zmorse) then
 !         calculate potential at r = re+beta(**-1)*ln(a/y)
           r(i) = re + dlog(a/y(i)) / beta
-      else
+    else
 !         calculate potential at r = sqrt(y/beta)
           r(i) = sqrt(y(i)/beta)
-      endif
-      write(6,"(f23.15,d25.12,f13.5)") y(i),wt(i),r(i)
- !1010 format (f23.15,d25.12,f13.5)
-      if (r(i) < x0) write(6,1015) i
+    endif
+    write(6,"(f23.15,d25.12,f13.5)") y(i),wt(i),r(i)
+    if (r(i) < x0) write(6,1015) i
  1015 format(5x,'***** warning: for integration point',i3,&
              ', r less than zero *****')
 
 !     calculate unnormalised laguerre polynomials at y
 
 !     polynomial of order 0
-      bass(0,i) = x1
-      if (nmax < 1) goto 70
+    bass(0,i) = x1
+    if (nmax < 1) goto 70
 !     polynomial of order 1
-      amx = alf + x1 - y(i)
-      bass(1,i) = amx
+    amx = alf + x1 - y(i)
+    bass(1,i) = amx
 !     use recurrence relationships for polynomials of order > 2
 !     n * l(n,alf) = (2*n+alf-1-x)*l(n-1,alf) - (n+alf-1)*l(n-2,alf)
-      en = x1
-      do 80 n=2,nmax
-      en = en + x1
-      amx = amx + x2
-      bass(n,i) = (amx * bass(n-1,i) - (alfm1+en) * bass(n-2,i)) / en
+    en = x1
+    do 80 n=2,nmax
+    en = en + x1
+    amx = amx + x2
+    bass(n,i) = (amx * bass(n-1,i) - (alfm1+en) * bass(n-2,i)) / en
    80 continue
    70 continue
 
-      do 90 n2=0,nmax
-!     normalise polynomials
-      bass(n2,i) = bass(n2,i) * dnorm(n2)
+    do 90 n2=0,nmax
+!    normalise polynomials
+    bass(n2,i) = bass(n2,i) * dnorm(n2)
    90 continue
    60 continue
 !     check that the correct points & weights have been generated
-      write(6,1020) csx,csa,tsx,tsa
+    write(6,1020) csx,csa,tsx,tsa
  1020 format(/4x,'Computed sum of points',d22.15,' & weights',d22.15,&
              /4x,'Exact    sum of points',d22.15,' & weights',d22.15)
-      if (abs((csx-tsx)/tsx) > toler) goto 900
-      if (abs((csa-tsa)/tsa) > toler) goto 900
-      return
+    if (abs((csx-tsx)/tsx) > toler) goto 900
+    if (abs((csa-tsa)/tsa) > toler) goto 900
+    return
   900 write(6,"(//5x,'points & weights in error, adjust algorithm',//)")
-  !910 format(//5x,'points & weights in error, adjust algorithm',//)
-      stop
-      end
+    stop
+    end
 
 !##########################################################################
 subroutine laguer(nn,x,a,alf,b,c,csx,csa,tsx,cc)
@@ -1592,51 +1533,51 @@ subroutine laguer(nn,x,a,alf,b,c,csx,csa,tsx,cc)
 !     cc = n!                      denominator for pseudo-weights: a
 !     b(n) = (alf + 2n -1)             b & c for recurrence relation
 !     c(n) = (n - 1) * ( alf + n - 1)
-      b(1)=fa
-      c(1)=0.0d0
-      fn=1.0d0
-      do 1 j=2,nn
+    b(1)=fa
+    c(1)=0.0d0
+    fn=1.0d0
+    do 1 j=2,nn
          fa=fa+2.0d0
          b(j)=fa
          c(j)=fn*(alf+fn)
          fn=fn+1.0d0
     1 continue
-      tsx=fn*(alf+fn)
-      xt1=0.0d0
+    tsx=fn*(alf+fn)
+    xt1=0.0d0
 !     formulas for initial point & step chosen because they work!
-      xt=(1.0d0+alf)*(2.0d0+alf)/(1.0d0+3.0d0*fn+2.0d0*alf)
-      step=3.0d0*(1.0d0+alf)/(1.0d0+3.0d0*fn+alf)
-      call lgrecr(pt,dpn,pn1,xt,nn,alf,b,c)
+    xt=(1.0d0+alf)*(2.0d0+alf)/(1.0d0+3.0d0*fn+2.0d0*alf)
+    step=3.0d0*(1.0d0+alf)/(1.0d0+3.0d0*fn+alf)
+    call lgrecr(pt,dpn,pn1,xt,nn,alf,b,c)
 
-      do 7 i=1,nn
-      if (i > 2) goto 4
+    do 7 i=1,nn
+    if (i > 2) goto 4
 !     smallest two zeros: found by "brute force" search
     2 xt2 = xt + step
-      call lgrecr(pt2,dpn,pn1,xt2,nn,alf,b,c)
-      if (dsign(x1,pt)*dsign(x1,pt2) > 0.0d0) goto 5
-      pt = pt2
-      xt = 0.5d0 * (xt + xt2)
-      go to 6
+    call lgrecr(pt2,dpn,pn1,xt2,nn,alf,b,c)
+    if (dsign(x1,pt)*dsign(x1,pt2) > 0.0d0) goto 5
+    pt = pt2
+    xt = 0.5d0 * (xt + xt2)
+    go to 6
     5 pt = pt2
-      xt = xt2
-      go to 2
+    xt = xt2
+    go to 2
 !     all other zeros: found using formula of stroud & secrest
     4 fi = dble(i-2)
-      r1 = (1.0d0+2.55d0*fi)/(1.9d0*fi)
-      r2 = 1.26d0*fi*alf/(1.0d0+3.5d0*fi)
-      ratio = (r1+r2)/(1.0d0+0.3d0*alf)
-      xt = xt + ratio*(xt-xt2)
+    r1 = (1.0d0+2.55d0*fi)/(1.9d0*fi)
+    r2 = 1.26d0*fi*alf/(1.0d0+3.5d0*fi)
+    ratio = (r1+r2)/(1.0d0+0.3d0*alf)
+    xt = xt + ratio*(xt-xt2)
 
     6 call lgroot(xt,nn,alf,dpn,pn1,b,c,eps)
-      xt2=xt1
-      xt1=xt
-      x(i) = xt
-      a(i) = cc/dpn/pn1
-      csx = csx + xt
-      csa = csa + a(i)
+    xt2=xt1
+    xt1=xt
+    x(i) = xt
+    a(i) = cc/dpn/pn1
+    csx = csx + xt
+    csa = csa + a(i)
     7 continue
-      return
-      end
+    return
+    end
 
 !##############################################################################
 subroutine lgroot(x,nn,alf,dpn,pn1,b,c,eps)
@@ -1656,16 +1597,16 @@ subroutine lgroot(x,nn,alf,dpn,pn1,b,c,eps)
     itmax = 10
     iter=0
     1 iter=iter+1
-      call lgrecr(p,dpn,pn1,x,nn,alf,b,c)
-      d = p/dpn
-      x = x-d
-      if (abs(d/x) <= eps) return
-      if (iter < itmax) goto 1 
-      write(6,100) iter,d,x
+    call lgrecr(p,dpn,pn1,x,nn,alf,b,c)
+    d = p/dpn
+    x = x-d
+    if (abs(d/x) <= eps) return
+    if (iter < itmax) goto 1 
+    write(6,100) iter,d,x
   100 format(5x,'warning: noconvergence after',i4,' iterations',&
              /,5x,'current difference',d26.15,' & root',d26.15)
-      return
-      end
+    return
+    end
 
 !###########################################################################
 subroutine lgrecr(pn,dpn,pn1,x,nn,alf,b,c)
@@ -1682,11 +1623,11 @@ subroutine lgrecr(pn,dpn,pn1,x,nn,alf,b,c)
     double precision, dimension(nn+1) :: b
     double precision, dimension(nn+1) :: c     
 
-      p1 = 1.0d0
-      p = x - alf - 1.0d0
-      dp1 = 0.0d0
-      dp = 1.0d0
-      do 1 j=2,nn
+    p1 = 1.0d0
+    p = x - alf - 1.0d0
+    dp1 = 0.0d0
+    dp = 1.0d0
+    do 1 j=2,nn
          q  = (x-b(j))* p-c(j)* p1
          dq = (x-b(j))*dp-c(j)*dp1 + p
          p1 = p
@@ -1694,11 +1635,11 @@ subroutine lgrecr(pn,dpn,pn1,x,nn,alf,b,c)
          dp1= dp
          dp = dq
     1 continue
-      pn = p
-      dpn= dp
-      pn1= p1
-      return
-      end
+    pn = p
+    dpn= dp
+    pn1= p1
+    return
+    end
 
 !###########################################################################
 subroutine keints(hbl,fke,nlim,nmax,iu)
@@ -1731,14 +1672,13 @@ subroutine keints(hbl,fke,nlim,nmax,iu)
           endif
    20   continue
    10 continue
-      if (.not. zprad) return
-!     write kinetic energy integrals if requested
-      write(6,"(//,'radial kinetic energy matrix calculated analytically')")
-  !500 format(//,5x,'radial kinetic energy matrix calculated',&
-    !          ' analytically',/)
-      call symout(hbl,nmax+1)
-      return
-      end
+    if (.not. zprad) return
+!    write kinetic energy integrals if requested
+    write(6,"(//,'radial kinetic energy matrix calculated analytically')")
+
+    call symout(hbl,nmax+1)
+    return
+    end
 
 !#######################################################################
 subroutine keint2(hbl,fke,rm2,dnorm,nlim,nmax,npnt,alf)
@@ -1763,46 +1703,44 @@ subroutine keint2(hbl,fke,rm2,dnorm,nlim,nmax,npnt,alf)
     do 10 n1=1,npnt
         gam = gam /(dble(n1)+alf+xp5)
    10 continue  
-      fact = x1
-      fn = x0
-      sum = gam
-      do 20 n1 = 1,nmax+1
-      index = (n1 * (n1+1)) / 2
-      do 30 n2 = n1,nmax+1
-      rm2(index) = dnorm(n1) * dnorm(n2) * sum
-      index = index + n2
+    fact = x1
+    fn = x0
+    sum = gam
+    do 20 n1 = 1,nmax+1
+    index = (n1 * (n1+1)) / 2
+    do 30 n2 = n1,nmax+1
+    rm2(index) = dnorm(n1) * dnorm(n2) * sum
+    index = index + n2
    30 continue
-      gam = (fn+alf+xp5) * gam
-      fn = fn + x1
-      fact = fn * fact
-      sum = sum + gam / fact
+    gam = (fn+alf+xp5) * gam
+    fn = fn + x1
+    fact = fn * fact
+    sum = sum + gam / fact
    20 continue
-      fact = alf * (alf + x1)
-      do 40 index=1,nlim
-      hbl(index) = - fact * rm2(index)
+    fact = alf * (alf + x1)
+    do 40 index=1,nlim
+    hbl(index) = - fact * rm2(index)
    40 continue
-      index = 0
-      fn = - x1
-      do 50 n2=1,nmax+1
-      fn = fn + x1
-      index=index+n2
+    index = 0
+    fn = - x1
+    do 50 n2=1,nmax+1
+    fn = fn + x1
+    index=index+n2
 !     special case:  n1 = n2
-      hbl(index) = hbl(index) + fke * (fn+fn+alf+1.5d0)
+    hbl(index) = hbl(index) + fke * (fn+fn+alf+1.5d0)
 !     special case:  n2 = n1 + 1
-      if (n2 > 1)&
+    if (n2 > 1)&
           hbl(index-1) = hbl(index-1) + fke * sqrt(fn*(fn+alf+xp5))
    50 continue
-      if (.not. zprad) return
+    if (.not. zprad) return
 !     write kinetic energy & inertia integrals if requested
-      write(6,"(//5x,'radial kinetic energy matrix calculated analytically'/)")
-  !500 format(//5x,'radial kinetic energy matrix calculated',&
-    !               ' analytically'/)
-      call symout(hbl,nmax+1)
-      write(6,"(//5x,'moment of inertia matrix calculated analytically'/)")
+    write(6,"(//5x,'radial kinetic energy matrix calculated analytically'/)")
+    call symout(hbl,nmax+1)
+    write(6,"(//5x,'moment of inertia matrix calculated analytically'/)")
  ! 510 format(//5x,'moment of inertia matrix calculated analytically'/)
-      call symout(rm2,nmax+1)
-      return
-      end
+    call symout(rm2,nmax+1)
+    return
+    end
 
 !##########################################################################
 subroutine k1k2(xk,hbl,bass,wt,npnt,nmax,nlim)
@@ -1819,9 +1757,9 @@ subroutine k1k2(xk,hbl,bass,wt,npnt,nmax,nlim)
     double precision, dimension(0:nmax,npnt) :: bass
     double precision, dimension(npnt) :: wt
 
-      xk = 0.0d0
+    xk = 0.0d0
 
-      do 10 k=1,npnt
+    do 10 k=1,npnt
         do 20 kp=1,k
           wtkkp = wt(k)*wt(kp)
           do 30 m=0,nmax
@@ -1834,8 +1772,8 @@ subroutine k1k2(xk,hbl,bass,wt,npnt,nmax,nlim)
         xk(kp,k)=xk(k,kp)
    20   continue
    10 continue
-      return
-      end
+    return
+    end
 
 !############################################################################
 subroutine jacobi(nn,nn2,x,a,alf,bta,csa,tsa)
@@ -1860,57 +1798,57 @@ subroutine jacobi(nn,nn2,x,a,alf,bta,csa,tsa)
     eps = 1.0d-12
 
     fn= dble(nn)
-      csa= x0
-      c(1) = x0
-      b(1) = x0
-      do 10 i=2,nn
-      xi= float(i)
-      b(i) = x0
-      c(i)= x4*(xi-x1)*(alf+xi-x1)*(bta+xi-x1)*(alf+bta+xi-x1)/&
+    csa= x0
+    c(1) = x0
+    b(1) = x0
+    do 10 i=2,nn
+    xi= float(i)
+    b(i) = x0
+    c(i)= x4*(xi-x1)*(alf+xi-x1)*(bta+xi-x1)*(alf+bta+xi-x1)/&
              ((alf+bta+x2*xi-x1)*(alf+bta+x2*xi-x2)*&
               (alf+bta+x2*xi-x2)*(alf+bta+x2*xi-x3))
   10 continue
-      cc=tsa
-      do 15 i=2,nn
-       cc= cc*c(i)
+    cc=tsa
+    do 15 i=2,nn
+    cc= cc*c(i)
    15 continue
 
 ! step through the jacobi polynomial and 
 ! notes a first guess for the posititions of the zeros in the 
 ! array xt(ii). Zeros are found by looking for a change in sign.
 
-      ii=0
-      pm1=x1
-      xxx=x1
+    ii=0
+    pm1=x1
+    xxx=x1
  30   continue
-      call recur(p,dp,pn1,xxx,nn,alf,bta,b,c)
+    call recur(p,dp,pn1,xxx,nn,alf,bta,b,c)
 
-      if (pm1*p < x0) then
+    if (pm1*p < x0) then
          pm1 = -pm1
          ii = ii +1
          xt(ii)=xxx
-      endif
+    endif
 
-      if (ii == nn2) then
+    if (ii == nn2) then
          do 40 i=1,nn2
          call recur(ptemp,dp,pn1,xt(i),nn,alf,bta,b,c)
 40      continue
-      else
+    else
          xxx=xxx-0.0001
          if (xxx > -0.002) goto 30
          write(6,*) "Incorrect number",ii-1," of zeros found in JACOBI"
          stop
-      endif 
+    endif 
 
-       do 20 i=1,nn2
-       call root(xt(i),nn,alf,bta,dpn,pn1,b,c,eps)
-       x(i)= xt(i)
-       a(i)= cc/(dpn*pn1)
-       csa= csa + a(i) + a(i)
+    do 20 i=1,nn2
+    call root(xt(i),nn,alf,bta,dpn,pn1,b,c,eps)
+    x(i)= xt(i)
+    a(i)= cc/(dpn*pn1)
+    csa= csa + a(i) + a(i)
   20  continue
-      if (2*nn2 /= nn) csa=csa-a(nn2)
-      return
-      end
+    if (2*nn2 /= nn) csa=csa-a(nn2)
+    return
+    end
 
 !#####################################################################
 subroutine root(x,nn,alf,bta,dpn,pn1,b,c,eps)
@@ -1924,16 +1862,16 @@ subroutine root(x,nn,alf,bta,dpn,pn1,b,c,eps)
     double precision :: x, alf, bta, dpn, pn1, eps, d, p, dp
     double precision, dimension(nn) :: b, c
    
-      iter= 0
+    iter= 0
 1     iter= iter + 1
-      call recur(p,dp,pn1,x,nn,alf,bta,b,c)
-      d = p/dp
-      x = x - d
-      if(abs(d) <= eps) goto 3 
-      if(iter < 10) goto 1 
+    call recur(p,dp,pn1,x,nn,alf,bta,b,c)
+    d = p/dp
+    x = x - d
+    if(abs(d) <= eps) goto 3 
+    if(iter < 10) goto 1 
 3     dpn= dp
-      return
-      end
+    return
+    end
 
 !======================================================================
 subroutine recur(pn,dpn,pn1,x,nn,alf,bta,b,c)
@@ -1946,11 +1884,11 @@ subroutine recur(pn,dpn,pn1,x,nn,alf,bta,b,c)
     x0 = 0.0d0
     x1 = 1.0d0
     x2 = 2.0d0
-      p1= x1
-      p= x + (alf-bta)/(alf + bta + x2)
-      dp1= x0
-      dp= x1
-      do 1 j=2,nn
+    p1= x1
+    p= x + (alf-bta)/(alf + bta + x2)
+    dp1= x0
+    dp= x1
+    do 1 j=2,nn
         q= (x - b(j))*p - c(j)*p1
         dq= (x - b(j))*dp + p - c(j)*dp1
         p1= p
@@ -1958,11 +1896,11 @@ subroutine recur(pn,dpn,pn1,x,nn,alf,bta,b,c)
         dp1= dp
         dp= dq
 1     continue
-      pn= p
-      dpn= dp
-      pn1= p1
-      return
-      end
+    pn= p
+    dpn= dp
+    pn1= p1
+    return
+    end
 
 !################################################################
 subroutine allpts(xalf,walf,nang,nang2)
@@ -1976,17 +1914,17 @@ subroutine allpts(xalf,walf,nang,nang2)
     double precision :: scale
     double precision, dimension(idvr) :: xalf,walf
 
-      scale = dble(max(1,idia))
-      do 10 i=1,nang2
-      walf(i) = sqrt(scale*walf(i))
-      if (idia == 2) goto 10
-      xalf(nang+1-i) = xalf(i)
-      xalf(i)        =-xalf(i)
-      walf(nang+1-i) = walf(i)
+    scale = dble(max(1,idia))
+    do 10 i=1,nang2
+    walf(i) = sqrt(scale*walf(i))
+    if (idia == 2) goto 10
+    xalf(nang+1-i) = xalf(i)
+    xalf(i)        =-xalf(i)
+    walf(nang+1-i) = walf(i)
    10 continue
   
-      return
-      end
+    return
+    end
 
 !########################################################################
 subroutine asleg(pleg,lmax,x,nn2,kz,lincr)
@@ -2007,60 +1945,59 @@ subroutine asleg(pleg,lmax,x,nn2,kz,lincr)
 
     x1 = 1.0d0
     x2 = 2.0d0
-      m = kz
-      if (m<0) goto 999
-      do 10 i=1,nn2
-      pmm = x1
-      fact = x1
-      do 11 j=1,m
+    m = kz
+    if (m<0) goto 999
+    do 10 i=1,nn2
+    pmm = x1
+    fact = x1
+    do 11 j=1,m
           pmm = -pmm * fact
           fact = fact + x2
    11 continue
 
-      pleg(0,i) = pmm
-      pmmp1= x(i)*(m+m+1)*pmm
-      pleg(1,i)= pmmp1
-      ll=1
-      do 2 l= 2+m,lmax+lincr
-      r2lm1 = dble(l+l-1)
-      rlpmm1= dble(l+m-1)
-      rlmm  = dble(l-m)
-      pll= (x(i)*r2lm1*pmmp1 - rlpmm1*pmm)/rlmm
-      pmm= pmmp1
-      pmmp1= pll
-      ll=ll+1
-      pleg(ll,i)= pll
+    pleg(0,i) = pmm
+    pmmp1= x(i)*(m+m+1)*pmm
+    pleg(1,i)= pmmp1
+    ll=1
+    do 2 l= 2+m,lmax+lincr
+    r2lm1 = dble(l+l-1)
+    rlpmm1= dble(l+m-1)
+    rlmm  = dble(l-m)
+    pll= (x(i)*r2lm1*pmmp1 - rlpmm1*pmm)/rlmm
+    pmm= pmmp1
+    pmmp1= pll
+    ll=ll+1
+    pleg(ll,i)= pll
 2     continue
 10    continue
 
 !     set up the normalisation constants
 !     (pnorm)**2 = (2j + 1)/2   *   (j - k)! / (j + k)!
-      jstart = m
-      jj = -1
-      do 13 j = jstart,lmax+lincr
-      fact = x1
-      do 12 i = j-m+1,j+m
+    jstart = m
+    jj = -1
+    do 13 j = jstart,lmax+lincr
+    fact = x1
+    do 12 i = j-m+1,j+m
          facti = dble(i)
          fact = fact * facti
    12 continue
-      rj = dble(j)
-      jj = jj + 1
-      pnorm(jj) = (rj + rj + x1) / (fact + fact)
-      pnorm(jj) = sqrt(pnorm(jj))
+    rj = dble(j)
+    jj = jj + 1
+    pnorm(jj) = (rj + rj + x1) / (fact + fact)
+    pnorm(jj) = sqrt(pnorm(jj))
    13 continue
 !     now normalise the polynomials
-      do 14 i=1,nn2
+    do 14 i=1,nn2
          jj = -1
          do 15 j=jstart,lmax+lincr
             jj = jj + 1
             pleg(jj,i) = pleg(jj,i) * pnorm(jj)
    15    continue
    14 continue
-      return
+    return
 999   write(6,"(/,/,5x,'improper argument in subroutine asleg',/)")
-!200   format(/,/,5x,'improper argument in subroutine asleg',/)
-      stop
-      end
+    stop
+    end
 
 !###################################################################
 subroutine lmatrx(xlmatr,pleg,walf,kz,ipar0,nidvr,lincr,alf)
@@ -2080,24 +2017,23 @@ subroutine lmatrx(xlmatr,pleg,walf,kz,ipar0,nidvr,lincr,alf)
     double precision, dimension(idvr) :: walf
 
     x0 = 0.0d0
-
-      if(zperp) then      
+    if(zperp) then      
         jstart = 0
         iparam = jstart
-      else
+    else
         jstart = kz
         iparam = lincr
-      endif
+    endif
 
-      realkz = kz
+    realkz = kz
 
-      jdia=max(1,idia)
-      jj0=-jdia
-      if (.not.zperp .and. mod(jstart,jdia) /= ipar0) then
+    jdia=max(1,idia)
+    jj0=-jdia
+    if (.not.zperp .and. mod(jstart,jdia) /= ipar0) then
           jj0=jj0+1
           jstart=jstart+1
-      endif
-      do 10 k= 1,nidvr
+    endif
+    do 10 k= 1,nidvr
         term =  walf(k)
         do 11 kp=k,nidvr
           sumj1=x0
@@ -2116,13 +2052,12 @@ subroutine lmatrx(xlmatr,pleg,walf,kz,ipar0,nidvr,lincr,alf)
         xlmatr(k,kp) = xlmatr(kp,k)
    11   continue
    10 continue   
-      if (.not. zlmat) return
+    if (.not. zlmat) return
 !     write xlmatr if requested
-      write(6,"(5x,'L-matrix for kz =',i3,', ipar =',i2/)") kz,ipar0
- !1010 format(5x,'L-matrix for kz =',i3,', ipar =',i2/)
-      call sqout(xlmatr,nidvr)
-      return
-      end
+    write(6,"(5x,'L-matrix for kz =',i3,', ipar =',i2/)") kz,ipar0
+    call sqout(xlmatr,nidvr)
+    return
+    end
 
 !##########################################################################
 
@@ -2176,64 +2111,62 @@ subroutine jhmain(xk1,xk2,xlmatr,r1,r2,xalf,r2m2t,kz)
     ALLOCATE(ham1(ndima,ndima),eigs1d(max2d),&
                eig1(ndima),iv1(ndimc,ndimb),vecs1d(max2d,ndima))
 
-      term  = dble(jrot * jrot + jrot - (2 * kz * kz))
+    term  = dble(jrot * jrot + jrot - (2 * kz * kz))
 !     construct the one-dimensional hamiltonian matrix h1(npnta,npnta')
 !     for each npntb and npntc, then solve by diagonalisation.
-      icall = 0
-      nsum = 0
-      do 10 ione = 1,npntc
-      nham2 = 0
-      do 20 itwo = 1,npntb
+    icall = 0
+    nsum = 0
+    do 10 ione = 1,npntc
+    nham2 = 0
+    do 20 itwo = 1,npntb
 
-      if (zr2r1) then
+    if (zr2r1) then
          call mkham1(ham1,xlmatr,ione,itwo,term,r1,r2,xalf,xk1,xk2,kz)
-      else
+    else
          call mkham1(ham1,xlmatr,itwo,ione,term,r1,r2,xalf,xk1,xk2,kz)
-      endif
+    endif
 
 !     diagonalise each block, saving the eigenvalues and vectors that
 !     fall below the cut-off energy emax1.
-      call diag(ham1,ndima,npnta,eig1)
-      call cut1d(ham1,eig1,iv1(ione,itwo),eigs1d,vecs1d,nham2,icall)
+    call diag(ham1,ndima,npnta,eig1)
+    call cut1d(ham1,eig1,iv1(ione,itwo),eigs1d,vecs1d,nham2,icall)
    20 continue
-      write(6,"(5x,' nham2 = ',i4)") nham2
-  !985 format(5x,' nham2 = ',i4)
-      nsum = nsum + nham2
-      if (ione == npntc) write(6,"(/5x,' sum = ',i5)") nsum
-  !986 format(/5x,' sum = ',i5)
-      if (nham2 > 0) then
+    write(6,"(5x,' nham2 = ',i4)") nham2
+    nsum = nsum + nham2
+    if (ione == npntc) write(6,"(/5x,' sum = ',i5)") nsum
+    if (nham2 > 0) then
 !        dump the 1d eigenavlues & vectors to disk for each ione
          call outrow(eigs1d,nham2,ieigs1)
          do 2 ka=1,npnta
          if (zvec) call outrow(vecs1d(1,ka),nham2,iout2)
          call outrow(vecs1d(1,ka),nham2,ivecs1)
     2    continue
-      endif
+    endif
    10 continue
 
-      if (zvec) write (iout1) iv1
+    if (zvec) write (iout1) iv1
 
-      DEALLOCATE(ham1,eig1)
-      ALLOCATE(ndim2d(ndimc),eigs2(max2d,ndimc),&
+    DEALLOCATE(ham1,eig1)
+    ALLOCATE(ndim2d(ndimc),eigs2(max2d,ndimc),&
                ham2(max2d,max2d),eig2(max2d),iv2(ndimc),eigs2d(max3d))
       
 !     now want to make the two-dimensional ham2(npntb,npntb',i,i'),
 !     where i runs over the selected ham1(npnta,npnta') solutions.
-      rewind ivecs1
-      rewind ieigs1
-      icall = 0
-      low3d = 0
+    rewind ivecs1
+    rewind ieigs1
+    icall = 0
+    low3d = 0
 !     if zall then set zcut for convenience...
-      if (zall) zcut = .true.
-      do 31 ione = 1,npntc
-      nham2 = 0
+    if (zall) zcut = .true.
+    do 31 ione = 1,npntc
+    nham2 = 0
 !     recall the size of ham2
-      do 3 itwo = 1,npntb
-      nham2 = nham2 + iv1(ione,itwo)
+    do 3 itwo = 1,npntb
+    nham2 = nham2 + iv1(ione,itwo)
     3 continue
-      ndim2d(ione) = nham2
+    ndim2d(ione) = nham2
 
-      if ( nham2 > 0 ) then
+    if ( nham2 > 0 ) then
         call mkham2(ham2,eigs1d,vecs1d,xk1,xk2,iv1,ione,nham2)
         if (.not. ztwod) then
            call diag(ham2,max2d,nham2,eig2)
@@ -2252,24 +2185,23 @@ subroutine jhmain(xk1,xk2,xlmatr,r1,r2,xalf,r2m2t,kz)
           low3d = max3d
         endif
 
-      endif
+    endif
 
-      if (ione == npntc .and. zcut) write(6,"(/i14,' eigenvalues selected below ',d20.10)")  low3d,emax2
-  !987 format(/i14,' eigenvalues selected below ',d20.10)
+    if (ione == npntc .and. zcut) write(6,"(/i14,' eigenvalues selected below ',d20.10)")  low3d,emax2
 
    31 continue
 
-      if (.not. zcut) call choose(eigs2,ndim2d,ham2,iv2,low3d)
+    if (.not. zcut) call choose(eigs2,ndim2d,ham2,iv2,low3d)
 
-      if (zvec) write (iout1) iv2
+    if (zvec) write (iout1) iv2
 
 !      call timer
 
-      nham3 = low3d
+    nham3 = low3d
 
 !     save the required bits to disk if zdiag = .false.
 !     first open the required disk file
-      if (.not. zdiag) then
+    if (.not. zdiag) then
         open(unit=idiag1,form='unformatted',recordtype='segmented')
         open(unit=idiag2,form='unformatted',recordtype='segmented')
         write(idiag1) npnta,npntb,npntc,max2d,nham3,zcut
@@ -2288,30 +2220,30 @@ subroutine jhmain(xk1,xk2,xlmatr,r1,r2,xalf,r2m2t,kz)
           call outrow(eigs2,max2d*ndimc,idiag1)
         endif
 
-      endif
-      DEALLOCATE(eigs1d,eig2)
-      ALLOCATE(hband(max2d,nham3),&
+    endif
+    DEALLOCATE(eigs1d,eig2)
+    ALLOCATE(hband(max2d,nham3),&
                cint(ndima*ndimb,max2d),cintp(ndima*ndimb,max2d))
 
-      call mkham3(nham3,ham2,cint,cintp,iv1,iv2,ndim2d,&
+    call mkham3(nham3,ham2,cint,cintp,iv1,iv2,ndim2d,&
                   vecs1d,xk1,xk2,eigs2d,eigs2,hband,xlmatr,r1,r2,&
                   r2m2t,term)
 
-      DEALLOCATE(ham2,cint,cintp,vecs1d,hband,iv1)
-      ALLOCATE(ham3(nham3,nham3))
+    DEALLOCATE(ham2,cint,cintp,vecs1d,hband,iv1)
+    ALLOCATE(ham3(nham3,nham3))
 
-      call loadh(ham3,nham3,iv2,ndim2d,eigs2d,eigs2)
+    call loadh(ham3,nham3,iv2,ndim2d,eigs2d,eigs2)
 
-      DEALLOCATE(iv2,ndim2d,eigs2d,eigs2)
-      ALLOCATE(eval(nham3))
+    DEALLOCATE(iv2,ndim2d,eigs2d,eigs2)
+    ALLOCATE(eval(nham3))
 
-      call diag3d(ham3,nham3,eval,kz)
+    call diag3d(ham3,nham3,eval,kz)
 
-      DEALLOCATE(ham3,eval)
+    DEALLOCATE(ham3,eval)
 
 !.....finally, can compute the actual wavefunction amplitude at
 !.....the grid points if needed.
-      if (ztran) then
+    if (ztran) then
          ALLOCATE(evall(neval),&
                  iv1l(ndimc,ndimb),iv2l(ndimc),ndim2l(ndimc),&
                  vecs1l(max2d,ndima),vecs2l(max2d,max2d),vecs3l(nham3),&
@@ -2321,13 +2253,13 @@ subroutine jhmain(xk1,xk2,xlmatr,r1,r2,xalf,r2m2t,kz)
                     vecs2l,vecs3l,phi,psi,evall,nham3)
 
          DEALLOCATE(iv1l,iv2l,ndim2l,vecs1l,vecs2l,vecs3l,phi,psi,evall)
-      endif
+    endif
 
-      return
-      end
+    return
+    end
 
 !#########################################################################
-      subroutine mkham1(ham1,xlmatr,i1,i2,term,r1,r2,xalf,xk1,xk2,kz)
+subroutine mkham1(ham1,xlmatr,i1,i2,term,r1,r2,xalf,xk1,xk2,kz)
 
     use size
     use outp
@@ -2353,11 +2285,11 @@ subroutine jhmain(xk1,xk2,xlmatr,r1,r2,xalf,r2m2t,kz)
     x1 = 1.0d0
 
 !     zero ham1
-      ham1 = x0
+    ham1 = x0
 !     zero rotational excitation term for j=0 cases
-      wterm = x0
+    wterm = x0
 !.....theta first
-      if (ztheta) then
+    if (ztheta) then
 
          w1gama = xp5 / (r1(i1)*r1(i1)*ur1)
          w2beta = xp5 / (r2(i2)*r2(i2)*ur2)
@@ -2371,34 +2303,34 @@ subroutine jhmain(xk1,xk2,xlmatr,r1,r2,xalf,r2m2t,kz)
 !              have term * r1**(-2) term
                wterm = term * w1gama * ur1/urr1
             endif
-!     extra NBO term if vib mass /= rot mass
+!    extra NBO term if vib mass /= rot mass
             if (kz > 0) then
                s1 = ur1/urr1-x1
                s2 = ur2/urr2-x1
                w3 = dble(kz*kz) * (s1*w1gama + s2*w2beta)*xp0
             endif
          endif
-      endif
+    endif
 
-      do 10 k = 1,npnta
-      if (ztheta) then
+    do 10 k = 1,npnta
+    if (ztheta) then
          call potv(v,r1(i1),r2(i2),xalf(k))
-      else
+    else
          if (zr2r1)then
             call potv(v,r1(i2),r2(k),xalf(i1))
           else
             call potv(v,r1(k),r2(i1),xalf(i2))
          endif
-      endif
+    endif
 
-      if (ztheta) then
+    if (ztheta) then
          if (kz > 0) v = v + w3/(x1-xalf(k)**2)
          ham1(k,k) = v + wterm
          do 20 kp= 1,k
          ham1(k,kp) = ham1(k,kp) + xlmatr(k,kp)*wsum
    20    continue    
 
-      else
+    else
          if (jrot > 0) then
             if (zembed) then
               if (zr2r1)then
@@ -2425,11 +2357,11 @@ subroutine jhmain(xk1,xk2,xlmatr,r1,r2,xalf,r2m2t,kz)
             ham1(k,kp) = ham1(k,kp) + xk1(k,kp)
    40       continue
          endif
-      endif
+    endif
    10 continue
 
-      return
-      end
+    return
+    end
 
 !####################################################################
 subroutine mkham2(ham2,eigs1d,vecs1d,xk1,xk2,iv1,ione,nham2)
@@ -2450,9 +2382,9 @@ subroutine mkham2(ham2,eigs1d,vecs1d,xk1,xk2,iv1,ione,nham2)
     double precision, dimension(npnt1,npnt1) :: xk1
 
 !     zero ham2
-      ham2 = 0.0d0
+    ham2 = 0.0d0
 
-      do 10 i3= 1,npnta
+    do 10 i3= 1,npnta
          call getrow(vecs1d(1,i3),nham2,ivecs1)
          do 20 j = 1,nham2
            do 30 k = 1,j
@@ -2461,8 +2393,8 @@ subroutine mkham2(ham2,eigs1d,vecs1d,xk1,xk2,iv1,ione,nham2)
    20    continue
    10 continue
 !     must now multiply by xk1 or xk2
-      ivbsm = 0
-      do 50 itwo = 1,npntb
+    ivbsm = 0
+    do 50 itwo = 1,npntb
         ivbpsm = 0
         ivb = iv1(ione,itwo)
         do 60 itwop = 1,itwo
@@ -2478,27 +2410,27 @@ subroutine mkham2(ham2,eigs1d,vecs1d,xk1,xk2,iv1,ione,nham2)
         else
            xkterm = xk2(itwo,itwop)
         endif
-      endif
-      ivbp = iv1(ione,itwop)
-      do 70 j  = 1,ivb
+    endif
+    ivbp = iv1(ione,itwop)
+    do 70 j  = 1,ivb
         ind1 = ivbsm + j
         do 77 jp = 1,ivbp
           ind2 = ivbpsm + jp
           ham2(ind1,ind2) = ham2(ind1,ind2) * xkterm
    77   continue
    70 continue
-      ivbpsm = ivbpsm + ivbp
+    ivbpsm = ivbpsm + ivbp
    60 continue
-      ivbsm = ivbsm + ivb
+    ivbsm = ivbsm + ivb
    50 continue
 
 !     now add the 1-d eigenvalues along the diagonal
-      call getrow(eigs1d,nham2,ieigs1)
-      do 80 nn = 1,nham2
+    call getrow(eigs1d,nham2,ieigs1)
+    do 80 nn = 1,nham2
          ham2(nn,nn) = ham2(nn,nn) + eigs1d(nn)
    80 continue
-      return
-      end
+    return
+    end
 
 !################################################################################
 subroutine mkham3(nham3,ham2,cint,cintp,iv1,iv2,ndim2d,&
@@ -2537,7 +2469,7 @@ subroutine mkham3(nham3,ham2,cint,cintp,iv1,iv2,ndim2d,&
     xp5 = 0.5d0
 
 !     if zdiag = .false. want eigs2d now
-      if (.not. zdiag) then
+    if (.not. zdiag) then
         rewind ieigs2
         neig = 0
         do 184 ione = 1,npntc
@@ -2550,15 +2482,15 @@ subroutine mkham3(nham3,ham2,cint,cintp,iv1,iv2,ndim2d,&
           endif
           if (iv > 0 .and. zcut) call getrow(eigs2d,iv,ieigs2)
   184   continue
-      endif
+    endif
 
 !     first do the intermediate transformation
-      ncint = npnta*npntb
-      ndimt = ndima*ndimb
-      rewind ivecs2
-      rewind ivecs1
+    ncint = npnta*npntb
+    ndimt = ndima*ndimb
+    rewind ivecs2
+    rewind ivecs1
 
-      do 10 ione = 1,npntc
+    do 10 ione = 1,npntc
 !        recall the size of the 2-d vectors
          nham2=ndim2d(ione)
          if (nham2 == 0) goto 10
@@ -2738,17 +2670,15 @@ subroutine mkham3(nham3,ham2,cint,cintp,iv1,iv2,ndim2d,&
    95       continue
           endif
    66  continue
-      endif
+    endif
 
-      if (.not. zdiag) then
+    if (.not. zdiag) then
          write(6,"(/5x,'hamiltonian written to disk - not diagonalised')")
-! 1080    format(/5x,'hamiltonian written to disk - not diagonalised')
          write(6,"(/5x,'hamiltonian bands written to stream idiag =',i4/)") idiag2
-! 1081    format(/5x,'hamiltonian bands written to stream idiag =',i4/)
          stop
-       endif
-       return
-       end
+    endif
+    return
+    end
 
 !======================================================================================
 subroutine loadh(ham3,nham3,iv2,ndim2d,eigs2d,eigs2)
@@ -2766,10 +2696,10 @@ subroutine loadh(ham3,nham3,iv2,ndim2d,eigs2d,eigs2)
     double precision, dimension(nham3) :: eigs2d
     double precision, dimension(max2d,ndimc) :: eigs2
 
-      ham3 = 0.0d0
-      rewind iband
-      ivsm = 0
-      do 62 ione = 1,npntc
+    ham3 = 0.0d0
+    rewind iband
+    ivsm = 0
+    do 62 ione = 1,npntc
         if (ndim2d(ione) == 0) goto 62
         iv = iv2(ione)
         do 72 jj=1,ndim2d(ione)
@@ -2780,11 +2710,11 @@ subroutine loadh(ham3,nham3,iv2,ndim2d,eigs2d,eigs2)
 
 !     now put the 2-d eigensolutions along the diagonal
 
-      rewind ieigs2
-      nn = 0
-      do 183 ione = 1,npntc
-       iv = iv2(ione)
-       if (.not. zcut) then
+    rewind ieigs2
+    nn = 0
+    do 183 ione = 1,npntc
+    iv = iv2(ione)
+    if (.not. zcut) then
        do 9 ii = 1,iv
           eigs2d(ii) = eigs2(ii,ione)
     9  continue
@@ -2796,10 +2726,10 @@ subroutine loadh(ham3,nham3,iv2,ndim2d,eigs2d,eigs2)
   185  continue
   183 continue
 
-      if (zpham) call wrtham(ham3,nham3)
+    if (zpham) call wrtham(ham3,nham3)
 
-      return
-      end
+    return
+    end
 
 !########################################################################
 !      subroutine diag(ham,maxham,nham,eig)
@@ -2842,10 +2772,9 @@ SUBROUTINE diag(ham,maxham,nham,eig)
     nnham=maxham*3
     call dsyev ('V','L',nham,ham,maxham,eig,work,nnham,ifail)
 
-      if (ifail /= 0) write(6,"(' diagonalisation has failed with, ifail=',i3)") ifail
-      return
-!100   format(' diagonalisation has failed with, ifail=',i3)
-    END SUBROUTINE diag
+    if (ifail /= 0) write(6,"(' diagonalisation has failed with, ifail=',i3)") ifail
+    return
+END SUBROUTINE diag
 
 !########################################################################
 subroutine diag3d(ham3,nham3,eval,kz)
@@ -2866,32 +2795,28 @@ subroutine diag3d(ham3,nham3,eval,kz)
 
 !     autocm converts atomic units (hartree) to cm-1.
 
-      if (zrot) then
+    if (zrot) then
          write(6,"(/5x,'Solutions with J =',i3,' k =',i3)") jrot,kz
-! 1040    format(/5x,'Solutions with J =',i3,' k =',i3)
          if (idia == -2) then
             if (ipar == 0)  write(6,"(/5x,'even parity solutions')")
- !1025       format(/5x,'even parity solutions')
             if (ipar == 1)  write(6,"(/5x,'odd parity solutions')")
- !1035       format(/5x,'odd parity solutions')
          endif
-      endif
+    endif
 !     we need this in special cases (nham3 < neval)
-      meval=min(neval,nham3)
-      if (zvec) write(iout2) meval
+    meval=min(neval,nham3)
+    if (zvec) write(iout2) meval
 
 !     diagonalise  the hamiltonian. the vectors are to overwrite the
 !     hamiltonian.
-      call diag(ham3,nham3,nham3,eval)
+    call diag(ham3,nham3,nham3,eval)
 
 !     print eigenvalues in atomic untis & wavenumbers
 
-      if (.not.zpmin) then
+    if (.not.zpmin) then
          write(6,"(/5x,'lowest',i4,' eigenvalues in hartrees:',/)") meval
-! 1010    format(/5x,'lowest',i4,' eigenvalues in hartrees:',/)
          write(6,"(5d24.12/)") (eval(i),i=1,meval)
-      endif
-      if (zpfun) then
+    endif
+    if (zpfun) then
          ip=jrot-kmin
          if (jrot /= 0 .and. ip /= 1) goto 10
          jdia=max(0,idia)
@@ -2899,55 +2824,47 @@ subroutine diag3d(ham3,nham3,eval,kz)
          isym=abs(min(0,idia))
          if (ipar == 1) isym=-isym
          write(ilev,"(6i4)") jrot,ip,jdia,jpar,isym,meval
- !1125    format(6i4)
          write(ilev,"(4d20.12)") (eval(i),i=1,meval)
- !1126    format(4d20.12)
-      endif
+    endif
    10 continue
 
 !     save the eigenvalues if needed
-      if (zvec) write (iout2) (eval(i),i=1,meval)
-      do 20 i=1,meval
-      evalcm(i) = eval(i) * autocm
+    if (zvec) write (iout2) (eval(i),i=1,meval)
+    do 20 i=1,meval
+    evalcm(i) = eval(i) * autocm
    20 continue
-      write(6,"(//5x,'Lowest',i4,' eigenvalues in wavenumbers:'/)") meval
- !1030 format(//5x,'Lowest',i4,' eigenvalues in wavenumbers:'/)
-      write(6,"(5d24.12/)") (evalcm(i),i=1,meval)
- !1020 format(5d24.12/)
-
+    write(6,"(//5x,'Lowest',i4,' eigenvalues in wavenumbers:'/)") meval
+    write(6,"(5d24.12/)") (evalcm(i),i=1,meval)
 !     if requested print the eigenvectors
-      if (zpvec) then
+    if (zpvec) then
          write(6,"(//'  Eigenvectors'/)")
- !1050    format(//'  Eigenvectors'/)
          do 40 i=1,meval
          write(6,"((1x,10f13.7))") (ham3(j,i),j=1,nham3)
- !1060    format((1x,10f13.7))
    40    continue
-      endif
+    endif
 !     write the final vectors to disk if required
-      if (zvec) then
+    if (zvec) then
          do 60 l = 1,meval
          call outrow(ham3(1,l),nham3,iout2)
    60    continue
-      endif
-      if (jrot /= 0) return
-      if (abs(idia) == 2 .and. ipar == 1) then
+    endif
+    if (jrot /= 0) return
+    if (abs(idia) == 2 .and. ipar == 1) then
          ii=1
          ezero=x0
          read(5,"(f20.0)",end=55) ezero
    ! 5    format(f20.0)
    55    continue
-      else
+    else
          ezero=evalcm(1)
          ii=2
-      endif
-      write(6,"(//'  Band origins in wavenumbers:'/)")
- !1070 format(//'  Band origins in wavenumbers:'/)
-      write(6,"(5f15.6/)") (evalcm(i)-ezero,i=ii,meval)
- !1021 format(5f15.6/)
+    endif
+    write(6,"(//'  Band origins in wavenumbers:'/)")
+    write(6,"(5f15.6/)") (evalcm(i)-ezero,i=ii,meval)
 
-      return
-      end
+
+    return
+    end
 
 !########################################################################
 subroutine choose(eigs2,ndim2d,ham2,iv2,low3d)
@@ -2968,15 +2885,15 @@ subroutine choose(eigs2,ndim2d,ham2,iv2,low3d)
     amtoau = 1.8228883d03
 
     eigmin = eigs2(1,1)
-      nhamsm = 0
-      do 160 i=1,npntc
+    nhamsm = 0
+    do 160 i=1,npntc
         eigmin = min(eigmin,eigs2(1,i))
         nhamsm = nhamsm + ndim2d(i)
         iv2(i) = 1
   160 continue
-      if (nhamsm < max3d) low3d = nhamsm
-      ipt = 1
-      do 200 n=1,low3d
+    if (nhamsm < max3d) low3d = nhamsm
+    ipt = 1
+    do 200 n=1,low3d
   210 if(iv2(ipt) <= ndim2d(ipt)) then
           eigvib = eigs2(iv2(ipt),ipt)
           jpt = ipt
@@ -2984,29 +2901,27 @@ subroutine choose(eigs2,ndim2d,ham2,iv2,low3d)
           ipt = ipt + 1
           goto 210
       endif
-      do 220 j=ipt+1,npntc
-      if(iv2(j) > ndim2d(j)) goto 220
-      if(eigs2(iv2(j),j) >= eigvib) goto 220
-      eigvib = eigs2(iv2(j),j)
-      jpt = j
+    do 220 j=ipt+1,npntc
+    if(iv2(j) > ndim2d(j)) goto 220
+    if(eigs2(iv2(j),j) >= eigvib) goto 220
+    eigvib = eigs2(iv2(j),j)
+    jpt = j
   220 continue
 !     keep the eigenvalue:
-      iv2(jpt) = iv2(jpt) + 1
+    iv2(jpt) = iv2(jpt) + 1
   200 continue
 !     store the number of eigenvalues selected for each alpha
-      iv2(1) = iv2(1) - 1
-      ivib = iv2(1)
-      write(6,"(//5x,'Selection outcome for the final, contracted basis:'/)")
-  !800 format(//5x,'Selection outcome for the final, contracted basis:'/)
-      write(6,"(5x,'npntc =',i3, ',', ' no. of eigenvectors =',i3 )")  1,iv2(1)
-      do 230 i=2,npntc
+    iv2(1) = iv2(1) - 1
+    ivib = iv2(1)
+    write(6,"(//5x,'Selection outcome for the final, contracted basis:'/)")
+    write(6,"(5x,'npntc =',i3, ',', ' no. of eigenvectors =',i3 )")  1,iv2(1)
+    do 230 i=2,npntc
        iv2(i) = iv2(i) - 1
        write(6,"(5x,'npntc =',i3, ',', ' no. of eigenvectors =',i3 )")  i,iv2(i)
-  !900  format(5x,'npntc =',i3, ',', ' no. of eigenvectors =',i3 )
        ivib = max(ivib,iv2(i))
   230 continue
 
-      write(6,998)  low3d,eigmin,eigvib
+    write(6,998)  low3d,eigmin,eigvib
   998 format(/i14,' eigenvalues selected from ',d20.10,' to',d20.10,&
           ' hartrees')
       write(6,999)  low3d,eigmin*autocm,eigvib*autocm
@@ -3014,36 +2929,33 @@ subroutine choose(eigs2,ndim2d,ham2,iv2,low3d)
           ' cm-1')
 
 
-      if (zp2d) then
+    if (zp2d) then
          write(6,"(//5x,'2d eigenvalues in wavenumbers:'/)")
- !1051    format(//5x,'2d eigenvalues in wavenumbers:'/)
          do 32 jone = 1,npntc
          ivj = iv2(jone)
          write(6,"(5d24.12/)") (eigs2(i,jone)*autocm,i=1,ivj)
- !1050    format(5d24.12/)
          write(6,"(/5x,'------------------------------'/)")
- !1052    format(/5x,'------------------------------'/)
    32    continue
-      endif      
+    endif      
 
 !     save the vectors chosen
-      rewind intvec
-      do 31 ione = 1,npntc
-      ivm = iv2(ione)
-      nham2 = ndim2d(ione)
-      do 7 i = 1,nham2
+    rewind intvec
+    do 31 ione = 1,npntc
+    ivm = iv2(ione)
+    nham2 = ndim2d(ione)
+    do 7 i = 1,nham2
         call getrow(ham2(1,i),nham2,intvec)
     7 continue
-      do 30 ind = 1,ivm
-      if (zvec) then
+    do 30 ind = 1,ivm
+    if (zvec) then
          if (nham2 > 0) call outrow(ham2(1,ind),nham2,iout2)
-      endif
+    endif
          if (nham2 > 0) call outrow(ham2(1,ind),nham2,ivecs2)
    30 continue
    31 continue
 
-      return
-      end
+    return
+    end
 
 !#####################################################################
 subroutine cut1d(ham1,eig1,ivn,eigs1d,vecs1d,nham2,icall)
@@ -3067,48 +2979,44 @@ subroutine cut1d(ham1,eig1,ivn,eigs1d,vecs1d,nham2,icall)
 
     amtoau = 1.8228883d03
 !     change emax1 to hartree for the selection
-      emaxau=emax1/autocm
+    emaxau=emax1/autocm
 
-      icall = icall + 1
-      if (.not. zall) then
+    icall = icall + 1
+    if (.not. zall) then
          ivn = 0
          do 10 n=1,npnta
          if (eig1(n) > emaxau) goto 20
          ivn = ivn + 1
    10    continue
    20    iv = ivn
-      else
+    else
          ivn = npnta
          iv  = ivn
-      endif
+    endif
 
-      if (zp1d) then
+    if (zp1d) then
          if (icall == 1) write(6,"(//5x,'1d eigenvalues in wavenumbers:'/)")
- !1051    format(//5x,'1d eigenvalues in wavenumbers:'/)
          write(6,"(5d24.12/)") (eig1(i)*autocm,i=1,npnta)
- !1050    format(5d24.12/)
          write(6,"(/5x,'------------------------------'/)")
- !1052    format(/5x,'------------------------------'/)
-      endif
+    endif
 
 !     save the vectors and eigenvalues (overwrite for each gamma).
-      do 30 i=1,iv
+    do 30 i=1,iv
          nham2 = nham2 + 1
 
-      if (nham2 > max2d .and. .not. zall)  then
+    if (nham2 > max2d .and. .not. zall)  then
          write(6,"(//6x,'**** core exceeded: reduce cut-off emax1 ****')")
-  !999    format(//6x,'**** core exceeded: reduce cut-off emax1 ****')
          stop
-      endif
+    endif
 
-         eigs1d(nham2)   = eig1(i)
-      do 31 j=1,npnta
+    eigs1d(nham2)   = eig1(i)
+    do 31 j=1,npnta
          vecs1d(nham2,j) = ham1(j,i)
    31 continue
    30 continue
 
-      return
-      end
+    return
+    end
 
 !####################################################################
 subroutine cut2d(ham2,eig2,ivm,nham2,low3d,icall)
@@ -3129,45 +3037,40 @@ subroutine cut2d(ham2,eig2,ivm,nham2,low3d,icall)
     amtoau = 1.8228883d03
 
 !     change emax2 to hartree for the selection
-      emaxau=emax2/autocm
+    emaxau=emax2/autocm
 
-      icall = icall + 1
-      if (.not. zall) then
+    icall = icall + 1
+    if (.not. zall) then
          ivm = 0
          do 10 n=1,nham2
          if(eig2(n) > emaxau) goto 20
          ivm = ivm + 1
    10    continue
    20    low3d = low3d + ivm
-      else
+    else
          ivm = nham2
          low3d = low3d + ivm
-      endif
+    endif
 
-      if (low3d > max3d .and. .not. zall)  then
+    if (low3d > max3d .and. .not. zall)  then
          write(6,"(//6x,'**** core exceeded: reduce cut-off emax2 ****')")
-  !999    format(//6x,'**** core exceeded: reduce cut-off emax2 ****')
          stop
-      endif
+    endif
 
-      if (zp2d) then
+    if (zp2d) then
          if (icall == 1) write(6,"(//5x,'2d eigenvalues in wavenumbers:'/)")
- !1051    format(//5x,'2d eigenvalues in wavenumbers:'/)
          write(6,"(5d24.12/)") (eig2(i)*autocm,i=1,nham2)
- !1050    format(5d24.12/)
          write(6,"(/5x,'------------------------------'/)")
- !1052    format(/5x,'------------------------------'/)
-      endif
+    endif
 
 !     save the vectors and eigenvalues
-      if (ivm > 0) call outrow(eig2,ivm,ieigs2)
-      do 30 ind = 1,ivm
-      if (zvec) call outrow(ham2(1,ind),nham2,iout2)
-      call outrow(ham2(1,ind),nham2,ivecs2)
+    if (ivm > 0) call outrow(eig2,ivm,ieigs2)
+    do 30 ind = 1,ivm
+    if (zvec) call outrow(ham2(1,ind),nham2,iout2)
+    call outrow(ham2(1,ind),nham2,ivecs2)
    30 continue
-      return
-      end
-
+    return
+    end
 !########################################################################
 subroutine nfmain(hr,htheta,r,theta,kz)
 
@@ -3214,73 +3117,67 @@ subroutine nfmain(hr,htheta,r,theta,kz)
 !       bsw=8.11332258d-9
 !       csw=1.87903243d-8
 
-      xtscw=(dble(jrot * jrot + jrot)*(asw+bsw)*0.5d0+dble(kz*kz)& 
+    xtscw=(dble(jrot * jrot + jrot)*(asw+bsw)*0.5d0+dble(kz*kz)& 
            *(csw-(bsw+asw)*0.5d0))*xp2
-      if (jrot /= 0) then
+    if (jrot /= 0) then
          term  = dble(jrot * jrot + jrot - kz * kz) / x8
          term2 = dble(jrot * jrot + jrot - 3 * kz * kz) / x4
          if (abs(kz) == 1) then
             term3 = dble(jrot * jrot + jrot) / x16
             if (kmin >= 1 .and. zrot) term3 = -term3
          endif
-      endif
+    endif
 
 ! no need for the 1d diagonalisations as there is no possiblity of
 ! truncation as the symmetry would be broken.
-      write(6,"(5x,'starting the 2d calculations.')")
-      call nftim('beginning of 2d loop')
-      do 30 igamma = 1,nalf
+    write(6,"(5x,'starting the 2d calculations.')")
+    call nftim('beginning of 2d loop')
+    do 30 igamma = 1,nalf
   
-        nv2(igamma) = (npnt*(npnt+1-ipar*2))/2
-        nham2 = nv2(igamma)
-        call blc2d1(theta(igamma),r,hr,ham2,nham2,&
+    nv2(igamma) = (npnt*(npnt+1-ipar*2))/2
+    nham2 = nv2(igamma)
+    call blc2d1(theta(igamma),r,hr,ham2,nham2,&
                           term,term2,term3,xtscw,kz)
 
-        call diag(ham2,nham2,nham2,eig2)
+    call diag(ham2,nham2,nham2,eig2)
 
-        if (.not. zcut) then
+    if (.not. zcut) then
           call choosr(igamma,nham2,eig2,ham2,iv2,eigs2d,&
                       vecs2d,nv2,eigtmp)
 
           if(igamma == nalf .and. .not. zpmin)&
               write(6,"(5x,'for gamma = ',i2,' selected ',i3,' energies.')") (itmp, iv2(2,itmp),itmp=1,nalf)
-        else
+          else
            call cut2dr(igamma,nham2,eig2,ham2,iv2,eigs2d,vecs2d)
           if (.not. zpmin) write(6,"(5x,'for gamma = ',i2,' selected ',i3,' energies.')") igamma, iv2(2,igamma)
-        endif
+    endif
 30    continue
-      call testiv(iv2,nbass)
+    call testiv(iv2,nbass)
 
-      nham3 = iv2(1,nalf) + iv2(2,nalf) - 1
-      if (.not. zpmin) write(6,"(25x,'total = ',i5)") nham3
-      call nftim('end of 2d loop')
-      write(6,"(5x,'building the 3d hamiltonian.')")
+    nham3 = iv2(1,nalf) + iv2(2,nalf) - 1
+    if (.not. zpmin) write(6,"(25x,'total = ',i5)") nham3
+    call nftim('end of 2d loop')
+    write(6,"(5x,'building the 3d hamiltonian.')")
 
-      if (.not.zcut) DEALLOCATE(eigtmp)
-      ALLOCATE(ham3(nham3,nham3))
+    if (.not.zcut) DEALLOCATE(eigtmp)
+    ALLOCATE(ham3(nham3,nham3))
 
-      call bloc3d(htheta,ham3,eigs2d,vecs2d,iv2,nv2,ham2,nham3,r)
+    call bloc3d(htheta,ham3,eigs2d,vecs2d,iv2,nv2,ham2,nham3,r)
 
-      DEALLOCATE(ham2,eig2,eigs2d,nv2)
+    DEALLOCATE(ham2,eig2,eigs2d,nv2)
  
-      call nftim('end of 3d ham building')
-      write(6,"(5x,'diagonalising the 3d hamiltonian.')")
-      ALLOCATE(eig3(nham3))
+    call nftim('end of 3d ham building')
+    write(6,"(5x,'diagonalising the 3d hamiltonian.')")
+    ALLOCATE(eig3(nham3))
 
-      call diag3d(ham3,nham3,eig3,kz)
+    call diag3d(ham3,nham3,eig3,kz)
 
-      call nftim('end of diagonalising 3d')
+    call nftim('end of diagonalising 3d')
 
-      if (ztran) call transr(iv2,vecs2d,ham3,eig3,nham3,nbass)
+    if (ztran) call transr(iv2,vecs2d,ham3,eig3,nham3,nbass)
 
-      DEALLOCATE(iv2,vecs2d,ham3,eig3)
-      return
-!110   format(5x,'for gamma = ',i2,' selected ',i3,' energies.')
-!120   format(25x,'total = ',i5)
-!130   format(5x,'starting the 2d calculations.')
-!160   format(5x,'building the 3d hamiltonian.')
-!170   format(5x,'diagonalising the 3d hamiltonian.')
-      end
+    DEALLOCATE(iv2,vecs2d,ham3,eig3)
+    return
 
 !***********************************************************************
 subroutine blc2d1(xcos,r,hr,ham2,nham2,term,term2,term3,xtscw,kz)
@@ -3306,14 +3203,14 @@ subroutine blc2d1(xcos,r,hr,ham2,nham2,term,term2,term3,xtscw,kz)
 
 ! Schwenke radial corrections (it looks like a mass correction)
 ! Kolya
-      hrpb=hr*(1.d0-xp1*0.4150706813595d-3*1.25d0)
+    hrpb=hr*(1.d0-xp1*0.4150706813595d-3*1.25d0)
 !      hrpb=hr
 ! I'm cancelling the rotational correction!!!!!!!!!!!!
 !      xtscw=0.d0
 
 
 !     allow for j > 0 case
-      if (jrot /= 0) then
+    if (jrot /= 0) then
         fact =  term + term2 / (x1 - xcos)
         if (kz == 1) fact = fact + term3 * (x1 + xcos)/(x1-xcos)
         ia = 0
@@ -3327,19 +3224,19 @@ subroutine blc2d1(xcos,r,hr,ham2,nham2,term,term2,term3,xtscw,kz)
 
 ! NBO term in Radau case (wsum2)
 
-        wsum2=kz*kz*(walpha+wbeta)*(1.d0/ur1-1.d0/urr1)*xp0/xsen2
+    wsum2=kz*kz*(walpha+wbeta)*(1.d0/ur1-1.d0/urr1)*xp0/xsen2
 
-       ham2(ialpha+ia,ialpha+ia)=ham2(ialpha+ia,ialpha+ia)+wsum-wsum2
+    ham2(ialpha+ia,ialpha+ia)=ham2(ialpha+ia,ialpha+ia)+wsum-wsum2
 
  25       continue
-          ia=ia+ibeta-ipar
-          if (ipar == 0) ham2(ia,ia) = ham2(ia,ia) + wsum - wsum2
+        ia=ia+ibeta-ipar
+        if (ipar == 0) ham2(ia,ia) = ham2(ia,ia) + wsum - wsum2
  15     continue
-      endif
-      q=1.0d0
-      if(ipar == 1) q=-1.0d0
-      iap=0
-      do 10 ibetap=1,npnt
+    endif
+    q=1.0d0
+    if(ipar == 1) q=-1.0d0
+    iap=0
+    do 10 ibetap=1,npnt
         ia=0
         do 20 ibeta=1,npnt
           do 30 ialphp=1,ibetap-ipar
@@ -3376,8 +3273,8 @@ subroutine blc2d1(xcos,r,hr,ham2,nham2,term,term2,term3,xtscw,kz)
 20      continue
         iap=iap+ibetap-ipar
 10    continue
-      return
-      end
+    return
+    end
 
 !     ***********************************************************************
 
@@ -3401,12 +3298,12 @@ subroutine choosr(igamma,nham2,eig2,ham2,iv2,eigs2d,vecs2d,nv2,eigtmp)
 
     autocm = 2.19474624d+05
 
-      if (igamma == 1) then
+    if (igamma == 1) then
          itotal = 0
          rewind intvec
-      endif
+    endif
 
-      do 10 i=1,nham2
+    do 10 i=1,nham2
         write(intvec) eig2(i)
         write(intvec) (ham2(j,i),j=1,nham2)
 10    continue
@@ -3463,14 +3360,14 @@ subroutine choosr(igamma,nham2,eig2,ham2,iv2,eigs2d,vecs2d,nv2,eigtmp)
 50        continue
           iv2(2,i) = ichose
 40      continue
-      endif
+    endif
 
 100   format(5x,'selecting ',i5,' energies between ',e14.6,&
              ' and ',e14.6,' in hartrees')
 110   format(5x,'selecting ',i5,' energies between ',e14.6,&
              ' and ',e14.6,' in wavenumbers')
-      return
-      end
+    return
+    end
 
 !     ***********************************************************************
 subroutine cut2dr(igamma,nham2,eig2,ham2,iv2,eigs2d,vecs2d)
@@ -3496,13 +3393,13 @@ subroutine cut2dr(igamma,nham2,eig2,ham2,iv2,eigs2d,vecs2d)
     autocm = 2.19474624d+05
 
 
-      if (igamma == 1) npos = 1
+    if (igamma == 1) npos = 1
 
 !     change emax2 to hartree for the selection
-      emaxau=emax2/autocm
+    emaxau=emax2/autocm
 
-      nvec = 0
-      do 10 ialpha = 1,nham2
+    nvec = 0
+    do 10 ialpha = 1,nham2
         if (eig2(ialpha) < emaxau) then
           ntot = npos + nvec
           if (ntot > max3d) then
@@ -3523,7 +3420,7 @@ subroutine cut2dr(igamma,nham2,eig2,ham2,iv2,eigs2d,vecs2d)
 140   format('number of 2d eigenvalues greater than ',i4,&
               ' increase max3d or reduce emax2 which is ',e12.5,&
               ' cm-1.')
-      end
+    end
 
 !##################################################################
 subroutine testiv(iv,nbass)
@@ -3539,7 +3436,7 @@ subroutine testiv(iv,nbass)
     integer :: iv(2,nalf)
     !double precision :: 
 
-      if (jrot > 0) then
+    if (jrot > 0) then
 !        first find the extent of the functions in low theta direction
          do 20 iend=nalf/2,nalf
          if (iv(2,iend) == 0) goto 30
@@ -3577,10 +3474,10 @@ subroutine testiv(iv,nbass)
   987    format(/5x,'*** warning: zlin = t forced the removal of',i4,&
                ' functions at theta = 0'&
                 /8x,' basis reset to  nham3 =',i5)
-       endif
+    endif
 
-      iang=0
-      do 60 ii=1,nalf
+    iang=0
+    do 60 ii=1,nalf
         if (iv(2,ii) > 0) iang=iang+1
    60 continue
       nbass=iang*max2d
@@ -3588,8 +3485,8 @@ subroutine testiv(iv,nbass)
          write(iwave) iang,nbass
          write(iwave) (iv(2,ii),ii=1,nalf)
       endif
-      return
-      end
+    return
+    end
 
 !***********************************************************************
 subroutine bloc3d(htheta,ham3,eigs2d,vecs2d,iv2,nv2,ham2,nham3,r)
@@ -3611,9 +3508,9 @@ subroutine bloc3d(htheta,ham3,eigs2d,vecs2d,iv2,nv2,ham2,nham3,r)
     autocm = 2.19474624d+05
 
 ! zero ham3
-      ham3 = 0.0d0
+    ham3 = 0.0d0
 
-      ndim1g = 1
+    ndim1g = 1
       do 10 igamma = 1,nalf
         if(iv2(2,igamma) > 0) then
           ndim2g = 1
@@ -3632,13 +3529,13 @@ subroutine bloc3d(htheta,ham3,eigs2d,vecs2d,iv2,nv2,ham2,nham3,r)
         endif
 10    continue
 
-      do 60 i = 1,nham3
+    do 60 i = 1,nham3
         ham3(i,i) = ham3(i,i) + eigs2d(i)
 60    continue
-      if (zpham) call wrtham(ham3,nham3)
+    if (zpham) call wrtham(ham3,nham3)
 
-      return
-      end
+    return
+    end
 
 !    ***********************************************************************
 subroutine blc2d2(r,igamma,igammp,htheta,ham2,nham2)
@@ -3655,15 +3552,15 @@ subroutine blc2d2(r,igamma,igammp,htheta,ham2,nham2)
 
     xp5 = 0.5d0
 
-      factr2 = sqrt(xp5)
+    factr2 = sqrt(xp5)
 
-      ham2 = 0.0d0
+    ham2 = 0.0d0
 
 !      q=0.0d0
-      q=1.0d0
-      if(ipar == 1) q=-1.0d0
-      iap=0
-      do 10 ibetap=1,npnt
+    q=1.0d0
+    if(ipar == 1) q=-1.0d0
+    iap=0
+    do 10 ibetap=1,npnt
         ia=0
         do 20 ibeta=1,npnt
           do 30 ialphp=1,ibetap-ipar
@@ -3697,8 +3594,8 @@ subroutine blc2d2(r,igamma,igammp,htheta,ham2,nham2)
 20      continue
         iap=iap+ibetap-ipar
 10    continue
-      return
-      end
+    return
+    end
 
 !***********************************************************************
 subroutine vecmul(veca,idima,jdima,vecb,idimb,jdimb,nvecln,hama,& 
@@ -3713,7 +3610,7 @@ subroutine vecmul(veca,idima,jdima,vecb,idimb,jdimb,nvecln,hama,&
     double precision, dimension(idima,idimb) :: hama
     double precision, dimension(ndim,jdimb) :: hamb
 
-      do 10 ib = 1,idimb
+    do 10 ib = 1,idimb
         do 20 ia = 1,idima
           temp1 = hama(ia,ib)
           if (temp1 == 0.0d0) goto 20
@@ -3725,8 +3622,8 @@ subroutine vecmul(veca,idima,jdima,vecb,idimb,jdimb,nvecln,hama,&
 30        continue
 20      continue
 10    continue
-      return
-      end
+    return
+    end
 
 !     ***********************************************************************
 subroutine transr(iv2,vecs2d,ham3,eig3,nham3,nbass)
@@ -3738,17 +3635,17 @@ subroutine transr(iv2,vecs2d,ham3,eig3,nham3,nbass)
     use oupb
     implicit none
 
-      integer :: iv2(2,nalf), level3, index, irs, igamma, level2, ivec2, nham3, nbass
-      double precision, dimension(max2d,max3d) :: vecs2d
-      double precision, dimension(nham3,nham3) :: ham3
-      double precision, dimension(nham3) :: eig3
-      double precision, dimension(nbass) :: wvfunc
+    integer :: iv2(2,nalf), level3, index, irs, igamma, level2, ivec2, nham3, nbass
+    double precision, dimension(max2d,max3d) :: vecs2d
+    double precision, dimension(nham3,nham3) :: ham3
+    double precision, dimension(nham3) :: eig3
+    double precision, dimension(nbass) :: wvfunc
 
-      call nftim('start of wavefunction generation')
-      write(iwave) neval
-      call outrow(eig3,neval,iwave)
+    call nftim('start of wavefunction generation')
+    write(iwave) neval
+    call outrow(eig3,neval,iwave)
 
-      do 40 level3=1,neval
+    do 40 level3=1,neval
         index=1
         wvfunc = 0.0d0
         index = 1    
@@ -3766,9 +3663,9 @@ subroutine transr(iv2,vecs2d,ham3,eig3,nham3,nbass)
         write(iwave) wvfunc
 40    continue
 
-      call nftim('end of wavefunction generation')
-      return
-      end
+    call nftim('end of wavefunction generation')
+    return
+    end
 
 !     ***********************************************************************
 subroutine trans(iv1l,iv2l,ndim2l,vecs1l,&
@@ -3800,54 +3697,54 @@ subroutine trans(iv1l,iv2l,ndim2l,vecs1l,&
 
 !     skip header on iout2
 
-      do 10 i=1,5
+    do 10 i=1,5
         read(iout2)
    10 continue
 
 !     read in iv1 and iv2 from a seperate stream (iout1)
-      call igetro(iv1l,ndimb*ndimc,iout1)
-      call igetro(iv2l,ndimc,iout1)
+    call igetro(iv1l,ndimb*ndimc,iout1)
+    call igetro(iv2l,ndimc,iout1)
 
-      do 32 ione = 1,npntc
-      nham2 = 0
+    do 32 ione = 1,npntc
+    nham2 = 0
 !     recall the size of ham2 for each npntc
-      do 3 itwo = 1,npntb
+    do 3 itwo = 1,npntb
         nham2 = nham2 + iv1l(ione,itwo)
     3 continue
-      ndim2l(ione) = nham2
+    ndim2l(ione) = nham2
    32 continue
 
 !     now rewrite the vectors to different streams
 
-      do 35 ione = 1,npntc
-      nham2 = ndim2l(ione)
-      if (nham2 > 0) then
+    do 35 ione = 1,npntc
+    nham2 = ndim2l(ione)
+    if (nham2 > 0) then
          do 5 kk=1,npnta
          call getrow(vecs1l(1,kk),nham2,iout2)
          if (iv2l(ione) /= 0) call outrow(vecs1l(1,kk),nham2,ivecs1)
     5    continue
-      endif
+    endif
    35 continue
-      rewind ivecs1
+    rewind ivecs1
 
-      do 31 ione = 1,npntc
-      nham2 = ndim2l(ione)
-      ivm = iv2l(ione)
-      if (nham2 > 0) then
+    do 31 ione = 1,npntc
+    nham2 = ndim2l(ione)
+    ivm = iv2l(ione)
+    if (nham2 > 0) then
          do 30 ind = 1,ivm
          call getrow(vecs2l(1,ind),nham2,iout2)
          call outrow(vecs2l(1,ind),nham2,ivecs2)
    30    continue
-      endif
+    endif
    31 continue
-      rewind ivecs2
+    rewind ivecs2
 
-      read (iout2) meval
-      write(iwave) meval
+    read (iout2) meval
+    write(iwave) meval
 
 !     call the eigenvalues into evall
-      call getrow(evall,meval,iout2)
-      call outrow(evall,meval,iwave)
+    call getrow(evall,meval,iout2)
+    call outrow(evall,meval,iwave)
 
 !     now ready to start reading the 3-d vectors
 
@@ -3855,36 +3752,36 @@ subroutine trans(iv1l,iv2l,ndim2l,vecs1l,&
 !     2-d vectors:  ivecs2 (stream 27)
 !     3-d vectors:  iout2  (stream 25)
 
-      ind2 = 0
-      do 58 ic = 1,npntc
-      nham2 = ndim2l(ic)
-      do 56 j  = 1,iv2l(ic)
-      ind2 = ind2 + 1
-      if (nham2 > 0) call getrow(vecs2l(1,j),nham2,ivecs2)
-      do 54 ia = 1,npnta
-      if (nham2>0 .and. j==1)&
+    ind2 = 0
+    do 58 ic = 1,npntc
+    nham2 = ndim2l(ic)
+    do 56 j  = 1,iv2l(ic)
+    ind2 = ind2 + 1
+    if (nham2 > 0) call getrow(vecs2l(1,j),nham2,ivecs2)
+    do 54 ia = 1,npnta
+    if (nham2>0 .and. j==1)&
        call getrow(vecs1l(1,ia),nham2,ivecs1)
-      ind1 = 0
-      do 52 ib = 1,npntb
-      sum1 = 0.0d0
-      do 50 k  = 1,iv1l(ic,ib)
-      ind1 = ind1 + 1
-      sum1 = sum1 + vecs1l(ind1,ia)*vecs2l(ind1,j)
+    ind1 = 0
+    do 52 ib = 1,npntb
+    sum1 = 0.0d0
+    do 50 k  = 1,iv1l(ic,ib)
+    ind1 = ind1 + 1
+    sum1 = sum1 + vecs1l(ind1,ia)*vecs2l(ind1,j)
    50 continue
-      phi(ind2,ia,ib) = sum1
+    phi(ind2,ia,ib) = sum1
    52 continue
    54 continue
    56 continue
    58 continue
 
-      do 959 ll=1,meval
+    do 959 ll=1,meval
 
-      call getrow(vecs3l,nham3,iout2)
+    call getrow(vecs3l,nham3,iout2)
 
 !     set psi to zero
-       psi = 0.0d0
+    psi = 0.0d0
 
-      if (ztheta) then
+    if (ztheta) then
 
         if (.not. zr2r1) then
 
@@ -3916,7 +3813,7 @@ subroutine trans(iv1l,iv2l,ndim2l,vecs1l,&
 
         endif
 
-      else
+    else
 
         if (.not. zr2r1) then
 
@@ -3948,27 +3845,26 @@ subroutine trans(iv1l,iv2l,ndim2l,vecs1l,&
 
         endif
 
-      endif
+    endif
 
 !     now save the wavefunction for each level (to stream 28)
-      call outrow(psi,idvr*npnt1*npnt2,iwave)
+    call outrow(psi,idvr*npnt1*npnt2,iwave)
 
   959 continue
-      return
-      end
+    return
+    end
 
 !#############################################################################
 subroutine sqout(sqmat,ndim)
 !     print lower triangle of square matrix
     implicit none
     integer :: ndim, i, j
-      double precision sqmat(ndim,ndim)
-      do 30 i=1,ndim
-      write(6,"(10f13.7)") (sqmat(i,j),j=1,i)
- !1020 format(10f13.7)
+    double precision sqmat(ndim,ndim)
+    do 30 i=1,ndim
+    write(6,"(10f13.7)") (sqmat(i,j),j=1,i)
    30 continue
-      return
-      end
+    return
+    end
 
 !###########################################################################
 subroutine symout(symmat,ndim)
@@ -3976,23 +3872,21 @@ subroutine symout(symmat,ndim)
     implicit none
     integer :: i, j, ndim, ip, llow, lup, i11, ind0, itop, ktop
     double precision :: symmat(1)
-      ip=0
+    ip=0
     3 llow=10*ip+1
-      lup=min(llow+9,ndim)
-      write(6,"(/,i11,9i13)") (i,i=llow,lup)
-    !4 format(/,i11,9i13)
-      ind0=llow*(llow+1)/2
-      do 5 i=llow,ndim
-      itop=min(lup,i)
-      ktop=itop-llow+ind0
-      write(6,"(i4,f12.7,9f13.7)") i,(symmat(j),j=ind0,ktop)
-   ! 7 format(i4,f12.7,9f13.7)
-      ind0=ind0+i
+    lup=min(llow+9,ndim)
+    write(6,"(/,i11,9i13)") (i,i=llow,lup)
+    ind0=llow*(llow+1)/2
+    do 5 i=llow,ndim
+    itop=min(lup,i)
+    ktop=itop-llow+ind0
+    write(6,"(i4,f12.7,9f13.7)") i,(symmat(j),j=ind0,ktop)
+    ind0=ind0+i
     5 continue
-      if(lup>=ndim) return
-      ip=ip+1
-      go to 3
-      end
+    if(lup>=ndim) return
+    ip=ip+1
+    go to 3
+    end
 
 !=======================================================================
 subroutine wrtham(hamil,nham)
@@ -4001,56 +3895,52 @@ subroutine wrtham(hamil,nham)
     implicit none
     integer :: nham, i, j
     double precision hamil(nham,nham)
-      write(6,"(5x,'hamiltonian matrix'/)")
- !1010 format(5x,'hamiltonian matrix'/)
-      do 30 i=1,nham
-      write(6,"(10f13.7)") (hamil(i,j),j=1,i)
- !1020 format(10f13.7)
+    write(6,"(5x,'hamiltonian matrix'/)")
+    do 30 i=1,nham
+    write(6,"(10f13.7)") (hamil(i,j),j=1,i)
    30 continue
-      return
-      end
+    return
+    end
 
 !===========================================================================
 subroutine getrow(row,nrow,iunit)
 !     fast non-formatted read
    implicit none
    integer :: nrow, iunit
-      double precision row(nrow)
-      read(iunit) row
-      return
-      end
+    double precision row(nrow)
+    read(iunit) row
+    return
+    end
 
 !============================================================================
 subroutine igetro(ivec,nsize,istream)
-      dimension ivec(nsize)
-      read(istream) ivec
-      return
-      end
+    dimension ivec(nsize)
+    read(istream) ivec
+    return
+    end
 
-      subroutine outrow(row,nrow,iunit)
+subroutine outrow(row,nrow,iunit)
 !     fast non-formatted write                                      #025
-      double precision row(nrow)
-      write(iunit) row
-      return
-      end
+    double precision row(nrow)
+    write(iunit) row
+    return
+    end
 
-      subroutine ioutro(ivec,nsize,istream)
-      dimension ivec(nsize)
-      write(istream) ivec
-      return
-      end
-      subroutine nftim(text)
-      common/timing/itime0
-      character text*(*)
-      write(6,"(/)")
-      write(6,*) 'Time at ',text,' is.........'
-      call SYSTEM_CLOCK(itime2,irate2,imax2)
-      itime=(itime2-itime0)/irate2
-      write(6,"(/i10,' secs CPU time used'/) ")itime
- !1    format(/i10,' secs CPU time used'/) 
-      return
-!10    format(/)
-      end
+subroutine ioutro(ivec,nsize,istream)
+    dimension ivec(nsize)
+    write(istream) ivec
+    return
+    end
+subroutine nftim(text)
+    common/timing/itime0
+    character text*(*)
+    write(6,"(/)")
+    write(6,*) 'Time at ',text,' is.........'
+    call SYSTEM_CLOCK(itime2,irate2,imax2)
+    itime=(itime2-itime0)/irate2
+    write(6,"(/i10,' secs CPU time used'/) ")itime
+    return
+    end
 
 !########################################################################
 subroutine mkmain(hr,htheta,r,theta,kz)
@@ -4081,16 +3971,16 @@ subroutine mkmain(hr,htheta,r,theta,kz)
     DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) ::eig3
 
 
-      ALLOCATE(ham2(max2d,max2d),eig2(max2d),iv2(2,nalf),&
+    ALLOCATE(ham2(max2d,max2d),eig2(max2d),iv2(2,nalf),&
                vecs2d(max2d,max3d),eigs2d(max3d),nv2(nalf))
-      if (.not.zcut) ALLOCATE(eigtmp(nalf*max2d))
+    if (.not.zcut) ALLOCATE(eigtmp(nalf*max2d))
 
 ! no need for the 1d diagonalisations as there is no possiblity of
 ! truncation as the symmetry would be broken.
-      write(6,"(5x,'starting the 2d calculations.')")
-      call nftim('beginning of 2d loop')
+    write(6,"(5x,'starting the 2d calculations.')")
+    call nftim('beginning of 2d loop')
 
-      do 30 igamma = 1,nalf     
+    do 30 igamma = 1,nalf     
         nv2(igamma) = (npnt*(npnt+1-ipar*2))/2      
         nham2 = nv2(igamma)
         call z_blc2d1(theta(igamma),r,hr,ham2,nham2,&
@@ -4110,40 +4000,35 @@ subroutine mkmain(hr,htheta,r,theta,kz)
         endif
 30    continue
 
-      call testiv(iv2,nbass)
+    call testiv(iv2,nbass)
 
-      nham3 = iv2(1,nalf) + iv2(2,nalf) - 1
-      if (.not. zpmin) write(6,"(25x,'total = ',i5)") nham3
-      call nftim('end of 2d loop')
-      write(6,"(5x,'building the 3d hamiltonian.')")
+    nham3 = iv2(1,nalf) + iv2(2,nalf) - 1
+    if (.not. zpmin) write(6,"(25x,'total = ',i5)") nham3
+    call nftim('end of 2d loop')
+    write(6,"(5x,'building the 3d hamiltonian.')")
 
-      if (.not.zcut) DEALLOCATE(eigtmp)
-      ALLOCATE(ham3(nham3,nham3))
+    if (.not.zcut) DEALLOCATE(eigtmp)
+    ALLOCATE(ham3(nham3,nham3))
 
-      call bloc3d(htheta,ham3,eigs2d,vecs2d,&
+    call bloc3d(htheta,ham3,eigs2d,vecs2d,&
                     iv2,nv2,ham2,nham3,r)
 
-      DEALLOCATE(ham2,eig2,eigs2d,nv2)
+    DEALLOCATE(ham2,eig2,eigs2d,nv2)
  
-      call nftim('end of 3d ham building')
-      write(6,"(5x,'diagonalising the 3d hamiltonian.')")
-      ALLOCATE(eig3(nham3))
+    call nftim('end of 3d ham building')
+    write(6,"(5x,'diagonalising the 3d hamiltonian.')")
+    ALLOCATE(eig3(nham3))
 
-      call diag3d(ham3,nham3,eig3,kz)
+    call diag3d(ham3,nham3,eig3,kz)
 
-      call nftim('end of diagonalising 3d')
+    call nftim('end of diagonalising 3d')
 
-      if (ztran) call transr(iv2,vecs2d,ham3,eig3,nham3,nbass)
+    if (ztran) call transr(iv2,vecs2d,ham3,eig3,nham3,nbass)
 
-      DEALLOCATE(iv2,vecs2d,ham3,eig3)
-      return
-!110   format(5x,'for gamma = ',i2,' selected ',i3,' energies.')
-!120   format(25x,'total = ',i5)
-!130   format(5x,'starting the 2d calculations.')
-!160   format(5x,'building the 3d hamiltonian.')
-!170   format(5x,'diagonalising the 3d hamiltonian.')  
+    DEALLOCATE(iv2,vecs2d,ham3,eig3)
+    return
     
-      end
+    end
       
 !########################################################################     
 subroutine z_blc2d1(xcos,r,hr,ham2,nham2,term,term2,kz)
@@ -4164,14 +4049,14 @@ subroutine z_blc2d1(xcos,r,hr,ham2,nham2,term,term2,kz)
 
 
 
-      factr2 = sqrt(xp5)
+    factr2 = sqrt(xp5)
 
-      ham2 = 0.0d0
-      realj = DBLE(jrot)
-      realkz = DBLE(kz)
+    ham2 = 0.0d0
+    realj = DBLE(jrot)
+    realkz = DBLE(kz)
 
 !     allow for j > 0 case
-      if (jrot /= 0) then
+    if (jrot /= 0) then
 ! for q=0(+) term goes with -
 ! for q=1(-) term goes with +
          if(iq == 0)then
@@ -4202,12 +4087,12 @@ subroutine z_blc2d1(xcos,r,hr,ham2,nham2,term,term2,kz)
             ia=ia+ibeta-ipar
             if (ipar == 0)ham2(ia,ia) = ham2(ia,ia) + wsum + wsum2
  15     continue
-      endif
+    endif
 
-      q=x1
-      if(ipar == 1) q=-x1
-      iap=0
-      do 10 ibetap=1,npnt
+    q=x1
+    if(ipar == 1) q=-x1
+    iap=0
+    do 10 ibetap=1,npnt
         ia=0
         do 20 ibeta=1,npnt
           do 30 ialphp=1,ibetap-ipar
@@ -4244,85 +4129,85 @@ subroutine z_blc2d1(xcos,r,hr,ham2,nham2,term,term2,kz)
 20      continue
         iap=iap+ibetap-ipar
 10    continue
-      return
-      end
+    return
+    end
 
 !#################################################################
 
-      MODULE constants
-      IMPLICIT NONE
-      INTEGER, PARAMETER :: real_kind=SELECTED_REAL_KIND(8,40)
-      END MODULE constants
+    MODULE constants
+    IMPLICIT NONE
+    INTEGER, PARAMETER :: real_kind=SELECTED_REAL_KIND(8,40)
+    END MODULE constants
 
 !=====================================================================
-      SUBROUTINE jac_basis(nn,nb,alf,bet,x,basis)
-      USE constants
-      IMPLICIT NONE
-      INTEGER :: n,i,nb,nn
-      REAL(KIND=real_kind) :: alf, bet
-      REAL(KIND=real_kind) :: x(nn),basis(0:nb,nn)
-      REAL(KIND=real_kind) :: bass(0:nb,nn),norm(0:nb)
+    SUBROUTINE jac_basis(nn,nb,alf,bet,x,basis)
+    USE constants
+    IMPLICIT NONE
+    INTEGER :: n,i,nb,nn
+    REAL(KIND=real_kind) :: alf, bet
+    REAL(KIND=real_kind) :: x(nn),basis(0:nb,nn)
+    REAL(KIND=real_kind) :: bass(0:nb,nn),norm(0:nb)
 
-      CALL norms2(norm,nb,alf,bet)
-      CALL jacgt(x,bass,alf,bet,nn,nb)
+    CALL norms2(norm,nb,alf,bet)
+    CALL jacgt(x,bass,alf,bet,nn,nb)
 
-      DO i=0,nb
+    DO i=0,nb
          DO n=1,nn
             basis(i,n)=bass(i,n)*norm(i)
          END DO
-      END DO
+    END DO
 
-      RETURN
-      END SUBROUTINE jac_basis
+    RETURN
+    END SUBROUTINE jac_basis
 
 !##################################################################
 
-      SUBROUTINE jacgt(x,bass,alf,bet,nn,nb)
-      USE constants
-      IMPLICIT NONE
-      INTEGER :: n,I,nn,nb
-      REAL(KIND=real_kind),EXTERNAL :: gammln
-      REAL(KIND=real_kind) :: alf, bet,lmd, x0,x1,x2
-      REAL(KIND=real_kind) :: x(nn),bass(0:nb,nn)
-      REAL(KIND=real_kind) :: A1n(nb),A2n(nb),A3n(nb),A4n(nb)
-      DATA x0,x1,x2/0.0d0,1.0d0,2.0d0/
-      lmd=alf+bet+x1
-      DO n=1,nb
+    SUBROUTINE jacgt(x,bass,alf,bet,nn,nb)
+    USE constants
+    IMPLICIT NONE
+    INTEGER :: n,I,nn,nb
+    REAL(KIND=real_kind),EXTERNAL :: gammln
+    REAL(KIND=real_kind) :: alf, bet,lmd, x0,x1,x2
+    REAL(KIND=real_kind) :: x(nn),bass(0:nb,nn)
+    REAL(KIND=real_kind) :: A1n(nb),A2n(nb),A3n(nb),A4n(nb)
+    DATA x0,x1,x2/0.0d0,1.0d0,2.0d0/
+    lmd=alf+bet+x1
+    DO n=1,nb
          A1n(n)=x2*(n+x1)*(n+lmd)*(x2*n+lmd-x1)
          A2n(n)=(x2*n+lmd)*(alf*alf-bet*bet)
          A3n(n)=(x2*n+lmd-x1)*(x2*n+lmd)*(x2*n+lmd+x1)
          A4n(n)=x2*(n+alf)*(n+bet)*(x2*n+lmd+x1)
-      END DO   
-      bass=x0
-      DO 60 I=1,nn
-      bass(0,I)=x1
-      IF(nb<1) GO TO 70
-      bass(1,I)=(alf-bet+(lmd+x1)*x(I))/x2
-      DO 80 n=2,nb
+    END DO   
+    bass=x0
+    DO 60 I=1,nn
+    bass(0,I)=x1
+    IF(nb<1) GO TO 70
+    bass(1,I)=(alf-bet+(lmd+x1)*x(I))/x2
+    DO 80 n=2,nb
          bass(n,I)=((A2n(n-1)+A3n(n-1)*x(I))*bass(n-1,I)&
          &         -A4n(n-1)*bass(n-2,I))/A1n(n-1)
  80   CONTINUE
  70   CONTINUE 
  60   CONTINUE
-      RETURN
-      END SUBROUTINE jacgt
+    RETURN
+    END SUBROUTINE jacgt
 
 !##################################################################
 
-      SUBROUTINE gaujac(x,w,n,alf,bet)
-      USE constants
-      IMPLICIT NONE
-      INTEGER :: n
-      REAL(KIND=real_kind):: alf,bet,x1,x2,x3
-      REAL(KIND=real_kind):: w(n),x(n)
-      REAL(KIND=real_kind),PARAMETER :: EPS=3.0D-14
-      INTEGER,PARAMETER :: MAXIT=10
-      INTEGER :: i,its,j
-      REAL(KIND=real_kind)::alfbet,an,bn,r1,r2,r3
-      REAL(KIND=real_kind)::c1,c2,c3,p1,p2,p3,pp,temp,z,z1
-      REAL(KIND=real_kind),EXTERNAL :: gammln
-      DATA x1,x2,x3/1.0d0,2.0d0,3.0d0/
-      DO 13 i=1,n
+    SUBROUTINE gaujac(x,w,n,alf,bet)
+    USE constants
+    IMPLICIT NONE
+    INTEGER :: n
+    REAL(KIND=real_kind):: alf,bet,x1,x2,x3
+    REAL(KIND=real_kind):: w(n),x(n)
+    REAL(KIND=real_kind),PARAMETER :: EPS=3.0D-14
+    INTEGER,PARAMETER :: MAXIT=10
+    INTEGER :: i,its,j
+    REAL(KIND=real_kind)::alfbet,an,bn,r1,r2,r3
+    REAL(KIND=real_kind)::c1,c2,c3,p1,p2,p3,pp,temp,z,z1
+    REAL(KIND=real_kind),EXTERNAL :: gammln
+    DATA x1,x2,x3/1.0d0,2.0d0,3.0d0/
+    DO 13 i=1,n
          IF(i==1)THEN
             an=alf/DBLE(n)
             bn=bet/DBLE(n)
@@ -4381,52 +4266,52 @@ subroutine z_blc2d1(xcos,r,hr,ham2,nham2,term,term2,kz)
        &      *temp*x2**alfbet/(pp*p2)
 
  13    CONTINUE
-       RETURN
-       END SUBROUTINE gaujac
+    RETURN
+    END SUBROUTINE gaujac
 
 !==========================================================================
-       FUNCTION gammln(XX)
-       USE constants
-       IMPLICIT NONE
-       INTEGER :: j
-       REAL(KIND=real_kind)::GAMMLN,XX
-       REAL(KIND=real_kind)::SER,STP,TMP,X,COF(6)
-       REAL(KIND=real_kind)::HALF,ONE,FPF
-       DATA COF,STP/76.18009173D0,-86.50532033D0,24.01409822D0,&
+    FUNCTION gammln(XX)
+    USE constants
+    IMPLICIT NONE
+    INTEGER :: j
+    REAL(KIND=real_kind)::GAMMLN,XX
+    REAL(KIND=real_kind)::SER,STP,TMP,X,COF(6)
+    REAL(KIND=real_kind)::HALF,ONE,FPF
+    DATA COF,STP/76.18009173D0,-86.50532033D0,24.01409822D0,&
       &    -1.231739516D0,.120858003D-2,-.536382D-5,2.50662827465D0/
-       DATA HALF,ONE,FPF/0.5D0,1.0D0,5.5D0/
-       X=XX-ONE
-       TMP=X+FPF
-       TMP=(X+HALF)*LOG(TMP)-TMP
-       SER=ONE
-       DO 11 J=1,6
-        X=X+ONE
-        SER=SER+COF(J)/X
+     DATA HALF,ONE,FPF/0.5D0,1.0D0,5.5D0/
+    X=XX-ONE
+    TMP=X+FPF
+    TMP=(X+HALF)*LOG(TMP)-TMP
+    SER=ONE
+    DO 11 J=1,6
+    X=X+ONE
+    SER=SER+COF(J)/X
 !        SER=SER+COF(J)/(X+0.000001d0)
 11     CONTINUE
-       GAMMLN=TMP+LOG(STP*SER)
-       RETURN
-       END FUNCTION gammln
+    GAMMLN=TMP+LOG(STP*SER)
+    RETURN
+    END FUNCTION gammln
 
 !####################################################################
 
-       SUBROUTINE norms2(norm,nn,alf,bet)
-       USE constants
-       IMPLICIT NONE
-       INTEGER :: n,nn
-       REAL(KIND=real_kind) :: alf, bet,lmd,x1,x2,norm1
-       REAL(KIND=real_kind) :: norm(0:nn)
-       REAL(KIND=real_kind) :: a1,a2,a3,a4
-       REAL(KIND=real_kind), EXTERNAL :: gammln
-       DATA x1,x2/1.0d0,2.0d0/
-       lmd=alf+bet+x1
-       do n=0,nn
+    SUBROUTINE norms2(norm,nn,alf,bet)
+    USE constants
+    IMPLICIT NONE
+    INTEGER :: n,nn
+    REAL(KIND=real_kind) :: alf, bet,lmd,x1,x2,norm1
+    REAL(KIND=real_kind) :: norm(0:nn)
+    REAL(KIND=real_kind) :: a1,a2,a3,a4
+    REAL(KIND=real_kind), EXTERNAL :: gammln
+    DATA x1,x2/1.0d0,2.0d0/
+    lmd=alf+bet+x1
+    do n=0,nn
           a1=gammln(DBLE(n+1))
           a2=gammln(DBLE(n)+lmd)
           a3=gammln(DBLE(n)+alf+x1)
           a4=gammln(DBLE(n)+bet+x1)
           norm1=2**(-lmd)*(x2*DBLE(n)+lmd)*exp(a1+a2-a3-a4)
           norm(n)=SQRT(norm1)
-       end do
-       END SUBROUTINE norms2
+    end do
+    END SUBROUTINE norms2
 

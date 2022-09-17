@@ -178,171 +178,169 @@ program spect4
 !
 !  Updated to f90 to use dynamic memory allocation and to preselect transitions
 !  by GJH & JT 2001.
-use spectra_logic
-use spectra_base
-use spectra_timing
-namelist/prt/ zout, zsort, zspe, zpfun, itra, ilev, ispe, item, &
-wsmax,wsmin, emin, emax, jmax, smin, gz,zpseg
-implicit double precision(a-h,o-y), logical(z)
-character(len=8) title(9)
+    use spectra_logic
+    use spectra_base
+    use spectra_timing
+    namelist/prt/ zout, zsort, zspe, zpfun, itra, ilev, ispe, item, &
+    wsmax,wsmin, emin, emax, jmax, smin, gz,zpseg
+    implicit double precision(a-h,o-y), logical(z)
+    character(len=8) title(9)
 
-DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: ee1, ee2, ss
-data autocm/ 2.19474624d+05/, autode/ 2.5417662d0/
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: ee1, ee2, ss
+    data autocm/ 2.19474624d+05/, autode/ 2.5417662d0/
 
-!     set time zero for timer
-call SYSTEM_CLOCK(itime0,irate2,imax2)
+    !     set time zero for timer
+    call SYSTEM_CLOCK(itime0,irate2,imax2)
 
-!     preset namelist defaults
+    !     preset namelist defaults
 
-zout= .false.
-zsort= .true.
-zspe= .true.
-zpfun= .true.
-zpseg=.false.
-itra= 13
-ilev= 14
-ispe= 15
-item= 16
-wsmin= 0.0d0
-wsmax= 1.0d6
-smin=0.0d0
-jmax=500
-emin= -1.0d27
-emax= +1.0d27
-gz=0.0d0
+    zout= .false.
+    zsort= .true.
+    zspe= .true.
+    zpfun= .true.
+    zpseg=.false.
+    itra= 13
+    ilev= 14
+    ispe= 15
+    item= 16
+    wsmin= 0.0d0
+    wsmax= 1.0d6
+    smin=0.0d0
+    jmax=500
+    emin= -1.0d27
+    emax= +1.0d27
+    gz=0.0d0
 
-write(6,*) "Program SPECTRA (version of Feb 2004)"
+    write(6,*) "Program SPECTRA (version of Feb 2004)"
 
-!     read in logical variables and title
-read(5,prt)
-read(5,"(9a8)") title
-!100   format(9a8)
-write(6,"(/5x,9a8/)") title
-!202   format(/5x,9a8/)
+    !     read in logical variables and title
+    read(5,prt)
+    read(5,"(9a8)") title
+    !100   format(9a8)
+    write(6,"(/5x,9a8/)") title
+    !202   format(/5x,9a8/)
 
-!     determine energy zero from levels file if available
-if (zpfun) then
-open(unit=ilev,form='formatted',status='old')
+    !     determine energy zero from levels file if available
+    if (zpfun) then
+    open(unit=ilev,form='formatted',status='old')
 
-write(6,"(5x,'Partition function: levels read from ilev =',i3/)") ilev
-!201     format(5x,'Partition function: levels read from ilev =',i3/)
-read(ilev,*) j
-read(ilev,*) gz
-gz=gz*autocm
-endif
-write(6,"(5x,'Ground state energy set to',f14.5,' cm-1')") gz
-!203   format(5x,'Ground state energy set to',f14.5,' cm-1')
-!     determine number of transitions to be processed and create item
+    write(6,"(5x,'Partition function: levels read from ilev =',i3/)") ilev
+    !201     format(5x,'Partition function: levels read from ilev =',i3/)
+    read(ilev,*) j
+    read(ilev,*) gz
+    gz=gz*autocm
+    endif
+    write(6,"(5x,'Ground state energy set to',f14.5,' cm-1')") gz
+    !203   format(5x,'Ground state energy set to',f14.5,' cm-1')
+    !     determine number of transitions to be processed and create item
 
-maxr=0
-nr= 0
-nmax1= 0
-nmax2= 0
-if (zpseg==.true.) then
-   open(unit=ispe,form='unformatted',recordtype='segmented') !* 
-else 
-   open(unit=ispe,form='unformatted') !* 
-end if 
-if(zsort) then
-write(6,1000) wsmin,wsmax,emin,emax,smin,jmax
-1000    format(/5x,'Sorting requested, list preselected using:', &
-/5x,'Minimum frequency,   WSMIN =',d12.5,' cm-1', &
-/5x,'Maximum frequency,   WSMAX =',d12.5,' cm-1', &
-/5x,'Minimum energy,       EMIN =',d12.5,' cm-1', &
-/5x,'Maximum energy,       EMAX =',d12.5,' cm-1', &
-/5x,'Minimum linestrength, SMIN =',d12.5,' D**2', &
-/5x,'Maximum rotations     JMAX =',i5)
+    maxr=0
+    nr= 0
+    nmax1= 0
+    nmax2= 0
+    if (zpseg==.true.) then
+    open(unit=ispe,form='unformatted',recordtype='segmented') !* 
+    else 
+    open(unit=ispe,form='unformatted') !* 
+    end if 
+    if(zsort) then
+    write(6,1000) wsmin,wsmax,emin,emax,smin,jmax
+    1000    format(/5x,'Sorting requested, list preselected using:', &
+    /5x,'Minimum frequency,   WSMIN =',d12.5,' cm-1', &
+    /5x,'Maximum frequency,   WSMAX =',d12.5,' cm-1', &
+    /5x,'Minimum energy,       EMIN =',d12.5,' cm-1', &
+    /5x,'Maximum energy,       EMAX =',d12.5,' cm-1', &
+    /5x,'Minimum linestrength, SMIN =',d12.5,' D**2', &
+    /5x,'Maximum rotations     JMAX =',i5)
 
-wsmi=wsmin/autocm
-wsma=wsmax/autocm
-emi=(emin+GZ)/autocm
-ema=(emax+GZ)/autocm
-smi=smin/autode**2
-if (zpseg==.true.) then 
-   open(unit=itra,form='unformatted',recordtype='segmented') !* 
-   open(unit=item,form='unformatted',recordtype='segmented') !* 
-else 
-   open(unit=itra,form='unformatted') !* 
-   open(unit=item,form='unformatted') !* 
-end if 
-rewind itra
-10       read(itra,end=90) j1,j2,kmin1,kmin2,neval1,neval2, &
-idia,ipar,isym,gz,zembed,ibase1,ibase2
-maxr=maxr+neval1*neval2
-if (max(j1,j2)>jmax) then
-do 9 ie2=1,neval2+2
-read(itra)
-9           continue
-goto 10
-endif
+    wsmi=wsmin/autocm
+    wsma=wsmax/autocm
+    emi=(emin+GZ)/autocm
+    ema=(emax+GZ)/autocm
+    smi=smin/autode**2
+    if (zpseg==.true.) then 
+    open(unit=itra,form='unformatted',recordtype='segmented') !* 
+    open(unit=item,form='unformatted',recordtype='segmented') !* 
+    else 
+    open(unit=itra,form='unformatted') !* 
+    open(unit=item,form='unformatted') !* 
+    end if 
+    rewind itra
+    10       read(itra,end=90) j1,j2,kmin1,kmin2,neval1,neval2, &
+    idia,ipar,isym,gz,zembed,ibase1,ibase2
+    maxr=maxr+neval1*neval2
+    if (max(j1,j2)>jmax) then
+    do 9 ie2=1,neval2+2
+    read(itra)
+    9           continue
+    goto 10
+    endif
 
-allocate(ee1(neval1), ee2(neval2), ss(neval1))
+    allocate(ee1(neval1), ee2(neval2), ss(neval1))
 
-ipar1=ipar
-if(neval1>nmax1) nmax1= neval1
-if(neval2>nmax2) nmax2= neval2
-read(itra) ee1
-read(itra) ee2
-!ddprint*,"ee1,ee2"
-if(idia==-2.and.mod(j1,2)==1.and.ipar1==0) then
-ipar1=mod(ipar1+j1,2)
-else if(idia==-2.and.mod(j1,2)==1.and.ipar1==1) then
-ipar1=0
-endif
-do 1 ie2=1,neval2
-read(itra) ss
-ee=ee2(ie2)
-if (ee<emi .or. ee>ema) goto 1
-do 2 ie1=1,neval1
+    ipar1=ipar
+    if(neval1>nmax1) nmax1= neval1
+    if(neval2>nmax2) nmax2= neval2
+    read(itra) ee1
+    read(itra) ee2
+    !ddprint*,"ee1,ee2"
+    if(idia==-2.and.mod(j1,2)==1.and.ipar1==0) then
+    ipar1=mod(ipar1+j1,2)
+    else if(idia==-2.and.mod(j1,2)==1.and.ipar1==1) then
+    ipar1=0
+    endif
+    do 1 ie2=1,neval2
+    read(itra) ss
+    ee=ee2(ie2)
+    if (ee<emi .or. ee>ema) goto 1
+    do 2 ie1=1,neval1
 
-if (ee1(ie1)<emi) goto 2
-if (ee1(ie1)>ema) goto 1
-if (ss(ie1)<smi) goto 2
-w= ee - ee1(ie1)
-if (abs(w)>=wsmi .and. abs(w)<=wsma) then
-if (w>=0.0d0) then
-write(item) ipar1,j2,kmin2,ie2,j1,kmin1,ie1, &
-ee2(ie2),ee1(ie1),w,ss(ie1),ibase2,ibase1
-else
-write(item) ipar1,j1,kmin1,ie1,j2,kmin2,ie2, &
-ee1(ie1),ee2(ie2),-w,ss(ie1),ibase1,ibase2
-endif
-nr= nr + 1
-endif
+    if (ee1(ie1)<emi) goto 2
+    if (ee1(ie1)>ema) goto 1
+    if (ss(ie1)<smi) goto 2
+    w= ee - ee1(ie1)
+    if (abs(w)>=wsmi .and. abs(w)<=wsma) then
+    if (w>=0.0d0) then
+    write(item) ipar1,j2,kmin2,ie2,j1,kmin1,ie1, &
+    ee2(ie2),ee1(ie1),w,ss(ie1),ibase2,ibase1
+    else
+    write(item) ipar1,j1,kmin1,ie1,j2,kmin2,ie2, &
+    ee1(ie1),ee2(ie2),-w,ss(ie1),ibase1,ibase2
+    endif
+    nr= nr + 1
+    endif
 2      continue
 1      continue
 
-deallocate(ee1, ee2, ss)
+    deallocate(ee1, ee2, ss)
 
-goto 10
-90       continue
-close(unit=itra)
+    goto 10
+    90       continue
+    close(unit=itra)
 
-write(6,"(/,i10,a100,i3,i10,a100,I3)") maxr,' transition records read from unit ITRA =',&
-&itra,nr,' selected and      written to unit ITEM =',item
-!1010 format(/,i10,' transition records read from unit ITRA =',i3, &
-!/,i10,' selected and      written to unit ITEM =',I3)
-if (nr<=0) then
-write(6,"(/'No lines selected: stop')")
-!900       format(/'No lines selected: stop')
-stop
-endif
-else
-rewind ispe
-read(ispe)
-13       read(ispe,end=93)
-nr= nr+1
-goto 13
-93       continue
-write(6,"(/5x,a20,/i10,a50,i3)") 'List already sorted:',nr,&
-&' transition records found on unit ISPE =',ispe
-!1020    format(/5x,'List already sorted:', &
-!/i10,' transition records found on unit ISPE =',i3)
-endif
+    write(6,"(/,i10,a100,i3,i10,a100,I3)") maxr,' transition records read from unit ITRA =',&
+    &itra,nr,' selected and      written to unit ITEM =',item
+    !1010 format(/,i10,' transition records read from unit ITRA =',i3, &
+    !/,i10,' selected and      written to unit ITEM =',I3)
+    if (nr<=0) then
+    write(6,"(/'No lines selected: stop')")
+    !900       format(/'No lines selected: stop')
+    stop
+    endif
+    else
+    rewind ispe
+    read(ispe)
+    13       read(ispe,end=93)
+    nr= nr+1
+    goto 13
+    93       continue
+    write(6,"(/5x,a20,/i10,a50,i3)") 'List already sorted:',nr,&
+    &' transition records found on unit ISPE =',ispe
+    endif
 
-call spmain(ilev,ispe,nr,nmax1,nmax2,item,idia,gz)
+    call spmain(ilev,ispe,nr,nmax1,nmax2,item,idia,gz)
 
-stop
+    stop
 end
 
 ! ------------------------------------------------------------------
@@ -350,82 +348,77 @@ end
 subroutine spmain(ilev,ispe,nr,nmax1,nmax2,item,idia,gz)
 
 !     this is the effective main program of spectra
-use spectra_logic
-implicit double precision(a-h,o-y), logical(z)
+    use spectra_logic
+    implicit double precision(a-h,o-y), logical(z)
 
-data dwl/0.0d0/,x1/1.0d0/,x0/0.0d0/
+    data dwl/0.0d0/,x1/1.0d0/,x0/0.0d0/
 
-!     sort out the spectrum on frequencies
+    !     sort out the spectrum on frequencies
 
-if (zsort) call sortsp(nr, item, ispe)
-if (.not.zspe) stop
-rewind ispe
-read(ispe) zembed
+    if (zsort) call sortsp(nr, item, ispe)
+    if (.not.zspe) stop
+    rewind ispe
+    read(ispe) zembed
 
-!     read in the nuclear spin factors
+    !     read in the nuclear spin factors
 
 
-read(5,"(6f10.0)") ge, go
-101   format(6f10.0)
-if(ge<=x0 .and. go<=x0) then
-ge= x1
-go= x1
-endif
-write(6,"(/5x,'Even spin factor = ',f6.3,'  odd spin factor = ',f6.3)") ge, go
-!205   format(/5x,'Even spin factor = ',f6.3,'  odd spin factor = ',f6.3)
+    read(5,"(6f10.0)") ge, go
+    101   format(6f10.0)
+    if(ge<=x0 .and. go<=x0) then
+    ge= x1
+    go= x1
+    endif
+    write(6,"(/5x,'Even spin factor = ',f6.3,'  odd spin factor = ',f6.3)") ge, go
 
-!     read in the conditions for spectra required.
-!
-read(5,101, end=92) temp, xmin, wmin, wmax, dwl, q
 
-!     print out run conditions
+    !     read in the conditions for spectra required.
+    !
+    read(5,101, end=92) temp, xmin, wmin, wmax, dwl, q
 
-write(6,"(/5x,'Temperature set to: ',f8.2,' K'//)") temp
-!206   format(/5x,'Temperature set to: ',f8.2,' K'//)
-if (xmin/=x0) then
-write(6,"(5x,'Minimum relative intensity required = ',f8.6)") xmin
-else
-write(6,"(5x,'All transitions printed out')")
-endif
-!207   format(5x,'Minimum relative intensity required = ',f8.6)
-!208   format(5x,'All transitions printed out')
-if(wmax/=x0) then
-write(6,"(5x,a50,f10.3,a20,f10.3,a100,f10.3/)") 'Frequency range from ',wmin,&
-&' cm-1 to ', wmax,' cm-1 profile half width', dwl
-else
-write(6,"(5x,a50,f10.3,a100,f10.3/)") 'Frequency range from ',wmin,&
-& ' cm-1 to maximum profile half width',dwl
-endif
-!209   format(5x,'Frequency range from ',f10.3,' cm-1 to ',f10.3,' cm-1',/ &
-!5x,'profile half width',f10.3/)
-!210   format(5x,'Frequency range from ',f10.3,' cm-1 to maximum',/ &
-!5x,'profile half width',f10.3/)
+    !     print out run conditions
+
+    write(6,"(/5x,'Temperature set to: ',f8.2,' K'//)") temp
+
+    if (xmin/=x0) then
+    write(6,"(5x,'Minimum relative intensity required = ',f8.6)") xmin
+    else
+    write(6,"(5x,'All transitions printed out')")
+    endif
+
+    if(wmax/=x0) then
+    write(6,"(5x,a50,f10.3,a20,f10.3,a100,f10.3/)") 'Frequency range from ',wmin,&
+    &' cm-1 to ', wmax,' cm-1 profile half width', dwl
+    else
+    write(6,"(5x,a50,f10.3,a100,f10.3/)") 'Frequency range from ',wmin,&
+    & ' cm-1 to maximum profile half width',dwl
+    endif
+
 
 !     calculate the partition function
 
-if (zpfun) then
-nlev=max(nmax1,nmax2)
-call pfcalc(temp,emax,qerr,ge,go,nlev,q,ilev,idia,gz)
-write(6,"(/5x,a29,d12.5,/,a50,d12.5,a10)") 'Partition function Q =',q,&
-& 'estimated error in Q =',qerr,' %'
-!211      format(/5x,'Partition function Q =',d12.5,/, &
-!5x,'estimated error in Q =',d12.5,' %')
-else
-if (q <= x0) q=x1
-write(6,"(/5x,' Partition function set to Q =',d12.5)") q
-!2061    format(/5x,' Partition function set to Q =',d12.5)
-endif
+    if (zpfun) then
+    nlev=max(nmax1,nmax2)
+    call pfcalc(temp,emax,qerr,ge,go,nlev,q,ilev,idia,gz)
+    write(6,"(/5x,a29,d12.5,/,a50,d12.5,a10)") 'Partition function Q =',q,&
+    & 'estimated error in Q =',qerr,' %'
+    !211      format(/5x,'Partition function Q =',d12.5,/, &
+    !5x,'estimated error in Q =',d12.5,' %')
+    else
+    if (q <= x0) q=x1
+    write(6,"(/5x,' Partition function set to Q =',d12.5)") q
+    endif
 
 !     calculate integrated absorption coefficients
-jdia= abs(idia)
-call spectm(xmin, wmin, wmax, dwl, &
-ge, go, temp, q, nr, jdia, ispe, gz)
+    jdia= abs(idia)
+    call spectm(xmin, wmin, wmax, dwl, &
+    ge, go, temp, q, nr, jdia, ispe, gz)
 
-92    continue
-write(6,"(/10x,'Job completed successfully')")
-!212   format(/10x,'Job completed successfully')
-call timer
-stop
+    92    continue
+    write(6,"(/10x,'Job completed successfully')")
+    !212   format(/10x,'Job completed successfully')
+    call timer
+    stop
 end
 
 ! ------------------------------------------------------------------
@@ -435,65 +428,65 @@ subroutine sortsp(nr, item, ispe)
 !     this subroutine sorts the dipole data on ascending frequencies.
 !     data printed out is in cm-1, debye**2 and sec-1.
 !     data written to ispe for spectm is in atomic units.
-use spectra_logic
+    use spectra_logic
 
-implicit double precision(a-h,o-y), logical(z)
-DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: da
-integer, allocatable, dimension(:,:) :: ia
-integer, allocatable, dimension(:) :: iperm
+    implicit double precision(a-h,o-y), logical(z)
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: da
+    integer, allocatable, dimension(:,:) :: ia
+    integer, allocatable, dimension(:) :: iperm
 
 !      fmem = (64*nr)/1048576.0d0
-fmem = 64.d0*dble(nr)/1048576.0d0 !Changed by Lorenzo Lodi, 10 June 2007
-write(6,"(/5x,'Memory required to sort transitions',f10.3,' MB')") fmem
-!300   format(/5x,'Memory required to sort transitions',f10.3,' MB')
-allocate(ia(nr,7), da(nr,4), iperm(nr))
+    fmem = 64.d0*dble(nr)/1048576.0d0 !Changed by Lorenzo Lodi, 10 June 2007
+    write(6,"(/5x,'Memory required to sort transitions',f10.3,' MB')") fmem
 
-if(.not.zspe) zout= .true.
-write(ispe) zembed
-ir= 0
+    allocate(ia(nr,7), da(nr,4), iperm(nr))
+
+    if(.not.zspe) zout= .true.
+    write(ispe) zembed
+    ir= 0
 
 !     read in of data from item.
 !     input is in atomic units.
 
-rewind item
-10    read(item,end=92,err=998) ipar1, j2,kmin2,ie2, j1,kmin1,ie1, &
-e2, e1, w, s,ibase2,ibase1
+    rewind item
+    10    read(item,end=92,err=998) ipar1, j2,kmin2,ie2, j1,kmin1,ie1, &
+    e2, e1, w, s,ibase2,ibase1
 
-ir= ir + 1
+    ir= ir + 1
 
-ia(ir,1)= ipar1
-ia(ir,2)= j2
-ia(ir,3)= kmin2
-ia(ir,4)= ie2 + ibase2 - 1
-ia(ir,5)= j1
-ia(ir,6)= kmin1
-ia(ir,7)= ie1 + ibase1 - 1
-da(ir,1)= e2
-da(ir,2)= e1
-da(ir,3)= w
-da(ir,4)= s
-goto 10
+    ia(ir,1)= ipar1
+    ia(ir,2)= j2
+    ia(ir,3)= kmin2
+    ia(ir,4)= ie2 + ibase2 - 1
+    ia(ir,5)= j1
+    ia(ir,6)= kmin1
+    ia(ir,7)= ie1 + ibase1 - 1
+    da(ir,1)= e2
+    da(ir,2)= e1
+    da(ir,3)= w
+    da(ir,4)= s
+    goto 10
 
 92    continue
 
 !     now sort on frequencies
 
-ier = 0
+    ier = 0
 
-call dpsort(da(1,3), nr, iperm, 1, ier)
-if(ier /= 0) then
-write(6,*) " ERROR returned by DPSORT", ier
-stop
-endif
+    call dpsort(da(1,3), nr, iperm, 1, ier)
+    if(ier /= 0) then
+    write(6,*) " ERROR returned by DPSORT", ier
+    stop
+    endif
 
-do 698 ir=1,7
+    do 698 ir=1,7
 
-call ipperm(ia(1,ir), nr, iperm, ier)
-if(ier /= 0) write(6,*) " ERROR returned by ipperm ", ier
-if(ir <= 4) then
-call dpperm(da(1,ir), nr, iperm, ier)
-if(ier /= 0) write(6,*) " ERROR returned by dpperm ", ier
-endif
+    call ipperm(ia(1,ir), nr, iperm, ier)
+    if(ier /= 0) write(6,*) " ERROR returned by ipperm ", ier
+    if(ir <= 4) then
+    call dpperm(da(1,ir), nr, iperm, ier)
+    if(ier /= 0) write(6,*) " ERROR returned by dpperm ", ier
+    endif
 
 698 continue
 
@@ -503,26 +496,22 @@ endif
 !     print out results to lineprinter if requested.
 !     output to lineprinter is in wavenumbers and debye.
 
-if (zout) write(6,"(//'ipar   j2  p2  i2   j1  p1  i1       e2        e1 freq       s(f-i)'/)")
-!202   format(//'ipar   j2  p2  i2   j1  p1  i1       e2        e1',9x, &
-!'freq       s(f-i)'/)
-i20= 0
-do 4 ir= 1,nr
-write(ispe) (ia(ir,ic), ic=1,7), (da(ir,ic), ic=1,4)
-if (zout) write(6,"(i3,2x,3(1x,i3),1x,3(1x,i3),3(2x,f9.3),2(3x,e10.3))") (ia(ir,ic), ic=1,7), (da(ir,ic), ic=1,4)
-4     continue
-!203   format(i3,2x,3(1x,i3),1x,3(1x,i3),3(2x,f9.3),2(3x,e10.3))
+    if (zout) write(6,"(//'ipar   j2  p2  i2   j1  p1  i1       e2        e1 freq       s(f-i)'/)")
 
-close(unit=item)
-deallocate(ia, da, iperm)
+    i20= 0
+    do 4 ir= 1,nr
+    write(ispe) (ia(ir,ic), ic=1,7), (da(ir,ic), ic=1,4)
+    if (zout) write(6,"(i3,2x,3(1x,i3),1x,3(1x,i3),3(2x,f9.3),2(3x,e10.3))") (ia(ir,ic), ic=1,7), (da(ir,ic), ic=1,4)
+    4     continue
 
-write(6,"(//10x,'Sort completed successfully')")
-!204   format(//10x,'Sort completed successfully')
-call timer
-return
-998   write(6,"(/,5x,'Failure reading from unit item, record',i6,/)") ir+1
-!898   format(/,5x,'Failure reading from unit item, record',i6,/)
-stop
+    close(unit=item)
+    deallocate(ia, da, iperm)
+
+    write(6,"(//10x,'Sort completed successfully')")
+    call timer
+    return
+    998   write(6,"(/,5x,'Failure reading from unit item, record',i6,/)") ir+1
+    stop
 end
 
 ! --------------------------------------------------------------
@@ -535,84 +524,82 @@ subroutine pfcalc(temp,emax,qerr,ge,go,nlev,q,ilev,idia,gz)
 !     taken from the file supplied by programs triatom and rotlev.
 
 !     the input stream is ilev, which is defaulted to stream 14.
-use spectra_logic
-implicit double precision(a-h,o-y), logical(z)
+    use spectra_logic
+    implicit double precision(a-h,o-y), logical(z)
 
-double precision, allocatable, dimension(:) :: e
-!     program constants
-!     autocm converts atomic units to wavenumbers
-data x0/0.0d0/,x1/1.0d0/,&
-hc/ 1.9864476d-16/, &
-bk/ 1.3806581d-16/, &
-autocm/ 2.19474624d+05/
-allocate(e(nlev))
+    double precision, allocatable, dimension(:) :: e
+    !     program constants
+    !     autocm converts atomic units to wavenumbers
+    data x0/0.0d0/,x1/1.0d0/,&
+    hc/ 1.9864476d-16/, &
+    bk/ 1.3806581d-16/, &
+    autocm/ 2.19474624d+05/
+    allocate(e(nlev))
 
-rewind ilev
+    rewind ilev
 
-tk= bk*temp
-c1= hc/tk
-q= x0
+    tk= bk*temp
+    c1= hc/tk
+    q= x0
 
 !     loop over read of energies from ilev
 
-jmax= 0
-emax= x0
-10    read(ilev,*,end=90) j, k, id, ipar, isym, neval !read(ilev,838,end=90) j, k, id, ipar, isym, neval
-!838   format(6i6)
-if(idia==-1 .or. idia==0) then
-ip= isym
-else
-if(idia==2.and..not.zembed) then
-ipar= ipar + j + k + 1
-ipar= mod(ipar,2)
-endif
-ip= ipar
-endif
-write(6,"(i8,' levels with j=',i3,' ip=',i2,' kmin=',i2,'  included')") neval,j, ip, k
-!202   format(i8,' levels with j=',i3,' ip=',i2,' kmin=',i2,'  included')
-!     check array e is big enough, if not make it bigger...
-if (neval > nlev) then
-deallocate(e)
-nlev=neval
-allocate(e(nlev))
-endif
+    jmax= 0
+    emax= x0
+    10    read(ilev,*,end=90) j, k, id, ipar, isym, neval !read(ilev,838,end=90) j, k, id, ipar, isym, neval
 
-read(ilev,*) (e(i), i=1,neval)
-if(j>jmax) then
-emax= e(1)
-jmax= j
-endif
+    if(idia==-1 .or. idia==0) then
+    ip= isym
+    else
+    if(idia==2.and..not.zembed) then
+    ipar= ipar + j + k + 1
+    ipar= mod(ipar,2)
+    endif
+    ip= ipar
+    endif
+    write(6,"(i8,' levels with j=',i3,' ip=',i2,' kmin=',i2,'  included')") neval,j, ip, k
+   
+    if (neval > nlev) then
+    deallocate(e)
+    nlev=neval
+    allocate(e(nlev))
+    endif
+
+    read(ilev,*) (e(i), i=1,neval)
+    if(j>jmax) then
+    emax= e(1)
+    jmax= j
+    endif
 
 !     calculate the partition coefficient
 !     first: degeneracy factors
-grot=dble(2*j+1)
-if(abs(idia) == 2) then
-if(ip==0 .or. ip==2) then
-gg= ge*grot
-else
-gg= go*grot
-endif
-else
-gg=grot
-endif
-do 3 i=1,neval
-q= q + gg*exp(-(e(i)*autocm-gz)*c1)
-3     continue
-goto 10
-90    emax= emax*autocm-gz
-write(6,"(/5x,a100,f13.5,a100,f13.5,a10)") 'Ground zero energy           = ',gz,&
-& ' cm-1 Lowest energy in jmax levels = ',emax,' cm-1'
-!203   format(/5x,'Ground zero energy           = ',f13.5,' cm-1',/, &
-!5x,'Lowest energy in jmax levels = ',f13.5,' cm-1')
+    grot=dble(2*j+1)
+    if(abs(idia) == 2) then
+    if(ip==0 .or. ip==2) then
+    gg= ge*grot
+    else
+    gg= go*grot
+    endif
+    else
+    gg=grot
+    endif
+    do 3 i=1,neval
+    q= q + gg*exp(-(e(i)*autocm-gz)*c1)
+    3     continue
+    goto 10
+    90    emax= emax*autocm-gz
+    write(6,"(/5x,a100,f13.5,a100,f13.5,a10)") 'Ground zero energy           = ',gz,&
+    & ' cm-1 Lowest energy in jmax levels = ',emax,' cm-1'
 
-if(q<=x0) q= x1
-qend= dble(2*jmax+1)*exp(-emax*c1)
-qerr= 100.0d0*qend/q
 
-close(unit=ilev)
-deallocate(e)
+    if(q<=x0) q= x1
+    qend= dble(2*jmax+1)*exp(-emax*c1)
+    qerr= 100.0d0*qend/q
 
-return
+    close(unit=ilev)
+    deallocate(e)
+
+    return
 end
 
 ! ------------------------------------------------------------
@@ -658,352 +645,347 @@ ge, go, temp, q, nr, jdia, ispe, gz)
 !               (2j'+1)*gg*hcw*exp(-hcw'/kt)*aif
 !         j(w)= --------------------------------
 !                             4pi*q
-use spectra_logic
-use spectra_base
+    use spectra_logic
+    use spectra_base
 
-implicit double precision(a-h,o-y), logical(z)
-double precision, allocatable, dimension(:,:) :: a
-integer, allocatable, dimension(:,:) :: iqnum
-namelist /spe/ emin1,emax1,jmax,zplot,zemit,iplot,zfreq,zeinst, &
-emin2,emax2,zprof,idat,zene,tinte,zlist,ilist, &
-zdop,prthr,npoints,xmolm
+    implicit double precision(a-h,o-y), logical(z)
+    double precision, allocatable, dimension(:,:) :: a
+    integer, allocatable, dimension(:,:) :: iqnum
+    namelist /spe/ emin1,emax1,jmax,zplot,zemit,iplot,zfreq,zeinst, &
+    emin2,emax2,zprof,idat,zene,tinte,zlist,ilist, &
+    zdop,prthr,npoints,xmolm
 
-!     program constants
-data idat/19/,iplot/20/,ilist/36/, &
-hc/ 1.9864476d-16/, &
-pi/ 3.1415927d0/, &
-bk/ 1.3806581d-16/, &
-!     autocm converts atomic units to wavenumbers
-autocm/ 2.19474624d+05/, &
-!     autode converts atomic units to debye
-autode/ 2.5417662d0/, &
-!     detosc converts from s(f-i) in debye**2 to seconds**(-1)
-detosc/ 3.136186d-07/, &
-conv  / 4.162034d-19/
+    !     program constants
+    data idat/19/,iplot/20/,ilist/36/, &
+    hc/ 1.9864476d-16/, &
+    pi/ 3.1415927d0/, &
+    bk/ 1.3806581d-16/, &
+    !     autocm converts atomic units to wavenumbers
+    autocm/ 2.19474624d+05/, &
+    !     autode converts atomic units to debye
+    autode/ 2.5417662d0/, &
+    !     detosc converts from s(f-i) in debye**2 to seconds**(-1)
+    detosc/ 3.136186d-07/, &
+    conv  / 4.162034d-19/
 
 !     detocg converts from debye to c.g.s. units.
 
-fmem =  76.d0*dble(nr)/1048576.0d0 !Changed by Lorenzo Lodi, 10 June 2007
-write(6,"(/5x,'Memory required to generate spectrum',f10.3,' MB'/)") fmem
-!300   format(/5x,'Memory required to generate spectrum',f10.3,' MB'/)
+    fmem =  76.d0*dble(nr)/1048576.0d0 !Changed by Lorenzo Lodi, 10 June 2007
+    write(6,"(/5x,'Memory required to generate spectrum',f10.3,' MB'/)") fmem
 
-allocate(iqnum(nr,7), a(nr,6))
+    allocate(iqnum(nr,7), a(nr,6))
 
-200   format(///)
+    200   format(///)
 
 !     preset namelist parameters
 
-emin1= -1.0d27
-emax1= +1.0d27
-emin2= -1.0d27
-emax2= +1.0d27
-jmax= -1
-tinte= +1.0d-15
-zplot= .false.
-zlist= .false.
-zprof= .false.
-npoints=3000
-zemit= .false.
-zfreq= .true.
-zeinst= .false.
-zene= .false.
-zdop= .false.
-prthr = 0.1d0
-xmolm = 18.0d0 !molecular mass default (H20).
+    emin1= -1.0d27
+    emax1= +1.0d27
+    emin2= -1.0d27
+    emax2= +1.0d27
+    jmax= -1
+    tinte= +1.0d-15
+    zplot= .false.
+    zlist= .false.
+    zprof= .false.
+    npoints=3000
+    zemit= .false.
+    zfreq= .true.
+    zeinst= .false.
+    zene= .false.
+    zdop= .false.
+    prthr = 0.1d0
+    xmolm = 18.0d0 !molecular mass default (H20).
 
 !     read in namelist parameters
 
-read(5,spe)
-if(zeinst) zemit=.true.
-write(6,*) "SPECTM output requests:"
-if (zplot) then
-write(6,"(5x,'Data for plotting written to stream IPLOT =',i3)") iplot
-!1010    format(5x,'Data for plotting written to stream IPLOT =',i3)
-open(unit=iplot,form='formatted')
-if (zprof) then
-open(unit=idat,form='formatted')
-write(6,"(5x,a20,i5,a100,i3)") 'Full line profile requested at',npoints,&
-&' points scatch  IDAT =',idat
-!1020    format(5x,'Full line profile requested at',i5,' points,',&
-!' scatch  IDAT =',i3)
-endif
-else
-write(6,"(5x,'Plot file not requested')")
-!1030    format(5x,'Plot file not requested')
-endif
-if (zlist) then
-write(6,"(5x,'Full line list    written to stream ILIST =',i3)") ILIST
-open(unit=ilist,form='formatted') 
-!1040    format(5x,'Full line list    written to stream ILIST =',i3)
-!open(unit=ilist,form='formatted')
-else
-write(6,"(5x,'Full line list not requested')")
-!1050    format(5x,'Full line list not requested')
-endif
-if (zlist) write(6,"(/5x,a100,d9.2)") 'Linelist printed using relative threshold PRTHR =',prthr
-!1060 format(/5x,'Linelist printed using relative threshold PRTHR =', &
-!d9.2)
+    read(5,spe)
+    if(zeinst) zemit=.true.
+    write(6,*) "SPECTM output requests:"
+    if (zplot) then
+    write(6,"(5x,'Data for plotting written to stream IPLOT =',i3)") iplot
+    !1010    format(5x,'Data for plotting written to stream IPLOT =',i3)
+    open(unit=iplot,form='formatted')
+    if (zprof) then
+    open(unit=idat,form='formatted')
+    write(6,"(5x,a20,i5,a100,i3)") 'Full line profile requested at',npoints,&
+    &' points scatch  IDAT =',idat
+    !1020    format(5x,'Full line profile requested at',i5,' points,',&
+    !' scatch  IDAT =',i3)
+    endif
+    else
+    write(6,"(5x,'Plot file not requested')")
+    !1030    format(5x,'Plot file not requested')
+    endif
+    if (zlist) then
+    write(6,"(5x,'Full line list    written to stream ILIST =',i3)") ILIST
+    open(unit=ilist,form='formatted') 
+
+    else
+    write(6,"(5x,'Full line list not requested')")
+    !1050    format(5x,'Full line list not requested')
+    endif
+    if (zlist) write(6,"(/5x,a100,d9.2)") 'Linelist printed using relative threshold PRTHR =',prthr
+
 
 !     determine the spectral range required
 
-nskip= 0
-ntrans= 0
-nread= 0
-rewind ispe
-read(ispe)
-10    read(ispe,end=90,err=99) ipar, j2, k2, ie2, j1, k1, ie1, e2, e1, w
-nread= nread+1
-w= w*autocm
-if(w<wmin) then
-nskip= nskip + 1
-goto 10
-endif
-if(wmax>0.0) then
-if(w<=wmax) then
-ntrans= ntrans + 1
-else
-goto 90
-endif
-else
-ntrans= ntrans + 1
-endif
-goto 10
+    nskip= 0
+    ntrans= 0
+    nread= 0
+    rewind ispe
+    read(ispe)
+    10    read(ispe,end=90,err=99) ipar, j2, k2, ie2, j1, k1, ie1, e2, e1, w
+    nread= nread+1
+    w= w*autocm
+    if(w<wmin) then
+    nskip= nskip + 1
+    goto 10
+    endif
+    if(wmax>0.0) then
+    if(w<=wmax) then
+    ntrans= ntrans + 1
+    else
+    goto 90
+    endif
+    else
+    ntrans= ntrans + 1
+    endif
+    goto 10
 90    continue
 
 !     skip unrequired transitions
 
-rewind ispe
-read(ispe)
-do 1 ir=1,nskip
-read(ispe)
-1     continue
+    rewind ispe
+    read(ispe)
+    do 1 ir=1,nskip
+    read(ispe)
+    1     continue
 
-!     read in required data from ispe:
+    !     read in required data from ispe:
 
-do 2 ir=1,ntrans
-read(ispe) (iqnum(ir,ic),ic=1,7), (a(ir,ic),ic=1,4)
-a(ir,1)= (a(ir,1)*autocm)-gz
-a(ir,2)= (a(ir,2)*autocm)-gz
-a(ir,3)= a(ir,3)*autocm
-a(ir,4)= a(ir,4)*autode*autode
-2     continue
+    do 2 ir=1,ntrans
+    read(ispe) (iqnum(ir,ic),ic=1,7), (a(ir,ic),ic=1,4)
+    a(ir,1)= (a(ir,1)*autocm)-gz
+    a(ir,2)= (a(ir,2)*autocm)-gz
+    a(ir,3)= a(ir,3)*autocm
+    a(ir,4)= a(ir,4)*autode*autode
+    2     continue
 
 !     start the calculation
 
-c1= hc/(temp*bk)
-if (zemit) goto 40
+    c1= hc/(temp*bk)
+    if (zemit) goto 40
 
-!     calculate integrated absorption coefficients
+    !     calculate integrated absorption coefficients
 
-c2= conv/q
+    c2= conv/q
 
-xmax= 0.0d0
-xint= 0.0d0
-if(jdia==2) then
-do 3 ir=1,ntrans
-if(iqnum(ir,1)==0.or.iqnum(ir,1)==2) then
-gg= ge
-else
-gg= go
-endif
-acur= c2*gg*a(ir,3)*a(ir,4)* &
-(exp(-a(ir,2)*c1) - exp(-a(ir,1)*c1))
-a(ir,5)= acur
-xint= xint + acur
-if(acur>xmax) xmax= acur
-3        continue
-else
-do 4 ir=1,ntrans
-acur= c2*a(ir,3)*a(ir,4)* &
-(exp(-a(ir,2)*c1) - exp(-a(ir,1)*c1))
-a(ir,5)= acur
-xint= xint + acur
+    xmax= 0.0d0
+    xint= 0.0d0
+    if(jdia==2) then
+    do 3 ir=1,ntrans
+    if(iqnum(ir,1)==0.or.iqnum(ir,1)==2) then
+    gg= ge
+    else
+    gg= go
+    endif
+    acur= c2*gg*a(ir,3)*a(ir,4)* &
+    (exp(-a(ir,2)*c1) - exp(-a(ir,1)*c1))
+    a(ir,5)= acur
+    xint= xint + acur
+    if(acur>xmax) xmax= acur
+    3        continue
+    else
+    do 4 ir=1,ntrans
+    acur= c2*a(ir,3)*a(ir,4)* &
+    (exp(-a(ir,2)*c1) - exp(-a(ir,1)*c1))
+    a(ir,5)= acur
+    xint= xint + acur
 
-if(acur>xmax) xmax= acur
-4        continue
-endif
-goto 41
+    if(acur>xmax) xmax= acur
+    4        continue
+    endif
+    goto 41
 
 !     calculate emissivity coefficients
 
-40    c2= hc*detosc/(4.0d0*pi*q)
-xmax= 0.0d0
-xint= 0.0d0
-if(jdia==2) then
-do 43 ir=1,ntrans
-w= a(ir,3)
-if(iqnum(ir,1)==0.or.iqnum(ir,1)==2) then
-gg= ge
-else
-gg= go
-endif
-if(.not. zeinst) then
-acur= w*w*w*w*a(ir,4)*c2*gg* &
-exp(-a(ir,1)*c1)
-else
-acur= w*w*w*gg*a(ir,4)*detosc
-endif
-a(ir,5)= acur
-xint= xint + acur
-if(acur>xmax) xmax= acur
-43       continue
-else
-do 44 ir=1,ntrans
-w= a(ir,3)
-if(.not. zeinst) then
-acur= w*w*w*w*a(ir,4)*c2* &
-exp(-a(ir,1)*c1)
-else
-acur= w*w*w*a(ir,4)*detosc
-endif
-a(ir,5)= acur
-xint= xint + acur
-if(acur>xmax) xmax= acur
-44       continue
-endif
-41    continue
+    40    c2= hc*detosc/(4.0d0*pi*q)
+    xmax= 0.0d0
+    xint= 0.0d0
+    if(jdia==2) then
+    do 43 ir=1,ntrans
+    w= a(ir,3)
+    if(iqnum(ir,1)==0.or.iqnum(ir,1)==2) then
+    gg= ge
+    else
+    gg= go
+    endif
+    if(.not. zeinst) then
+    acur= w*w*w*w*a(ir,4)*c2*gg* &
+    exp(-a(ir,1)*c1)
+    else
+    acur= w*w*w*gg*a(ir,4)*detosc
+    endif
+    a(ir,5)= acur
+    xint= xint + acur
+    if(acur>xmax) xmax= acur
+    43       continue
+    else
+    do 44 ir=1,ntrans
+    w= a(ir,3)
+    if(.not. zeinst) then
+    acur= w*w*w*w*a(ir,4)*c2* &
+    exp(-a(ir,1)*c1)
+    else
+    acur= w*w*w*a(ir,4)*detosc
+    endif
+    a(ir,5)= acur
+    xint= xint + acur
+    if(acur>xmax) xmax= acur
+    44       continue
+    endif
+    41    continue
 
 !     relative absorption or emissivity coefficients
 
-inc= 0
-neg= 0
-xmax1= 0.0d0
-do 5 ir= 1,ntrans
-if(jmax>-1.and.iqnum(ir,5)>jmax) goto 5
-if(a(ir,2)<emin1) goto 5
-if(a(ir,2)>emax1) goto 5
-if(a(ir,1)<emin2) goto 5
-if(a(ir,1)>emax2) goto 5
-if(a(ir,5)>xmax1) xmax1= a(ir,5)
-5     continue
+    inc= 0
+    neg= 0
+    xmax1= 0.0d0
+    do 5 ir= 1,ntrans
+    if(jmax>-1.and.iqnum(ir,5)>jmax) goto 5
+    if(a(ir,2)<emin1) goto 5
+    if(a(ir,2)>emax1) goto 5
+    if(a(ir,1)<emin2) goto 5
+    if(a(ir,1)>emax2) goto 5
+    if(a(ir,5)>xmax1) xmax1= a(ir,5)
+    5     continue
 
-do 6 ir= 1,ntrans
-a(ir,6)= a(ir,5)/xmax1
-if(a(ir,6)<xmin) goto 7
-if(jmax>-1.and.iqnum(ir,5)>jmax) goto 7
-if(a(ir,2)<emin1) goto 7
-if(a(ir,2)>emax1) goto 7
-if(a(ir,1)<emin2) goto 7
-if(a(ir,1)>emax2) goto 7
-inc= inc + 1
-goto 6
-7     continue
-neg= neg + 1
-6     continue
+    do 6 ir= 1,ntrans
+    a(ir,6)= a(ir,5)/xmax1
+    if(a(ir,6)<xmin) goto 7
+    if(jmax>-1.and.iqnum(ir,5)>jmax) goto 7
+    if(a(ir,2)<emin1) goto 7
+    if(a(ir,2)>emax1) goto 7
+    if(a(ir,1)<emin2) goto 7
+    if(a(ir,1)>emax2) goto 7
+    inc= inc + 1
+    goto 6
+    7     continue
+    neg= neg + 1
+    6     continue
 
-if(jmax==-1) then
-jm=500
-else
-jm= jmax
-endif
-if(.not.zemit) then
-write(6,2021) xmax,xint,emin1,emax1,emin2,emax2,jm,ntrans, &
-inc,neg
-else
-write(6,2022) xmax,xint,emin1,emax1,emin2,emax2,jm,ntrans, &
-inc,neg
-endif
-2021  format(/5x,'Maximum absorption coefficient = ',e15.6,/, &
-10x,'units are cm./molecule.'//, &
-5x,'Integrated band absorption =',e15.6,//, &
-5x,'Transitions with lower state energy = ',e13.6,' cm-1', &
-' to ',e13.6,' cm-1 considered.',/, &
-5x,'transitions with upper state energy = ',e13.6,' cm-1', &
-' to ',e13.6,' cm-1 considered.',/, &
-5x,'Maximum allowed value of J" =',i4,//, &
-i11,' transitions within spectral range',/, &
-i11,' transitions included',/, &
-i11,' transitions neglected')
-2022  format(/5x,'Maximum emission coefficient = ',e15.6,/, &
-10x,'units are erg/molecule/sr.'//, &
-5x,'Integrated band emission =',e15.6,//, &
-5x,'Transitions with lower state energy = ',e13.6,' cm-1', &
-' to ',e13.6,' cm-1 considered.',/, &
-5x,'Transitions with upper state energy = ',e13.6,' cm-1', &
-' to ',e13.6,' cm-1 considered.',/, &
-5x,'maximum allowed value of j" =',i4,//, &
-i11,' transitions within spectral range',/, &
-i11,' transitions included',/, &
-i11,' transitions neglected')
+    if(jmax==-1) then
+    jm=500
+    else
+    jm= jmax
+    endif
+    if(.not.zemit) then
+    write(6,2021) xmax,xint,emin1,emax1,emin2,emax2,jm,ntrans, &
+    inc,neg
+    else
+    write(6,2022) xmax,xint,emin1,emax1,emin2,emax2,jm,ntrans, &
+    inc,neg
+    endif
+    2021  format(/5x,'Maximum absorption coefficient = ',e15.6,/, &
+    10x,'units are cm./molecule.'//, &
+    5x,'Integrated band absorption =',e15.6,//, &
+    5x,'Transitions with lower state energy = ',e13.6,' cm-1', &
+    ' to ',e13.6,' cm-1 considered.',/, &
+    5x,'transitions with upper state energy = ',e13.6,' cm-1', &
+    ' to ',e13.6,' cm-1 considered.',/, &
+    5x,'Maximum allowed value of J" =',i4,//, &
+    i11,' transitions within spectral range',/, &
+    i11,' transitions included',/, &
+    i11,' transitions neglected')
+    2022  format(/5x,'Maximum emission coefficient = ',e15.6,/, &
+    10x,'units are erg/molecule/sr.'//, &
+    5x,'Integrated band emission =',e15.6,//, &
+    5x,'Transitions with lower state energy = ',e13.6,' cm-1', &
+    ' to ',e13.6,' cm-1 considered.',/, &
+    5x,'Transitions with upper state energy = ',e13.6,' cm-1', &
+    ' to ',e13.6,' cm-1 considered.',/, &
+    5x,'maximum allowed value of j" =',i4,//, &
+    i11,' transitions within spectral range',/, &
+    i11,' transitions included',/, &
+    i11,' transitions neglected')
 
 !     final output
 
-write(6,*)
-i20= 0
-write(6,203)
-203   format(/'ipar  j2 p2 i2  j1 p1 i1    e2         e1   ', &
-'   freq      s(f-i)    abs i(w)   rel i(w)     a(if) '/)
-!204   format(i3,2x,2i3,i4,1x,2i3,i4,3f13.6,1x,e16.8,3e11.3)
-!204   format(i3,2x,2i5,i5,1x,2i5,i5,3f14.6,1x,e16.8,3e15.6) ! Changed by Lorenzo Lodi, 10 June 2007
-do 8 ir=1,ntrans
-if(jmax>-1.and.iqnum(ir,5)>jmax) goto 8
-if(a(ir,2)<emin1) goto 8
-if(a(ir,2)>emax1) goto 8
-if(a(ir,1)<emin2) goto 8
-if(a(ir,1)>emax2) goto 8
-if(a(ir,6)<xmin) goto 8
-w= a(ir,3)
-aa= w*w*w*a(ir,4)*detosc/dble(2*iqnum(ir,2) + 1)
-iqnum(ir,3) = abs(iqnum(ir,3) - 1)
-iqnum(ir,6) = abs(iqnum(ir,6) - 1)
+    write(6,*)
+    i20= 0
+    write(6,203)
+    203   format(/'ipar  j2 p2 i2  j1 p1 i1    e2         e1   ', &
+    '   freq      s(f-i)    abs i(w)   rel i(w)     a(if) '/)
+    do 8 ir=1,ntrans
+    if(jmax>-1.and.iqnum(ir,5)>jmax) goto 8
+    if(a(ir,2)<emin1) goto 8
+    if(a(ir,2)>emax1) goto 8
+    if(a(ir,1)<emin2) goto 8
+    if(a(ir,1)>emax2) goto 8
+    if(a(ir,6)<xmin) goto 8
+    w= a(ir,3)
+    aa= w*w*w*a(ir,4)*detosc/dble(2*iqnum(ir,2) + 1)
+    iqnum(ir,3) = abs(iqnum(ir,3) - 1)
+    iqnum(ir,6) = abs(iqnum(ir,6) - 1)
 
 !###EDIT EAMON CONWAY... WRITE TO ZLIST ABSOLUTE INTENSITY > XMIN  INSTEAD OF RELATIVE INTENSITY
-if (zlist .and. (a(ir,5) > xmin   )) &
-write(ilist,"(i3,2x,2i5,i5,1x,2i5,i5,3f14.6,1x,e16.8,3e15.6)") (iqnum(ir,ic),ic=1,7),(a(ir,ic),ic=1,6),aa
+    if (zlist .and. (a(ir,5) > xmin   )) &
+    write(ilist,"(i3,2x,2i5,i5,1x,2i5,i5,3f14.6,1x,e16.8,3e15.6)") (iqnum(ir,ic),ic=1,7),(a(ir,ic),ic=1,6),aa
 
 
 !if (zlist) &
 !write(ilist,204) (iqnum(ir,ic),ic=1,7),(a(ir,ic),ic=1,6),aa
-if(a(ir,6)>=prthr) then
-write(6,"(i3,2x,2i5,i5,1x,2i5,i5,3f14.6,1x,e16.8,3e15.6)") (iqnum(ir,ic),ic=1,7),(a(ir,ic),ic=1,6),aa
-i20= i20 + 1
-endif
-if(zplot.and..not.zprof) then
-if( a(ir,6) >=tinte) then
-if ( zfreq ) then
-xval= a(ir,3)
-else
-xval= 10000.0/a(ir,3)
-endif
-if ( .not.zene ) then
-write(iplot,207) xval, a(ir,6)
-else
-write(iplot,206) xval, a(ir,6),a(ir,1),a(ir,2), &
-iqnum(ir,2),iqnum(ir,5)
-endif
-endif
-endif
-if(i20==20) then
-write(6,200)
-i20= 0
-endif
-8     continue
+    if(a(ir,6)>=prthr) then
+    write(6,"(i3,2x,2i5,i5,1x,2i5,i5,3f14.6,1x,e16.8,3e15.6)") (iqnum(ir,ic),ic=1,7),(a(ir,ic),ic=1,6),aa
+    i20= i20 + 1
+    endif
+    if(zplot.and..not.zprof) then
+    if( a(ir,6) >=tinte) then
+    if ( zfreq ) then
+    xval= a(ir,3)
+    else
+    xval= 10000.0/a(ir,3)
+    endif
+    if ( .not.zene ) then
+    write(iplot,207) xval, a(ir,6)
+    else
+    write(iplot,206) xval, a(ir,6),a(ir,1),a(ir,2), &
+    iqnum(ir,2),iqnum(ir,5)
+    endif
+    endif
+    endif
+    if(i20==20) then
+    write(6,200)
+    i20= 0
+    endif
+    8     continue
 
-if(zplot.and.zprof) then
-do 9 ir=1,ntrans
-if( zfreq ) then
-a(ir,6)= a(ir,3)
-else
-a(ir,6)= 10000.0/a(ir,3)
-endif
-write(idat,*) a(ir,6), a(ir,5)
-9        continue
-fmin= a(1,6)
-fmax= a(ntrans,6)
-call profil(idat,dwl,temp,iplot,fmin,fmax,npoints,&
-xmolm,zdop,zfreq)
-endif
-206   format(1x,f11.5,2x,f13.10,2x,f12.4,2x,f12.4,2x,i3,2x,i3)
-207   format(1x,f11.5,2x,f20.10)
-write(6,200)
-write(6,205)
-205   format(10x,'Spectrum completed successfully')
-return
-99    write(6,*) nread, j2,k2,ie2,j1,k1,ie1,e2,e1,w
+    if(zplot.and.zprof) then
+    do 9 ir=1,ntrans
+    if( zfreq ) then
+    a(ir,6)= a(ir,3)
+    else
+    a(ir,6)= 10000.0/a(ir,3)
+    endif
+    write(idat,*) a(ir,6), a(ir,5)
+    9        continue
+    fmin= a(1,6)
+    fmax= a(ntrans,6)
+    call profil(idat,dwl,temp,iplot,fmin,fmax,npoints,&
+    xmolm,zdop,zfreq)
+    endif
+    206   format(1x,f11.5,2x,f13.10,2x,f12.4,2x,f12.4,2x,i3,2x,i3)
+    207   format(1x,f11.5,2x,f20.10)
+    write(6,200)
+    write(6,205)
+    205   format(10x,'Spectrum completed successfully')
+    return
+    99    write(6,*) nread, j2,k2,ie2,j1,k1,ie1,e2,e1,w
 
-deallocate(iqnum, a)
+    deallocate(iqnum, a)
 
-stop
+    stop
 end
 
 ! --------------------------------------------------------
@@ -1089,87 +1071,87 @@ xmolm,zdop,zfreq)
 ! Here, however, we use the rigorous definition of
 ! half width at half maximum of the Gaussian.
 
-implicit double precision (a-h,o-y), logical(z)
-double precision Temp, xmolm, xln2, rtln2, rtln2pi, xlambda
+    implicit double precision (a-h,o-y), logical(z)
+    double precision Temp, xmolm, xln2, rtln2, rtln2pi, xlambda
 
-DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: f, wl
+    DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: f, wl
 
-allocate(f(npoints), wl(npoints))
+    allocate(f(npoints), wl(npoints))
 
-write(6,*)
-write(6,*) "LINE PROFILING"
+    write(6,*)
+    write(6,*) "LINE PROFILING"
 
-if(zdop) then
-write(6,*) "Thermal Doppler line profiling requested."
-write(6,*) "Molecular mass set to", xmolm
-else
-write(6,*) "Gaussian profiling requested."
-write(6,*) "Half width at half maximum set to ", dwl, " cm**-1"
-endif
-if (zfreq) then
-write(6,*) "Wavenumber units of cm**-1 selected"
-else
-write(6,*) "Wavelength units of microns selected"
-endif
+    if(zdop) then
+    write(6,*) "Thermal Doppler line profiling requested."
+    write(6,*) "Molecular mass set to", xmolm
+    else
+    write(6,*) "Gaussian profiling requested."
+    write(6,*) "Half width at half maximum set to ", dwl, " cm**-1"
+    endif
+    if (zfreq) then
+    write(6,*) "Wavenumber units of cm**-1 selected"
+    else
+    write(6,*) "Wavelength units of microns selected"
+    endif
 
-df= (fmax - fmin)/dble(npoints-1)
-! some constants.
-pi= acos(-1.0d0)
-xln2=log(2.0d0)
-rtln2=sqrt(xln2)
-rtln2pi=rtln2/sqrt(pi)
+    df= (fmax - fmin)/dble(npoints-1)
+    ! some constants.
+    pi= acos(-1.0d0)
+    xln2=log(2.0d0)
+    rtln2=sqrt(xln2)
+    rtln2pi=rtln2/sqrt(pi)
 
-!     zero the intensity array
+    !     zero the intensity array
 
-do 1 i= 1,npoints
-f(i)= 0.0d0
-wl(i)= fmin + dble(i-1)*df
-1     continue
-!     read in data from idat
+    do 1 i= 1,npoints
+    f(i)= 0.0d0
+    wl(i)= fmin + dble(i-1)*df
+    1     continue
+    !     read in data from idat
 
-rewind idat
-10    read(idat,*,end=11) w, x
+    rewind idat
+    10    read(idat,*,end=11) w, x
 
-if(zfreq .eqv. .false.) then
-xlambda=w
-w=10000.0d0/w
-endif
+    if(zfreq .eqv. .false.) then
+    xlambda=w
+    w=10000.0d0/w
+    endif
 
-! set the half width at half maximum [cm**-1]
-if(zdop) then
-hw=dop_half(temp,w,xmolm)
-else
-hw=dwl
-endif
+    ! set the half width at half maximum [cm**-1]
+    if(zdop) then
+    hw=dop_half(temp,w,xmolm)
+    else
+    hw=dwl
+    endif
 
-fac= rtln2pi/hw  ! Normalisation factor [cm]
+    fac= rtln2pi/hw  ! Normalisation factor [cm]
 
-do 12 i=1,npoints
-! set displacement from line centre in [cm**-1]
-if(zfreq) then
-delw= wl(i) - w
-else
-delw= (10000.0d0/wl(i))-w
-endif
+    do 12 i=1,npoints
+    ! set displacement from line centre in [cm**-1]
+    if(zfreq) then
+    delw= wl(i) - w
+    else
+    delw= (10000.0d0/wl(i))-w
+    endif
 
-if(abs(delw)>10.0d0*hw) goto 12
-xarg= delw/hw
-xx= x*exp(-xarg*xarg*xln2)  ! Guassian line profile, ....
-f(i)= f(i) + (xx*fac)       ! normalise and bin.
-12    continue
-goto 10
+    if(abs(delw)>10.0d0*hw) goto 12
+    xarg= delw/hw
+    xx= x*exp(-xarg*xarg*xln2)  ! Guassian line profile, ....
+    f(i)= f(i) + (xx*fac)       ! normalise and bin.
+    12    continue
+    goto 10
 
-!     output the spectrum
+    !     output the spectrum
 
-11    continue
-do 20 i=1,npoints
+    11    continue
+    do 20 i=1,npoints
 
-write(iplot,*) wl(i), f(i)
-20    continue
+    write(iplot,*) wl(i), f(i)
+    20    continue
 
-deallocate(f, wl)
+    deallocate(f, wl)
 
-return
+    return
 end
 
 ! ----------------------------------------------------------
@@ -1186,50 +1168,49 @@ function dop_half(T,nu_cm, molm)
 ! OUTPUT:
 !        dop_half: doppler half width (cm-1).
 
-implicit none
+    implicit none
 
-double precision T, Nu_cm,molm, dop_half,  C
+    double precision T, Nu_cm,molm, dop_half,  C
 
-data C /3.5682149d-7/
+    data C /3.5682149d-7/
 
-dop_half=C*sqrt(T/Molm)*nu_cm
+    dop_half=C*sqrt(T/Molm)*nu_cm
 
-return
+    return
 end
 
 ! -------------------------------------------------------------
 
 subroutine getrow(row,nrow,iunit)
 
-implicit double precision (a-h,o-y)
-dimension row(nrow)
-read(iunit,err=999) row
-return
-999   write(6,"(/,5x,'fell over in getrow reading unit = ',i6,/)") iunit
-!899   format(/,5x,'fell over in getrow reading unit = ',i6,/)
-stop
+    implicit double precision (a-h,o-y)
+    dimension row(nrow)
+    read(iunit,err=999) row
+    return
+    999   write(6,"(/,5x,'fell over in getrow reading unit = ',i6,/)") iunit
+    stop
 end
 
 ! ------------------------------------------------------------
 
 subroutine outrow(row,nrow,iunit)
 
-implicit double precision (a-h,o-y)
-dimension row(nrow)
-write(iunit) row
-return
-end
+    implicit double precision (a-h,o-y)
+    dimension row(nrow)
+    write(iunit) row
+    return
+    end
 
-subroutine timer
-!     prints current cpu time usage                                 #030
-use spectra_timing
-implicit double precision (a-h,o-y)
-write(6,"(/)")
-call SYSTEM_CLOCK(itime2,irate2,imax2)
-itime=(itime2-itime0)/irate2
-write(6,"(/i10,' secs CPU time used'/)")itime
-!1    format(/i10,' secs CPU time used'/)
-return
-!10    format(/)
+    subroutine timer
+    !     prints current cpu time usage                                 #030
+    use spectra_timing
+    implicit double precision (a-h,o-y)
+    write(6,"(/)")
+    call SYSTEM_CLOCK(itime2,irate2,imax2)
+    itime=(itime2-itime0)/irate2
+    write(6,"(/i10,' secs CPU time used'/)")itime
+    
+    return
+
 end
 

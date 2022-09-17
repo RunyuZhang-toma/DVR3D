@@ -2,7 +2,6 @@
 
 module dipj0dvr_sizes
     save
-
     integer :: lbra0
     integer :: nbra0
     integer :: lket0
@@ -16,7 +15,6 @@ module dipj0dvr_sizes
     integer :: nr2
     integer :: neval0
     integer :: neval1
-
 end module dipj0dvr_sizes
 
 module dipj0dvr_diffs
@@ -24,19 +22,15 @@ module dipj0dvr_diffs
     integer :: nqe
     integer :: nqo
     integer :: nr21
-
     double precision alphae
     double precision :: betae
     double precision :: alphao
     double precision :: betao
-
     logical zsame
-
 end module dipj0dvr_diffs
 
 module dipj0dvr_old
     save
-
     integer :: npta
     integer :: nptb
     integer :: nptc
@@ -47,31 +41,25 @@ module dipj0dvr_old
     integer :: nptc1
     integer :: max2d1
     integer :: max3d1
-
     logical :: ztheta ! T let theta be first in the order of solution;
                                 ! F let theta be last in the order of solution.
     logical :: zr2r1  ! T let r_2 come before r_1 in the order of solution;
                                 ! F let r_1 come before r_2 in the order of solution. (only idia > -2).
     logical :: zthet1
     logical :: zr2r11
-
 end module dipj0dvr_old
 
 module dipj0dvr_logic
     save
-
     integer :: iptot
     integer :: idia
-
     logical :: zembed ! T z axis is along r2, = f z axis is along r1.
                     ! only used if J > 0 ZBISC = in JHMAIN ie if zbisc=f and zperp=f.
     logical :: zdone
-
 end module dipj0dvr_logic
 
 module dipj0dvr_stream
     save
-
     integer :: ibra0
     integer :: ibra1
     integer :: iket0
@@ -82,36 +70,27 @@ module dipj0dvr_stream
     integer :: ivc1
     integer :: ione
     integer :: itwo
-
-
-
 end module dipj0dvr_stream
 
 module dipj0dvr_mass
     save
-
     double precision :: xmass(3)
     double precision :: g1
     double precision :: g2
-
 end module dipj0dvr_mass
 
 module dipj0dvr_eqm
     save
-
     double precision :: ex(3)
     double precision :: ez(3)
     double precision :: tmass
-
 end module dipj0dvr_eqm
 
 module dipj0dvr_time
     save
-
     double precision :: ouser
     double precision :: osys
     double precision :: ototal
-
 end module dipj0dvr_time
 
 
@@ -123,57 +102,48 @@ program dipj0dvr
 ! have been obtained using DVR theory in the program DVR3D.
 !
 
-use dipj0dvr_sizes
-use dipj0dvr_diffs
-implicit none
-integer :: navail, maxq, ir2, itheta, i, j
-double precision :: dipx, dipz, dx, dz
-
-parameter (navail=500000)
-parameter (maxq=500)
-character*80 title
-character c1,c2
-double precision, dimension(navail) :: array
+    use dipj0dvr_sizes
+    use dipj0dvr_diffs
+    implicit none
+    integer :: navail, maxq, ir2, itheta, i, j
+    double precision :: dipx, dipz, dx, dz
+    parameter (navail=500000)
+    parameter (maxq=500)
+    character*80 title
+    character c1,c2
+    double precision, dimension(navail) :: array
 
 ! this subroutine reads all the controlling data for the job
-call rddata(title,array(1),array(1+maxq),array(1+maxq*2),array(1+maxq*3),array(1+maxq*4),array(1+maxq*5),maxq)
-
-do ir2=1,nr2
-   array(nr1+ir2)=array(maxq+ir2)
-enddo
-
-do itheta=1,ntheta
-   array(nr1+nr2+itheta)=array(maxq*2+itheta)
-enddo
-
-if (.not.zsame) then
-  do ir2=1,nr21
-     array(nr1+nr2+ntheta+ir2)=array(maxq*4+ir2)
-  enddo
-endif
-
-call messge(title)         ! this subroutine writes the header for the job
-call gtmain(array,navail)  ! this subroutine allocates memory and then calls rest of the program
-
-do i=1,360
-   call DIPD(dipx, 1.8242d0, 1.8242d0, cos(i*3.14159d0/180.0d0),1)
-   call DIPD(dipz, 1.8242d0, 1.8242d0, cos(i*3.14159d0/180.0d0),0)
-   write(20,*),i,sqrt(dipx*dipx+dipz*dipz)
-enddo
-
-do i=1,200
-   call DIPD(dx,1.8242d0*i/100.0d0,1.8242d0*i/100.0d0,-.030527d0,1)
-   call DIPD(dz,1.8242d0*i/100.0d0,1.8242d0*i/100.0d0,-.030527d0,0)
-   write(21,*),i,sqrt(dx*dx+dz*dz)
-enddo
-
-do i=1,200
-   j=201-i
-   call DIPD(dx,1.8242d0*i/100.0d0,1.8242d0*j/100.0d0,-.030527d0,1)
-   call DIPD(dz,1.8242d0*i/100.0d0,1.8242d0*j/100.0d0,-.030527d0,0)
-   write(22,*),i,sqrt(dx*dx+dz*dz)
-enddo
-
+    call rddata(title,array(1),array(1+maxq),array(1+maxq*2),array(1+maxq*3),array(1+maxq*4),array(1+maxq*5),maxq)
+    do ir2=1,nr2
+     array(nr1+ir2)=array(maxq+ir2)
+    enddo
+    do itheta=1,ntheta
+     array(nr1+nr2+itheta)=array(maxq*2+itheta)
+    enddo
+    if (.not.zsame) then
+     do ir2=1,nr21
+        array(nr1+nr2+ntheta+ir2)=array(maxq*4+ir2)
+     enddo
+    endif
+    call messge(title)         ! this subroutine writes the header for the job
+    call gtmain(array,navail)  ! this subroutine allocates memory and then calls rest of the program
+    do i=1,360
+     call DIPD(dipx, 1.8242d0, 1.8242d0, cos(i*3.14159d0/180.0d0),1)
+     call DIPD(dipz, 1.8242d0, 1.8242d0, cos(i*3.14159d0/180.0d0),0)
+     write(20,*),i,sqrt(dipx*dipx+dipz*dipz)
+    enddo
+    do i=1,200
+     call DIPD(dx,1.8242d0*i/100.0d0,1.8242d0*i/100.0d0,-.030527d0,1)
+     call DIPD(dz,1.8242d0*i/100.0d0,1.8242d0*i/100.0d0,-.030527d0,0)
+     write(21,*),i,sqrt(dx*dx+dz*dz)
+    enddo
+    do i=1,200
+     j=201-i
+     call DIPD(dx,1.8242d0*i/100.0d0,1.8242d0*j/100.0d0,-.030527d0,1)
+     call DIPD(dz,1.8242d0*i/100.0d0,1.8242d0*j/100.0d0,-.030527d0,0)
+     write(22,*),i,sqrt(dx*dx+dz*dz)
+    enddo
 end program dipj0dvr
 
 !========================================================== rddata =====
@@ -431,7 +401,7 @@ subroutine rddata(title,r1,r2,theta,r11,r21,theta1,maxq)
                 stop
                 endif
 10        continue
-          do 20 ipt=1,nr2
+        do 20 ipt=1,nr2
             if (abs(r2(ipt)-r21(ipt))/r2(ipt) > tol) then
               write(6,*)' **** The two runs use different quadrature points ****'
               stop
@@ -465,27 +435,21 @@ subroutine rddata(title,r1,r2,theta,r11,r21,theta1,maxq)
     call conver(r1e,r2e,xcose,ex,ez)
 
     return
-!1000  format(a80)
-!1001  format(5i5)
-!1002  format(3f20.0)
-    end
+end
 
 !========================================================== message =====
 ! This subroutine writes a header message giving information about the
 ! program and the wavefunctions used.
 subroutine messge(title)
-
     use dipj0dvr_logic
     use dipj0dvr_mass
     use dipj0dvr_eqm
     use dipj0dvr_sizes
     use dipj0dvr_diffs
     implicit none
-
     integer :: i, maxq
     double precision :: x1, xsin, xcos, r1, r2, xl, xm, sumx, sumz, rmass
     character*80 title
-
     write(6,"(1x,78a1///5x,'Program DIPJ0DVR - version 1.1 (16 Oct 1992)'///1x,78a1///1x,a80///)")('*',i=1,78),('*',i=1,78),title
     if (g1 == 0d0) then
     ! bondlength-bondangle coordinates
@@ -497,20 +461,17 @@ subroutine messge(title)
     ! all other general coordinates
         write(6,"(1x,'The DVR calculation was performed in ',a,' coordinates'//)")'generalised'
     endif
-
     if (zembed) then
         write(6,"(a100, a100)")'The coordinate system used for the DVR calculation',& 
         & 'of the wavefunction had the z axis embedded along the r2 direction'
     else
         write(6,"(a100,a100)")'The coordinate system used for the DVR calculation',&
-            &'of the wavefunction had the z axis embedded along the r1 direction'
+        &'of the wavefunction had the z axis embedded along the r1 direction'
     endif
-
     write(6,104)
     do 10 i=1,3
         write(6,"(1x,'Atom ',i1,' (mass ',f12.6,' amu):',5x,f13.6,7x,f13.6)")i,xmass(i),ex(i),ez(i)
 10  continue
-
     if (iptot /= 2) then
         write(6,"(a100,i3,a10,i3,a20,i3,a10,i3,a20)") 'Transition intensities are to be calculated for transitions from the ',&
      &lket0,' to ',nket0,' initial states to the ',lbra0,' to ',nbra0,' final states'
@@ -532,29 +493,10 @@ subroutine messge(title)
         endif
         if (.not.zsame) write(6,112)nqe,idint(alphae),betae,nqo,idint(alphao),betao
     endif
-
     return
-!100 format(1x,78a1///5x,'Program DIPJ0DVR - version 1.1 (16 Oct 1992)'///1x,78a1///1x,a80///)
-!102 format(1x,'The DVR calculation was performed in ',a,' coordinates'//)
-!103 format(1x,'The coordinate system used for the DVR calculation'/   &
-!     &       1x,'of the wavefunction had the z axis embedded along '/   &
-!     &       1x,'the ',a2,' direction'//)
 104 format(1x,'The equilibrium values of r1, r2, and cos(theta)'/     &
      &       1x,'correspond to the following atom coordinates:'//       &
      &       42x,'x',20x,'z')
-!105 format(1x,'Atom ',i1,' (mass ',f12.6,' amu):',5x,f13.6,7x,f13.6)
-!106 format(//1x,'Transition intensities are to be calculated for ',   &
- !    &       'transitions '/                                            &
- !    &       1x,'from the ',i3,' to ',i3,' initial states to the ',     &
-  !   &                      i3,' to ',i3,' final states'//)
-!107 format(//1x,'Transition intensities are to be calculated for ',   &
- !    &       'transitions')
-!108 format(1x,'from even states ',i3,' to ',i3,' and odd states ',i3, &
- !    &          ' to ',i3)
-!109 format(1x,'from ',a4,' states ',i3,' to ',i3)
-!110 format(1x,'  to even states ',i3,' to ',i3,' and odd states ',i3,  &
- !    &          ' to ',i3//)
-!111 format(1x,'  to ',a4,' states ',i3,' to ',i3//)
 112 format(1x,'The even and odd blocks of the Hamiltonian used',        &
      &       ' different parameters for r_2.'/                            &
      &       1x,'An average will be taken of the transition',             &
@@ -575,19 +517,15 @@ subroutine conver(r1,r2,xcos,x,z)
     use dipj0dvr_mass
     use dipj0dvr_eqm
     implicit none
-
     integer :: x1, i
     double precision :: xsin, xcos, r2, r1, xl, xm, sumx, sumz
-
     parameter (x1=1d0)
     double precision x(3),z(3),zint
-
     do 10 i=1,3
         x(i)=0d0
         z(i)=0d0
 10  continue
     xsin=dsqrt(x1-xcos*xcos)
-
     if (g1 == 0d0) then
     ! bondlength-bondangle coordinates
         if (zembed) then
@@ -632,7 +570,6 @@ subroutine conver(r1,r2,xcos,x,z)
             x(3)=r2*(x1-xm)*xsin/(x1-g1)
         endif
     endif
-
     sumx=0d0
     sumz=0d0
     do 20 i=1,3
@@ -641,30 +578,24 @@ subroutine conver(r1,r2,xcos,x,z)
 20  continue
         sumx=sumx/tmass
         sumz=sumz/tmass
-
 ! Move so that centre-of-mass is at the origin
     do 30 i=1,3
         x(i)=x(i)-sumx
         z(i)=z(i)-sumz
 30  continue
-
     return
-    end
-
+end
 !== ======================================================== gtmain =====
 ! This routine allocates memory, & calls the real main program (inmain)
 subroutine gtmain(array,navail)
-    
     use dipj0dvr_logic
     use dipj0dvr_sizes
     use dipj0dvr_old
     use dipj0dvr_diffs
     implicit none
-    
     integer :: ibegin, istart, i1, i2, i3, i4, j1, j2, j3, j4, j5, j6, j7, j8, j9, j10, j11, j12, &
     & i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, navail
     double precision ::  array(navail)
-
     ! check that enough memory has been allocated.
     ibegin=nr1+nr2+ntheta+1
     istart=ibegin
@@ -674,7 +605,6 @@ subroutine gtmain(array,navail)
     i1=istart+ntheta*nr1*max(nr2,nr21)
     ! phiket
     i2=i1+ntheta*nr1*max(nr2,nr21)
-
     ! size of dipole array
     ! dipx
     i3=i2+ntheta*nr1*nr2
@@ -686,7 +616,6 @@ subroutine gtmain(array,navail)
         i3=i2+ntheta*nr1*nr2*nr21
     ! dipz
         i4=i3+ntheta*nr1*nr2
-
     !  extra arrays to produce dipx.  These can all be overwritten.
     ! transe
         j1=i4+nr2*nr2
@@ -718,7 +647,6 @@ subroutine gtmain(array,navail)
     i5=i4+(nbra0+nbra1-lbra0-lbra1+2)*(nket0+nket1-lket0-lket1+2)
     ! Tz
     i6=i5+(nbra0+nbra1-lbra0-lbra1+2)*(nket0+nket1-lket0-lket1+2)
-
 ! size of pointer arrays
 ! these can be overlaid over phiket onwards, as they are only needed to
 ! generate the wavefunctions which are then stored.
@@ -739,7 +667,6 @@ subroutine gtmain(array,navail)
     i13=i12+max(max3d,max3d1)
 ! cprod
     i14=i13+max(npta,npta1)*max(nptb,nptb1)*max(max3d,max3d1)
-
     else    !The following 2 lines were added by L. Lodi to avoid run-time error "used but not defined" on i14
         i14=0
     endif
@@ -748,7 +675,6 @@ subroutine gtmain(array,navail)
 ! size of energy array
 ! evals
     i16=i15+neval0+neval1
-
     write(6,*)' space needed is    ',i16
     write(6,*)' space available is ',navail
     if (i16 > navail) then
@@ -758,16 +684,14 @@ subroutine gtmain(array,navail)
         write(6,*)'       and then recompile and rerun'
         stop
     endif
-
     call inmain(array(istart),array(istart),array(i1),array(i2),       &
 ! That's......... phi,          phibra,       phiket,   dipx,
      &            array(i3),array(i4),array(i5),array(i2),array(i15),    &
 ! ............... dipz,     Tx,       Tz        j,        evals,
      &            array(1),array(nr1+1),array(nr1+nr2+1),array(ibegin))
 ! ............... r1,      r2,          theta,           r21
-
     return
-    end
+end
 
 !== ======================================================== inmain =====
 ! This is the real main program, which calls all the other subroutines
@@ -802,7 +726,6 @@ subroutine inmain(phi,phibra,phiket,dipx,dipz,Tx,Tz,j,              &
             call timer('Reading in wavefunctions took')
         endif
     endif
-
     if (iptot == 2 .and. max(nbra1,nket1) /= 0) then
 
         if (zdone) then
@@ -814,26 +737,19 @@ subroutine inmain(phi,phibra,phiket,dipx,dipz,Tx,Tz,j,              &
         call timer( &
         &  'Reading in wavefunctions for odd symmetry block took')
     endif
-
 ! calculate dipole (in Eckart coordinates) at each DVR point
     call getmu(dipx,dipz,r1,r2,theta,nr2)
-
     call timer('Calculating dipole at DVR points took')
-
 ! If even and odd symmetry blocks use different DVR points, need to get
 ! transformation matrices, and do integral over dipole & basis functions
 !
 ! Tx is passed as the starting point of arrays needed to produce dipx
     if (.not.zsame .and. iptot == 2 .and..not. &
         & (max(nbra0,nket0) == 0 .or. max(nbra1,nket1) == 0)) then
-
         call diffmu(dipx,Tx,r1,theta,max(nqe,nqo,nr2,nr21))
-
     endif
-
 ! Calculate transition intensities
     call getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,0,0,nr2)
-
     if (iptot == 2) then
         call timer( &
         &'Calculating transition intensities for even-even transitions took &
@@ -841,64 +757,48 @@ subroutine inmain(phi,phibra,phiket,dipx,dipz,Tx,Tz,j,              &
     else
         call timer('Calculating transition intensities took')
     endif
-
 ! If symmetry used other transition intensities must also be calculated
     if (iptot == 2 .and. zsame) then
-
         call getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,0,1,nr2)
         call timer( &
         &'Calculating transition intensities for even-odd transitions took'  &
         &)
-
         call getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,1,1,nr2)
-
         call timer( &
         &'Calculating transition intensities for odd-odd transitions took')
     elseif (iptot == 2 .and. max(nbra1,nket1) /= 0) then
-
 ! if even and odd blocks use different DVR points, calculating the
 ! transition intensities is slightly more complicated
         call diffT(phibra,phiket,dipx,evals,Tx,Tz)
-
         call timer( &
         &'Calculating transition intensities for even-odd transitions took' &
         &)
-
 ! if even and odd blocks use different DVR points, the dipole must be
 ! recalculated at the DVR points for the odd block
         call getmu(dipx,dipz,r1,r21,theta,nr21)
-
         call timer( &
         &'Calculating dipole at DVR points of odd Hamiltonian took')
-
         call getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,1,1,nr21)
-
         call timer( &
         &'Calculating transition intensities for odd-odd transitions took')
     endif
-
 ! After all sections of the transition intensity matrix have been
 ! calculated, it can be written out.
     call writeT(Tx,Tz,evals)
-
     return
-    end
+end
 
 !== ======================================================== rdphi  =====
 ! This subroutine reads in phi(a,b,c) from the stream supplied by DVR3D
 ! (iwave) and then stores it in two places for the bra and the ket
 subroutine rdphi(phi,evals,itime,mr2,neval)
-
     use dipj0dvr_stream
     use dipj0dvr_sizes
     implicit none
-
     integer :: itime, iwave, nbra, nket, jbra, jket, ibra, iket, meval, i, min, max, mr2, neval
     double precision :: autocm
     double precision :: phi(ntheta*nr1*mr2), evals(neval)
-
     autocm = 2.19474624D+05
-
     if (itime == 0) then
         iwave=iwave0
         neval=neval0
@@ -922,34 +822,27 @@ subroutine rdphi(phi,evals,itime,mr2,neval)
     read(iwave0) ! Record skip to conform to new dvr3drjz format. Lorenzo Lodi 30-Oct-2009
     read(iwave0) ! Record skip to conform to new dvr3drjz format. Lorenzo Lodi 30-Oct-2009
     read(iwave) meval
-
     if (meval < neval) neval=meval
     call getrow(evals,neval,iwave)
-
     do 300 i=1,min(jbra,jket)-1
     call getrow(phi,ntheta*nr1*mr2,iwave)
 300 continue
-
     do 310 i=min(jbra,jket),max(nbra,nket)
     call getrow(phi,ntheta*nr1*mr2,iwave)
     call outrow(phi,ntheta*nr1*mr2,ibra)
     call outrow(phi,ntheta*nr1*mr2,iket)
 310 continue
-
     do 320 i=1,neval
     evals(i)=autocm*evals(i)
 320 continue
     rewind ibra
     rewind iket
-
     return
-    end
-
+end
 !== ======================================================== oldphi =====
 ! This subroutine works out phi(a,b,c) from the 1D 2D and 3D
 ! coefficients, and then stores it in two places for the bra and the ket
 subroutine oldphi(phi,array,evals,itime,neval)
-      
     use dipj0dvr_logic
     use dipj0dvr_stream
     use dipj0dvr_mass
@@ -958,13 +851,11 @@ subroutine oldphi(phi,array,evals,itime,neval)
     use dipj0dvr_sizes
     use dipj0dvr_diffs
     implicit none
-
     integer :: itime, ibra, iket, iout, ivc, mpta, mptb, mptc, n2d, n3d, jbra, nbra, jket, nket, &
         & istart, i1, i2, i3, i4, i5, i6, i7, i8, neval
     double precision :: phi, evals(neval)
     double precision :: array((2+2*nptb)*nptc+max2d+npta*max2d+max3d*(1+npta*nptb))
     logical :: zt, zr
-
     if (itime == 0) then
         ibra=ibra0
         iket=iket0
@@ -998,7 +889,6 @@ subroutine oldphi(phi,array,evals,itime,neval)
         zt=zthet1
         zr=zr2r11
     endif
-
 ! set up arrays for working out phi
     istart=1
     i1=istart+mptc
@@ -1009,35 +899,29 @@ subroutine oldphi(phi,array,evals,itime,neval)
     i6=i5+n2d*mpta
     i7=i6+n3d
     i8=i7+n3d*mpta*mptb
-
     call getphi(phi,array(istart),array(i1),array(i2),array(i3),      &
 ! That's........  phi,j,            iidum,    k,        c2d,
      &            array(i4),array(i5),array(i6),array(i7),evals,        &
 ! ..............  ndim2d,   c1d,      c3d,      cprod,
      &            n2d,n3d,mpta,mptb,mptc,neval,ibra,iket,iout,ivc,      &
      &            ione,itwo,jbra,nbra,jket,nket,zt,zr)
-
     return
-    end
+end
 
 !== ======================================================== getphi =====
 subroutine getphi(phi,j,iidum,k,c2d,ndim2d,c1d,c3d,cprod, &
      & evals,n2d,n3d,npta,nptb,nptc,neval,ibra,iket,   &
      & iout,ivc,ivec1,ivec2,jbra,nbra,jket,nket,       &
      & ztheta,zr2r1)
-
     implicit none
-
     integer :: ivc, i, ndum, ibeta, igamma, ntot, nham2, ivec1, ivec2, ialpha, iout, jj, &
         & meval, jdum, kdum, kk, jbra, kbet, min, max, nbra, nket, ibra, iket, jket, n2d, &
         & n3d, npta, nptb, nptc, neval
     double precision :: utocm, autocm, temp
     logical :: ztheta, zr2r1
-
     integer :: j(nptc), iidum(nptb*nptc), k(nptb,nptc), ndim2d(nptc)
     double precision :: phi(npta*nptb*nptc), c2d(n2d),c1d(n2d,npta),&
      & c3d(n3d),evals(neval), cprod(n3d,npta,nptb)
-
     utocm=2.19474624D+05
 ! k(b,c) and j(c) mark the size of the 1D and 2D Hamiltonians
 ! respectively.  They are read in from a different stream (ivc)
@@ -1049,7 +933,6 @@ subroutine getphi(phi,j,iidum,k,c2d,ndim2d,c1d,c3d,cprod, &
         NDUM=NDUM+1
         K(IBETA,IGAMMA)=IIDUM(NDUM)
 10  CONTINUE
-
 ! Calculate the cumulative size of the 2D Hamiltonian for each value
 ! of gamma
     ntot=0
@@ -1062,7 +945,6 @@ subroutine getphi(phi,j,iidum,k,c2d,ndim2d,c1d,c3d,cprod, &
         ntot=ntot+nham2
 20  CONTINUE
     if(n3d>ntot) n3d=ntot
-
 ! Write the 1D and 2D  Hamiltonian coefficients to different streams
 ! in order to facilitate the calculations
     rewind ivec1
@@ -1089,10 +971,7 @@ subroutine getphi(phi,j,iidum,k,c2d,ndim2d,c1d,c3d,cprod, &
     do 120 i=1,neval
         evals(i)=autocm*evals(i)
 120 continue
-
-
 ! Now we are ready to start the calculation
-
     JDUM=0
     REWIND IVEC1
     REWIND IVEC2
@@ -1116,11 +995,9 @@ subroutine getphi(phi,j,iidum,k,c2d,ndim2d,c1d,c3d,cprod, &
 190         CONTINUE
 160     CONTINUE
 150 CONTINUE
-
     do 300 i=1,min(jbra,jket)-1
         CALL GETROW(C3D,n3D,iout)
 300 continue
-
     DO 310 I=min(jbra,jket),max(nbra,nket)
         CALL GETROW(C3D,n3D,iout)
         do 320 ialpha=1,npta
@@ -1150,26 +1027,20 @@ subroutine getphi(phi,j,iidum,k,c2d,ndim2d,c1d,c3d,cprod, &
         call outrow(phi,npta*nptb*nptc,ibra)
         call outrow(phi,npta*nptb*nptc,iket)
 310  continue
-
     rewind ibra
     rewind iket
-
     return
     end
-
 !== ======================================================== getmu  =====
 ! This subroutine calculates the dipoles along the x and z axes of the
 ! Eckart embedding coordinate system, and stores them
 subroutine getmu(dipx,dipz,r1,r2,theta,mr2)
-
     use dipj0dvr_sizes
     implicit none
-
     integer :: ir2, ir1, itheta
     double precision :: dx, dz, mr2
     double precision :: dipx(ntheta,nr1,mr2),dipz(ntheta,nr1,mr2),r1(nr1), &
     & r2(nr2),theta(ntheta)
-
     do 10 ir2=1,mr2
     do 10 ir1=1,nr1
     do 10 itheta=1,ntheta
@@ -1177,10 +1048,8 @@ subroutine getmu(dipx,dipz,r1,r2,theta,mr2)
     dipx(itheta,ir1,ir2)=dx
     dipz(itheta,ir1,ir2)=dz
 10  continue
-
     return
-    end
-
+end
 !== ======================================================== dipcal =====
 ! This subroutine calls dipd and hence obtains the dipole components
 ! along the axes of the embedding used for the wavefunctions.  It then
@@ -1188,7 +1057,6 @@ subroutine getmu(dipx,dipz,r1,r2,theta,mr2)
 ! (see Le Sueur, CR,  Miller, S, Tennyson, J & Sutcliffe, BT; Mol Phys
 ! (1992) 76, 1147 for the theory behind this conversion)
 subroutine dipcal(r1,r2,xcos,dipx,dipz)
-    
     use dipj0dvr_mass
     use dipj0dvr_eqm
     implicit none
@@ -1196,11 +1064,9 @@ subroutine dipcal(r1,r2,xcos,dipx,dipz)
     double precision :: r1, r2, xcos, dx, dz, top, bottom, angle, datam, datan, gcos, &
         & dcos, gsin, dsin, dipx, dipz
     double precision :: x(3),z(3)
-
     call conver(r1,r2,xcos,x,z)
     call dipd(dx,r1,r2,xcos,1)
     call dipd(dz,r1,r2,xcos,0)
-
     top=0d0
     bottom=0d0
     do 10 i=1,3
@@ -1210,17 +1076,14 @@ subroutine dipcal(r1,r2,xcos,dipx,dipz)
     angle=datan(top/bottom)
     gcos=dcos(angle)
     gsin=dsin(angle)
-
     dipx=gcos*dx+gsin*dz
     dipz=gcos*dz-gsin*dx
-
     return
-    end
+end
 !== ======================================================== getT   =====
 ! This subroutine calculates the transition intensities from the
 ! wavefunctions and the dipoles
 subroutine getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,ibtime,iktime,mr2)
-
     use dipj0dvr_logic
     use dipj0dvr_stream
     use dipj0dvr_sizes
@@ -1234,7 +1097,6 @@ subroutine getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,ibtime,iktime,mr2)
         & evals(neval0+neval1), &
         & Tx(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2), &
         & Tz(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2)
-
     if (ibtime == iktime .and. ibtime == 0) then
         ibra=ibra0
         iket=iket0
@@ -1258,12 +1120,10 @@ subroutine getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,ibtime,iktime,mr2)
         jket=min(lbra1,lket1)
     endif
     rewind iket
-
     mket=min(jbra,jket)
     if (ibtime /= iktime) mket=jket
     mbra=min(jbra,jket)
     if (ibtime /= iktime) mbra=jbra
-
     do 10 lket=mket,nket
         call getrow(phiket,ntheta*nr1*mr2,iket)
         if (lket < jket) goto 10
@@ -1329,24 +1189,19 @@ subroutine getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,ibtime,iktime,mr2)
             endif
 20      continue
 10  continue
-
     return
-    end
+end
 !== ======================================================== diffmu =====
 ! This subroutine calculates the dipoles along the x and z axes of the
 ! Eckart embedding coordinate system, and stores them
     subroutine diffmu(dipx,start,r1,theta,maxq)
-      
     use dipj0dvr_sizes
     use dipj0dvr_diffs
     implicit none
-
     integer :: istart, j1, j2, j3, j4, j5, j6, j7, j8, j9, j10, j11, j12, maxq
     double precision :: dipx(ntheta,nr1,nr2,nr21),r1(nr1),theta(ntheta), &
         & start(nr2*nr2+nr21*nr21+(nr2+nr21+1)*(nqe+nqo)+ &
         & 6*maxq+nr2+nr21)
-
-
 ! set up arrays
     istart=1
 ! transe
@@ -1373,33 +1228,26 @@ subroutine getT(phibra,phiket,dipx,dipz,evals,Tx,Tz,ibtime,iktime,mr2)
     j11=j10+nr21
 ! crunch
     j12=j11+nr2*nr21*(nqe+nqo)
-
     call gettra(start(istart),start(j1),start(j5),start(j6), &
 ! That's......... transe,       transo,   q,        wt
     & start(j7),start(j8),start(j9),start(j10),maxq)
 ! ............... b,        c,        dnorme,    dnormo
     call timer('Calculating transformation matrices took')
-
     call getbas(start(j2),start(j3),start(j4),start(j5),start(j6), &
 ! That's......... basise,   basiso,   reo,      q,        wt,
     & start(j7),start(j8),start(j9),start(j10),maxq)
 ! ............... b,        c,        dnorme,   dnormo
     call timer('Calculating basis functions took')
-
     call domult(dipx,start(istart),start(j1),start(j2),start(j3),r1, &
 ! That's......... dipx,transe,       transo,   basise,   basiso,   r1,
     & start(j4),theta,start(j11))
 ! ............... r2,       theta,crunch
     call timer('Integrating over dipole and transforming back took')
-
     return
-    end
-
-
+end
 !== ======================================================== gettra =====
 ! this routine calculates the transformation matrices for the r2 points
 subroutine gettra(transe,transo,q,wt,b,c,dnorme,dnormo,maxq)
-
     use dipj0dvr_sizes
     use dipj0dvr_diffs
     implicit none
@@ -1407,10 +1255,7 @@ subroutine gettra(transe,transo,q,wt,b,c,dnorme,dnormo,maxq)
     double precision :: csx, csa, tsx, tsa, prefac
     double precision :: toler, transe(nr2,nr2),transo(nr21,nr21), &
         & q(maxq),wt(maxq),b(maxq),c(maxq),dnorme(nr2),dnormo(nr21)
-
     toler=1d-8
-
-
     call glagpt(q,wt,b,c,alphae+0.5d0,csx,csa,tsx,nr2)
     call basis(transe,q,dnorme,alphae,nr2-1,nr2-1,nr2)
     tsa=1d0/(dnorme(1)*dnorme(1))
@@ -1419,14 +1264,12 @@ subroutine gettra(transe,transo,q,wt,b,c,dnorme,dnormo,maxq)
         write(6,1000)'even',nr2,csx,csa,tsx,tsa
         stop
     endif
-
     do 10 ipt=1,nr2
         prefac=dsqrt(wt(ipt))
         do 20 ifn=1,nr2
             transe(ifn,ipt)=transe(ifn,ipt)*prefac*dnorme(ifn)
 20      continue
 10  continue
-
     call glagpt(q,wt,b,c,alphao+0.5d0,csx,csa,tsx,nr21)
     call basis(transo,q,dnormo,alphao,nr21-1,nr21-1,nr21)
         tsa=1d0/(dnormo(1)*dnormo(1))
@@ -1435,14 +1278,12 @@ subroutine gettra(transe,transo,q,wt,b,c,dnorme,dnormo,maxq)
         write(6,1000)'odd',nr21,csx,csa,tsx,tsa
         stop
     endif
-
     do 110 ipt=1,nr21
         prefac=dsqrt(wt(ipt))
         do 120 ifn=1,nr21
           transo(ifn,ipt)=transo(ifn,ipt)*prefac*dnormo(ifn)
 120     continue
 110 continue
-
     return
 1000  format(1x,'Computed and analyti! sums of points and weights ',       &
      &       'do not agree'/                                               &
@@ -1452,16 +1293,12 @@ subroutine gettra(transe,transo,q,wt,b,c,dnorme,dnormo,maxq)
      &       1x,'Computed',2x,e25.13,10x,e25.13/                           &
      &       1x,'Analytic',2x,e25.13,10x,e25.13)
       end
-
 !== ======================================================== basis  =====
 subroutine basis(rbasis,q,dnorm,A,idim,maxfn,npts)
     implicit none
-
     integer :: ipt, npt1, ifn, ifail1, ifail2, ifnm1, ifnm2, idim, maxfn, npts
     double precision :: a, alpha, amx, afnm1, bin, count, fn, rbasis(0:idim,npts),q(npts),dnorm(0:maxfn),s14aaf
-
     alpha=A+0.5d0
-
 ! Calculate normalisation constants, which are given by
 !                 {(npts + alpha)               }
 !  N_nalpha = sqrt{(   n + alpha) n! (npts - n)!}
@@ -1473,7 +1310,6 @@ subroutine basis(rbasis,q,dnorm,A,idim,maxfn,npts)
         rbasis(0,ipt)=1d0
         rbasis(1,ipt)=alpha+1d0-q(ipt)
 10  continue
-
     count=dfloat(npts)+alpha
     npt1=npts+1
     bin=1d0
@@ -1491,7 +1327,6 @@ subroutine basis(rbasis,q,dnorm,A,idim,maxfn,npts)
         & *s14aaf(fn+1d0,ifail2))
         count=count-1d0
 40  continue
-
 ! Calculate the rest of the basis functions at each quadrature point,
 ! using arecursion formula
     amx=alpha+1d0
@@ -1505,7 +1340,6 @@ subroutine basis(rbasis,q,dnorm,A,idim,maxfn,npts)
             rbasis(ifn,ipt)=((amx-q(ipt))*rbasis(ifnm1,ipt) &
             & -afnm1*rbasis(ifnm2,ipt))/fn
 50  continue
-
     return
     end
 !== ======================================================== s14aaf =====
@@ -1513,10 +1347,8 @@ subroutine basis(rbasis,q,dnorm,A,idim,maxfn,npts)
 !   Mock-up of NAG routine of the same names for
 !   evaluating Gamma functions in the range (0,1)
     implicit none
-
     integer :: ifail 
     double precision :: xx, gammln
-
     s14aaf=exp(gammln(xx))
     ifail=0
     RETURN
@@ -1525,14 +1357,11 @@ subroutine basis(rbasis,q,dnorm,A,idim,maxfn,npts)
     double precision FUNCTION GAMMLN(XX)
 !     Gamma function routine from Numerical Recipes p. 157
     implicit none
-
     integer :: j
     DOUBLE PRECISION :: COF(6), HALF,ONE,X,TMP,SER,xx, &
     & FPF(3)= (/0.5D0, 1.0D0, 5.5D0/), &
     stp(7) = (/76.18009173D0,-86.50532033D0,24.01409822D0,         &
      &    -1.231739516D0,.120858003D-2,-.536382D-5,2.50662827465D0/)
-
-
     X=XX-ONE
     TMP=X+FPF
     TMP=(X+HALF)*LOG(TMP)-TMP
@@ -1544,7 +1373,6 @@ subroutine basis(rbasis,q,dnorm,A,idim,maxfn,npts)
     GAMMLN=TMP+LOG(STP*SER)
     RETURN
     END
-
 !== ======================================================== glagpt =====
 subroutine glagpt(q,wt,b,c,alpha,csx,csa,tsx,npts)
 ! This subroutine calculates the quadrature points and weights for
@@ -1576,7 +1404,6 @@ subroutine glagpt(q,wt,b,c,alpha,csx,csa,tsx,npts)
     integer :: ifail, ipt, npts
     double precision :: cc, alpha, fa, fn,eps = 1d-12, csx, csa, tsx, xt, step, pt, dpn, &
         & fi, r1, r2, ratio, pn1, xt2, pt2,s14aaf
-
 ! zero calculated sum of points
     csx=0d0
 ! zero calculated sum of weights
@@ -1584,7 +1411,6 @@ subroutine glagpt(q,wt,b,c,alpha,csx,csa,tsx,npts)
 ! evaluate numerator for weights
     ifail=0
     cc=s14aaf(dfloat(npts),ifail)/(dfloat(npts)+alpha)
-
     fa=alpha+1d0
     b(1)=fa
     c(1)=0d0
@@ -1595,16 +1421,13 @@ subroutine glagpt(q,wt,b,c,alpha,csx,csa,tsx,npts)
         c(ipt)=fn*(alpha+fn)
         fn=fn+1d0
 10  continue
-
 ! evaluate exact sum of points
     tsx=fn*(alpha+fn)
-
 ! calculate roots.  First two are calculated using a different formula
 ! from that given by S&S.
     xt=(1d0+alpha)*(2d0+alpha)/(1d0+3d0*fn+2d0*alpha)
     step=3d0*(1d0+alpha)/(1d0+3d0*fn+alpha)
     call lgrecr(pt,dpn,pn1,xt,npts,alpha,b,c)
-
 20  xt2=xt+step
     call lgrecr(pt2,dpn,pn1,xt2,npts,alpha,b,c)
     if (dsign(1d0,pt)*dsign(1d0,pt2) <= 0d0) then
@@ -1619,7 +1442,6 @@ subroutine glagpt(q,wt,b,c,alpha,csx,csa,tsx,npts)
     wt(1)=cc/dpn/pn1
     csx=csx+q(1)
     csa=csa+wt(1)
-
     xt=q(1)
 25  xt2=xt+step
     call lgrecr(pt2,dpn,pn1,xt2,npts,alpha,b,c)
@@ -1636,7 +1458,6 @@ subroutine glagpt(q,wt,b,c,alpha,csx,csa,tsx,npts)
     csx=csx+q(2)
     csa=csa+wt(2)
     if (npts <= 2) return
-
     do 30 ipt=3,npts
         fi=dfloat(ipt-2)
         r1=(1d0+2.55d0*fi)/(1.9d0*fi)
@@ -1648,20 +1469,16 @@ subroutine glagpt(q,wt,b,c,alpha,csx,csa,tsx,npts)
         csx=csx+q(ipt)
         csa=csa+wt(ipt)
 30   continue
-
     return
     end
 !== ======================================================== LGRECR =====
 SUBROUTINE LGRECR(PN,DPN,PN1,X,NN,ALF,B,C)
-
 !     USES RECURRENCE RELATIONS TO SET UP POLYNOMIALS
 !     THIS ROUTINE IS DUE TO STROUD & SECREST
-
     implicit none
     integer :: j, nn
     double precision :: p1, p, x, alf, dp1, dp,q, dq,pn, dpn, pn1, &
         & B(NN), C(NN)
-
     P1 = 1.0D0
     P = X - ALF - 1.0D0
     DP1 = 0.0D0
@@ -1676,24 +1493,18 @@ SUBROUTINE LGRECR(PN,DPN,PN1,X,NN,ALF,B,C)
     PN = P
     DPN= DP
     PN1= P1
-
     RETURN
     END
-
 !== ======================================================== LGROOT =====
 SUBROUTINE LGROOT(X,NN,ALF,DPN,PN1,B,C,EPS)
-
 !     IMPROVES THE APPROXIMATE ROOT X; IN ADDITION OBTAINS
 !          DPN = DERIVATIVE OF P(N) AT X
 !          PN1 = VALUE OF P(N-1) AT X
 !     THIS ROUTINE IS DUE TO STROUD & SECREST
-
     IMPLICIT none
-
     integer :: itmax, iter, nn
     double precision :: B(NN),C(NN), p, dpn, pn1, x, alf, d, eps
     itmax=10
-
     ITER=0
 1   ITER=ITER+1
     CALL LGRECR(P,DPN,PN1,X,NN,ALF,B,C)
@@ -1703,8 +1514,6 @@ SUBROUTINE LGROOT(X,NN,ALF,DPN,PN1,B,C,EPS)
     IF (ITER - ITMAX) 1,2,2
 2   WRITE(6,"(a50,I4,a20,D26.15,a20,D26.15)")'WARNING: NOCONVERGENCE AFTER',ITER,' ITERATIONS',&
         &'CURRENT DIFFERENCE',D,' & ROOT',X
-!100 FORMAT(5X,'WARNING: NOCONVERGENCE AFTER',I4,' ITERATIONS', &
-  !      & /,5X,'CURRENT DIFFERENCE',D26.15,' & ROOT',D26.15)
     RETURN
     END
 
@@ -1712,7 +1521,6 @@ SUBROUTINE LGROOT(X,NN,ALF,DPN,PN1,B,C,EPS)
 ! this subroutine finds the quadrature points to be used in evaluating
 ! the dipole
 subroutine getbas(basise,basiso,reo,q,wt,b,c,dnorme,dnormo,maxq)
-    
     use dipj0dvr_sizes
     use dipj0dvr_diffs
     implicit none
@@ -1721,18 +1529,14 @@ subroutine getbas(basise,basiso,reo,q,wt,b,c,dnorme,dnormo,maxq)
     double precision ::  basise(nr2,nqe+nqo),basiso(nr21,nqe+nqo), &
             & reo(nqe+nqo),q(2*maxq),wt(2*maxq),b(maxq),c(maxq),   &
             & dnorme(nr2),dnormo(nr21)
-
-
     if (nqe > 0) call glagpt(q,wt,b,c,alphae+0.5d0,csxe,csae,tsxe,nqe)
     do 100 ipt=1,nqe
         reo(ipt)=dsqrt(q(ipt)/betae)
 100 continue
-
     if (nqo > 0) call glagpt(q(1+nqe),wt(1+nqe),b,c,alphao+0.5d0,csxo,csao,tsxo,nqo)
     do 200 ipt=1,nqo
         reo(ipt+nqe)=dsqrt(q(ipt+nqe)/betao)
 200 continue
-
     if (nqe > 0) then
         call basis(basise(1,1),q,dnorme,alphae,nr2-1,nr2-1,nqe)
         tsae=1d0/(dnorme(1)*dnorme(1))
@@ -1743,7 +1547,6 @@ subroutine getbas(basise,basiso,reo,q,wt,b,c,dnorme,dnormo,maxq)
         endif
         call basis(basiso(1,1),q,dnormo,alphao,nr21-1,nr21-1,nqe)
     endif
-
     ifaile=0
     ifailo=0
     if (nqe > 0)  &
@@ -1775,13 +1578,11 @@ subroutine getbas(basise,basiso,reo,q,wt,b,c,dnorme,dnormo,maxq)
             stop
         endif
     endif
-
     ifaile=0
     ifailo=0
     if (nqo > 0) &
      &factor=dsqrt(s14aaf(dfloat(nqo)+alphao+1.5d0,ifailo)/ &
      &s14aaf(dfloat(nqo)+alphae+1.5d0,ifaile))
-
         do 210 ipt=1,nqo
             prefac=dsqrt(wt(ipt+nqe))
             do 220 ifn=1,nr2
@@ -1793,7 +1594,6 @@ subroutine getbas(basise,basiso,reo,q,wt,b,c,dnorme,dnormo,maxq)
                 basiso(ifn,ipt+nqe)=basiso(ifn,ipt+nqe)*prefac*dnormo(ifn)
 230         continue
 210     continue
-
     return
 1000  format(1x,'Computed and analyti! sums of points and weights ',     &
      &       'do not agree'/                                             &
@@ -1803,23 +1603,19 @@ subroutine getbas(basise,basiso,reo,q,wt,b,c,dnorme,dnormo,maxq)
      &       1x,'Computed',2x,e25.13,10x,e25.13/                         &
      &       1x,'Analytic',2x,e25.13,10x,e25.13)
     end
-
 !== ======================================================== domult =====
 ! this routine calculates transition moments for the specific case when
 ! r2 is run last, and the bra and the ket use different functions for r2
 subroutine domult(dipx,transe,transo,basise,basiso,r1,r2,theta,crunch)
-
     use dipj0dvr_sizes
     use dipj0dvr_diffs
     implicit none
-
     integer :: ico, ic1, ipt, ic0, ia, ib
     double precision :: divide, temp, nc0, even, odd, nc1, dx, dz, &
         & dipx(ntheta,nr1,nr2,nr21),transe(nr2,nr2), &
         & transo(nr21,nr21),basise(nr2,nqe+nqo), &
         & basiso(nr21,nqe+nqo),r1(nr1),r2(nqe+nqo),theta(ntheta), &
         & crunch(nr2,nr21,nqe+nqo)
-
     divide=2d0
     if (nqe == 0 .or. nqo == 0) divide=1d0
         do 100 ic0=1,nr2
@@ -1836,7 +1632,6 @@ subroutine domult(dipx,transe,transo,basise,basiso,r1,r2,theta,crunch)
 110                 continue
                     crunch(ic0,ic1,ipt)=temp/divide
 100     continue
-
     do 10 ia=1,ntheta
         do 10 ib=1,nr1
             do 20 ic0=1,nr2
@@ -1851,7 +1646,6 @@ subroutine domult(dipx,transe,transo,basise,basiso,r1,r2,theta,crunch)
 40              continue
 30             continue
 10  continue
-
     return
     end
 
@@ -1859,19 +1653,16 @@ subroutine domult(dipx,transe,transo,basise,basiso,r1,r2,theta,crunch)
 ! this routine calculates transition moments for the specific case when
 ! r2 is run last, and the bra and the ket use different functions for r2
 subroutine diffT(phibra,phiket,dipx,evals,Tx,Tz)
-    
     use dipj0dvr_stream
     use dipj0dvr_sizes
     use dipj0dvr_diffs
     implicit none
-
     integer :: ico, ic1, iab, ic0
     double precision :: ne, no, tix, &
         & phibra(ntheta*nr1,nr2),phiket(ntheta*nr1,nr21), &
         & dipx(ntheta*nr1,nr2,nr21),evals(neval0+neval1), &
         & Tx(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2), &
         & Tz(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2)
-
     rewind ibra0
     do 200 ne=min(lbra0,lket0),max(nbra0,nket0)
         call getrow(phibra,ntheta*nr1*nr2,ibra0)
@@ -1902,7 +1693,6 @@ subroutine diffT(phibra,phiket,dipx,evals,Tx,Tz)
             endif
 210     continue
 200 continue
-
     return
     end
 
@@ -1910,38 +1700,30 @@ subroutine diffT(phibra,phiket,dipx,evals,Tx,Tz)
 ! This subroutine writes out the transition intensities in the same
 ! format as DIPOLE does.
 subroutine writeT(Tx,Tz,evals)
-
     use dipj0dvr_logic
     use dipj0dvr_sizes
     implicit none
-
     integer :: ie1, i1, ie2, i2, istream, nsize
     double precision :: autocm, autode, detosec, gzz, e1, xe1, e2, xe2, &
         & dd, dd3, sx, tzd,txd, sxd, t, a, vec, &
         & Tx(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2),  &
         & Tz(nbra0+nbra1-lbra0-lbra1+2,nket0+nket1-lket0-lket1+2),  &
         & evals(neval0+neval1)
-
     character c1, c2;
     AUTOCM= 2.19474624D+05
 ! AUTODE CONVERTS ATOMIC UNITS TO DEBYE
     AUTODE= 2.5417662D0
 ! DETOSEC CONVERTS FROM S(F-I) IN DEBYE**2 TO SECONDS-1
     DETOSEC= 3.136186D-07
-
     WRITE(6,"(/,/,/)")
     WRITE(6,201)
-
     WRITE(6,"(/,/,/)")
     GZZ= evals(1)
     WRITE(6,"(5X,'GROUND ZERO =',E16.8,' CM-1')") GZZ
-
     WRITE(6,"(/,/,/)")
     WRITE(6,"(a100, a100)")' IE1   IE2     KET ENERGY   BRA ENERGY    FREQUENCY  Z',&
       &' TRANSITION    X TRANSITION       DIPOLE       S(F-I)      A-COEFFICIENT'
-
 !   CALCULATE TRANSITION MOMENTS, LINE STRENGTHS AND A-COEFFICIENTS
-
     DO 1 IE1=1,Nbra0+nbra1-lbra0-lbra1+2
         c1=' '
         if (iptot == 2 .and. ie1 <= nbra0-lbra0+1) c1='e'
@@ -1953,7 +1735,6 @@ subroutine writeT(Tx,Tz,evals)
             e1=evals(i1+neval0)
         endif
         XE1= (E1 - GZz)
-
         DO 2 IE2=1,Nket0+nket1-lket0-lket1+2
             c2=' '
             if (iptot == 2 .and. ie2 <= nket0-lket0+1) c2='e'
@@ -1978,7 +1759,6 @@ subroutine writeT(Tx,Tz,evals)
 2       CONTINUE
         WRITE(6,"(//)")
 1   CONTINUE
-
     return
 !200 FORMAT(/,/,/)
 201 FORMAT(1H1,5X,'*************************************************'   &
@@ -1993,21 +1773,17 @@ subroutine writeT(Tx,Tz,evals)
 !      & // ' TRANSITION    X TRANSITION       DIPOLE       S(F-I)      A-COEFFICIENT',/)
 !206 FORMAT(2(I4,1x,a1),3(3X,F10.3),5(2X,E13.6))
 !207 FORMAT(//)
-
     end
 
 !== ======================================================== GETROW =====
 SUBROUTINE GETROW(VEC,NSIZE,ISTREAM)
-
     IMPLICIT none
-
     integer :: nsize, istream
     double precision :: vec
     DIMENSION VEC(NSIZE)
     READ(ISTREAM) VEC
     RETURN
-    END
-
+END
 !== ======================================================== OUTROW =====
 SUBROUTINE OUTROW(VEC,NSIZE,ISTREAM)
     IMPLICIT none
@@ -2016,31 +1792,24 @@ SUBROUTINE OUTROW(VEC,NSIZE,ISTREAM)
     DIMENSION VEC(NSIZE)
     WRITE(ISTREAM) VEC
     RETURN
-    END
+END
 !== ======================================================== timer  =====
 subroutine timer(text)
-
     use dipj0dvr_time
     implicit none
-
     character text*(*)
     real*4 etime,inewtime(2)
     double precision total, user, system
-
     total = 0.0
     user = 0.0
     system = 0.0
-
 !     total=dble(etime(inewtime))
 !     user=dble(inewtime(1))
 !     system=dble(inewtime(2))
-
     if (ototal /= 0d0) write(6,1000)text, total-ototal
-
     ouser=user
     osys=system
     ototal=total
-
     return
 1000  format(1x,a,/,10x,f20.3,' seconds of user time',  &
         & /,10x,f20.3,' seconds of system time', &
@@ -2051,7 +1820,6 @@ double precision FUNCTION FCT(R1,R2,R3,NPA,C,INDEX,RO)
     IMPLICIT none
     integer :: i, j, npa
     double precision :: r2, r3, r1, f, C(NPA),INDEX(3,NPA), Q(3),R(3),RO(3)
-      
     R(1)= R1
     R(2)= R2
     R(3)= R3
@@ -2068,5 +1836,4 @@ double precision FUNCTION FCT(R1,R2,R3,NPA,C,INDEX,RO)
             FCT=FCT+C(I)*F
 1       CONTINUE
     RETURN
-      
     END

@@ -1,91 +1,110 @@
 module dipole3_logic
-      !save
-      logical :: zmors1 = .true.
-      logical :: znco1
-      logical :: znco2
-      logical :: zprint = .false.
-      logical :: zpmin = .false.
-      logical :: ztra = .true.
-      logical :: zstart = .false.
-      logical :: zmors2 = .true.
-      logical :: zuvvis = .false.
-      logical :: zpseg = .false.
+    logical :: zmors1 = .true.   ! T use morse oscillator-like functions for r_1 coordinate;
+    logical :: znco1
+    logical :: znco2
+    logical :: zprint = .false.    ! T supplies extra print out for debugging purposes.    
+    logical :: zpmin = .false.    ! T supplies less  print out for large runs.
+    logical :: ztra = .true.    ! T writes out the data needed for program spectra 
+                                   ! to calculate simulated spectra.
+    logical :: zstart = .false.   ! T if we are writing out for spectra for the first time.
+    logical :: zmors2 = .true.    ! T use morse oscillator-like functions for r_2 coordinate;
+                                   ! F use spherical oscillator functions.
+    logical :: zuvvis = .false.   
+    logical :: zpseg = .false.
 end module dipole3_logic
 
 module dipole3_head
-      !save
-      double precision :: title
+    double precision :: title
 end module dipole3_head
 
 module dipole3_stream
-      !save
-      integer :: iket = 11
-      integer :: ibra = 12
-      integer :: itra = 13
-      integer :: iscr = 24
-      integer :: ires = 0
-      integer :: mblock
-      integer :: nblock = 1000
+    integer :: iket = 11    ! input stream from DVR3DRJZ/ROTLEV3/ROTLEV3B for the ket (unformated)
+    integer :: ibra = 12       ! input stream for the bra (unformmatted)
+    integer :: itra = 13     ! output stream to program spectrm (if ztra).
+                              ! note that for all times other than the dipole assumes 
+                              ! that we have accessed the permanent dataset or file which has the
+                              ! data from previous runs and that we are writing to the end of that file.
+                              ! ************************************************
+                              ! **  for the sake of safety you are therefore  **
+                              ! **  advised to keep one previous edition as   **
+                              ! **  backup!                                   **
+                              ! ************************************************
+    integer :: iscr = 24   ! scratch file used for restart runs
+                              ! holds hamiltonian file used if always
+
+    integer :: ires = 0     ! a) ires (0) restart parameter
+                              ! ires = 0, normal run
+                              ! ires = 1, restart run
+
+    integer :: mblock
+    integer :: nblock = 1000   ! b) nblock (1000) number of k --> k' blocks to be attempted
 end module dipole3_stream
 
 module dipole3_timing
-      !save
-      integer :: itime0
+    integer :: itime0
 end module dipole3_timing
 
 module dipole3_dim
-      !save
-      integer :: ncrood
-      integer :: npnt
-      integer :: npnt1
-      integer :: npnt2
-      integer :: nrade
-      integer :: nrado
-      integer :: npot
-      integer :: nbin
-      integer :: nbmax1
-      integer :: nbmax2
-      integer :: mbass1
-      integer :: mbass2
-      integer :: mbass
-      integer :: kmin1
-      integer :: kmin2
-      integer :: jk1
-      integer :: jk2
-      integer :: neval1
-      integer :: neval2
-      integer :: nn2
-      integer :: ibase1
-      integer :: ibase2
-      integer :: ipot
+    integer :: ncrood    ! number of vibrational coordinates explicitly considered
+                              ! ncoord = 2: atom-diatom problem with diatom rigid
+                              ! ncoord=2: also need lmax,lpot,idia,kmin
+                              ! ncoord = 3: full 3-d triatomic problem
+                              ! ncoord=3: all paramters required
+    integer :: npnt     ! max(npnt1,npnt2) number of gauss-associated legendre grid points requested
+    integer :: npnt1    ! number of (gauss-laguerre) dvr points in r1
+    integer :: npnt2     ! number of (gauss-laguerre) dvr points in r2
+    integer :: nrade 
+    integer :: nrado
+    integer :: npot    ! number of Gauss-Legendre integration points used
+                              ! in i5 format
+    integer :: nbin      ! largest binomial coef. required for angular integration(+1)
+    integer :: nbmax1
+    integer :: nbmax2
+    integer :: mbass1
+    integer :: mbass2
+    integer :: mbass      ! maximum size of vibrational problem (excluding linear geom)
+    integer :: kmin1
+    integer :: kmin2
+    integer :: jk1
+    integer :: jk2
+    integer :: neval1
+    integer :: neval2
+    integer :: nn2
+    integer :: ibase1    ! number of lowest ket eigenfunctions skipped
+    integer :: ibase2   ! number of lowest bra eigenfunctions skipped
+    integer :: ipot
 end module dipole3_dim
 
 module dipole3_sym
-      !save
-      integer :: idia
-      integer :: ipar1
-      integer :: ipar2
-      integer :: jrot1
-      integer :: jrot2
+    integer :: idia     ! 1 scattering coordinates heteronuclear diatomic
+                         ! 2 scattering coordinates homonuclear diatomic
+                         ! -1 radau  coordinates hetronuclear diatomic
+                         ! -2 radau  coordinates homonuclear  diatomic
+                         ! 0 radau   coordinates with the z axis perpendicular to the molecular plane.
+
+    integer :: ipar1
+    integer :: ipar2
+    integer :: jrot1
+    integer :: jrot2
 end module dipole3_sym
 
 module dipole3_mass
-      !save
-      double precision :: xmass(3)
-      double precision :: g1
-      double precision :: g2
-      logical :: zembed
-      logical :: zbisc
+    double precision :: xmass(3)
+    double precision :: g1
+    double precision :: g2
+    logical :: zembed    ! T z axis is along r2, = f z axis is along r1.
+                                   ! only used if J > 0 ZBISC = in JHMAIN ie if zbisc=f and zperp=f.
+    logical :: zbisc      ! T place the Z-axis along the bisector
 end module dipole3_mass
 
-      program shallot
-      call dipole3b
-      stop
-      end
+program shallot
+    call dipole3b
+    stop
+end
 
 !ccccccccccccccccccccccccccccccccccccccccccc
 !                                                **001
-      subroutine dipole3b
+    subroutine dipole3b
 !
 !    dipoleb3, and the various subroutines it calls, calculate the
 !    transitions between vib-rot eigenfunctions due to the
@@ -221,19 +240,18 @@ end module dipole3_mass
 !
 !    for |j' - j"| = 1, then ipar1 and ipar2 must be different.
 !
-      use dipole3_logic
-      use dipole3_stream
-      use dipole3_timing
+    use dipole3_logic
+    use dipole3_stream
+    use dipole3_timing
 
-      namelist/prt/ zprint, zpmin, ztra, zstart,&
+    namelist/prt/ zprint, zpmin, ztra, zstart,&
                     iket, ibra, itra, iscr, ires, nblock,zuvvis,zpseg      
-      implicit none
-      character(len=8) title(9)
-      integer :: irate2, imax2
+    implicit none
+    character(len=8) title(9)
+    integer :: irate2, imax2
 
-      write(6,"(//,5x,'Program DIPOLE3 (version of January 2004):',/)")
-!200   format(//,5x,'Program DIPOLE3 (version of January 2004):',/)
-      call SYSTEM_CLOCK(itime0,irate2,imax2)
+    write(6,"(//,5x,'Program DIPOLE3 (version of January 2004):',/)")
+    call SYSTEM_CLOCK(itime0,irate2,imax2)
 !
 !     read in of the logical control parameters zprint, ztra, etc
 !
@@ -243,28 +261,26 @@ end module dipole3_mass
 !     spectrum to compute a simulated spectrum.
 !  *  the default values of all three parameters are .false.
 !
-      read(5,prt)
-      read(5,"(9a8)") title
-!100   format(9a8)
-      write(6,"(5x,9a8)") title
-!202   format(5x,9a8)
+    read(5,prt)
+    read(5,"(9a8)") title
+    write(6,"(5x,9a8)") title
 
 !     read control parameters
 
-      call insize
+    call insize
 
 
-      call main
+    call main
 
-      stop
-      end
+    stop
+    end
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **002
 
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **003
-      subroutine insize
+    subroutine insize
 !
 !     subroutine insize reads in the parameters which control the
 !     overall size of the problem. some of these are passed from the
@@ -298,103 +314,92 @@ end module dipole3_mass
 !     ncoord: number of vibrational coordinates explicitly considered
 !     if (ncoord /= 3) some of the above are dummies, see below.
 !
-      use dipole3_dim
-      use dipole3_sym
-      use dipole3_logic
-      use dipole3_stream
-      use dipole3_mass
-      implicit none
+    use dipole3_dim
+    use dipole3_sym
+    use dipole3_logic
+    use dipole3_stream
+    use dipole3_mass
+    implicit none
 !     save masses, g's and embedding in case they are needed
 !     in the dipole routine
-      integer :: ncoord, idia1, lmax1, nmax11, nmax12, idia2, lmax2, nmax21, &
+    integer :: ncoord, idia1, lmax1, nmax11, nmax12, idia2, lmax2, nmax21, &
             & nmax22,ipar, i, j, jt, nv1, nv2, itot, jdia
-      logical :: zemb1, zmor12, zmor11, zemb2, zmor21, zmor22, re11, diss11, we11, &
+    logical :: zemb1, zmor12, zmor11, zemb2, zmor21, zmor22, re11, diss11, we11, &
             & re12, diss12, we12, re21, diss21, we21, re22, diss22, we22
-      double precision, dimension(3) :: xm1,xm2
-      double precision toler, g11, g21,g12,g22
-      data toler/1.0d-3/
+    double precision, dimension(3) :: xm1,xm2
+    double precision toler, g11, g21,g12,g22
+    toler=1.0d-3
 !
 !     read in control parameters of problem:
 !     ncoord = 2: atom-diatom problem with diatom rigid
 !     ncoord = 3: full 3-d triatomic problem (default value)
-      ncoord=3
-      write(6,1057)iket,ibra,itra
+    ncoord=3
+    write(6,1057)iket,ibra,itra
  1057 format(//5x,'input ket wavefunctions read from stream ',&
              'iket  =',i4,&
              /5x,'input bra wavefunctions read from stream ',&
              'ibra  =',i4,&
              /5x,'output transition data written to stream ',&
              'itra  =',i4)
-      if (ires<=0) write(6,"(a100,i4)")'restart data written to           stream iscr  =' ,iscr
- !1005 format(  5x,'restart data written to           stream ',&
-  !           'iscr  =',i4)
-      if (ires>0) write(6,"(a100,i4)")'RESTART RUN: input data read from stream iscr  =' ,iscr
-             
- !1006 format(  5x,'RESTART RUN: input data read from stream ',&
-  !           'iscr  =',i4)
-
+    if (ires<=0) write(6,"(a100,i4)")'restart data written to           stream iscr  =' ,iscr
+    if (ires>0) write(6,"(a100,i4)")'RESTART RUN: input data read from stream iscr  =' ,iscr
+            
 !     read in of data for the ket
 
-      if (zpseg==.true.) then 
+    if (zpseg==.true.) then 
          open(unit=iket,form='unformatted',recordtype='segmented')  !* 
-      else 
+    else 
         open(unit=iket,form='unformatted')
-      end if 
-      read(iket) idia1,ipar1,lmax1,nmax11,nmax12,jrot1,kmin1,neval1
-      read(iket) zemb1,zmor11,zmor12,xm1,g11,g21,znco1
+    end if 
+    read(iket) idia1,ipar1,lmax1,nmax11,nmax12,jrot1,kmin1,neval1
+    read(iket) zemb1,zmor11,zmor12,xm1,g11,g21,znco1
 
 !     read in of data for the bra
 
-      if (zpseg==.true.) then
+    if (zpseg==.true.) then
           open(unit=ibra,form='unformatted',recordtype='segmented') !* 
-      else 
+    else 
           open(unit=ibra,form='unformatted')
-      end if 
-      read(ibra) idia2,ipar2,lmax2,nmax21,nmax22,jrot2,kmin2,neval2
-      read(ibra) zemb2,zmor21,zmor22,xm2,g12,g22,znco2
+    end if 
+    read(ibra) idia2,ipar2,lmax2,nmax21,nmax22,jrot2,kmin2,neval2
+    read(ibra) zemb2,zmor21,zmor22,xm2,g12,g22,znco2
 
-      if (zpseg==.true.) then
+    if (zpseg==.true.) then
          open(unit=iscr,form='unformatted',recordtype='segmented') !* 
-      else 
+    else 
          open(unit=iscr,form='unformatted')
-      end if 
-      if (ztra) open(unit=itra,form='unformatted',recordtype='segmented') 
+    end if 
+    if (ztra) open(unit=itra,form='unformatted',recordtype='segmented') 
 
 !     check the bra and ket are consistent
 
-      if (idia1/=idia2) then
+    if (idia1/=idia2) then
           write(6,"(a100,i2,a20,i2,/)")'** fatal ** diatomic mismatch idia1=', idia1,'  idia2=',idia2
-!998       format(//,5x,'** fatal ** diatomic mismatch',/&
- !                     5x,'idia1=',i2,'  idia2=',i2,/)
          stop
-      else
+    else
          idia= idia1
-
          write(6,"(/,5x,'diatomic parameter idia  =',i4)") idia
-!888      format(/,5x,'diatomic parameter idia  =',i4)
-      endif
+    endif
 !cccccccccccccccccccc
-      if (jrot1==0.or.jrot2==0) then
+    if (jrot1==0.or.jrot2==0) then
          zembed= zemb1
          if (jrot1==0) zembed= zemb2
          if (jrot1==0.and.jrot2==0) then
            write(6,"(//,5x,'j = 0 -> 0 not allowed: stop')")
-!980        format(//,5x,'j = 0 -> 0 not allowed: stop')
            stop
          endif
-      else
+    else
          if (idia  > -2) then
          if (zemb1.neqv.zemb2) then
              write(6,"(/,/,5x,'** fatal ** embedding mismatch',/)")
-!996          format(/,/,5x,'** fatal ** embedding mismatch',/)
              stop
          else
             zembed= zemb1
          endif
          endif
-      endif
+    endif
 !ccccccccccccccccc
-      if (idia > -2) then
+    if (idia > -2) then
          if (zembed) then
             if (ipar1/=ipar2 .and. idia==2) then
                write(6,997) ipar1,ipar2
@@ -409,7 +414,7 @@ end module dipole3_mass
             endif
          endif
          zbisc=.false.
-      else
+    else
          zbisc=.true.
          zembed=.true.
          if (jrot1 == jrot2) then
@@ -423,40 +428,36 @@ end module dipole3_mass
                stop
             endif
          endif
-      endif
-      ipar= ipar1
+    endif
+    ipar= ipar1
 !cccccccccccccccccccccccccccccccccc
-      if (zmor11.neqv.zmor21) then
+    if (zmor11.neqv.zmor21) then
          write(6,"(//,5x,'** fatal ** r',i1,' radial function mismatch',/)") 1
-!995      format(//,5x,'** fatal ** r',i1,' radial function mismatch',/)
          stop
-      else
+    else
          zmors1= zmor11
-      endif
+    endif
 !ccccccccccccccccccccccccccccc
-      if (zmor12.neqv.zmor22) then
+    if (zmor12.neqv.zmor22) then
           write(6,"(//,5x,'** fatal ** r',i1,' radial function mismatch',/)") 2
           stop
-      else
+    else
          zmors2= zmor22
-      endif
+    endif
 !cccccccccccccccccccccccccccccccccccccc
-      write(6,"(/,5x,'number of co-ordinates   =',i4)") ncoord
-!884   format(/,5x,'number of co-ordinates   =',i4)
+    write(6,"(/,5x,'number of co-ordinates   =',i4)") ncoord
 !
-      if (zbisc) then
+    if (zbisc) then
          write(6,"(/,5x,'z axis embedded along the biscetor of r1 and r2')")
- !1330    format(/,5x,'z axis embedded along the biscetor of r1 and r2')
-      else
+    else
          if (zembed) then
            write(6,"(/,5x,'z axis embedded along r',i1,' co-ordinate'/)") 2
-!886        format(/,5x,'z axis embedded along r',i1,' co-ordinate'/)
          else
            write(6,"(/,5x,'z axis embedded along r',i1,' co-ordinate'/)") 1
          endif
-      endif
+    endif
 !cccccccccccccccccccccccccccccccc
-      if (ncoord > 2) then
+    if (ncoord > 2) then
          if (zmors1) then
             write(6,"(5x,'morse functions in r',i1,' radial basis set')") 1
          else
@@ -468,150 +469,144 @@ end module dipole3_mass
          else
             npnt1=nmax11
          endif
-      else
+    else
          npnt1=1
-      endif
+    endif
 !cccccccccccccccccccccccccccccccccc
-      if (zmors2) then
+    if (zmors2) then
          write(6,"(5x,'morse functions in r',i1,' radial basis set')") 2
-      else
+    else
          write(6,"(5x,'spherical functions in r',i1,' radial basis set')") 2
-      endif
+    endif
 !cccccccccccccccccccccccccccccccccc
-      if (nmax12 /= nmax22) then
+    if (nmax12 /= nmax22) then
           write(6,875) 2,nmax12,nmax22
           stop
-      else
+    else
           npnt2=nmax12
-      endif
-!885   format(5x,'morse functions in r',i1,' radial basis set')
-!775   format(5x,'spherical functions in r',i1,' radial basis set')
+    endif
 875   format(//,5x,'** fatal ** r2 radial function mismatch',&
              /,5x,i5,' dvr points in bra,',i5,' in ket',/)
 !cccccccccccccccccccccccccccccccccccc
-      if (zpmin) write(6,"(/5x,' Minimum printing requested')")
- !2255 format(/5x,' Minimum printing requested')
+    if (zpmin) write(6,"(/5x,' Minimum printing requested')")
 !cccccccccccccccccccccccccccccccccccc
 !     check parameters are consistent within limit of toler
-      if (abs(g12-g11)>toler) then
+    if (abs(g12-g11)>toler) then
          write(6,919) g11,g12
 919      format(/,5x,'co-ordinate system incompatible',&
                /,2(e18.8,5x),/)
          stop
-      else
+    else
          g1= g11
-      endif
+    endif
 !cccccccccccccccccccccccccccccccccccc
-      if (abs(g22-g21)>toler) then
+    if (abs(g22-g21)>toler) then
          write(6,919) g21,g22
          stop
-      else
+    else
          g2= g22
-      endif
+    endif
 !cccccccccccccccccccccccccccccccccccc
-      do 1 i=1,3
-      if (abs(xm2(i)-xm1(i))>toler) then
+    do 1 i=1,3
+    if (abs(xm2(i)-xm1(i))>toler) then
          write(6,918) (xm1(j),xm2(j),j=1,3)
 918      format(/,5x,'masses incompatible',&
                /,(2(e18.8,5x)))
          stop
-      else
+    else
         xmass(i)= xm1(i)
-      endif
+    endif
 !cccccccccccccccccccccccccccccccccccc
 1     continue
 !
-      read(ibra) re11,diss11,we11,re12,diss12,we12
-      read(iket) re21,diss21,we21,re22,diss22,we22
+    read(ibra) re11,diss11,we11,re12,diss12,we12
+    read(iket) re21,diss21,we21,re22,diss22,we22
 
-      if (abs(re21-re11)>toler) then
+    if (abs(re21-re11)>toler) then
          write(6,917) 1,re11,re21
 917      format(/,5x,'re',i1,' parameters incompatible',&
                /,2(e18.8,5x),/)
          stop
-      endif
+    endif
 !ccccccccccccccccccccccccccc
-      if (abs(diss21-diss11)>toler) then
+    if (abs(diss21-diss11)>toler) then
          write(6,916) 1,diss11,diss21
 916      format(/,5x,'r',i1,' dissociation energy incompatible',&
                /,2(e18.8,5x),/)
          stop
-      endif
+    endif
 !ccccccccccccccccccccccccccc
-      if (abs(we21-we11)>toler) then
+    if (abs(we21-we11)>toler) then
          write(6,915) 1,we11,we21
 915      format(/,5x,'r',i1,' morse frequency incompatible',&
                /,2(e18.8,5x),/)
          stop
-      endif
+    endif
 !ccccccccccccccccccccccccccc
-      if (abs(re22-re12)>toler) then
+    if (abs(re22-re12)>toler) then
          write(6,917) 2,re12,re22
          stop
-      endif
+    endif
 !ccccccccccccccccccccccccccc
-      if (abs(diss22-diss12)>toler) then
+    if (abs(diss22-diss12)>toler) then
          write(6,916) 2,diss12,diss22
          stop
-      endif
-      if (abs(we22-we12)>toler) then
+    endif
+    if (abs(we22-we12)>toler) then
          write(6,915) 2,we12,we22
          stop
-      endif
+    endif
 !cccccccccccccccccccccccccccc
 !     are we doing a non coriolis problem?
 !     set up jk for the two cases and total basis set sizes
 !
 !     first correct for the case where j=1f has been done non-coriolis
 !     but a full calculation is required
-      if (znco1.and..not.znco2) then
+    if (znco1.and..not.znco2) then
          if (abs(jrot1) > 1) then
             write(6,"(//,5x,'attempt to mix no coriolis and coupled calcs: stop')")
             stop
          else
             kmin1=0
          endif
-      endif
+    endif
 !ccccccccccccccccccccccccccccc
-      if (znco2.and..not.znco1) then
+    if (znco2.and..not.znco1) then
          if (abs(jrot2) > 1) then
             write(6,"(//,5x,'attempt to mix no coriolis and coupled calcs: stop')")
             stop
          else
             kmin2=0
          endif
-     endif
+    endif
 !ccccccccccccccccccccccccccccc
-!889   format(//,5x,'attempt to mix no coriolis and coupled calcs: stop')
-      if (znco1 .and. znco2) then
+    if (znco1 .and. znco2) then
          jk1= 1
          jk2= 1
          jrot1=abs(jrot1)
          jrot2=abs(jrot2)
          if (abs(kmin2-kmin1)>1) then
             write(6,"(//,5x,'k levels differ by more than 1',/)")
-!878         format(//,5x,'k levels differ by more than 1',/)
             stop
          endif
          mblock=1
-      else
+    else
          if (jrot1==0) kmin1= 1
          jk1= jrot1 + kmin1
          if (jrot2==0) kmin2= 1
          jk2= jrot2 + kmin2
          mblock=jk1+jk2+min(jk1,jk2)-2
-      endif
+    endif
 !ccccccccccccccccccccccccccc
-      nblock=min(nblock,mblock)
-      if (nblock<mblock) write(6,"(/i7,' blocks to be calculated out a maximum of',i4)") nblock,mblock
- !1015 format(/i7,' blocks to be calculated out a maximum of',i4)
+    nblock=min(nblock,mblock)
+    if (nblock<mblock) write(6,"(/i7,' blocks to be calculated out a maximum of',i4)") nblock,mblock
 !
-      if (idia > -2) then
+    if (idia > -2) then
          nrade=npnt1*npnt2
          nrado=nrade
          mbass1=nrade*jk1*lmax1
          mbass2=nrade*jk2*lmax2
-      else
+    else
          nrade=npnt1*(npnt1+1)/2
          nrado=npnt1*(npnt1-1)/2
          jt=jk1/2
@@ -633,26 +628,24 @@ end module dipole3_mass
            if (ipar2 /= 0) mbass2=mbass2+nrado
          endif
          mbass2=mbass2*lmax2
-       endif
+    endif
 !
 !     set other parameters to maximum values
 !
-      mbass= max(mbass1,mbass2)
-      npnt=max(npnt1,npnt2)
+    mbass= max(mbass1,mbass2)
+    npnt=max(npnt1,npnt2)
 !
 !     read in of integration parameters and states to be considered
 !     zeros will give the default values
 !
-      read(5,"(5i5)") npot,nv1,nv2,ibase1,ibase2
-!101   format(5i5)
-       if (ibase1 <= 0 .or. ibase1 > neval1) ibase1 = 1
-       if (ibase2 <= 0 .or. ibase2 > neval2) ibase2 = 1
+    read(5,"(5i5)") npot,nv1,nv2,ibase1,ibase2
+    if (ibase1 <= 0 .or. ibase1 > neval1) ibase1 = 1
+    if (ibase2 <= 0 .or. ibase2 > neval2) ibase2 = 1
 !
 !     write out data from triatom/rotlev runs
 !
-      write(6,"(/,9x,'parameters passed to dipole for the ket & the bra',/)")
-!299   format(/,9x,'parameters passed to dipole for the ket & the bra',/)
-      write(6,200) mbass1,mbass2,nmax11,nmax21,nmax12,nmax22,&
+    write(6,"(/,9x,'parameters passed to dipole for the ket & the bra',/)")
+    write(6,200) mbass1,mbass2,nmax11,nmax21,nmax12,nmax22,&
                   lmax1,lmax2,jrot1,jrot2,ipar1,ipar2,&
                   kmin1,kmin2,neval1,neval2,nv1,nv2,&
                   ibase1,ibase2
@@ -670,217 +663,207 @@ end module dipole3_mass
 !     are we doing an allowed transition?
 !     stop otherwise.
 !
-      itot= jrot1 + jrot2 + 1 + kmin1 + kmin2
-      if (mod(itot,2) /= 0 .or. abs(jrot1 - jrot2) > 1) then
-         write(6,"(/,/,5x,'selection rules violated',/)")
-!9999     format(/,/,5x,'selection rules violated',/)
-         stop
-      endif
+    itot= jrot1 + jrot2 + 1 + kmin1 + kmin2
+    if (mod(itot,2) /= 0 .or. abs(jrot1 - jrot2) > 1) then
+        write(6,"(/,/,5x,'selection rules violated',/)")
+        stop
+    endif
 !
 !     reset number of vib-rot functions to be considered
 !
-      if (nv1>0) neval1=min(nv1,neval1-ibase1+1)
-      if (nv1<=0) neval1=neval1-ibase1+1
-      if (nv2>0) neval2= min(nv2,neval2-ibase2+1)
-      if (nv2<=0) neval2=neval2-ibase2+1
-      jdia=max(1,idia)
-      nbin=jrot1+jrot2+3
+    if (nv1>0) neval1=min(nv1,neval1-ibase1+1)
+    if (nv1<=0) neval1=neval1-ibase1+1
+    if (nv2>0) neval2= min(nv2,neval2-ibase2+1)
+    if (nv2<=0) neval2=neval2-ibase2+1
+    jdia=max(1,idia)
+    nbin=jrot1+jrot2+3
 !
 !     check dimension of angular integration: should be even
 !
-      if (mod(npot,2)/=0) npot=npot+1
-      nn2= npot/2
+    if (mod(npot,2)/=0) npot=npot+1
+    nn2= npot/2
 ! set the number of anglular integartion points needed for the problem
-      if (idia<2) then
+    if (idia<2) then
 ! radau coordiantes and scattering coordinates without symmetry (hetronuclear)
-         ipot = npot
-      else
+        ipot = npot
+    else
 ! scattering coordiantes with symmetry (homunuclear)
-         ipot = npot / 2
-      endif
-      return
-      end
+        ipot = npot / 2
+    endif
+    return
+    end
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **004
-      subroutine main
+    subroutine main
 !
-      use dipole3_dim
-      use dipole3_stream
-      implicit none
+    use dipole3_dim
+    use dipole3_stream
+    implicit none
 
 
-      integer, allocatable, dimension(:):: nbass1,nbass2
-      allocate(nbass1(jk1))
-      allocate(nbass2(jk2))
+    integer, allocatable, dimension(:):: nbass1,nbass2
+    allocate(nbass1(jk1))
+    allocate(nbass2(jk2))
 
-       write(*,*) 'Iam in main. size(nbass1)=', size(nbass1)
-       write(*,*) 'Iam in main. size(nbass2)=', size(nbass2)
-       write(*,*) 'jk1, jk2', jk1, jk2
+    write(*,*) 'Iam in main. size(nbass1)=', size(nbass1)
+    write(*,*) 'Iam in main. size(nbass2)=', size(nbass2)
+    write(*,*) 'jk1, jk2', jk1, jk2
 
 
 !     generate the subindex arrays needed for trans
 
-      call genind(nbass1,mbass1,jk1,nbmax1,iket)
-      call genind(nbass2,mbass2,jk2,nbmax2,ibra)
+    call genind(nbass1,mbass1,jk1,nbmax1,iket)
+    call genind(nbass2,mbass2,jk2,nbmax2,ibra)
 
-      write(*,*) 'checkpoint 0: about to call dmain'
-      write(*,*) 'Iam in main. size(nbass1)=', size(nbass1)
-      write(*,*) 'Iam in main. size(nbass2)=', size(nbass2)
+    write(*,*) 'checkpoint 0: about to call dmain'
+    write(*,*) 'Iam in main. size(nbass1)=', size(nbass1)
+    write(*,*) 'Iam in main. size(nbass2)=', size(nbass2)
 
-      call dmain(nbass1,nbass2)
-      deallocate(nbass1)
-      deallocate(nbass2)
+    call dmain(nbass1,nbass2)
+    deallocate(nbass1)
+    deallocate(nbass2)
 
-      stop
-      end
+    stop
+    end
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **005
-      subroutine genind(nbass,mbass,jk,nbmax,ivec)
+    subroutine genind(nbass,mbass,jk,nbmax,ivec)
 !
 !     this subroutine sets up the sub-index arrays needed for trans
 !     and reads in the basis function labels for the vectors.
 !     it calculates nbmax, the largest value of nbass, neeeded to
 !     dimension the space needed for the d-coefficients.
 !     
-      use dipole3_logic
-      implicit none
-      integer :: mbass, mbass0, ivec, nbmax, k, jk
+    use dipole3_logic
+    implicit none
+    integer :: mbass, mbass0, ivec, nbmax, k, jk
 !       dimension nbass(jk),lmin(jk),lbass(jk)
-      integer, dimension(jk) :: nbass
-      integer, allocatable, dimension(:) :: lmin, lbass
-      allocate( lmin(jk) )
-      allocate( lbass(jk) )
+    integer, dimension(jk) :: nbass
+    integer, allocatable, dimension(:) :: lmin, lbass
+    allocate( lmin(jk) )
+    allocate( lbass(jk) )
 
-      if (zprint) write(6,"(//,'   j + kmin =',i3,'   mbass=',i7,/)") jk,mbass
-!205   format(//,'   j + kmin =',i3,'   mbass=',i7,/)
+    if (zprint) write(6,"(//,'   j + kmin =',i3,'   mbass=',i7,/)") jk,mbass
 !
 !     read in the basis function labels
 !
-      mbass0=-999
-      write(*,*) 'Iam in genind. size(nbass)=', size(nbass)
-      nbass = -999
-      read(ivec, err=333) mbass0,lmin,lbass,nbass
-      if (mbass0>mbass) goto 999
+    mbass0=-999
+    write(*,*) 'Iam in genind. size(nbass)=', size(nbass)
+    nbass = -999
+    read(ivec, err=333) mbass0,lmin,lbass,nbass
+    if (mbass0>mbass) goto 999
 !
 !     generate the sub-index arrays and  find nbmax
 !
-      nbmax=nbass(1)
-      do 2 k=2,jk
-      nbmax=max(nbmax,nbass(k))
+    nbmax=nbass(1)
+    do 2 k=2,jk
+    nbmax=max(nbmax,nbass(k))
 2     continue
-      if (zprint) then
+    if (zprint) then
          write(6,"(//,5x,'indices generated by genind',/)")
-!201      format(//,5x,'indices generated by genind',/)
          write(6,"(5x,'nbmax= ',i5,/,5x,'nbass follows',/)") nbmax
-!202      format(5x,'nbmax= ',i5,/,5x,'nbass follows',/)
          write(6,*) (nbass(k), k=1,jk)
-      endif
-      deallocate(lmin)
-      deallocate(lbass)
-      return
+    endif
+    deallocate(lmin)
+    deallocate(lbass)
+    return
 999   write(6,"(a100,i3,a20,i7,a20,i7,a20)") 'basis function dimensions in error unit =',ivec,&
              &' mbass =',mbass,' expected, =',mbass0,' found'
-!200   format(//,5x,'basis function dimensions in error',&
- !            /,5x,'unit =',i3,' mbass =',i7,' expected, =',i7,' found')
 333   write(6,*)'mbass0 =',mbass0,' not consistent with nbass =',nbass
-      stop
-      end
+    stop
+    end
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-     subroutine dmain(nbass1,nbass2)
+    subroutine dmain(nbass1,nbass2)
 !     Effective main program.
 !     All data etc for the ket are labelled 1;
 !     all data etc for the bra are labelled 2.
-      use dipole3_dim
-      use dipole3_logic
-      use dipole3_sym
-      use dipole3_stream
-      use dipole3_mass
-      implicit double precision (a-h,o-y), logical (z)
+    use dipole3_dim
+    use dipole3_logic
+    use dipole3_sym
+    use dipole3_stream
+    use dipole3_mass
+    implicit double precision (a-h,o-y), logical (z)
+    integer, dimension(:) :: nbass1(jk1)
+    integer, dimension(:) :: nbass2(jk2)
+    double precision, allocatable, dimension(:)     :: e1
+    double precision, allocatable, dimension(:)     :: e2,xe2
+    double precision, allocatable, dimension(:,:)  :: binom
+    double precision, allocatable, dimension(:,:) :: dipol
+    double precision, allocatable, dimension(:)      :: r1
+    double precision, allocatable, dimension(:)      :: r2
+    double precision, allocatable, dimension(:)       :: xd ,wtd
+    double precision, allocatable, dimension(:,:)  :: tz,tx,sint
+    double precision, allocatable, dimension(:) :: dstemp, dc1, dc2, dlower, dmiddle, dupper
 
-      !dimension nbass1(jk1)
-      !dimension nbass2(jk2)
-      integer, dimension(:) :: nbass1(jk1)
-      integer, dimension(:) :: nbass2(jk2)
-      double precision, allocatable, dimension(:)     :: e1
-      double precision, allocatable, dimension(:)     :: e2,xe2
-      double precision, allocatable, dimension(:,:)  :: binom
-      double precision, allocatable, dimension(:,:) :: dipol
-      double precision, allocatable, dimension(:)      :: r1
-      double precision, allocatable, dimension(:)      :: r2
-      double precision, allocatable, dimension(:)       :: xd ,wtd
-      double precision, allocatable, dimension(:,:)  :: tz,tx,sint
-      double precision, allocatable, dimension(:) :: dstemp, dc1, dc2, dlower, dmiddle, dupper
+    data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
+    write(*,*) 'checkpoint 1dmain: Allocating'
+    write(*,*) 'Iam in dmain. size(nbass1)=', size(nbass1)
+    write(*,*) 'Iam in dmain. size(nbass2)=', size(nbass2)
 
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
-      write(*,*) 'checkpoint 1dmain: Allocating'
-      write(*,*) 'Iam in dmain. size(nbass1)=', size(nbass1)
-      write(*,*) 'Iam in dmain. size(nbass2)=', size(nbass2)
+    allocate( e1(neval1)  )
+    allocate( e2(neval2)  )
+    allocate( xe2(neval2) )
+    allocate( binom(nbin,nbin)  )
+    allocate( dipol(nrade,ipot) )
+    allocate( r1(npnt1) )
+    allocate( r2(npnt2) )
+    allocate( xd(npot)  )
+    allocate( wtd(npot) )
+    allocate( tz(neval1,neval2) )
+    allocate( tx(neval1,neval2) )
+    allocate( sint(neval1,neval2) )
 
-      allocate( e1(neval1)  )
-      allocate( e2(neval2)  )
-      allocate( xe2(neval2) )
-      allocate( binom(nbin,nbin)  )
-      allocate( dipol(nrade,ipot) )
-      allocate( r1(npnt1) )
-      allocate( r2(npnt2) )
-      allocate( xd(npot)  )
-      allocate( wtd(npot) )
-      allocate( tz(neval1,neval2) )
-      allocate( tx(neval1,neval2) )
-      allocate( sint(neval1,neval2) )
+    allocate(dstemp(max(nbmax1*neval1,nbmax2*neval2)))
+    allocate(dc1(neval1*max(nrade*ipot,nbmax1)))
+    allocate(dc2(neval2*max(nrade*ipot,nbmax2)))
+    allocate(dlower(neval2*max(nrade*ipot,nbmax2)))
+    allocate(dmiddle(neval2*max(nrade*ipot,nbmax2)))
+    allocate(dupper(neval2*max(nrade*ipot,nbmax2)))
 
-      allocate(dstemp(max(nbmax1*neval1,nbmax2*neval2)))
-      allocate(dc1(neval1*max(nrade*ipot,nbmax1)))
-      allocate(dc2(neval2*max(nrade*ipot,nbmax2)))
-      allocate(dlower(neval2*max(nrade*ipot,nbmax2)))
-      allocate(dmiddle(neval2*max(nrade*ipot,nbmax2)))
-      allocate(dupper(neval2*max(nrade*ipot,nbmax2)))
+    dlower = 0
+    dmiddle = 0
+    dupper = 0
 
-      dlower = 0
-      dmiddle = 0
-      dupper = 0
+    write(*,*) 'checkpoint 2 : in dmain'
 
-      write(*,*) 'checkpoint 2 : in dmain'
-
-200   format(///)
 !     call to setfac
-      call setfac(binom,nbin)
+    call setfac(binom,nbin)
 
-      if (ires==0) then
+    if (ires==0) then
 !     zero tz and tx.....
-         tz = x0
-         tx = x0
-         iblock=0
+        tz = x0
+        tx = x0
+        iblock=0
 
-      else
+    else
 !     ... or retrieve them for a restart run
          call rdscr(tz,tx,neval1*neval2,iscr,iblock)
-      endif
+    endif
 
-      jblock=0
-      kblock=iblock+nblock
+    jblock=0
+    kblock=iblock+nblock
 
 !     read in radial dvr grid points (same for bra and ket)
-      call getrow(r1,npnt1,ibra)
-      if (idia > -2) call getrow(r2,npnt2,ibra)
-     write(*,*) 'checkpoint 3 : in dmain'
-      if (jk2 <= 1) then
+    call getrow(r1,npnt1,ibra)
+    if (idia > -2) call getrow(r2,npnt2,ibra)
+    write(*,*) 'checkpoint 3 : in dmain'
+    if (jk2 <= 1) then
         read(ibra)
         read(ibra)
         read(ibra)
-        if (idia == -2) then
-           read(ibra)
-           read(ibra)
-        endif
+    if (idia == -2) then
+        read(ibra)
+        read(ibra)
+    endif
 !
-      endif
-           write(*,*) 'checkpoint 4 : in dmain'
-        read(iket)
-        if (idia > -2) read(iket)
+    endif
+    write(*,*) 'checkpoint 4 : in dmain'
+    read(iket)
+    if (idia > -2) read(iket)
 !
-      if (jk1 <= 1) then
+    if (jk1 <= 1) then
         read(iket)
         read(iket)
         read(iket)
@@ -889,76 +872,68 @@ end module dipole3_mass
            read(iket)
         endif
 !
-      endif
-            write(*,*) 'checkpoint 5 : in dmain'
-            write(*,*) 'Iam in dmain. size(nbass1)=', size(nbass1)
-            write(*,*) 'Iam in dmain. size(nbass2)=', size(nbass2)
+    endif
+    write(*,*) 'checkpoint 5 : in dmain'
+    write(*,*) 'Iam in dmain. size(nbass1)=', size(nbass1)
+    write(*,*) 'Iam in dmain. size(nbass2)=', size(nbass2)
 !     read in of energies for the ket
-      read(iket) neval
-      read(iket)(dum, i=1,ibase1 - 1),e1
-      write(6,200)
-      write(6,"(5x,'First 10 energies for the ket in a.u.',/)")
-!201   format(5x,'First 10 energies for the ket in a.u.',/)
-      if (.not.zpmin) write(6,"(5d24.12,/)") (e1(i),i=1,min(10,neval1))
+    read(iket) neval
+    read(iket)(dum, i=1,ibase1 - 1),e1
+    write(6,“(///))
+    write(6,"(5x,'First 10 energies for the ket in a.u.',/)")
+    if (.not.zpmin) write(6,"(5d24.12,/)") (e1(i),i=1,min(10,neval1))
 
 !     read in of energies for the bra
-
-      read(ibra) neval
-      read(ibra)(dum, i=1,ibase2 - 1),e2
-      write(6,200)
-      write(6,"(5x,'First 10 energies for the bra in a.u.',/)")
-!202   format(5x,'First 10 energies for the bra in a.u.',/)
-      if (.not.zpmin) write(6,"(5d24.12,/)") (e2(i),i=1,min(10,neval2))
-!203   format(5d24.12,/)
-
-      kbeg1= 0
-      kbeg2= 0
-      if (znco1.and.znco2) goto 54
-      write(*,*) 'checkpoint 6 : in dmain'
-      write(*,*) 'Iam in dmain. size(nbass1)=', size(nbass1)
-      write(*,*) 'Iam in dmain. size(nbass2)=', size(nbass2)
-
-!cccccccccccccccccccccccccccccc
+    read(ibra) neval
+    read(ibra)(dum, i=1,ibase2 - 1),e2
+    write(6,”(///))
+    write(6,"(5x,'First 10 energies for the bra in a.u.',/)")
+    if (.not.zpmin) write(6,"(5d24.12,/)") (e2(i),i=1,min(10,neval2))
+    kbeg1= 0
+    kbeg2= 0
+    if (znco1.and.znco2) goto 54
+    write(*,*) 'checkpoint 6 : in dmain'
+    write(*,*) 'Iam in dmain. size(nbass1)=', size(nbass1)
+    write(*,*) 'Iam in dmain. size(nbass2)=', size(nbass2)
+!ccccccccccccccccccccccccccccc
 !     nu = 0 calculation.
 !ccccccccccccccccccccccccccccc
-      nu = 0
+    nu = 0
 
 !     call to lagpt
 
-      write(6,"(/,5x,'lagpt called after')")
-!6020  format(/,5x,'lagpt called after')
-      call timer
-      call lagpt(dipol,r1,r2,xd,wtd,nu)
+    write(6,"(/,5x,'lagpt called after')")
+    call timer
+    call lagpt(dipol,r1,r2,xd,wtd,nu)
 !     call to trans
-      write(6,"(/,5x,'trans called after')")
-!603   format(/,5x,'trans called after')
-      call timer
+    write(6,"(/,5x,'trans called after')")
+    call timer
 
 !     get bra and ket properly lined up
 
-      ks1= 1
-      ip=ipar1
+    ks1= 1
+    ip=ipar1
 !     e to f calculation
-      if (kmin1>kmin2) then
-         ks1= 2
-         ip=1-ip
-      endif
+    if (kmin1>kmin2) then
+        ks1= 2
+        ip=1-ip
+    endif
 !cccccccccccccccccc!
 
 !-----Djedjiga phase correction for Radau coordinate system
-      if(idia==-2) then
-      ipar11=ipar1
-      ipar22=ipar2
-      if(kmin1==0) ipar11=ipar1+1
-      if(kmin2==0) ipar22=ipar2+1
-      endif
+    if(idia==-2) then
+    ipar11=ipar1
+    ipar22=ipar2
+    if(kmin1==0) ipar11=ipar1+1
+    if(kmin2==0) ipar22=ipar2+1
+    endif
 !------------------
 
-      do 10 k1= ks1,jk1
-      k2= k1 - kmin1 + kmin2
-      if (k2>jk2) goto 10
-      jblock=jblock+1
-      if (jblock>iblock) then
+    do 10 k1= ks1,jk1
+    k2= k1 - kmin1 + kmin2
+    if (k2>jk2) goto 10
+    jblock=jblock+1
+    if (jblock>iblock) then
        iblock=iblock+1
        write(*,*) 'checkpoint 7a : in dmain'
        write(*,*) 'size(nbass1)=', size(nbass1)
@@ -969,55 +944,52 @@ end module dipole3_mass
        if (nbass1(k1) == 0 .or. nbass2(k2) == 0) then
          write(6,"(/5x,'Block',i4,' k1 =',i3,' to k2 =',i3,' skipped')") iblock,k1-kmin1,k2-kmin2
 ! 2020   format(/5x,'Block',i4,' k1 =',i3,' to k2 =',i3,' skipped')
-      else
-           write(*,*) 'checkpoint 7b : in dmain'
-         kk=k1-kmin1
-         call dsrd(dc1,dstemp,iket,mbass1,nbass1(k1),neval1,&
+    else
+        write(*,*) 'checkpoint 7b : in dmain'
+        kk=k1-kmin1
+        call dsrd(dc1,dstemp,iket,mbass1,nbass1(k1),neval1,&
              k1,kbeg1,jk1,ip,ibase1,xd,kk,nu,ipar1)
-         call dsrd(dc2,dstemp,ibra,mbass2,nbass2(k2),neval2,&
+        call dsrd(dc2,dstemp,ibra,mbass2,nbass2(k2),neval2,&
            k2,kbeg2,jk2,1-ip,ibase2,xd,kk,nu,ipar2)
-         xfac= x1
+        xfac= x1
 
-         if (idia==-2 .and. mod((kk+ipar11)/2+(kk+ipar22)/2,2)/=0)&
+        if (idia==-2 .and. mod((kk+ipar11)/2+(kk+ipar22)/2,2)/=0)&
            xfac=-xfac
-         call trans(tz,dipol,binom,dc1,dc2,k1,k2,xfac,nu,1)
-         call wrscr(tz,tx,neval1*neval2,iscr,iblock)
-         write(6,"(/5x,'Block',i4,' k1 =',i3,' to k2 =',i3,' completed')") iblock,k1-kmin1,k2-kmin2
- !2000    format(/5x,'Block',i4,' k1 =',i3,' to k2 =',i3,' completed')
-         if (iblock >= kblock) goto 154
+        call trans(tz,dipol,binom,dc1,dc2,k1,k2,xfac,nu,1)
+        call wrscr(tz,tx,neval1*neval2,iscr,iblock)
+        write(6,"(/5x,'Block',i4,' k1 =',i3,' to k2 =',i3,' completed')") iblock,k1-kmin1,k2-kmin2
+        if (iblock >= kblock) goto 154
        endif
-      endif
-      ip=1-ip
+    endif
+    ip=1-ip
 10    continue
 
 !cccccccccccccccccccccccccccccccccccccccccccc
 !     nu = +/-1 calculation.
 !ccccccccccccccccccccccccccccccccccccccccccccc
-      nu = 1
+    nu = 1
 
 !     call to lagpt
-      write(6,"(/,5x,'lagpt called after')")
-!602   format(/,5x,'lagpt called after')
-      call lagpt(dipol,r1,r2,xd,wtd,nu)
+    write(6,"(/,5x,'lagpt called after')")
+    call lagpt(dipol,r1,r2,xd,wtd,nu)
 
 !     call to trans
-      write(6,"(/,5x,'trans called after')")
-      call timer
-
-      j1= jk1 - kmin1
-      j2= jk2 - kmin2
+    write(6,"(/,5x,'trans called after')")
+    call timer
+    j1= jk1 - kmin1
+    j2= jk2 - kmin2
 
 !     parities for symmetrised radau bisector embedding
 
-      ip=ipar1
-      do 11 k1= 1,jk1
-      kk1= k1 - kmin1
-      if (nbass1(k1)==0) goto 110
+    ip=ipar1
+    do 11 k1= 1,jk1
+    kk1= k1 - kmin1
+    if (nbass1(k1)==0) goto 110
 
-      if (jblock-iblock>-2) then
+    if (jblock-iblock>-2) then
 	call dsrd(dc1,dstemp,iket,mbass1,&
           nbass1(k1),neval1,k1,kbeg1,jk1,ip,ibase1,xd,kk1,nu,ipar1)
-      endif
+    endif
 
 !cccccccccccccccccccccccccccccccc
 !
@@ -1031,7 +1003,7 @@ end module dipole3_mass
 ! The code cycles through these and avoids doing rewinds of the bra file inside the dsrd subroutine, which proves to be prohibitive for large files.
 !
 !cccccccccccccccccccccccccccccccc
-      if (k1==1) then
+    if (k1==1) then
 !	write(*,*) "Start modification"
 	
 	if (kmin1==0) then
@@ -1046,7 +1018,7 @@ end module dipole3_mass
 				1,kbeg2,jk2,ip,ibase2,xd,0,1,ipar2)
 			call dsrd(dmiddle,dstemp,ibra,mbass2,nbass2(2),neval2,& 
 				2,kbeg2,jk2,1-ip,ibase2,xd,1,1,ipar2)
-if(jk2 /= 1) call dsrd(dupper,dstemp,ibra,mbass2,nbass2(3),neval2,& 
+        if(jk2 /= 1) call dsrd(dupper,dstemp,ibra,mbass2,nbass2(3),neval2,& 
                    		3,kbeg2,jk2,ip,ibase2,xd,2,1,ipar2)
 		endif
 	else
@@ -1060,18 +1032,18 @@ if(jk2 /= 1) call dsrd(dupper,dstemp,ibra,mbass2,nbass2(3),neval2,&
         	           1,kbeg2,jk2,ip,ibase2,xd,1,1,ipar2)
 		endif
 	endif
-      endif
+    endif
 
-if(jk2 <= 1) go to 108
+    if(jk2 <= 1) go to 108
 !cccccccccccccccccccccccccccccccccccc
 !     nu = +1 calculation
 !cccccccccccccccccccccccccccccccccccc
-      nu= 1
-      kk2= kk1 + nu
-      k2= kk2 + kmin2
-      if (k2<=jk2) then
-       jblock=jblock+1
-       if (jblock>iblock) then
+    nu= 1
+    kk2= kk1 + nu
+    k2= kk2 + kmin2
+    if (k2<=jk2) then
+    jblock=jblock+1
+    if (jblock>iblock) then
         iblock=iblock+1
         if (nbass2(k2)==0) then
          write(6,"(/5x,'Block',i4,' k1 =',i3,' to k2 =',i3,' skipped')") iblock,k1-kmin1,k2-kmin2
@@ -1089,16 +1061,16 @@ if(jk2 <= 1) go to 108
          if (iblock >= kblock) goto 154
         endif
        endif
-      endif
+    endif
 
 108 continue
 !cccccccccccccccccccccccccccccccccccc
 !     nu = -1 calculation
 !cccccccccccccccccccccccccccccccccccc
-      nu= -1
-      kk2= kk1 + nu
-      k2= kk2 + kmin2
-      if (k2>=1) then
+    nu= -1
+    kk2= kk1 + nu
+    k2= kk2 + kmin2
+    if (k2>=1) then
        jblock=jblock+1
        if (jblock>iblock) then
         iblock=iblock+1
@@ -1118,12 +1090,12 @@ if(jk2 <= 1) go to 108
          if (iblock>=kblock .and. k1<jk1) goto 154
         endif
        endif
-      endif
+    endif
 
 110   ip=1-ip
-      dlower = dmiddle
-      dmiddle = dupper
-      if (kbeg2/=jk2) then
+    dlower = dmiddle
+    dmiddle = dupper
+    if (kbeg2/=jk2) then
 	if (kmin1==kmin2) then
 		kk2 = kbeg2+(1 - INT((kmin1 + kmin2)/2))
 	else
@@ -1131,260 +1103,255 @@ if(jk2 <= 1) go to 108
 	endif
         call dsrd(dupper,dstemp,ibra,mbass2,nbass2(kbeg2 + 1),neval2,&
                    kbeg2 + 1,kbeg2,jk2,ip,ibase2,xd,kk2,nu,ipar2)
-      endif
+    endif
 11    continue
 
-      goto 55
+    goto 55
 154   if (iblock>=mblock) goto 55
-      write(6,"(//i7,' blocks calculated. dipole3 shutting down')") iblock
-!1540  format(//i7,' blocks calculated. dipole3 shutting down')
-      call timer
-      goto 55
+    write(6,"(//i7,' blocks calculated. dipole3 shutting down')") iblock
+    call timer
+    goto 55
 54    continue
 
 !     non coriolis coupled case
-     write(*,*) 'checkpoint 8 : in dmain'
-      nu= abs(kmin2-kmin1)
-      nrad=nrado
-      if (nu == 1) nrad=nrade
+    write(*,*) 'checkpoint 8 : in dmain'
+    nu= abs(kmin2-kmin1)
+    nrad=nrado
+    if (nu == 1) nrad=nrade
 
 !     call to lagpt
-      write(6,"(/,5x,'lagpt called after')")
-      call lagpt(dipol,r1,r2,xd,wtd,nu)
-     write(*,*) 'checkpoint 9 : in dmain'
+    write(6,"(/,5x,'lagpt called after')")
+    call lagpt(dipol,r1,r2,xd,wtd,nu)
+    write(*,*) 'checkpoint 9 : in dmain'
 !     call to trans
-      write(6,"(/,5x,'trans called after')")
+    write(6,"(/,5x,'trans called after')")
 
-      nu= (kmin2-kmin1)
-      k1= kmin1
-      k2= kmin2
+    nu= (kmin2-kmin1)
+    k1= kmin1
+    k2= kmin2
 
-      call dsrd(dc1,dstemp,ibra,mbass1,nbass1(1),neval1,&
+    call dsrd(dc1,dstemp,ibra,mbass1,nbass1(1),neval1,&
                 1,kbeg1,jk1,ipar1,ibase1,xd,k1,nu,ipar1)
-      call dsrd(dc2,dstemp,ibra,mbass2,nbass2(1),neval2,&
+    call dsrd(dc2,dstemp,ibra,mbass2,nbass2(1),neval2,&
                 1,kbeg2,jk2,ipar2,ibase2,xd,k2,nu,ipar2)
 
-      if (nu==0) then
+    if (nu==0) then
          xfac= x1
-      else if (nu==1) then
+    else if (nu==1) then
          xfac= -x1/sqrt(x2)
          if (k1==0.or.k2==0) xfac= -x1
-      else if (nu==-1) then
+    else if (nu==-1) then
          xfac= x1/sqrt(x2)
          if (k1==0.or.k2==0) xfac= x1
-      endif
-      if (idia==-2 .and. mod((k1+ipar1)/2+(k2+ipar2)/2,2)/=0)&
+    endif
+    if (idia==-2 .and. mod((k1+ipar1)/2+(k2+ipar2)/2,2)/=0)&
            xfac=-xfac
-      call trans(tx,dipol,binom,dc1,dc2,k1,k2,xfac,nu,ipar1)
+    call trans(tx,dipol,binom,dc1,dc2,k1,k2,xfac,nu,ipar1)
 
 !     end of transition dipole moment calculation
 
 !     call to spect
-55    write(6,"(/,5x,'spect called after')")
-!604   format(/,5x,'spect called after')
-      call timer
-      call spect(tz,tx,e1,e2,sint,xe2)
+    55    write(6,"(/,5x,'spect called after')")
+    call timer
+    call spect(tz,tx,e1,e2,sint,xe2)
 
 !     final time
-       write(6,"(/,5x,'program ended after')")
-!605   format(/,5x,'program ended after')
-      call timer
-      deallocate(dstemp, dc1, dc2)
-      stop
-      return
-      end
+    write(6,"(/,5x,'program ended after')")
+    call timer
+    deallocate(dstemp, dc1, dc2)
+    stop
+    return
+    end
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **009
-      subroutine setfac(binom,nbin)
+    subroutine setfac(binom,nbin)
 !
 !     setfa! initialises binomial array:
 !        binom(i+1,j+1) = i! / (j! * (i-j)!)
 
-      implicit double precision (a-h,o-y), logical (z)
-      double precision, dimension(nbin,nbin) :: binom
-      data x1/1.0d0/
-      binom(1,1) = x1
-      binom(2,1) = x1
-      binom(2,2) = x1
-      do 10 i=3,nbin
-      binom(i,1) = x1
-      binom(i,i) = x1
-      i1 = i - 1
-      do 20 j=2,i1
-      binom(i,j) = binom(i1,j-1) + binom(i1,j)
+    implicit double precision (a-h,o-y), logical (z)
+    double precision, dimension(nbin,nbin) :: binom
+    data x1/1.0d0/
+    binom(1,1) = x1
+    binom(2,1) = x1
+    binom(2,2) = x1
+    do 10 i=3,nbin
+    binom(i,1) = x1
+    binom(i,i) = x1
+    i1 = i - 1
+    do 20 j=2,i1
+    binom(i,j) = binom(i1,j-1) + binom(i1,j)
    20 continue
    10 continue
-      return
-      end
+    return
+    end
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **011
-      subroutine lagpt(d0,r1,r2,xd,wtd,nu)
+    subroutine lagpt(d0,r1,r2,xd,wtd,nu)
 
 !     subroutine lagpt obtains values of the dipole at the radial
 !     dvr points and angular integration points
-      use dipole3_dim
-      use dipole3_sym
-      implicit double precision(a-h,o-y), logical (z)
+    use dipole3_dim
+    use dipole3_sym
+    implicit double precision(a-h,o-y), logical (z)
 
-      double precision, dimension(*) :: d0
-      double precision, dimension(npnt1) :: r1
-      double precision, dimension(npnt2) :: r2
-      double precision, dimension(npot) :: xd,wtd
-      double precision, allocatable, dimension(:) :: b,c
+    double precision, dimension(*) :: d0
+    double precision, dimension(npnt1) :: r1
+    double precision, dimension(npnt2) :: r2
+    double precision, dimension(npot) :: xd,wtd
+    double precision, allocatable, dimension(:) :: b,c
 
-      data x0/0.0d0/,toler/1.0d-8/,&
+    data x0/0.0d0/,toler/1.0d-8/,&
            x1/1.0d0/,x2/2.0d0/,x3/3.0d0/,x4/4.0d0/
 
-       allocate( b(npot) )
-       allocate( c(npot) )
+    allocate( b(npot) )
+    allocate( c(npot) )
 
-       write(*,*) 'Checkpoint 1 in lagpt'
+    write(*,*) 'Checkpoint 1 in lagpt'
 
 !     set up points & weights for npot point angular integration
 
-      xnu= x0
-      alf= xnu
-      bta= alf
-      do 10 i=2,npot
-      xi= dble(i)
-      b(i)= (alf+bta)*(bta-alf)/&
+    xnu= x0
+    alf= xnu
+    bta= alf
+    do 10 i=2,npot
+    xi= dble(i)
+    b(i)= (alf+bta)*(bta-alf)/&
             ((alf+bta+x2*xi)*(alf+bta+x2*xi-x2))
-      c(i)= x4*(xi-x1)*(alf+xi-x1)*(bta+xi-x1)*(alf+bta+xi-x1)/&
+    c(i)= x4*(xi-x1)*(alf+xi-x1)*(bta+xi-x1)*(alf+bta+xi-x1)/&
             ((alf+bta+x2*xi-x1)*(alf+bta+x2*xi-x2)*&
              (alf+bta+x2*xi-x2)*(alf+bta+x2*xi-x3))
 10    continue
 
-      call jacobi(npot,xd,wtd,alf,bta,b,c,csa,tsa)
-      write(6,1000) npot,0,(xd(i),wtd(i),i=1,nn2)
+    call jacobi(npot,xd,wtd,alf,bta,b,c,csa,tsa)
+    write(6,1000) npot,0,(xd(i),wtd(i),i=1,nn2)
  1000 format(//,i8,' point gauss-associated legendre integration',&
                   ' with k =',i2,&
              //,5x,'integration points',11x,'weights',&
              /,(f23.15,d25.12))
-      write(6,"(/,5x,'computed sum of weights',d26.15,&
+    write(6,"(/,5x,'computed sum of weights',d26.15,&
              /,5x,'exact    sum of weights',d26.15//)") csa,tsa
- !1010 format(/,5x,'computed sum of weights',d26.15,&
-  !           /,5x,'exact    sum of weights',d26.15//)
-      if (abs((csa-tsa)/tsa) > toler) then
+
+    if (abs((csa-tsa)/tsa) > toler) then
          write(6,"(/,5x,'gauss-legendre weights in error: adjust algorithm')")
-  !940   format(/,5x,'gauss-legendre weights in error: adjust algorithm')
          stop
-      endif
+    endif
 !     define other integration points
-      do 20 i=1,nn2
-      if (idia >=0) then
+    do 20 i=1,nn2
+    if (idia >=0) then
          j=i+nn2
          xd(j)=-xd(npot-j+1)
          wtd(j)=wtd(npot-j+1)
-      else
+    else
          j=npot+1-i
          xd(j)=-xd(i)
          wtd(j)=wtd(i)
-      endif
+    endif
    20 continue
 !     calculate dipole at (r1,r2,cos\theta)
-      if (idia == -2) then
+    if (idia == -2) then
          iadd=1-abs(nu)
-      else
+    else
          i0=npnt1
-      endif
-      jdia = max(1, idia)
-      ii=0
-      do 30 i2=1,npnt2
-      if (idia == -2) then
+    endif
+    jdia = max(1, idia)
+    ii=0
+    do 30 i2=1,npnt2
+    if (idia == -2) then
          rr2=r1(i2)
          i0=i2-iadd
-      else
+    else
          rr2=r2(i2)
-      endif
-      do 40 i1=1,i0
-      do 50 j=1,ipot
-      ii=ii+1
-      call dipd(d0(ii),r1(i1),rr2,xd(j),nu)
-      if (jdia==2) d0(ii)=x2*d0(ii)
-      d0(ii)=wtd(j)*d0(ii)
+    endif
+    do 40 i1=1,i0
+    do 50 j=1,ipot
+    ii=ii+1
+    call dipd(d0(ii),r1(i1),rr2,xd(j),nu)
+    if (jdia==2) d0(ii)=x2*d0(ii)
+    d0(ii)=wtd(j)*d0(ii)
    50 continue
    40 continue
    30 continue
-          write(*,*) 'Checkpoint 2 in lagpt'
-      return
-      end
+    write(*,*) 'Checkpoint 2 in lagpt'
+    return
+    end
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-      subroutine asleg(pleg,pnorm,lmax,x,ipot,m)
+    subroutine asleg(pleg,pnorm,lmax,x,ipot,m)
 
 !     calculate polynomials 1 to lmax at x = cos(theta) for m = 0 or 1,
 !     using the routine of press et al, numerical recipes, p. 182,
 !     for the polynomial part of associated legendre functions.
 !     a factor of sin(theta)**m has NOT been removed from all functions.
-      use dipole3_mass
-      use dipole3_sym
-      implicit double precision (a-h,o-y), logical (z)
+    use dipole3_mass
+    use dipole3_sym
+    implicit double precision (a-h,o-y), logical (z)
 
-      double precision, dimension(ipot,0:lmax) :: pleg
-      double precision, dimension(ipot) :: x
-      double precision, dimension(0:lmax) :: pnorm
+    double precision, dimension(ipot,0:lmax) :: pleg
+    double precision, dimension(ipot) :: x
+    double precision, dimension(0:lmax) :: pnorm
+    double precision :: x1,x2
+    x1 = 1.0d0
+    x2 = 2.0d0
 
-      data x1/1.0d0/,x2/2.0d0/
+    do 10 i=1,ipot
 
-      do 10 i=1,ipot
-
-      if (m < 0 .or. abs(x(i)) > x1) then
+    if (m < 0 .or. abs(x(i)) > x1) then
           write(6,"(//5x,'improper argument in subroutine asleg'/)")
-!200      format(//5x,'improper argument in subroutine asleg'/)
           stop
-      endif
+    endif
 
-      pmm = x1
-      fact = x1
-      somx2=sqrt((x1-x(i))*(x1+x(i)))
+    pmm = x1
+    fact = x1
+    somx2=sqrt((x1-x(i))*(x1+x(i)))
 
-      do 11 j=1,m
-      pmm = -pmm * fact * somx2
-      fact = fact + x2
+    do 11 j=1,m
+    pmm = -pmm * fact * somx2
+    fact = fact + x2
    11 continue
-      pleg(i,0)= pmm
-      pmmp1= x(i)*dble(m+m+1)*pmm
-      pleg(i,1)= pmmp1
-      ll=1
+    pleg(i,0)= pmm
+    pmmp1= x(i)*dble(m+m+1)*pmm
+    pleg(i,1)= pmmp1
+    ll=1
 
 !loop ensures that same number of functions is calculated
 !for both symmetry and no symmetry
-      do 2 l= 2+m,(lmax+m)
-      r2lm1 = dble(l+l-1)
-      rlpmm1= dble(l+m-1)
-      rlmm  = dble(l-m)
-      pll= (x(i)*r2lm1*pmmp1 - rlpmm1*pmm)/rlmm
+    do 2 l= 2+m,(lmax+m)
+    r2lm1 = dble(l+l-1)
+    rlpmm1= dble(l+m-1)
+    rlmm  = dble(l-m)
+    pll= (x(i)*r2lm1*pmmp1 - rlpmm1*pmm)/rlmm
 
-      pmm= pmmp1
-      pmmp1= pll
-      ll=ll+1
-      pleg(i,ll)= pll
+    pmm= pmmp1
+    pmmp1= pll
+    ll=ll+1
+    pleg(i,ll)= pll
 2     continue
 10    continue
 
 !     set up the normalisation constants
 !     (pnorm)**2 = (2j + 1)/2   *   (j - k)! / (j + k)!
-      jj = -1
-      do 13 j = m,(lmax+m)
-      fact = x1
-      do 12 i = j-m+1,j+m
-      facti = dble(i)
-      fact = fact * facti
+    jj = -1
+    do 13 j = m,(lmax+m)
+    fact = x1
+    do 12 i = j-m+1,j+m
+    facti = dble(i)
+    fact = fact * facti
    12 continue
-      jj = jj + 1
-      pnorm(jj) = sqrt(dble(j+j+1) / (fact + fact))
+    jj = jj + 1
+    pnorm(jj) = sqrt(dble(j+j+1) / (fact + fact))
    13 continue
 !     now normalise the polynomials
-      do 14 jj=0,lmax
+    do 14 jj=0,lmax
 
-       do 15 i=1,ipot
-       pleg(i,jj) = pleg(i,jj) * pnorm(jj)
+    do 15 i=1,ipot
+    pleg(i,jj) = pleg(i,jj) * pnorm(jj)
 15     continue
    14 continue
-      return
-      end
+    return
+    end
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                               **018
-      subroutine jacobi(nn,x,a,alf,bta,b,c,csa,tsa)
+    subroutine jacobi(nn,x,a,alf,bta,b,c,csa,tsa)
 
 !     calculates zeros x(i) of the nn'th order jacobi polynomial
 !     pn(alf,bta) for the segment (-1,1) & and corresponding weights
@@ -1393,128 +1360,128 @@ if(jk2 <= 1) go to 108
 !     integration formulas", 1966, prentice hall, page 29.
 !     note that for our purposes, alf= bta= nu.
 
-      implicit double precision(a-h,o-z)
-      double precision, dimension(nn) :: x,a,b,c
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/,x3/3.0d0/,x4/4.0d0/,x6/6.0d0/,&
+    implicit double precision(a-h,o-z)
+    double precision, dimension(nn) :: x,a,b,c
+    data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/,x3/3.0d0/,x4/4.0d0/,x6/6.0d0/,&
           x8/8.0d0/,eps/1.0d-12/
-      fn= dble(nn)
-      nn2= nn/2
-      csa= x0
-      beta= x1
-      if (alf==1) beta = beta/x6
-      cc= beta*x2**(alf+bta+x1)
-      tsa= cc/x2
-      do 10 i=2,nn
-      cc= cc*c(i)
+    fn= dble(nn)
+    nn2= nn/2
+    csa= x0
+    beta= x1
+    if (alf==1) beta = beta/x6
+    cc= beta*x2**(alf+bta+x1)
+    tsa= cc/x2
+    do 10 i=2,nn
+    cc= cc*c(i)
    10 continue
-      do 20 i=1,nn2
-      if (i == 1) then
+    do 20 i=1,nn2
+    if (i == 1) then
 !         largest zero
-      an= alf/fn
-      bn= bta/fn
-      r1= (x1 + alf)*(2.78d0/(x4 + fn*fn) +0.768*an/fn)
-      r2= x1 + 1.48d0*an + 0.96d0*bn + 0.452*an*an + 0.83d0*an*bn
-      xt= x1 - r1/r2
-      else if (i == 2) then
+    an= alf/fn
+    bn= bta/fn
+    r1= (x1 + alf)*(2.78d0/(x4 + fn*fn) +0.768*an/fn)
+    r2= x1 + 1.48d0*an + 0.96d0*bn + 0.452*an*an + 0.83d0*an*bn
+    xt= x1 - r1/r2
+    else if (i == 2) then
 !         second zero
-      r1= (4.1d0 + alf)/((x1 + alf)*(x1 + 0.156*alf))
-      r2= x1 + 0.06d0*(fn - x8)*(x1 + 0.12d0*alf)/fn
-      r3= x1 + 0.012*bta*(x1 + abs(alf)/x4)/fn
-      ratio= r1*r2*r3
-      xt= xt - ratio*(x1 - xt)
-      else if (i == 3) then
+    r1= (4.1d0 + alf)/((x1 + alf)*(x1 + 0.156*alf))
+    r2= x1 + 0.06d0*(fn - x8)*(x1 + 0.12d0*alf)/fn
+    r3= x1 + 0.012*bta*(x1 + abs(alf)/x4)/fn
+    ratio= r1*r2*r3
+    xt= xt - ratio*(x1 - xt)
+    else if (i == 3) then
 !         third zero
-      r1= (1.67d0 + 0.28d0*alf)/(x1 + 0.37d0*alf)
-      r2= x1 + 0.22d0*(fn - x8)/fn
-      r3= x1 + x8*bta/((6.28d0 + bta)*fn*fn)
-      ratio= r1*r2*r3
-      xt= xt - ratio*(x(1) - xt)
-      else
+    r1= (1.67d0 + 0.28d0*alf)/(x1 + 0.37d0*alf)
+    r2= x1 + 0.22d0*(fn - x8)/fn
+    r3= x1 + x8*bta/((6.28d0 + bta)*fn*fn)
+    ratio= r1*r2*r3
+    xt= xt - ratio*(x(1) - xt)
+    else
 !         middle zeros
-      xt= x3*x(i-1) - x3*x(i-2) + x(i-3)
-      endif
+    xt= x3*x(i-1) - x3*x(i-2) + x(i-3)
+    endif
 
-      call root(xt,nn,alf,bta,dpn,pn1,b,c,eps)
-      x(i)= xt
-      a(i)= cc/(dpn*pn1)
-      csa= csa + a(i)
+    call root(xt,nn,alf,bta,dpn,pn1,b,c,eps)
+    x(i)= xt
+    a(i)= cc/(dpn*pn1)
+    csa= csa + a(i)
 20    continue
-      return
-      end
+    return
+    end
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **019
-      subroutine root(x,nn,alf,bta,dpn,pn1,b,c,eps)
+    subroutine root(x,nn,alf,bta,dpn,pn1,b,c,eps)
 
 !     improves the approximate root x; in addition obtains
 !          dpn = derivative of p(n) at x
 !          pn1 = value of p(n-1) at x.
 
-      implicit double precision(a-h,o-z)
-      double precision, dimension(nn) :: b,c
-      iter= 0
+    implicit double precision(a-h,o-z)
+    double precision, dimension(nn) :: b,c
+    iter= 0
 1     iter= iter + 1
-      call recur(p,dp,pn1,x,nn,alf,bta,b,c)
-      d = p/dp
-      x = x - d
-      if (abs(d) > eps .and. iter < 10) goto 1
-      dpn= dp
-      return
-      end
+    call recur(p,dp,pn1,x,nn,alf,bta,b,c)
+    d = p/dp
+    x = x - d
+    if (abs(d) > eps .and. iter < 10) goto 1
+    dpn= dp
+    return
+    end
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **020
-      subroutine recur(pn,dpn,pn1,x,nn,alf,bta,b,c)
-      implicit double precision(a-h,o-z)
-      double precision, dimension(nn) :: b,c
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
-      p1= x1
-      p= x + (alf-bta)/(alf + bta + x2)
-      dp1= x0
-      dp= x1
-      do 10 j=2,nn
-      q= (x - b(j))*p - c(j)*p1
-      dq= (x - b(j))*dp + p - c(j)*dp1
-      p1= p
-      p= q
-      dp1= dp
-      dp= dq
+    subroutine recur(pn,dpn,pn1,x,nn,alf,bta,b,c)
+    implicit double precision(a-h,o-z)
+    double precision, dimension(nn) :: b,c
+    data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
+    p1= x1
+    p= x + (alf-bta)/(alf + bta + x2)
+    dp1= x0
+    dp= x1
+    do 10 j=2,nn
+    q= (x - b(j))*p - c(j)*p1
+    dq= (x - b(j))*dp + p - c(j)*dp1
+    p1= p
+    p= q
+    dp1= dp
+    dp= dq
   10 continue
-      pn= p
-      dpn= dp
-      pn1= p1
-      return
-      end
+    pn= p
+    dpn= dp
+    pn1= p1
+    return
+    end
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **021
-      subroutine dsrd(d,temp,ivec,mmbass,nbass,ne,kneed,kbeg,&
+    subroutine dsrd(d,temp,ivec,mmbass,nbass,ne,kneed,kbeg,&
                      jk,ipar,ibase,xd,kk,nu,jay_ipar)
 
 !     subroutine to read d coefficients from dstore data
-      use dipole3_dim
-      use dipole3_logic
-      use dipole3_mass
-      use dipole3_sym
-      implicit double precision (a-h,o-y), logical(z)
-      parameter (iz=1)
-      double precision, dimension(ne,max(nrade*ipot,nbass)) :: d
-      double precision, dimension(ne,nbass) :: temp
-      double precision, dimension(npot) :: xd
-      double precision, allocatable, dimension(:,:) :: plegd
-      integer, allocatable, dimension(:) :: iv
+    use dipole3_dim
+    use dipole3_logic
+    use dipole3_mass
+    use dipole3_sym
+    implicit double precision (a-h,o-y), logical(z)
+    parameter (iz=1)
+    double precision, dimension(ne,max(nrade*ipot,nbass)) :: d
+    double precision, dimension(ne,nbass) :: temp
+    double precision, dimension(npot) :: xd
+    double precision, allocatable, dimension(:,:) :: plegd
+    integer, allocatable, dimension(:) :: iv
 
-      data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
+    data x0/0.0d0/,x1/1.0d0/,x2/2.0d0/
 
-      nang=nbass/nrade
-      if (ipar==1 .and. zbisc) nang=nbass/nrado
-      nrad=nrado
-      jdia=max(1,idia)
-      if (abs(nu)==1 .and. ipar==0) nrad=nrade
+    nang=nbass/nrade
+    if (ipar==1 .and. zbisc) nang=nbass/nrado
+    nrad=nrado
+    jdia=max(1,idia)
+    if (abs(nu)==1 .and. ipar==0) nrad=nrade
 
-      if (jk > 1) then
+    if (jk > 1) then
          kz=kk
 !
          if (kneed <= kbeg) then
            rewind ivec
-	   write(*,*) "Rewinded ivec"
+	write(*,*) "Rewinded ivec"
 
            do 10 i=1,kneed+6
            read(ivec)
@@ -1550,7 +1517,7 @@ if(jk2 <= 1) go to 108
             read(ivec)(dum,i=1,nbass*(ibase-1)),&
                   ((temp(i,j),j=1,nbass),i=1,ne)
           endif
-      else
+    else
 
          rewind ivec
 
@@ -1577,14 +1544,14 @@ if(jk2 <= 1) go to 108
          call jtran(temp,nrad,ne,plegd,maxleg,nidvr,kz,d,&
                    ivec,ipar,iv,iang,ibass,ibase,nu,d(ne/2,1),jay_ipar)
          deallocate(plegd,iv)
-      endif
+    endif
 
 !     calculate the legendre function
 !
-      allocate(plegd(ipot,0:(nang*jdia)-1))
-      call asleg(plegd,d,(nang*jdia)-1,xd,ipot,kz)
+    allocate(plegd(ipot,0:(nang*jdia)-1))
+    call asleg(plegd,d,(nang*jdia)-1,xd,ipot,kz)
 
-      if (idia==2) then
+    if (idia==2) then
         if(zembed) then
          !r2 case
            jfirst = mod(kk+ipar1,2) !ipar1 used as in r2 case parity of basis
@@ -1600,27 +1567,27 @@ if(jk2 <= 1) go to 108
             plegd(i,ll)=plegd(i,index)
             index = index + 2
          END DO
-      END DO
-      endif
+    END DO
+    endif
 
 
 !     evaluate wavefunction at angular integration points
 
-      beta=x1
-      d=x0
-      ipt=1
-      jpt=1
+    beta=x1
+    d=x0
+    ipt=1
+    jpt=1
 !
-      do 60 mn=1,nrad
-      call dgemm('n','t',ne,ipot,nang,beta,temp(1,jpt),ne,plegd,&
+    do 60 mn=1,nrad
+    call dgemm('n','t',ne,ipot,nang,beta,temp(1,jpt),ne,plegd,&
                 ipot,beta,d(1,ipt),ne)
-      ipt=ipt+ipot
-      jpt=jpt+nang
+    ipt=ipt+ipot
+    jpt=jpt+nang
    60 continue
-      kbeg=kneed
-      deallocate(plegd)
+    kbeg=kneed
+    deallocate(plegd)
 !     check normalisation if requested
-      if (zprint) then
+    if (zprint) then
          xnorm=x0
          i=0
          do 70 i=1,nbass
@@ -1629,49 +1596,49 @@ if(jk2 <= 1) go to 108
           if (idia==2) xnorm = x2 * xnorm
           write(6,*) ' Vector 1 with k =',kk,ipar,ivec,&
                    ' contribution to  normalisation is',xnorm
-      endif
-      return
-      end
+    endif
+    return
+    end
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-      subroutine jtran(coef,nrad,mvib,pleg,maxleg,idvr,kz,dvrvec,&
+    subroutine jtran(coef,nrad,mvib,pleg,maxleg,idvr,kz,dvrvec,&
                         ivec,ipar,iv,iang,ibass,ibase,nu,temp,jay_ipar)
-      use dipole3_dim
-      use dipole3_sym
-      use dipole3_mass
-      implicit double precision (a-h,o-y), logical (z)
+    use dipole3_dim
+    use dipole3_sym
+    use dipole3_mass
+    implicit double precision (a-h,o-y), logical (z)
 
-      double precision, dimension(0:maxleg,idvr) :: pleg
-      double precision, dimension(iang,*) :: dvrvec
-      double precision, dimension(nrad) :: sumk
-      double precision, dimension(mvib,*) :: coef
-      dimension iv(idvr)
-      double precision, dimension(iang,*) :: temp
-
-      data x0/0.0d0/
+    double precision, dimension(0:maxleg,idvr) :: pleg
+    double precision, dimension(iang,*) :: dvrvec
+    double precision, dimension(nrad) :: sumk
+    double precision, dimension(mvib,*) :: coef
+    dimension iv(idvr)
+    double precision, dimension(iang,*) :: temp
+    double precision :: x0 
+    x0 = 0.0d0
 
 !     transform back to the original fbr-type basis in the
 !     associated legendre functions
-      jstart=kz
-      jdia=max(idia,1)
-      jj0=-jdia
-      if (zembed) then
+    jstart=kz
+    jdia=max(idia,1)
+    jj0=-jdia
+    if (zembed) then
          if (idia == 2 .and. mod(jstart,2) /= ipar1) then !r2 case
            jj0=jj0+1
            jstart=jstart+1
          endif
-      else
+    else
          if (idia == 2 .and. mod(jstart,2) /= jay_ipar) then !r1 case
             jj0=jj0+1
             jstart=jstart+1
          endif
-       endif
-      nang=(maxleg+kz-jstart)/jdia+1
-      do 5 l=1,ibase-1
-      read(ivec)
+    endif
+    nang=(maxleg+kz-jstart)/jdia+1
+    do 5 l=1,ibase-1
+    read(ivec)
 5     continue
-      do 10 l=1,mvib
+    do 10 l=1,mvib
 !     first read in a new vector
-      if (nu==0 .and. idia==-2 .and. ipar==0) then
+    if (nu==0 .and. idia==-2 .and. ipar==0) then
          call getrow(temp,ibass,ivec)
          ipt=0
          jpt=0
@@ -1685,36 +1652,36 @@ if(jk2 <= 1) go to 108
    12    continue
          jpt=jpt+1
    13    continue
-      else
+    else
          call getrow(dvrvec,ibass,ivec)
-      endif
-      jj=jj0
-      do 20 j=1,nang
-      sumk=x0
-      jj=jj+jdia
-      kk=0
-      do 40 k=1,idvr
-      if (iv(k) <= 0) goto 40
-      kk=kk+1
-      do 50 mn=1,nrad
-      sumk(mn)=sumk(mn) + dvrvec(kk,mn) * pleg(jj,k)
+    endif
+    jj=jj0
+    do 20 j=1,nang
+    sumk=x0
+    jj=jj+jdia
+    kk=0
+    do 40 k=1,idvr
+    if (iv(k) <= 0) goto 40
+    kk=kk+1
+    do 50 mn=1,nrad
+    sumk(mn)=sumk(mn) + dvrvec(kk,mn) * pleg(jj,k)
    50 continue
    40 continue
 
-      ipt=j
-      do 60 mn=1,nrad
-      coef(l,ipt) = sumk(mn)
-      ipt=ipt+nang
+    ipt=j
+    do 60 mn=1,nrad
+    coef(l,ipt) = sumk(mn)
+    ipt=ipt+nang
    60 continue
    20 continue
 
    10 continue
 
-      return
-      end
+    return
+    end
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **022
-      subroutine trans(t,dipol,binom,dc1,dc2,k1,k2,xfac,nu,ipar)
+    subroutine trans(t,dipol,binom,dc1,dc2,k1,k2,xfac,nu,ipar)
 
 !     subroutine trans is the main working routine in program dipole.
 !     it carries out the necessary angular integrations using 3-j
@@ -1728,84 +1695,84 @@ if(jk2 <= 1) go to 108
 !     TRANS uses BLAS rank-1-update routine DGER.
 !     Adapted to run in parallel on SGI Origin machines by Greg Harris
 !     In this case NCPUS should be set to the number of processors.
-      use dipole3_dim
-      use dipole3_logic
-      use dipole3_sym
-      implicit double precision (a-h,o-y), logical (z)
+    use dipole3_dim
+    use dipole3_logic
+    use dipole3_sym
+    implicit double precision (a-h,o-y), logical (z)
+    parameter (NCPUS=1)
 
-      parameter (NCPUS=1)
+    double precision, dimension(neval1,neval2) :: t
+    double precision, dimension(*) :: dipol
+    double precision, dimension(nbin,nbin) :: binom
+    double precision, dimension(neval1,*) :: dc1
+    double precision, dimension(neval2,*) :: dc2
+    double precision, allocatable, dimension(:,:,:) :: ttemp
+    double precision :: x0
+    x0 = 0.0d0
 
-      double precision, dimension(neval1,neval2) :: t
-      double precision, dimension(*) :: dipol
-      double precision, dimension(nbin,nbin) :: binom
-      double precision, dimension(neval1,*) :: dc1
-      double precision, dimension(neval2,*) :: dc2
-      double precision, allocatable, dimension(:,:,:) :: ttemp
 
-      data x0/0.0d0/
-
-      if (ncpus > 1) then
+    if (ncpus > 1) then
          allocate(ttemp(neval1,neval2,ncpus))
          ttemp=x0
-      endif
+    endif
 
-      if (znco1 .and. znco2) then
+    if (znco1 .and. znco2) then
          j1= jk1
          j2= jk2
          kk1= kmin1
          kk2= kmin2
-      else
+    else
          j1= jk1 - kmin1
          j2= jk2 - kmin2
          kk1= k1 - kmin1
          kk2= k2 - kmin2
-      endif
+    endif
 
 !     start the calculation
 
-      x1= threej(j1,1,j2,kk1,nu,-kk2,binom,nbin)*xfac
-      if (mod(kk1,2) /= 0) x1=-x1
-      if (zprint) write(6,*) 'j1, k1, nu, j2, k2 ',j1,kk1,nu,j2,kk2
-      if (zprint) write(6,*) 'xfac, x1 =',xfac, x1
+    x1= threej(j1,1,j2,kk1,nu,-kk2,binom,nbin)*xfac
+    if (mod(kk1,2) /= 0) x1=-x1
+    if (zprint) write(6,*) 'j1, k1, nu, j2, k2 ',j1,kk1,nu,j2,kk2
+    if (zprint) write(6,*) 'xfac, x1 =',xfac, x1
 
-      i0=1
-      if (abs(nu)==1 .and. ipar==0) i0=0
-      i=0
-      id=0
-      n0=npnt2
+    i0=1
+    if (abs(nu)==1 .and. ipar==0) i0=0
+    i=0
+    id=0
+    n0=npnt2
 
-      do 10 nn1=1,npnt1
-      if (idia == -2) n0=nn1-i0
-      niter=n0*ipot
+    do 10 nn1=1,npnt1
+    if (idia == -2) n0=nn1-i0
+    niter=n0*ipot
 
 ! serial case: whole calculation for NCPUS=1 or else the remainder
-      if (ncpus == 1) then
+    if (ncpus == 1) then
          irem=niter
          nparr=0
-      else
+    else
          irem=mod(niter, ncpus)
          nparr=(niter-irem)/ncpus
-      endif
+    endif
 
-      i2 = i
-      id2 = id
+    i2 = i
+    id2 = id
 
-      do 101 n1=1,irem
+    do 101 n1=1,irem
             ii=i2+n1
             idd=id2+n1
             x3=x1*dipol(idd)
-      call dger(neval1,neval2,x3,dc1(1,ii),1,dc2(1,ii),1,t,neval1)
+    call dger(neval1,neval2,x3,dc1(1,ii),1,dc2(1,ii),1,t,neval1)
  101  continue
 
-      If (nparr > 0) then
+    If (nparr > 0) then
 
 ! Paralell part
 !$OMP PARALLEL
 !$OMP DO PRIVATE(ii,j,idd,x3,n1,i2,id2)
-         do 20 j=1,ncpus
-         i2 = i + irem + ((j-1)*nparr)
-         id2 = id + irem + ((j-1)*nparr)
-         do 30 n1=1,nparr
+    do 20 j=1,ncpus
+    i2 = i + irem + ((j-1)*nparr)
+    id2 = id + irem + ((j-1)*nparr)
+    do 30 n1=1,nparr
             ii=i2+n1
             idd=id2+n1
             x3=x1*dipol(idd)
@@ -1815,82 +1782,79 @@ if(jk2 <= 1) go to 108
 20    continue
 !$OMP END DO
 !$OMP END PARALLEL
-      endif
+    endif
 
-      i=i+niter
-      id=id+niter
+    i=i+niter
+    id=id+niter
 !     take care of diagonal case in symmetric Radau
-      if (abs(nu)==i0 .and. idia == -2) id=id+npot
+    if (abs(nu)==i0 .and. idia == -2) id=id+npot
 10    continue
 
-      if (ncpus > 1) then
+    if (ncpus > 1) then
 !  matrix summation
 !$OMP PARALLEL
 !$OMP DO PRIVATE(ij, jk, ki)
-         do 40 jk=1,neval2
-         do 41 ki=1,ncpus
-         do 42 ij=1,neval1
-         t(ij,jk)=t(ij,jk)+ttemp(ij,jk,ki)
+    do 40 jk=1,neval2
+    do 41 ki=1,ncpus
+    do 42 ij=1,neval1
+    t(ij,jk)=t(ij,jk)+ttemp(ij,jk,ki)
 42       continue
 41       continue
 40       continue
 !$OMP END DO
 !$OMP END PARALLEL
-         deallocate(ttemp)
-      endif
-
-      return
-      end
-
+    deallocate(ttemp)
+    endif
+    return
+    end
 !                                                **024
-      function threej(j1,j2,j3,m1,m2,m3,binom,nbin)
+    function threej(j1,j2,j3,m1,m2,m3,binom,nbin)
+    implicit double precision(a-h,o-z)
+    double precision, dimension(nbin,nbin) :: binom
+    double precision :: zero,one
+    zero = 0.0d0
+    one  = 1.0d0
 
-      implicit double precision(a-h,o-z)
-
-      double precision, dimension(nbin,nbin) :: binom
-      data zero,one/0.0d0,1.0d0/
-
-      threej = zero
-      if (m1+m2+m3 /= 0) return
-      i1 = -j1+j2+j3+1
-      if (i1 <= 0) return
-      i2 = j1-j2+j3+1
-      if (i2 <= 0) return
-      i3 =  j1+j2-j3+1
-      if (i3 <= 0) return
-      k1 =  j1+m1+1
-      if (k1 <= 0) return
-      k2 = j2+m2+1
-      if (k2 <= 0) return
-      k3 =  j3+m3+1
-      if (k3 <= 0) return
-      l1 = j1-m1+1
-      if (l1 <= 0) return
-      l2 = j2-m2+1
-      if (l2 <= 0) return
-      l3 = j3-m3+1
-      if (l3 <= 0) return
-      n1 = -j1-m2+j3
-      n2 = m1-j2+j3
-      n3 = j1-j2+m3
-      imin = max(-n1,-n2,0)+1
-      imax = min(l1,k2,i3)
-      if (imin > imax) return
-      sign = one
-
-      do 20 i=imin,imax
-      sign = -sign
-      threej = threej + sign*binom(i1,n1+i)*binom(i2,n2+i)*binom(i3,i)
+    threej = zero
+    if (m1+m2+m3 /= 0) return
+    i1 = -j1+j2+j3+1
+    if (i1 <= 0) return
+    i2 = j1-j2+j3+1
+    if (i2 <= 0) return
+    i3 =  j1+j2-j3+1
+    if (i3 <= 0) return
+    k1 =  j1+m1+1
+    if (k1 <= 0) return
+    k2 = j2+m2+1
+    if (k2 <= 0) return
+    k3 =  j3+m3+1
+    if (k3 <= 0) return
+    l1 = j1-m1+1
+    if (l1 <= 0) return
+    l2 = j2-m2+1
+    if (l2 <= 0) return
+    l3 = j3-m3+1
+    if (l3 <= 0) return
+    n1 = -j1-m2+j3
+    n2 = m1-j2+j3
+    n3 = j1-j2+m3
+    imin = max(-n1,-n2,0)+1
+    imax = min(l1,k2,i3)
+    if (imin > imax) return
+    sign = one
+    do 20 i=imin,imax
+    sign = -sign
+    threej = threej + sign*binom(i1,n1+i)*binom(i2,n2+i)*binom(i3,i)
    20 continue
-      threej = threej * sqrt(binom(j2+j2+1,i3)*binom(j1+j1+1,i2)&
+    threej = threej * sqrt(binom(j2+j2+1,i3)*binom(j1+j1+1,i2)&
              / (binom(j1+j2+j3+2,i3)*dble(j3+j3+1)&
              * binom(j1+j1+1,l1)*binom(j2+j2+1,l2)*binom(j3+j3+1,l3)))
-      if (mod(n3+imin,2) /= 0) threej = - threej
-      return
-      end
+    if (mod(n3+imin,2) /= 0) threej = - threej
+    return
+    end
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **025
-      subroutine spect(tz,tx,e1,e2,sint,xe2)
+    subroutine spect(tz,tx,e1,e2,sint,xe2)
 
 !     subroutine spect calculates s(f-i), the line strength,
 !     and controls the printing out of the transition moments,
@@ -1899,40 +1863,36 @@ if(jk2 <= 1) go to 108
 !     if ztra is .true. it calls outpt to output energies
 !     and line strengths for program spectrum to calculate
 !     simulated spectra
-      use dipole3_dim
-      use dipole3_logic
-      use dipole3_sym
-      use dipole3_mass
-      implicit double precision (a-h,o-y), logical (z)
+    use dipole3_dim
+    use dipole3_logic
+    use dipole3_sym
+    use dipole3_mass
+    implicit double precision (a-h,o-y), logical (z)
+    double precision, dimension(neval1,neval2) :: tz,tx
+    double precision, dimension(neval1) :: e1
+    double precision, dimension(neval2) :: e2
+    double precision, dimension(neval1,neval2) :: sint
+    double precision, dimension(neval2) :: xe2
+    double precision :: ezeroup, te,autocm,x0,autode,detosec
+    autocm = 2.19474624d+05
+    x0 = 0.0d0
+    autode = 2.5417662d0
+    detosec = 3.136186d-07
 
-      !common /head/ title
-
-
-      double precision, dimension(neval1,neval2) :: tz,tx
-      double precision, dimension(neval1) :: e1
-      double precision, dimension(neval2) :: e2
-      double precision, dimension(neval1,neval2) :: sint
-      double precision, dimension(neval2) :: xe2
-      double precision :: ezeroup, te
-
-      character(len=8)  title(9)
-      data autocm/2.19474624d+05/,x0/0.0d0/,&
-           autode/2.5417662d0/,&
-           detosec/3.136186d-07/
+    character(len=8)  title(9)
 !     autocm converts atomic units to wavenumbers
 !     autode converts atomic units to debye
 !     detose! converts from s(f-i) in debye**2 to seconds
 
-      if (znco1.and.znco2) then
+    if (znco1.and.znco2) then
          j1= jk1
          j2= jk2
-      else
+    else
          j1= jk1-kmin1
          j2= jk2-kmin2
-      endif
-      write(6,200)
-200   format(///)
-      write(6,201)
+    endif
+    write(6,“(///))
+    write(6,201)
 201   format(//,5x,'*************************************************'&
              //,5x,'print out of dipole transition moments and s(f-1)'&
              //,9x,'frequencies in wavenumbers',&
@@ -1941,34 +1901,27 @@ if(jk2 <= 1) go to 108
               /,9x,'einstein a-coefficient in sec-1',//,&
            5x,'*************************************************')
 
-      write(6,200)
-      write(6,"(5x,9a8)") title
-!202   format(5x,9a8)
-      write(6,200)
-      write(6,"(5x,a10,i4,a10,i4,a10,i4,a10,i4,a10,i4,a10,i4,a10,i4,//)")'j1=', j1,'  kmin1=', kmin1,'  j2=', j2,'  kmin2=', kmin2,'  idia=', idia, '  ipar1=',ipar1,'  ipar2=', ipar2
-!203   format(5x,'j1=',i4,'  kmin1=',i4,'  j2=',i4,'  kmin2=',i4,&
- !              '  idia=',i4,'  ipar1=',i4,'  ipar2=',i4,//)
-      ezero=x0
-       if (zuvvis==.true.) then 
+    write(6,”(///))
+    write(6,"(5x,9a8)") title
+    write(6,“(///))
+    write(6,"(5x,a10,i4,a10,i4,a10,i4,a10,i4,a10,i4,a10,i4,a10,i4,//)")'j1=', j1,'  kmin1=', kmin1,'  j2=', j2,'  kmin2=', kmin2,'  idia=', idia, '  ipar1=',ipar1,'  ipar2=', ipar2
+    ezero=x0
+    if (zuvvis==.true.) then 
 	         read(5,*) ezero,ezeroup,te
-       else
+    else
                  read(5,*) ezero
-      end if 
-  505 format(f20.0)
-      write(6,"(5x,'ground zero =',e16.8,' cm-1')") ezero
-!204   format(5x,'ground zero =',e16.8,' cm-1')
+    end if 
+    write(6,"(5x,'ground zero =',e16.8,' cm-1')") ezero
   555 continue
 
-      write(6,200)
-      write(6,"(a100, a100 ,/)")' ie1 ie2   ket energy   bra energy    frequency  z trans',&
+    write(6,”(///))
+    write(6,"(a100, a100 ,/)")' ie1 ie2   ket energy   bra energy    frequency  z trans',&
       &'ition    x transition       dipole       s(f-i)      a-coefficient'
-!205   format(/,' ie1 ie2   ket energy   bra energy    frequency  z trans', &
- !     'ition    x transition       dipole       s(f-i)      a-coefficient' ,/)
 
 !     xf is the factor that allows for the root$(2j' + 1)(2j"+1)^G
 !     left over from the calculation of the transition moment
 
-      xf= sqrt(dble((2*j1+1)*(2*j2+1)))
+    xf= sqrt(dble((2*j1+1)*(2*j2+1)))
 
 !     calculate transition moments, line strengths and a-coefficients
 
@@ -1987,170 +1940,165 @@ if(jk2 <= 1) go to 108
 !       write(itra) j1,j2,kmin1,kmin2,neval1,neval2,idia,ipar1,ipar2,gz,zembed
 !       gz is ezero  in cm-1
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-if (zuvvis==.true.) then
-!MP: I need the ZPEs, Te in au 
-!      ezero=ezero/autocm
-      ezeroup=ezeroup/autocm
-      te=te/autocm
-end if
+    if (zuvvis==.true.) then
+    !MP: I need the ZPEs, Te in au 
+    !      ezero=ezero/autocm
+        ezeroup=ezeroup/autocm
+        te=te/autocm
+    end if
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      do 1 ie1=1,neval1
-      xe1= e1(ie1)*autocm - ezero
+    do 1 ie1=1,neval1
+    xe1= e1(ie1)*autocm - ezero
 
-if (zuvvis==.true.) then
-      do 2 ie2=1,neval2
-      if (ie1==1) xe2(ie2)= e2(ie2)+te-ezeroup
-      dd= xe2(ie2) - xe1
-      dd3= abs(dd*dd*dd)
-      sx= (tz(ie1,ie2) + tx(ie1,ie2))**2
-      sint(ie1,ie2)= sx*xf*xf
-      tzd= tz(ie1,ie2)*autode*xf
-      txd= tx(ie1,ie2)*autode*xf
-      if (.not.zbisc .and. zembed) txd = -txd
-      t= abs(tzd + txd)
-      sxd= t*t
+    if (zuvvis==.true.) then
+        do 2 ie2=1,neval2
+        if (ie1==1) xe2(ie2)= e2(ie2)+te-ezeroup
+        dd= xe2(ie2) - xe1
+        dd3= abs(dd*dd*dd)
+        sx= (tz(ie1,ie2) + tx(ie1,ie2))**2
+        sint(ie1,ie2)= sx*xf*xf
+        tzd= tz(ie1,ie2)*autode*xf
+        txd= tx(ie1,ie2)*autode*xf
+        if (.not.zbisc .and. zembed) txd = -txd
+        t= abs(tzd + txd)
+        sxd= t*t
 
-      if (dd > x0) a= sxd*dd3*detosec/dble(2*j2 + 1)
-      if (dd < x0) a= sxd*dd3*detosec/dble(2*j1 + 1)
+        if (dd > x0) a= sxd*dd3*detosec/dble(2*j2 + 1)
+        if (dd < x0) a= sxd*dd3*detosec/dble(2*j1 + 1)
 
-      if (zpmin .and. max(ie1,ie2)>10) goto 2
-      write(6,"(2(i4),3(3x,f14.6),5(2x,es15.8))") ie1,ie2,xe1,xe2(ie2),dd,tzd,txd,t,sxd,a
-!206   format(2(i4),3(3x,f10.3),5(2x,e13.6))
-!206   format(2(i4),3(3x,f14.6),5(2x,es15.8)) ! changed L Lodi 8-Feb-2010
-2     continue
-else 
-      do 2002 ie2=1,neval2
-      if (ie1==1) xe2(ie2)= e2(ie2)*autocm - ezero
-      dd= xe2(ie2) - xe1
-      dd3= abs(dd*dd*dd)
-      sx= (tz(ie1,ie2) + tx(ie1,ie2))**2
-      sint(ie1,ie2)= sx*xf*xf
-      tzd= tz(ie1,ie2)*autode*xf
-      txd= tx(ie1,ie2)*autode*xf
-      if (.not.zbisc .and. zembed) txd = -txd
-      t= abs(tzd + txd)
-      sxd= t*t
+        if (zpmin .and. max(ie1,ie2)>10) goto 2
+        write(6,"(2(i4),3(3x,f14.6),5(2x,es15.8))") ie1,ie2,xe1,xe2(ie2),dd,tzd,txd,t,sxd,a
+    2     continue
+    else 
+        do 2002 ie2=1,neval2
+        if (ie1==1) xe2(ie2)= e2(ie2)*autocm - ezero
+        dd= xe2(ie2) - xe1
+        dd3= abs(dd*dd*dd)
+        sx= (tz(ie1,ie2) + tx(ie1,ie2))**2
+        sint(ie1,ie2)= sx*xf*xf
+        tzd= tz(ie1,ie2)*autode*xf
+        txd= tx(ie1,ie2)*autode*xf
+        if (.not.zbisc .and. zembed) txd = -txd
+        t= abs(tzd + txd)
+        sxd= t*t
 
-      if (dd > x0) a= sxd*dd3*detosec/dble(2*j2 + 1)
-      if (dd < x0) a= sxd*dd3*detosec/dble(2*j1 + 1)
+        if (dd > x0) a= sxd*dd3*detosec/dble(2*j2 + 1)
+        if (dd < x0) a= sxd*dd3*detosec/dble(2*j1 + 1)
 
-      if (zpmin .and. max(ie1,ie2)>10) goto 2002
-      write(6,"(2(i4),3(3x,f14.6),5(2x,es15.8))") ie1,ie2,xe1,xe2(ie2),dd,tzd,txd,t,sxd,a
-!206   format(2(i4),3(3x,f10.3),5(2x,e13.6))
-!2060  format(2(i4),3(3x,f14.6),5(2x,es15.8)) ! changed L Lodi 8-Feb-2010
-2002  continue
-end if
+        if (zpmin .and. max(ie1,ie2)>10) goto 2002
+        write(6,"(2(i4),3(3x,f14.6),5(2x,es15.8))") ie1,ie2,xe1,xe2(ie2),dd,tzd,txd,t,sxd,a
+    2002  continue
+    end if
 
 
 !      if (.not.zpmin .or. ie1<=10) write(6,207)
-!207   format(//)
+
 
 1     continue
 
 ! writes in itra e1 and e1 : energy values in au
 ! then it will write the values of sint ( in au as weel)
 
-      if (ztra .and. zuvvis) call outpt(e1,e2,sint,0.0d0)
-      if (ztra .and. zuvvis==.false.) call outpt(e1,e2,sint,ezero)
-      return
-      end
+    if (ztra .and. zuvvis) call outpt(e1,e2,sint,0.0d0)
+    if (ztra .and. zuvvis==.false.) call outpt(e1,e2,sint,ezero)
+    return
+    end
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **026
-      subroutine outpt(e1,e2,sint,gz)
+    subroutine outpt(e1,e2,sint,gz)
 
 !     subroutine outpt outputs the data necessary for program
 !     spectrum to simulate laboratory or interstellar spectra.
 !     the output data is in atomic units.
 
-      use dipole3_dim
-      use dipole3_logic
-      use dipole3_stream
-      use dipole3_sym
-      use dipole3_mass
-      implicit double precision(a-h,o-y), logical(z)
+    use dipole3_dim
+    use dipole3_logic
+    use dipole3_stream
+    use dipole3_sym
+    use dipole3_mass
+    implicit double precision(a-h,o-y), logical(z)
 
-      double precision, dimension(neval1) :: e1
-      double precision, dimension(neval2) :: e2
-      double precision, dimension(neval1,neval2) :: sint
+    double precision, dimension(neval1) :: e1
+    double precision, dimension(neval2) :: e2
+    double precision, dimension(neval1,neval2) :: sint
 
-      if (znco1.and.znco2) then
+    if (znco1.and.znco2) then
          j1= jk1
          j2= jk2
-      else
+    else
          j1= jk1-kmin1
          j2= jk2-kmin2
-      endif
+    endif
 
 !     is this the first write-out?
 
 !      open(unit=itra,form='unformatted')
-      if (.not.zstart) then
+    if (.not.zstart) then
 10       read(itra,end=90)
-         goto 10
+    goto 10
 90       continue
 ! *****  inclusion of the following card is machine dependent *****
 !        backspace itra
-      endif
+    endif
 
-      write(itra) j1,j2,kmin1,kmin2,neval1,neval2,idia,ipar1,ipar2,gz,&
+    write(itra) j1,j2,kmin1,kmin2,neval1,neval2,idia,ipar1,ipar2,gz,&
                  zembed,ibase1,ibase2
-      write(itra) e1
-      write(itra) e2
-      do 20 ie2=1,neval2
-      call outrow(sint(1,ie2),neval1,itra)
+    write(itra) e1
+    write(itra) e2
+    do 20 ie2=1,neval2
+    call outrow(sint(1,ie2),neval1,itra)
 20    continue
-      return
-      end
+    return
+    end
 !ccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **027
-      subroutine getrow(row,nrow,iunit)
+    subroutine getrow(row,nrow,iunit)
 
-      implicit double precision (a-h,o-y)
-      double precision, dimension(nrow) :: row
-      read(iunit) row
-      return
-      end
+    implicit double precision (a-h,o-y)
+    double precision, dimension(nrow) :: row
+    read(iunit) row
+    return
+    end
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !                                                **028
-      subroutine outrow(row,nrow,iunit)
+    subroutine outrow(row,nrow,iunit)
 
-      implicit double precision (a-h,o-y)
-      double precision, dimension(nrow) :: row
-      write(iunit) row
-      return
-      end
+    implicit double precision (a-h,o-y)
+    double precision, dimension(nrow) :: row
+    write(iunit) row
+    return
+    end
 !cccccccccccccccccccccccccccccccccccccc
-      subroutine rdscr(t1,t2,ndim,iscr,iblock)
+    subroutine rdscr(t1,t2,ndim,iscr,iblock)
 !     read restart data stored on unit iscr
-      implicit double precision (a-h,o-y), logical (z)
-      double precision, dimension(ndim) :: t1,t2
-      read(iscr) iblock
-      read(iscr) t1
-      read(iscr) t2
-      return
-      end
+    implicit double precision (a-h,o-y), logical (z)
+    double precision, dimension(ndim) :: t1,t2
+    read(iscr) iblock
+    read(iscr) t1
+    read(iscr) t2
+    return
+    end
 !cccccccccccccccccccccccccccccccccccccccc
-      subroutine wrscr(t1,t2,ndim,iscr,iblock)
+    subroutine wrscr(t1,t2,ndim,iscr,iblock)
 !     write restart data to unit iscr
-      implicit double precision (a-h,o-y), logical (z)
-      double precision, dimension(ndim) :: t1,t2
-      rewind iscr
-      write(iscr) iblock
-      write(iscr) t1
-      write(iscr) t2
-      return
-      end
+    implicit double precision (a-h,o-y), logical (z)
+    double precision, dimension(ndim) :: t1,t2
+    rewind iscr
+    write(iscr) iblock
+    write(iscr) t1
+    write(iscr) t2
+    return
+    end
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-      subroutine timer
+    subroutine timer
 !     prints current cpu time usage                                 #030
 !     needs a subroutine which can access the machine clock
-      use dipole3_timing
-      call SYSTEM_CLOCK(itime2,irate2,imax2)
-      itime=(itime2-itime0)/irate2
-      write(6,"(/i10,' secs CPU time used'/)")itime
- !1    format(/i10,' secs CPU time used'/)
-      return
-      end
+    use dipole3_timing
+    call SYSTEM_CLOCK(itime2,irate2,imax2)
+    itime=(itime2-itime0)/irate2
+    write(6,"(/i10,' secs CPU time used'/)")itime
+    return
+    end
 
 !     SUBROUTINE DIPD(DIPC,R1,R2,XCOS,NU)
 !!
