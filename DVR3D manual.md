@@ -4,7 +4,9 @@
 
 ### Current project git repo: https://github.com/RunyuZhang-toma/DVR3D
 
-### Dependency Library and :  
+
+
+### Dependency Library:  
 
 1. intel ifortran(standalone version): https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler.html#gs.4vpj2f
 2. intel math kernal Library(standalone version): https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl.html
@@ -13,18 +15,42 @@
 5. gcc
 6. VMware
 
-### Command Requirements
+
+
+### Development Platform
+
+* Intel 10980xe
+* Asus R6EE motherboard
+* Crucial 16G*8 ddr4 3600
+* Samsung PM983zet 960G
+* Microsoft windows11 professional edition
+
+
+
+#### Virtual Machine:
+
+* CPU 8 cores
+* Ram 8 GB
+* ROM 50 GB
+
+
+
+### Commands Requirements
 
 ``` bash
 source ~/.bashrc
 source /opt/intel/oneapi/compiler/latest/env/vars.sh # default location
 source /home/toma/intel/oneapi/setvars.sh # default location
+
+# compile and run in the sample folder such as ~/DVR3D/HCN
 make dvr.out # in the project location
 sh run.sh # in the HCN file
 ll -htr
 tail -n20 result.HCN.
 tail -n20 result.HCN.*
 ```
+
+
 
 ### Code format rules
 
@@ -44,46 +70,37 @@ tail -n20 result.HCN.*
 ```
 
 ```fortran
-! For subroutine / function / main function
-!=========================================================
-!Section ***
-	subroutine name
-	implicit
-	common
-	Data
-	integer
-	real
-	allocate
-	...
-	end
-!=========================================================
+!========================================================= !Copyright(C). 2022, University College London
+!File name: model.f90
+!Author: Runyu Zhang & Jonathan Tennyson
+!Version: 1.1
+!Data: 7th/july/2022
+!Description: this Fortran90 file contains the module !template for the source folder common
+! constants divided by the common group
+!Dependency: Folder source !=========================================================
 ```
 
 ``` fortran
-!Comment Section
+!Comment for module definition
 
-!---------------------------------------------------------
-!<Section number> <Section title>
-!---------------------------------------------------------
-
-!(same indent as code) <Comment>
+!========================================================
+!By Runyu Zhang & Tennyson Jonathan 1/Sep/2022
+!Contains size, outp, oupb, timing, split1, split2, mass 
+!Special notice:: The module name contains the file name, 
+!it means cannot directly paste to other
+!files and use. There are some difference
+!between the constant numbers , types and
+! default value. !=========================================================
 ```
 
-### Current changed format
+### 
 
-1. Regular indent 6.
-2. Comment notation ! in the front line, Comment align to the code.
-3. Every function, module, subroutine and main function have one blank line with before and after section.
-4. if statement in one line mode should have a blank line after it.
-5. The maximum line length permitted is 80 for old editor and terminals support.
-6. Use >, >=, ==, <, <=, /= instead of .gt., .ge., .eq., .lt., .le., .ne. in logical comparisons. The new syntax, being closer to standard mathematical notation, should be clearer.
-<<<<<<< HEAD
-7. Still cannot change the .or., .and., .not. to the normally format. Because the fortrna 90 still not support that.
-8. !(incomplete)Separate the information to be output from the formatting information on how to output it on I/O statements.  That is don't put text inside the brackets of the I/O statement.
+### Updates
 
-### Constant module
-
-### Segmented
-=======
-7. !(incomplete)Separate the information to be output from the formatting information on how to output it on I/O statements.  That is don't put text inside the brackets of the I/O statement.
->>>>>>> parent of a8934eb (update the issue sheet and manual)
+* Relation Operators Update
+* Declaration Standard
+* Constants Documents
+* Constants Modulization
+* Code Format Standardization
+* Read/Write update
+* Comment
